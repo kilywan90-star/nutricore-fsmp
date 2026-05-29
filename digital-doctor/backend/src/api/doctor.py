@@ -5,11 +5,12 @@ from typing import Optional
 from src.db.session import get_db
 from src.services.patient_manager import get_patient_list, get_patient_detail
 from src.services.alert_engine import check_glucose_alerts
+from src.api.auth_deps import require_role
 
 router = APIRouter()
 
 
-@router.get("/patients")
+@router.get("/patients", dependencies=[Depends(require_role("doctor", "admin"))])
 async def list_patients(
     page: int = Query(1, ge=1),
     page_size: int = Query(20, ge=1, le=100),
@@ -20,7 +21,7 @@ async def list_patients(
     return await get_patient_list(db, page=page, page_size=page_size, search=search, risk_filter=risk_filter)
 
 
-@router.get("/patients/{patient_id}")
+@router.get("/patients/{patient_id}", dependencies=[Depends(require_role("doctor", "admin"))])
 async def patient_detail(patient_id: str, db: AsyncSession = Depends(get_db)):
     detail = await get_patient_detail(db, patient_id)
     if not detail:
@@ -28,7 +29,7 @@ async def patient_detail(patient_id: str, db: AsyncSession = Depends(get_db)):
     return detail
 
 
-@router.get("/patients/{patient_id}/alerts")
+@router.get("/patients/{patient_id}/alerts", dependencies=[Depends(require_role("doctor", "admin"))])
 async def patient_alerts(patient_id: str, db: AsyncSession = Depends(get_db)):
     detail = await get_patient_detail(db, patient_id)
     if not detail:

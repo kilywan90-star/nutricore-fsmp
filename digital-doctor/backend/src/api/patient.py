@@ -11,6 +11,7 @@ from src.api.deps import (
     check_glucose_alerts,
     CoachContext,
 )
+from src.api.auth_deps import require_role
 
 router = APIRouter()
 
@@ -33,7 +34,7 @@ class RiskAssessmentResponse(BaseModel):
     recommendations: list[str]
 
 
-@router.post("/risk-assessment", response_model=RiskAssessmentResponse)
+@router.post("/risk-assessment", response_model=RiskAssessmentResponse, dependencies=[Depends(require_role("patient"))])
 async def assess_diabetes_risk(req: RiskAssessmentRequest):
     result = calculate_diabetes_risk(
         age=req.age,
@@ -52,7 +53,7 @@ class ReportInterpretRequest(BaseModel):
     results: dict
 
 
-@router.post("/report-interpret")
+@router.post("/report-interpret", dependencies=[Depends(require_role("patient"))])
 async def interpret_report(req: ReportInterpretRequest):
     return interpret_lab_report(req.report_type, req.results)
 
@@ -72,7 +73,7 @@ class GlucoseStatsResponse(BaseModel):
     time_in_range: Optional[dict]
 
 
-@router.post("/glucose-stats", response_model=GlucoseStatsResponse)
+@router.post("/glucose-stats", response_model=GlucoseStatsResponse, dependencies=[Depends(require_role("patient"))])
 async def glucose_statistics(values: list[float]):
     stats = calculate_glucose_stats(values)
     tir = TimeInRange(values) if values else None
@@ -101,7 +102,7 @@ class HealthCoachResponse(BaseModel):
     is_urgent: bool
 
 
-@router.post("/health-coach", response_model=HealthCoachResponse)
+@router.post("/health-coach", response_model=HealthCoachResponse, dependencies=[Depends(require_role("patient"))])
 async def health_coach_chat(req: HealthCoachRequest):
     coach = get_health_coach()
     ctx = CoachContext(
