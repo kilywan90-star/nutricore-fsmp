@@ -1,4 +1,3 @@
-# digital-doctor/backend/src/services/glucose_tracker.py
 from datetime import datetime
 from typing import Any
 

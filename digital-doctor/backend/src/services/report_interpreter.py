@@ -1,4 +1,3 @@
-# digital-doctor/backend/src/services/report_interpreter.py
 from typing import Any
 
 

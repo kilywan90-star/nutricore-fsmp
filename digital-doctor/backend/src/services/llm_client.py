@@ -1,4 +1,3 @@
-# digital-doctor/backend/src/services/llm_client.py
 from httpx import AsyncClient
 from src.config import settings
 

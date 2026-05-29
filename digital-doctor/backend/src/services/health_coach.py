@@ -1,4 +1,3 @@
-# digital-doctor/backend/src/services/health_coach.py
 from dataclasses import dataclass, field
 from typing import Any
 from src.services.llm_client import llm_client

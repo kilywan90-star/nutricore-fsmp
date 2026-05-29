@@ -1,4 +1,3 @@
-# digital-doctor/backend/src/services/medication_reminder.py
 from dataclasses import dataclass
 from datetime import datetime
 from src.models.patient import MedicationReminder

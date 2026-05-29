@@ -1,4 +1,3 @@
-# digital-doctor/backend/src/models/user.py
 import uuid
 from datetime import datetime
 from sqlalchemy import String, Boolean, DateTime, Enum as SAEnum

@@ -1,5 +1,3 @@
-# digital-doctor/backend/src/services/patient_manager.py
-import uuid
 from datetime import datetime, date
 from typing import Any
 from sqlalchemy import select, func, desc
@@ -62,8 +60,7 @@ async def _get_unacknowledged_alert_count(db: AsyncSession, patient_id) -> int:
 
 
 async def get_patient_detail(db: AsyncSession, patient_id: str) -> dict | None:
-    pid = uuid.UUID(patient_id)
-    stmt = select(Patient).where(Patient.id == pid)
+    stmt = select(Patient).where(Patient.id == patient_id)
     result = await db.execute(stmt)
     patient = result.scalar_one_or_none()
     if not patient:
