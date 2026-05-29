@@ -1,9 +1,8 @@
-# 在 tests/conftest.py 中
+# digital-doctor/backend/tests/conftest.py
 import pytest
 import pytest_asyncio
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
 from src.db.base import Base
-
 
 TEST_DATABASE_URL = "sqlite+aiosqlite:///:memory:"
 

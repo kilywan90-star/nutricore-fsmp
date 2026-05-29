@@ -1,6 +1,7 @@
+# digital-doctor/backend/src/models/patient.py
 import uuid
-from datetime import date, datetime
-from sqlalchemy import String, Integer, Float, Date, DateTime, ForeignKey, Text, Boolean, ARRAY
+from datetime import date, datetime, time
+from sqlalchemy import String, Integer, Float, Date, DateTime, ForeignKey, JSON, ARRAY, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.dialects.postgresql import UUID
 
@@ -32,7 +33,7 @@ class GlucoseRecord(Base):
     id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     patient_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), ForeignKey("patients.id"), index=True)
     value_mmol_l: Mapped[float] = mapped_column(Float)
-    measure_type: Mapped[str] = mapped_column(String(20))
+    measure_type: Mapped[str] = mapped_column(String(20))  # fasting, pre_meal, post_prandial, bedtime, random
     recorded_at: Mapped[datetime] = mapped_column(DateTime, index=True)
     notes: Mapped[str | None] = mapped_column(Text, nullable=True)
 
@@ -46,14 +47,10 @@ class MedicationReminder(Base):
     patient_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), ForeignKey("patients.id"), index=True)
     drug_name: Mapped[str] = mapped_column(String(100))
     dosage: Mapped[str] = mapped_column(String(50))
-    frequency: Mapped[str] = mapped_column(String(20))
-    time_of_day: Mapped[list[str]] = mapped_column(ARRAY(String))
+    frequency: Mapped[str] = mapped_column(String(20))  # qd, bid, tid, qid
+    time_of_day: Mapped[list] = mapped_column(JSON, default=list)
     start_date: Mapped[date] = mapped_column(Date)
     end_date: Mapped[date | None] = mapped_column(Date, nullable=True)
     is_active: Mapped[bool] = mapped_column(default=True)
 
     patient: Mapped["Patient"] = relationship(back_populates="medications")
-
-
-# Ensure forward references resolve for relationships across modules
-import src.models.clinical  # noqa: E402, F401

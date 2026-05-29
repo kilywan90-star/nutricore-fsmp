@@ -1,3 +1,4 @@
+# digital-doctor/backend/src/db/base.py
 from sqlalchemy.orm import DeclarativeBase
 
 

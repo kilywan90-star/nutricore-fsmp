@@ -1,3 +1,4 @@
+# digital-doctor/backend/src/models/clinical.py
 import uuid
 from datetime import date, datetime
 from sqlalchemy import String, Float, Date, DateTime, ForeignKey, JSON, Text, Boolean, Enum as SAEnum
