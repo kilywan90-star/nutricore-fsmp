@@ -1,118 +1,155 @@
-import type { RiskAssessmentResult } from './api';
+import type { RiskAssessmentResult, ReportInterpretResult, GlucoseStats, CoachReply } from './api';
 
-/** Mock risk assessment result for demo mode */
-export const mockRiskResult: RiskAssessmentResult = {
-  risk_level: '中危',
-  score: 12,
-  max_score: 45,
-  factor_scores: {
-    age_score: 4,
-    bmi_score: 3,
-    waist_score: 0,
-    family_score: 0,
-    activity_score: 2,
-    glucose_score: 3,
-    hypertension_score: 0,
-  },
-  recommendations: [
-    '建议3个月后复查空腹血糖，并行OGTT筛查',
-    '建议每日主食控制在250-400g，减少含糖饮料摄入',
-  ],
-};
-
-/** Mock glucose records for demo charts */
-export const mockGlucoseRecords = [
-  { date: '2026-05-24', fasting: 6.5, postPr: 9.2 },
-  { date: '2026-05-25', fasting: 6.8, postPr: 8.8 },
-  { date: '2026-05-26', fasting: 7.0, postPr: 10.1 },
-  { date: '2026-05-27', fasting: 6.3, postPr: 9.5 },
-  { date: '2026-05-28', fasting: 6.9, postPr: 8.2 },
-  { date: '2026-05-29', fasting: 7.2, postPr: 9.8 },
-  { date: '2026-05-30', fasting: 7.0, postPr: 10.3 },
-];
-
-/** Mock patient list for demo mode */
-export const mockPatients = [
-  {
-    id: 'p-001',
-    gender: 'M',
-    birth_year: 1965,
-    diabetes_type: 'type2',
-    hba1c_target: 7.0,
-    latest_glucose: 7.2,
-    alert_count: 2,
-  },
-  {
-    id: 'p-002',
-    gender: 'F',
-    birth_year: 1980,
-    diabetes_type: 'type2',
-    hba1c_target: 7.0,
-    latest_glucose: 6.5,
-    alert_count: 0,
-  },
-  {
-    id: 'p-003',
-    gender: 'M',
-    birth_year: 1972,
-    diabetes_type: 'type2',
-    hba1c_target: 8.0,
-    latest_glucose: 9.8,
-    alert_count: 3,
-  },
-  {
-    id: 'p-004',
-    gender: 'F',
-    birth_year: 1958,
-    diabetes_type: 'type2',
-    hba1c_target: 8.0,
-    latest_glucose: 6.8,
-    alert_count: 1,
-  },
-];
-
-/** Mock patient detail for demo mode */
-export const mockPatientDetail = {
-  id: 'p-001',
-  gender: 'M',
-  birth_year: 1965,
-  diabetes_type: 'type2',
-  diagnosis_date: '2020-03-15',
-  hba1c_target: 7.0,
-  glucose_records: [
-    { id: 'g-001', value_mmol_l: 6.5, measure_type: 'fasting', recorded_at: '2026-05-30T07:00:00', notes: '' },
-    { id: 'g-002', value_mmol_l: 9.2, measure_type: 'post_prandial', recorded_at: '2026-05-30T12:30:00', notes: '' },
-    { id: 'g-003', value_mmol_l: 7.0, measure_type: 'fasting', recorded_at: '2026-05-29T07:00:00', notes: '' },
-    { id: 'g-004', value_mmol_l: 8.5, measure_type: 'post_prandial', recorded_at: '2026-05-29T12:30:00', notes: '午餐后散步15分钟' },
-    { id: 'g-005', value_mmol_l: 6.8, measure_type: 'fasting', recorded_at: '2026-05-28T07:00:00', notes: '' },
-  ],
-  lab_reports: [
-    {
-      id: 'lr-001',
-      report_type: 'blood_glucose_panel',
-      report_date: '2026-05-28',
-      results: { fpg: 7.0, hba1c: 7.2, ppg_2h: 10.1 },
-      ai_interpretation: '空腹血糖7.0mmol/L，已达糖尿病诊断标准；HbA1c 7.2%提示近3月血糖控制未达标。建议调整治疗方案。',
+export function mockAssessRisk(): RiskAssessmentResult {
+  return {
+    risk_level: '中危',
+    score: 12,
+    max_score: 45,
+    factor_scores: {
+      age_score: 4,
+      bmi_score: 3,
+      waist_score: 3,
+      family_score: 0,
+      activity_score: 2,
+      glucose_score: 0,
+      hypertension_score: 0,
     },
-  ],
-  alerts: [
-    {
-      id: 'a-001',
-      alert_type: 'consecutive_high_fpg',
-      severity: 'warning',
-      title: '空腹血糖持续偏高',
-      detail: '连续3天空腹血糖≥7.0mmol/L',
-      acknowledged: false,
-      created_at: '2026-05-30T07:05:00',
+    recommendations: [
+      '建议3个月后复查空腹血糖，并行OGTT筛查',
+      '建议每日主食控制在250-400g，减少含糖饮料摄入',
+    ],
+  };
+}
+
+export function mockInterpretReport(reportType: string, results: Record<string, number>): ReportInterpretResult {
+  if (reportType === 'blood_glucose_panel') {
+    return {
+      status: 'impaired',
+      status_label: '临界异常',
+      items: [
+        { item: 'fpg', value: results.fpg ?? 6.5, status: 'impaired' },
+        { item: 'hba1c', value: results.hba1c ?? 7.2, status: 'abnormal' },
+      ],
+      interpretation: '空腹血糖6.5mmol/L，处于糖尿病前期范围(6.1-7.0) 糖化血红蛋白7.2%，提示近3月血糖控制未达标(目标<7.0%) 建议定期监测血糖，遵医嘱调整治疗方案。',
+    };
+  }
+  if (reportType === 'lipid_panel') {
+    return {
+      status: 'normal',
+      status_label: '正常',
+      items: [
+        { item: 'tc', value: results.tc ?? 5.0, status: 'normal' },
+        { item: 'ldl', value: results.ldl ?? 3.0, status: 'normal' },
+        { item: 'hdl', value: results.hdl ?? 1.2, status: 'normal' },
+        { item: 'tg', value: results.tg ?? 1.5, status: 'normal' },
+      ],
+      interpretation: '血脂检查结果均在正常范围。继续维持当前生活方式和治疗方案。',
+    };
+  }
+  return {
+    status: 'normal',
+    status_label: '正常',
+    items: [{ item: 'hba1c', value: results.hba1c ?? 6.8, status: 'impaired' }],
+    interpretation: '检查结果均在正常范围。继续维持当前生活方式和治疗方案。',
+  };
+}
+
+export function mockGlucoseStats(): GlucoseStats {
+  return {
+    count: 14,
+    avg: 7.2,
+    max: 12.5,
+    min: 4.8,
+    std: 1.8,
+    time_in_range: {
+      in_range_pct: 64.3,
+      above_range_pct: 28.6,
+      below_range_pct: 7.1,
     },
-    {
-      id: 'a-002',
-      alert_type: 'missed_logging',
-      severity: 'warning',
-      title: '连续2天未记录血糖',
-      detail: '上次记录时间：05月25日，请提醒患者恢复血糖监测',
-      acknowledged: false,
-      created_at: '2026-05-28T08:00:00',
-    },
-  ],
-};
+  };
+}
+
+export function mockCoachReply(message: string): CoachReply {
+  const urgentKeywords = ['心慌', '出冷汗', '头晕', '看不清', '昏迷', '晕倒', '测不出', '很高', '低血糖', '发抖'];
+  const isUrgent = urgentKeywords.some(kw => message.includes(kw));
+
+  if (isUrgent) {
+    return {
+      reply: '您的症状需要立即引起重视。请立即测量血糖，如血糖<3.9mmol/L请立即补充15g速效碳水（如半杯果汁/3块方糖）；如症状持续不缓解，请立即拨打120或前往急诊。',
+      is_urgent: true,
+    };
+  }
+
+  if (message.includes('血糖高') || message.includes('控制不好')) {
+    return {
+      reply: '理解您的担忧。近期空腹血糖平均7.2mmol/L（目标<7.0），建议：1) 减少晚餐主食量至平时2/3 2) 餐后散步20分钟 3) 避免含糖饮料和甜点。持续记录血糖，下周复诊时带上记录给医生看。',
+      is_urgent: false,
+    };
+  }
+
+  if (message.includes('吃什么') || message.includes('饮食')) {
+    return {
+      reply: '建议选择低GI食物：全麦面包、燕麦、荞麦面、杂豆饭作为主食；蔬菜每日500g以上；蛋白质优选鱼虾去皮禽肉；水果选苹果、柚子、草莓，每次不超过100g，两餐之间食用。每日主食总量控制在250-400g。',
+      is_urgent: false,
+    };
+  }
+
+  return {
+    reply: '记录得很好！继续坚持规律的血糖监测、合理饮食和适度运动。如果有任何不适或疑问，随时告诉我。',
+    is_urgent: false,
+  };
+}
+
+export interface MedicationItem {
+  id: string;
+  drug_name: string;
+  dosage: string;
+  frequency: string;
+  time_of_day: string[];
+  is_active: boolean;
+}
+
+export function mockMedications(): MedicationItem[] {
+  return [
+    { id: '1', drug_name: '二甲双胍', dosage: '500mg', frequency: 'bid', time_of_day: ['08:00', '18:00'], is_active: true },
+    { id: '2', drug_name: '阿卡波糖', dosage: '50mg', frequency: 'tid', time_of_day: ['08:00', '12:00', '18:00'], is_active: true },
+    { id: '3', drug_name: '达格列净', dosage: '10mg', frequency: 'qd', time_of_day: ['08:00'], is_active: true },
+  ];
+}
+
+export interface GlucoseRecord {
+  id: string;
+  value_mmol_l: number;
+  measure_type: string;
+  recorded_at: string;
+  notes: string;
+}
+
+export function mockGlucoseRecords(): GlucoseRecord[] {
+  const records: GlucoseRecord[] = [];
+  const now = new Date();
+  for (let i = 13; i >= 0; i--) {
+    const date = new Date(now);
+    date.setDate(date.getDate() - i);
+
+    // Fasting
+    records.push({
+      id: `f-${i}`,
+      value_mmol_l: parseFloat((5.5 + Math.random() * 3.5).toFixed(1)),
+      measure_type: 'fasting',
+      recorded_at: new Date(date.setHours(7, 0, 0, 0)).toISOString(),
+      notes: '',
+    });
+
+    // Post-prandial
+    date.setHours(10, 0, 0, 0);
+    records.push({
+      id: `p-${i}`,
+      value_mmol_l: parseFloat((7.0 + Math.random() * 5).toFixed(1)),
+      measure_type: 'post_prandial',
+      recorded_at: new Date(date.setHours(10, 0, 0, 0)).toISOString(),
+      notes: '',
+    });
+  }
+  return records;
+}

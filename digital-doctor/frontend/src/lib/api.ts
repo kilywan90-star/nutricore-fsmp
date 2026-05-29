@@ -23,17 +23,42 @@ export interface RiskAssessmentResult {
   recommendations: string[];
 }
 
+export interface ReportInterpretResult {
+  status: string;
+  status_label: string;
+  items: Array<{ item: string; value: number; status: string }>;
+  interpretation: string;
+}
+
+export interface GlucoseStats {
+  count: number;
+  avg: number | null;
+  max: number | null;
+  min: number | null;
+  std: number | null;
+  time_in_range?: {
+    in_range_pct: number;
+    above_range_pct: number;
+    below_range_pct: number;
+  } | null;
+}
+
+export interface CoachReply {
+  reply: string;
+  is_urgent: boolean;
+}
+
 export async function assessRisk(input: RiskAssessmentInput): Promise<RiskAssessmentResult> {
   const { data } = await api.post('/patient/risk-assessment', input);
   return data;
 }
 
-export async function interpretReport(reportType: string, results: Record<string, number>) {
+export async function interpretReport(reportType: string, results: Record<string, number>): Promise<ReportInterpretResult> {
   const { data } = await api.post('/patient/report-interpret', { report_type: reportType, results });
   return data;
 }
 
-export async function getGlucoseStats(values: number[]) {
+export async function getGlucoseStats(values: number[]): Promise<GlucoseStats> {
   const { data } = await api.post('/patient/glucose-stats', values);
   return data;
 }
@@ -44,7 +69,7 @@ export async function chatWithCoach(input: {
   recent_ppg?: number[];
   hba1c?: number;
   medications?: string[];
-}) {
+}): Promise<CoachReply> {
   const { data } = await api.post('/patient/health-coach', input);
   return data;
 }
