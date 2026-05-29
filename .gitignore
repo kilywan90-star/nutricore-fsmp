@@ -10,8 +10,8 @@ dist/
 downloads/
 eggs/
 .eggs/
-lib/
-lib64/
+/lib/
+/lib64/
 parts/
 sdist/
 var/
@@ -41,6 +41,9 @@ Thumbs.db
 # Logs
 logs/
 *.log
+
+# Node
+node_modules/
 
 # Config
 *.local.yaml
