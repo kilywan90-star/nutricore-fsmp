@@ -1,4 +1,3 @@
-# digital-doctor/backend/src/models/clinical.py
 import uuid
 from datetime import date, datetime
 from sqlalchemy import String, Float, Date, DateTime, ForeignKey, JSON, Text, Boolean, Enum as SAEnum
@@ -14,7 +13,7 @@ class LabReport(Base):
 
     id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     patient_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), ForeignKey("patients.id"), index=True)
-    report_type: Mapped[str] = mapped_column(String(50))  # blood_glucose_panel, lipid_panel, renal_function, etc.
+    report_type: Mapped[str] = mapped_column(String(50))
     report_date: Mapped[date] = mapped_column(Date)
     results: Mapped[dict] = mapped_column(JSON)
     ai_interpretation: Mapped[str] = mapped_column(Text, default="")
@@ -34,7 +33,7 @@ class Alert(Base):
 
     id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     patient_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), ForeignKey("patients.id"), index=True)
-    alert_type: Mapped[str] = mapped_column(String(50))  # glucose_high, glucose_low, hba1c_high, missed_medication
+    alert_type: Mapped[str] = mapped_column(String(50))
     severity: Mapped[AlertSeverity] = mapped_column(SAEnum(AlertSeverity))
     title: Mapped[str] = mapped_column(String(200))
     detail: Mapped[str] = mapped_column(Text)
