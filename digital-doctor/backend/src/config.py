@@ -13,6 +13,11 @@ class Settings(BaseSettings):
     LLM_API_KEY: str = ""
     LLM_BASE_URL: str = "https://api.openai.com/v1"
     LLM_MODEL: str = "gpt-4o"
+    LLM_MAX_TOKENS: int = 2048
+    LLM_TEMPERATURE: float = 0.3
+    LLM_RETRY_COUNT: int = 3
+    LLM_TIMEOUT_SECONDS: int = 60
+    LLM_FALLBACK_ENABLED: bool = True
 
     SECRET_KEY: str = "dev-secret-change-in-production"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
