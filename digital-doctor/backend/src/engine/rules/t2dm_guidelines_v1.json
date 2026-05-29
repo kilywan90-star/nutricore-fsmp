@@ -1,0 +1,195 @@
+{
+  "version": "1.0.0",
+  "guideline_source": "中国2型糖尿病防治指南(2024版)",
+  "effective_date": "2024-01-01",
+  "rules": {
+    "classification": [
+      {
+        "id": "class-001",
+        "name": "2型糖尿病诊断标准",
+        "type": "hard",
+        "category": "diagnosis",
+        "conditions": [
+          {"field": "fpg", "operator": "gte", "value": 7.0},
+          {"field": "fpg_count", "operator": "gte", "value": 2}
+        ],
+        "conclusion": "符合2型糖尿病空腹血糖诊断标准",
+        "confidence": "high",
+        "recommendation": "建议行OGTT+糖化血红蛋白确诊",
+        "reference": "中国2型糖尿病防治指南(2024版) §4.1"
+      },
+      {
+        "id": "class-002",
+        "name": "HbA1c诊断阈值",
+        "type": "hard",
+        "category": "diagnosis",
+        "conditions": [
+          {"field": "hba1c", "operator": "gte", "value": 6.5}
+        ],
+        "conclusion": "HbA1c ≥ 6.5%，符合糖尿病诊断标准",
+        "confidence": "high",
+        "recommendation": "建议结合临床症状确诊",
+        "reference": "中国2型糖尿病防治指南(2024版) §4.1"
+      },
+      {
+        "id": "class-003",
+        "name": "糖尿病前期(IFG)",
+        "type": "soft",
+        "category": "diagnosis",
+        "conditions": [
+          {"field": "fpg", "operator": "gte", "value": 6.1},
+          {"field": "fpg", "operator": "lt", "value": 7.0}
+        ],
+        "conclusion": "空腹血糖受损(IFG)，糖尿病前期",
+        "confidence": "high",
+        "recommendation": "建议生活方式干预，3个月后复查OGTT",
+        "reference": "中国2型糖尿病防治指南(2024版) §4.2"
+      }
+    ],
+    "treatment_target": [
+      {
+        "id": "target-001",
+        "name": "一般成人血糖控制目标",
+        "type": "soft",
+        "category": "treatment_target",
+        "conditions": [
+          {"field": "age", "operator": "lt", "value": 65},
+          {"field": "has_complication", "operator": "eq", "value": false}
+        ],
+        "conclusion": "血糖控制目标：空腹4.4-7.0, 餐后<10.0, HbA1c<7.0%",
+        "confidence": "high",
+        "recommendation": "个体化调整，避免低血糖",
+        "reference": "中国2型糖尿病防治指南(2024版) §8.1"
+      },
+      {
+        "id": "target-002",
+        "name": "老年/合并并发症宽松目标",
+        "type": "soft",
+        "category": "treatment_target",
+        "conditions": [
+          {"field": "age", "operator": "gte", "value": 65}
+        ],
+        "conclusion": "血糖控制目标：空腹<7.8, 餐后<11.1, HbA1c<8.0%",
+        "confidence": "medium",
+        "recommendation": "个体化评估，以不出现低血糖为原则",
+        "reference": "中国2型糖尿病防治指南(2024版) §8.1"
+      }
+    ],
+    "medication_pathway": [
+      {
+        "id": "med-001",
+        "name": "一线治疗推荐-二甲双胍",
+        "type": "soft",
+        "category": "medication",
+        "conditions": [
+          {"field": "egfr", "operator": "gte", "value": 45},
+          {"field": "has_contraindication_metformin", "operator": "eq", "value": false}
+        ],
+        "conclusion": "推荐二甲双胍作为一线治疗药物",
+        "confidence": "high",
+        "recommendation": "起始剂量500mg bid，根据耐受性调整至2000mg/日",
+        "reference": "中国2型糖尿病防治指南(2024版) §6.3"
+      },
+      {
+        "id": "med-002",
+        "name": "二甲双胍禁忌-eGFR<45",
+        "type": "hard",
+        "category": "contraindication",
+        "conditions": [
+          {"field": "egfr", "operator": "lt", "value": 45}
+        ],
+        "conclusion": "eGFR < 45，二甲双胍需减量或禁用",
+        "confidence": "high",
+        "recommendation": "eGFR 30-44: 减量至1000mg/日; eGFR<30: 禁用",
+        "reference": "中国2型糖尿病防治指南(2024版) §6.3"
+      },
+      {
+        "id": "med-003",
+        "name": "联合治疗-HbA1c不达标",
+        "type": "soft",
+        "category": "medication",
+        "conditions": [
+          {"field": "hba1c", "operator": "gte", "value": 7.0},
+          {"field": "on_metformin_monotherapy", "operator": "eq", "value": true},
+          {"field": "duration_months", "operator": "gte", "value": 3}
+        ],
+        "conclusion": "单用二甲双胍3个月HbA1c仍未达标，建议联合治疗",
+        "confidence": "high",
+        "recommendation": "可联合SGLT-2i、DPP-4i、GLP-1RA、磺脲类等，个体化选择",
+        "reference": "中国2型糖尿病防治指南(2024版) §6.5"
+      }
+    ],
+    "monitoring": [
+      {
+        "id": "mon-001",
+        "name": "HbA1c监测频率",
+        "type": "soft",
+        "category": "monitoring",
+        "conditions": [
+          {"field": "hba1c", "operator": "gte", "value": 7.0}
+        ],
+        "conclusion": "血糖未达标，建议每3个月复查HbA1c",
+        "confidence": "high",
+        "recommendation": "达标后可每6个月复查一次",
+        "reference": "中国2型糖尿病防治指南(2024版) §10.1"
+      },
+      {
+        "id": "mon-002",
+        "name": "并发症年度筛查",
+        "type": "hard",
+        "category": "monitoring",
+        "conditions": [
+          {"field": "last_complication_screening_months", "operator": "gte", "value": 12}
+        ],
+        "conclusion": "距上次并发症筛查超过12个月，建议年度筛查",
+        "confidence": "high",
+        "recommendation": "眼底检查+尿微量白蛋白+足部检查+神经病变筛查",
+        "reference": "中国2型糖尿病防治指南(2024版) §10.2"
+      }
+    ],
+    "alert_thresholds": [
+      {
+        "id": "alert-001",
+        "name": "严重高血糖预警",
+        "type": "hard",
+        "category": "alert",
+        "conditions": [
+          {"field": "fpg", "operator": "gte", "value": 16.7}
+        ],
+        "conclusion": "空腹血糖≥16.7mmol/L，严重高血糖，需立即处理",
+        "confidence": "high",
+        "severity": "critical",
+        "recommendation": "建议立即就医，检查酮体，排除DKA/HHS",
+        "reference": "中国2型糖尿病防治指南(2024版) §12.1"
+      },
+      {
+        "id": "alert-002",
+        "name": "低血糖预警",
+        "type": "hard",
+        "category": "alert",
+        "conditions": [
+          {"field": "glucose", "operator": "lte", "value": 3.9}
+        ],
+        "conclusion": "血糖≤3.9mmol/L，低血糖",
+        "confidence": "high",
+        "severity": "warning",
+        "recommendation": "立即补充15-20g速效碳水化合物，15分钟后复测",
+        "reference": "中国2型糖尿病防治指南(2024版) §12.2"
+      },
+      {
+        "id": "alert-003",
+        "name": "空腹血糖持续偏高",
+        "type": "soft",
+        "category": "alert",
+        "conditions": [
+          {"field": "consecutive_high_fpg_days", "operator": "gte", "value": 3}
+        ],
+        "conclusion": "连续3天空腹血糖偏高，需评估治疗方案",
+        "confidence": "medium",
+        "severity": "warning",
+        "recommendation": "复查饮食运动依从性，考虑调整治疗方案",
+        "reference": "中国2型糖尿病防治指南(2024版) §8.2"
+      }
+    ]
+  }
+}
