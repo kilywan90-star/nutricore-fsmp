@@ -1,5 +1,6 @@
 from dataclasses import dataclass, field
 from src.services.llm_client import llm_client
+from src.services.prompts import HEALTH_COACH_SYSTEM_PROMPT, HEALTH_COACH_USER_TEMPLATE
 
 
 @dataclass
@@ -34,21 +35,14 @@ class HealthCoach:
         hba1c_str = f"最近HbA1c：{ctx.hba1c}%" if ctx.hba1c else "暂无HbA1c数据"
         meds = "、".join(ctx.medications) if ctx.medications else "未记录"
 
-        return f"""你是一位专业的糖尿病健康管理教练，基于《中国2型糖尿病防治指南(2024版)》为患者提供日常管理建议。
-
-当前患者数据：
-- {fpg_str}
-- {ppg_str}
-- {hba1c_str}
-- 当前用药：{meds}
-- 饮食依从性：{ctx.diet_adherence}
-- 运动依从性：{ctx.exercise_adherence}
-
-规则：
-1. 提供具体、可执行的建议（不是笼统的"注意饮食"）
-2. 出现低血糖症状或严重高血糖时，优先建议就医
-3. 回答简洁，不超过150字
-4. 不替代医生诊断，必要时建议到内分泌科就诊"""
+        return HEALTH_COACH_SYSTEM_PROMPT.format(
+            fpg_info=fpg_str,
+            ppg_info=ppg_str,
+            hba1c_info=hba1c_str,
+            medications=meds,
+            diet_adherence=ctx.diet_adherence,
+            exercise_adherence=ctx.exercise_adherence,
+        )
 
     def _mock_reply(self, ctx: CoachContext, user_message: str) -> str:
         if self._has_urgent_keywords(user_message):
@@ -63,7 +57,7 @@ class HealthCoach:
         system = self._build_system_prompt(ctx)
         messages = [
             {"role": "system", "content": system},
-            {"role": "user", "content": user_message},
+            {"role": "user", "content": HEALTH_COACH_USER_TEMPLATE.format(user_message=user_message)},
         ]
         try:
             return await llm_client.chat(messages)
