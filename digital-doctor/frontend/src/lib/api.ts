@@ -25,6 +25,27 @@ export interface RiskAssessmentResult {
   recommendations: string[];
 }
 
+export interface ReportInterpretResult {
+  status: string;
+  status_label: string;
+  items: Array<{ item: string; value: number; status: string }>;
+  interpretation: string;
+}
+
+export interface GlucoseStats {
+  count: number;
+  avg: number | null;
+  max: number | null;
+  min: number | null;
+  std?: number | null;
+  time_in_range?: { in_range_pct: number; above_range_pct: number; below_range_pct: number } | null;
+}
+
+export interface CoachReply {
+  reply: string;
+  is_urgent: boolean;
+}
+
 export interface PatientListItem {
   id: string;
   gender: string;
