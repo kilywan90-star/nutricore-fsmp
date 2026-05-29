@@ -1,4 +1,4 @@
-from datetime import datetime, date
+import uuid
 from typing import Any
 from sqlalchemy import select, func, desc
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -59,8 +59,16 @@ async def _get_unacknowledged_alert_count(db: AsyncSession, patient_id) -> int:
     return result.scalar() or 0
 
 
+def _parse_uuid(patient_id: str) -> uuid.UUID:
+    try:
+        return uuid.UUID(patient_id)
+    except (ValueError, AttributeError):
+        return uuid.UUID("00000000-0000-0000-0000-000000000000")
+
+
 async def get_patient_detail(db: AsyncSession, patient_id: str) -> dict | None:
-    stmt = select(Patient).where(Patient.id == patient_id)
+    uid = _parse_uuid(patient_id)
+    stmt = select(Patient).where(Patient.id == uid)
     result = await db.execute(stmt)
     patient = result.scalar_one_or_none()
     if not patient:

@@ -1,6 +1,6 @@
 import uuid
 from datetime import date, datetime
-from sqlalchemy import String, Integer, Float, Date, DateTime, ForeignKey, ARRAY, Text
+from sqlalchemy import String, Integer, Float, Date, DateTime, ForeignKey, JSON, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.dialects.postgresql import UUID
 
@@ -47,7 +47,7 @@ class MedicationReminder(Base):
     drug_name: Mapped[str] = mapped_column(String(100))
     dosage: Mapped[str] = mapped_column(String(50))
     frequency: Mapped[str] = mapped_column(String(20))
-    time_of_day: Mapped[list[str]] = mapped_column(ARRAY(String))
+    time_of_day: Mapped[list[str]] = mapped_column(JSON)
     start_date: Mapped[date] = mapped_column(Date)
     end_date: Mapped[date | None] = mapped_column(Date, nullable=True)
     is_active: Mapped[bool] = mapped_column(default=True)

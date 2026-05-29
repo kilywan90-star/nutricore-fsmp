@@ -1,4 +1,3 @@
-# digital-doctor/backend/tests/test_models.py
 import pytest
 from datetime import date, datetime
 from src.models.patient import Patient, GlucoseRecord, MedicationReminder

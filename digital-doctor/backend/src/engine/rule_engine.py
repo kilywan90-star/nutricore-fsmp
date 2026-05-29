@@ -11,9 +11,9 @@ class RuleEngine:
         matches: list[dict] = []
         rule_groups = self.rules.get("rules", {})
         for cat_name, cat_rules in rule_groups.items():
-            if category and cat_name != category:
-                continue
             for rule in cat_rules:
+                if category and rule.get("category") != category:
+                    continue
                 if self._match_rule(rule, patient_data):
                     matches.append(rule)
         return matches

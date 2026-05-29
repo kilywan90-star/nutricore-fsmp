@@ -1,4 +1,3 @@
-# digital-doctor/backend/tests/test_config.py
 import os
 from src.config import Settings
 
@@ -20,5 +19,4 @@ def test_settings_from_env(monkeypatch):
 def test_phi_encryption_key_required_in_production(monkeypatch):
     monkeypatch.setenv("PHI_ENCRYPTION_KEY", "")
     settings = Settings()
-    # 开发模式不强制要求
     assert settings.PHI_ENCRYPTION_KEY == ""

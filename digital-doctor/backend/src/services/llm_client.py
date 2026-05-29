@@ -31,7 +31,6 @@ class LLMClient:
             return data["choices"][0]["message"]["content"]
 
     def _mock_response(self, messages: list[dict]) -> str:
-        """无API Key时的mock响应，用于开发测试"""
         last_msg = messages[-1]["content"] if messages else ""
         if "风险评估" in last_msg:
             return '{"risk_level": "中危", "score": 12, "recommendations": ["建议生活方式干预", "3个月后复查空腹血糖"]}'

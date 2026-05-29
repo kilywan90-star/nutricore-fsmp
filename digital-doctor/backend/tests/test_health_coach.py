@@ -1,6 +1,4 @@
-# digital-doctor/backend/tests/test_health_coach.py
 import pytest
-from datetime import datetime
 from src.services.health_coach import HealthCoach, CoachContext
 
 

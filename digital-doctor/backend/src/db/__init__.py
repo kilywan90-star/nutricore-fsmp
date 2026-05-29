@@ -1,2 +1,5 @@
-# digital-doctor/backend/src/db/__init__.py
-from src.db.base import Base
+from sqlalchemy.orm import DeclarativeBase
+
+
+class Base(DeclarativeBase):
+    pass

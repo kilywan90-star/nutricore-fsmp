@@ -1,6 +1,4 @@
-# digital-doctor/backend/tests/test_report_interpreter.py
 import pytest
-from datetime import date
 from src.services.report_interpreter import interpret_lab_report
 
 
@@ -40,4 +38,4 @@ def test_interpret_lipid_panel():
 
 def test_interpret_unknown_report_type():
     result = interpret_lab_report("unknown", {"x": 1})
-    assert result["status"] == "normal"
+    assert result["status"] == "unknown"

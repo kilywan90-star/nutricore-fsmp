@@ -19,7 +19,7 @@ def calculate_diabetes_risk(
 ) -> dict:
     scores = {}
 
-    # 年龄评分
+    # Age scoring
     if age < 35:
         scores["age_score"] = 0
     elif age < 45:
@@ -31,7 +31,7 @@ def calculate_diabetes_risk(
     else:
         scores["age_score"] = 8
 
-    # BMI评分
+    # BMI scoring
     if bmi < 24:
         scores["bmi_score"] = 0
     elif bmi < 28:
@@ -39,7 +39,7 @@ def calculate_diabetes_risk(
     else:
         scores["bmi_score"] = 6
 
-    # 腰围评分（男性≥90, 女性≥85）
+    # Waist circumference scoring
     if waist_circumference < 85:
         scores["waist_score"] = 0
     elif waist_circumference < 95:
@@ -47,14 +47,14 @@ def calculate_diabetes_risk(
     else:
         scores["waist_score"] = 6
 
-    # 家族史
+    # Family history
     scores["family_score"] = 6 if family_history else 0
 
-    # 体力活动
+    # Physical activity
     activity_scores = {"high": 0, "moderate": 2, "low": 4}
     scores["activity_score"] = activity_scores.get(physical_activity, 2)
 
-    # 空腹血糖
+    # Fasting glucose
     if fasting_glucose < 5.6:
         scores["glucose_score"] = 0
     elif fasting_glucose < 6.1:
@@ -64,7 +64,7 @@ def calculate_diabetes_risk(
     else:
         scores["glucose_score"] = 12
 
-    # 高血压
+    # Hypertension
     scores["hypertension_score"] = 3 if has_hypertension else 0
 
     total = sum(scores.values())

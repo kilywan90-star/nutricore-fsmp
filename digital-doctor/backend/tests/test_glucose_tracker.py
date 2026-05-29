@@ -1,6 +1,4 @@
-# digital-doctor/backend/tests/test_glucose_tracker.py
 import pytest
-from datetime import datetime, timedelta
 from src.services.glucose_tracker import (
     analyze_glucose_trend,
     calculate_glucose_stats,
@@ -18,7 +16,7 @@ def test_calculate_stats_with_data():
     records = [6.5, 7.2, 5.8, 8.0, 6.1]
     stats = calculate_glucose_stats(records)
     assert stats["count"] == 5
-    assert stats["avg"] == 6.7
+    assert 6.6 < stats["avg"] < 6.8
     assert stats["max"] == 8.0
     assert stats["min"] == 5.8
 

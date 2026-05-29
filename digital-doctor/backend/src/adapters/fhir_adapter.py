@@ -1,13 +1,8 @@
-from datetime import date, datetime
-from typing import Any
-from uuid import UUID
-
-
 class FHIRPatientAdapter:
-    """将FHIR R4 Patient资源转换为内部Patient模型字段"""
+    """FHIR R4 Patient resource to internal Patient model fields"""
 
     @staticmethod
-    def from_fhir(fhir_resource: dict) -> dict[str, Any]:
+    def from_fhir(fhir_resource: dict) -> dict:
         return {
             "fhir_id": fhir_resource.get("id"),
             "gender": _extract_gender(fhir_resource),
@@ -26,10 +21,10 @@ class FHIRPatientAdapter:
 
 
 class FHIRObservationAdapter:
-    """FHIR Observation → 实验室检查结果"""
+    """FHIR Observation to lab test results"""
 
     @staticmethod
-    def from_fhir(fhir_resource: dict) -> dict[str, Any]:
+    def from_fhir(fhir_resource: dict) -> dict:
         code = fhir_resource.get("code", {}).get("coding", [{}])[0].get("code", "unknown")
         value = fhir_resource.get("valueQuantity", {}).get("value")
         unit = fhir_resource.get("valueQuantity", {}).get("unit", "")
@@ -39,25 +34,6 @@ class FHIRObservationAdapter:
             "value": value,
             "unit": unit,
             "effective_date": effective,
-        }
-
-
-class FHIRBundleBuilder:
-    """构建FHIR Bundle用于批量导入"""
-
-    @staticmethod
-    def build_search_bundle(resources: list[dict], resource_type: str, total: int) -> dict:
-        return {
-            "resourceType": "Bundle",
-            "type": "searchset",
-            "total": total,
-            "entry": [
-                {
-                    "fullUrl": f"urn:uuid:{r.get('id', '')}",
-                    "resource": {"resourceType": resource_type, **r},
-                }
-                for r in resources
-            ],
         }
 
 
@@ -80,3 +56,22 @@ def _extract_identifier(resource: dict) -> str:
     if identifiers:
         return identifiers[0].get("value", "")
     return ""
+
+
+class FHIRBundleBuilder:
+    """Build FHIR Bundle for batch import"""
+
+    @staticmethod
+    def build_search_bundle(resources: list[dict], resource_type: str, total: int) -> dict:
+        return {
+            "resourceType": "Bundle",
+            "type": "searchset",
+            "total": total,
+            "entry": [
+                {
+                    "fullUrl": f"urn:uuid:{r.get('id', '')}",
+                    "resource": {"resourceType": resource_type, **r},
+                }
+                for r in resources
+            ],
+        }

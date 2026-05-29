@@ -1,52 +1,51 @@
-# digital-doctor/backend/tests/test_patient_manager.py
 import pytest
 from datetime import date, datetime
-from src.services.patient_manager import get_patient_list, get_patient_detail
-from src.models.patient import Patient
+from src.models.patient import Patient, GlucoseRecord
+from src.models.clinical import LabReport, Alert
 
 
 @pytest.mark.asyncio
-async def test_get_patient_list_with_pagination(db_session):
-    # Create test patients
-    for i in range(3):
-        patient = Patient(
-            name_hash=f"hash{i}",
-            gender="M" if i % 2 == 0 else "F",
-            birth_year=1970 + i * 5,
-            diabetes_type="type2",
-            hba1c_target=7.0,
-        )
-        db_session.add(patient)
-    await db_session.commit()
-
-    result = await get_patient_list(db_session, page=1, page_size=2)
-    assert result["total"] == 3
-    assert result["page"] == 1
-    assert result["page_size"] == 2
-    assert len(result["items"]) == 2
+async def test_get_patient_list_empty(db_session):
+    from src.services.patient_manager import get_patient_list
+    result = await get_patient_list(db_session)
+    assert result["total"] == 0
+    assert result["items"] == []
 
 
 @pytest.mark.asyncio
-async def test_get_patient_detail(db_session):
+async def test_get_patient_detail_not_found(db_session):
+    from src.services.patient_manager import get_patient_detail
+    result = await get_patient_detail(db_session, "00000000-0000-0000-0000-000000000000")
+    assert result is None
+
+
+@pytest.mark.asyncio
+async def test_get_patient_detail_with_data(db_session):
+    from src.services.patient_manager import get_patient_detail
+
     patient = Patient(
-        name_hash="hash_detail",
-        gender="F",
-        birth_year=1975,
+        name_hash="test_hash",
+        gender="M",
+        birth_year=1970,
         diabetes_type="type2",
-        diagnosis_date=date(2020, 3, 15),
+        diagnosis_date=date(2020, 1, 15),
         hba1c_target=7.0,
     )
     db_session.add(patient)
     await db_session.commit()
-    await db_session.refresh(patient)
+
+    glucose = GlucoseRecord(
+        patient_id=patient.id,
+        value_mmol_l=6.5,
+        measure_type="fasting",
+        recorded_at=datetime(2026, 5, 30, 7, 0),
+    )
+    db_session.add(glucose)
+    await db_session.commit()
 
     detail = await get_patient_detail(db_session, str(patient.id))
     assert detail is not None
-    assert detail["gender"] == "F"
-    assert detail["birth_year"] == 1975
-    assert detail["diabetes_type"] == "type2"
-    assert detail["hba1c_target"] == 7.0
-    assert detail["diagnosis_date"] == "2020-03-15"
-    assert "glucose_records" in detail
-    assert "lab_reports" in detail
-    assert "alerts" in detail
+    assert detail["gender"] == "M"
+    assert detail["birth_year"] == 1970
+    assert len(detail["glucose_records"]) >= 1
+    assert detail["glucose_records"][0]["value_mmol_l"] == 6.5

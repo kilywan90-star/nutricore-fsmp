@@ -1,4 +1,3 @@
-# digital-doctor/backend/tests/test_medication_reminder.py
 import pytest
 from datetime import date
 from src.services.medication_reminder import (
@@ -41,7 +40,7 @@ def test_generate_daily_schedule_multiple_drugs():
 def test_check_missed_no_doses():
     reminders = [make_reminder("二甲双胍", "500mg", "bid", ["08:00", "18:00"])]
     taken = {"08:00", "18:00"}
-    missed = check_missed_doses(reminders, taken, current_time="23:59")
+    missed = check_missed_doses(reminders, taken)
     assert len(missed) == 0
 
 

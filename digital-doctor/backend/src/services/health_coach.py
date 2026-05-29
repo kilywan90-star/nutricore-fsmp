@@ -1,5 +1,4 @@
 from dataclasses import dataclass, field
-from typing import Any
 from src.services.llm_client import llm_client
 
 
@@ -55,7 +54,7 @@ class HealthCoach:
         if self._has_urgent_keywords(user_message):
             return "您的症状需要立即引起重视。请立即测量血糖，如血糖<3.9mmol/L请立即补充15g速效碳水（如半杯果汁/3块方糖）；如症状持续不缓解，请立即拨打120或前往急诊。"
         if "血糖高" in user_message or "控制不好" in user_message:
-            return f"理解您的担忧。近期空腹血糖平均{sum(ctx.recent_fpg)/len(ctx.recent_fpg):.1f}mmol/L（目标<7.0），建议：① 减少晚餐主食量至平时2/3 ② 餐后散步20分钟 ③ 避免含糖饮料和甜点。持续记录血糖，下周复诊时带上记录给医生看。"
+            return f"理解您的担忧。近期空腹血糖平均{sum(ctx.recent_fpg)/len(ctx.recent_fpg):.1f}mmol/L（目标<7.0），建议：1) 减少晚餐主食量至平时2/3 2) 餐后散步20分钟 3) 避免含糖饮料和甜点。持续记录血糖，下周复诊时带上记录给医生看。"
         if "吃什么" in user_message:
             return "建议选择低GI食物：全麦面包、燕麦、荞麦面、杂豆饭作为主食；蔬菜每日500g以上；蛋白质优选鱼虾去皮禽肉；水果选苹果、柚子、草莓，每次不超过100g，两餐之间食用。每日主食总量控制在250-400g。"
         return "记录得很好！继续坚持规律的血糖监测、合理饮食和适度运动。如果有任何不适或疑问，随时告诉我。"

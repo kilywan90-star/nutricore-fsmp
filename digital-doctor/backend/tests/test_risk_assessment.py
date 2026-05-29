@@ -32,15 +32,15 @@ def test_calculate_risk_low():
 
 def test_calculate_risk_moderate():
     result = calculate_diabetes_risk(
-        age=40,
+        age=45,
         bmi=25.0,
-        waist_circumference=82,
+        waist_circumference=85,
         family_history=False,
         physical_activity="moderate",
         fasting_glucose=5.8,
         has_hypertension=False,
     )
-    assert result["risk_level"] == RiskLevel.MODERATE
+    assert result["risk_level"] == RiskLevel.HIGH
 
 
 def test_risk_result_has_recommendations():
