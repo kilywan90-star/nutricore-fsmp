@@ -10,8 +10,10 @@ dist/
 downloads/
 eggs/
 .eggs/
-/lib/
-/lib64/
+lib/
+lib64/
+# Front-end lib directories are not Python libs
+!digital-doctor/frontend/src/lib/
 parts/
 sdist/
 var/
@@ -50,4 +52,3 @@ dist/
 *.local.yaml
 *.local.yml
 .env
-```
