@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>火山引擎 × 成都先导 — AI 智能体方案</title>
+<style>
+  :root {
+    --ve-black: #111827;
+    --ve-red: #e03a2e;
+    --ve-red-dark: #c62828;
+    --ve-blue: #1e40af;
+    --ve-gray: #6b7280;
+    --ve-light: #f3f4f6;
+    --ve-white: #ffffff;
+    --ve-border: #e5e7eb;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: "PingFang SC", "Microsoft YaHei", "Helvetica Neue", -apple-system, sans-serif;
+    background: #1a1a1a;
+    color: #1f2937;
+    line-height: 1.7;
+    font-size: 15px;
+    display: flex; justify-content: center; align-items: center;
+    min-height: 100vh; overflow: hidden;
+  }
+
+  /* ── DECK WRAPPER ── */
+  .deck {
+    position: relative;
+    width: 1100px; height: 700px;
+    background: #fff;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+    border-radius: 4px;
+    overflow: hidden;
+    display: flex; flex-direction: column;
+  }
+
+  /* ── SLIDES CONTAINER ── */
+  .slides-viewport {
+    flex: 1; overflow: hidden; position: relative;
+  }
+  .slides-track {
+    display: flex; height: 100%;
+    transition: transform 0.45s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  }
+  .slide {
+    flex: 0 0 100%; height: 100%;
+    padding: 48px 64px 40px;
+    overflow-y: auto;
+    position: relative;
+  }
+
+  /* ── NAV BUTTONS (hidden by default, show on hover) ── */
+  .nav-btn {
+    position: absolute; top: 50%; transform: translateY(-50%);
+    width: 44px; height: 44px; border-radius: 50%;
+    background: rgba(0,0,0,0.55); color: #fff; border: none;
+    cursor: pointer; z-index: 10;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px;
+    opacity: 0; transition: opacity 0.25s;
+    pointer-events: none;
+  }
+  .deck:hover .nav-btn, .nav-btn:focus-visible { opacity: 1; pointer-events: auto; }
+  .nav-btn:hover { background: rgba(0,0,0,0.8); }
+  .nav-btn.prev { left: 12px; }
+  .nav-btn.next { right: 12px; }
+
+  /* ── PAGE INDICATOR ── */
+  .page-dots {
+    position: absolute; bottom: 16px; left: 50%; transform: translateX(-50%);
+    display: flex; gap: 8px; z-index: 10;
+    opacity: 0; transition: opacity 0.25s;
+  }
+  .deck:hover .page-dots { opacity: 1; }
+  .page-dots .dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: rgba(255,255,255,0.4); cursor: pointer;
+    transition: background 0.2s;
+  }
+  .page-dots .dot.active { background: #fff; }
+
+  /* ── SLIDE 1: COVER ── */
+  .slide-cover {
+    background: linear-gradient(135deg, #111827 0%, #1f2937 40%, #0f172a 100%);
+    color: #fff; display: flex; flex-direction: column;
+    justify-content: center; align-items: center; text-align: center;
+  }
+  .slide-cover .brand-tag {
+    font-size: 13px; letter-spacing: 5px; text-transform: uppercase;
+    color: var(--ve-red); margin-bottom: 20px;
+  }
+  .slide-cover h1 {
+    font-size: 36px; font-weight: 800; letter-spacing: 1px; margin-bottom: 12px;
+    max-width: 640px;
+  }
+  .slide-cover .sub {
+    font-size: 19px; color: #9ca3af; font-weight: 400; margin-bottom: 36px;
+  }
+  .slide-cover .meta {
+    font-size: 13px; color: #6b7280;
+    border-top: 1px solid rgba(255,255,255,0.1);
+    padding-top: 20px;
+  }
+  .slide-cover .logo-row {
+    display: flex; gap: 32px; align-items: center; font-size: 14px; color: #9ca3af;
+    margin-top: 10px;
+  }
+
+  /* ── SECTION HEAD ── */
+  h2.section-head {
+    font-size: 22px; font-weight: 800; color: var(--ve-black);
+    border-left: 4px solid var(--ve-red); padding-left: 14px;
+    margin-bottom: 20px; line-height: 1.3;
+  }
+  h3 {
+    font-size: 16px; font-weight: 700; color: var(--ve-black);
+    margin: 20px 0 10px;
+  }
+
+  /* ── INSIGHT BAR ── */
+  .insight {
+    background: #fef2f2; border-left: 3px solid var(--ve-red);
+    padding: 12px 18px; margin: 12px 0 20px;
+    font-size: 14px; color: #7f1d1d; font-weight: 600; border-radius: 0 4px 4px 0;
+  }
+
+  /* ── GRID ── */
+  .grid-2 {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 14px;
+  }
+  .grid-3 {
+    display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px;
+  }
+  .grid-4 {
+    display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 12px;
+  }
+
+  /* ── CARDS ── */
+  .card {
+    border: 1px solid var(--ve-border); border-radius: 6px;
+    padding: 16px 18px; background: #fff;
+  }
+  .card h4 {
+    font-size: 15px; font-weight: 700; color: var(--ve-black); margin-bottom: 4px;
+  }
+  .card .card-tag {
+    display: inline-block; font-size: 10px; font-weight: 700; text-transform: uppercase;
+    color: var(--ve-red); letter-spacing: 0.5px; margin-bottom: 6px;
+  }
+  .card p { font-size: 13px; color: #4b5563; line-height: 1.6; }
+
+  .card.accent {
+    border-color: var(--ve-red); border-width: 2px; background: #fffbfb;
+  }
+
+  /* ── TABLE ── */
+  table.mini {
+    width: 100%; border-collapse: collapse; font-size: 13px; margin: 10px 0;
+  }
+  table.mini thead th {
+    background: var(--ve-black); color: #fff; padding: 8px 12px;
+    text-align: left; font-weight: 600; font-size: 12px;
+  }
+  table.mini tbody td {
+    padding: 8px 12px; border-bottom: 1px solid var(--ve-border); vertical-align: top;
+  }
+  table.mini tbody tr:nth-child(even) { background: #f9fafb; }
+
+  /* ── METRIC ROW ── */
+  .metric-row {
+    display: flex; gap: 16px; margin: 14px 0;
+  }
+  .metric {
+    flex: 1; text-align: center; padding: 16px 8px;
+    border: 1px solid var(--ve-border); border-radius: 6px; background: #fff;
+  }
+  .metric .num { font-size: 28px; font-weight: 800; color: var(--ve-red); }
+  .metric .unit { font-size: 14px; }
+  .metric .label { font-size: 12px; color: var(--ve-gray); margin-top: 4px; }
+
+  /* ── MODEL STACK ── */
+  .model-layer {
+    display: flex; align-items: stretch; gap: 14px; margin-bottom: 10px;
+  }
+  .model-layer .layer-tag {
+    width: 120px; flex-shrink: 0; display: flex; align-items: center;
+    justify-content: center; font-size: 12px; font-weight: 800; color: #fff;
+    border-radius: 4px; text-align: center; padding: 10px 6px;
+    letter-spacing: 0.5px;
+  }
+  .layer-tag.base { background: var(--ve-black); }
+  .layer-tag.medical { background: var(--ve-blue); }
+  .layer-tag.embed { background: #7c3aed; }
+  .layer-tag.util { background: #0891b2; }
+  .model-layer .layer-content {
+    flex: 1; border: 1px solid var(--ve-border); border-radius: 4px;
+    padding: 12px 16px; display: flex; justify-content: space-between;
+    align-items: center; gap: 12px;
+  }
+  .model-layer .layer-content .name {
+    font-size: 15px; font-weight: 700; color: var(--ve-black);
+  }
+  .model-layer .layer-content .desc {
+    font-size: 13px; color: #6b7280; flex: 1;
+  }
+  .model-layer .layer-content .badge {
+    font-size: 11px; background: #f0fdf4; color: #166534;
+    padding: 3px 10px; border-radius: 12px; white-space: nowrap;
+    font-weight: 600;
+  }
+
+  /* ── CLOSING SLIDE ── */
+  .closing {
+    background: linear-gradient(135deg, #111827 0%, #1f2937 100%);
+    color: #fff; text-align: center;
+    display: flex; flex-direction: column;
+    justify-content: center; align-items: center;
+  }
+  .closing h2 { font-size: 30px; font-weight: 800; margin-bottom: 12px; }
+  .closing p { font-size: 16px; color: #9ca3af; max-width: 500px; line-height: 1.7; }
+  .closing .action-box {
+    margin-top: 28px; padding: 14px 32px;
+    border: 2px solid var(--ve-red); border-radius: 6px;
+    color: var(--ve-red); font-weight: 700; font-size: 15px;
+  }
+
+  /* ── SLIDE FOOTER ── */
+  .slide-foot {
+    position: absolute; bottom: 0; left: 64px; right: 64px;
+    height: 36px; border-top: 1px solid var(--ve-border);
+    display: flex; justify-content: space-between; align-items: center;
+    font-size: 11px; color: #9ca3af;
+  }
+  .slide-cover .slide-foot, .closing .slide-foot {
+    border-color: rgba(255,255,255,0.1); color: #6b7280;
+    left: 48px; right: 48px;
+  }
+
+  /* ── KEYBOARD HINT ── */
+  .kb-hint {
+    position: absolute; bottom: 12px; right: 16px;
+    font-size: 11px; color: #d1d5db; z-index: 10;
+    opacity: 0; transition: opacity 0.25s;
+    pointer-events: none;
+  }
+  .deck:hover .kb-hint { opacity: 1; }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 1160px) {
+    .deck { width: 96vw; height: 62vw; }
+    .slide { padding: 36px 48px 32px; }
+    .slide-foot { left: 48px; right: 48px; }
+    h2.section-head { font-size: 20px; }
+    .grid-4 { grid-template-columns: 1fr 1fr; }
+  }
+
+  @media print {
+    body { background: #fff; display: block; }
+    .deck { width: 100%; height: auto; box-shadow: none; }
+    .slides-viewport { overflow: visible; }
+    .slides-track { display: block; transform: none !important; }
+    .slide { page-break-after: always; height: auto; min-height: 100vh; }
+    .nav-btn, .page-dots, .kb-hint { display: none !important; }
+  }
+</style>
+</head>
+<body>
+
+<div class="deck" id="deck">
+
+  <!-- Navigation buttons (hidden, show on hover) -->
+  <button class="nav-btn prev" id="btnPrev" title="上一页">&#9664;</button>
+  <button class="nav-btn next" id="btnNext" title="下一页">&#9654;</button>
+
+  <!-- Page indicator dots -->
+  <div class="page-dots" id="pageDots"></div>
+
+  <!-- Keyboard hint -->
+  <div class="kb-hint">← → 键翻页</div>
+
+  <!-- Slides track -->
+  <div class="slides-viewport">
+    <div class="slides-track" id="slidesTrack">
+
+      <!-- ═══════════ SLIDE 1: COVER ═══════════ -->
+      <div class="slide slide-cover">
+        <div class="brand-tag">Volcano Engine &times; HitGen</div>
+        <h1>AI 智能体方案<br>让每一位研究员都拥有 AI 副驾驶</h1>
+        <div class="sub">全私有化部署 &middot; 秒级知识检索 &middot; 数据不出内网</div>
+        <div class="meta">火山引擎 &nbsp;|&nbsp; 面向成都先导药物开发股份有限公司 &nbsp;|&nbsp; 2026.05</div>
+      </div>
+
+      <!-- ═══════════ SLIDE 2: 业务理解 + 痛点 ═══════════ -->
+      <div class="slide">
+        <h2 class="section-head">成都先导的业务画像与核心痛点</h2>
+
+        <div class="insight">
+          We understand your world &mdash; 靶点、DEL、ADMET、ELN、GLP，这些术语是我们方案设计的业务锚点。
+        </div>
+
+        <!-- 6 key terms -->
+        <div class="grid-3" style="margin-bottom:14px;">
+          <div class="card">
+            <div class="card-tag">Target</div>
+            <h4>靶点</h4>
+            <p>药物作用的特定生物分子，新药研发的起点。</p>
+          </div>
+          <div class="card">
+            <div class="card-tag">Hit Compound</div>
+            <h4>Hit 化合物</h4>
+            <p>筛选中命中靶点、显示活性的化合物，药物优化起点。</p>
+          </div>
+          <div class="card">
+            <div class="card-tag">ADMET</div>
+            <h4>吸收 / 分布 / 代谢 / 排泄 / 毒性</h4>
+            <p>决定候选药物能否成药的五项核心指标。</p>
+          </div>
+          <div class="card">
+            <div class="card-tag">DEL</div>
+            <h4>DNA 编码化合物库 <span style="color:var(--ve-red);">— 贵司核心技术</span></h4>
+            <p>数十亿化合物与 DNA 条形码连接，混合筛选后通过测序定位活性分子。</p>
+          </div>
+          <div class="card">
+            <div class="card-tag">ELN</div>
+            <h4>电子实验记录本</h4>
+            <p>实验全流程记录，GLP 合规硬性要求。</p>
+          </div>
+          <div class="card">
+            <div class="card-tag">GLP</div>
+            <h4>药物非临床研究质量管理规范</h4>
+            <p>国际通行质量体系，确保研究结果真实、完整、可靠。</p>
+          </div>
+        </div>
+
+        <h3>贵司数据已电子化，但缺乏统一检索入口</h3>
+        <div class="insight" style="background:#fff7ed;border-color:#f59e0b;color:#7c2d12;">
+          研究员查一个靶点的历史数据，需分别登录 ELN、DEL 库、SDMS 多个系统，跨部门汇总动辄数天 &mdash; 智能体统一检索秒级输出，恰好命中这个刚需。
+        </div>
+
+        <table class="mini">
+          <thead>
+            <tr><th>业务环节</th><th>现有系统</th><th>数据规模</th><th>痛点</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>DEL 筛选 / 化合物管理</td><td>内部 DEL 数据库、SDMS</td><td>数十亿级化合物</td><td>人工无法管理，跨系统查询低效</td></tr>
+            <tr><td>实验过程记录</td><td>ELN 电子实验记录本</td><td>海量实验记录</td><td>GLP 留痕要求，但缺乏智能检索</td></tr>
+            <tr><td>项目与客户交付</td><td>LIMS、项目管理系统</td><td>客户项目全生命周期</td><td>需"数据-报告-审计"全链路打通</td></tr>
+            <tr><td>文献 / 专利情报</td><td>内部知识库、专利监控</td><td>每日海量新增文献</td><td>人工阅读跟不上更新速度</td></tr>
+          </tbody>
+        </table>
+
+        <div class="slide-foot">
+          <span>火山引擎 × 成都先导</span><span>2 / 5</span>
+        </div>
+      </div>
+
+      <!-- ═══════════ SLIDE 3: 五大智能体场景 + 模型组合 ═══════════ -->
+      <div class="slide">
+        <h2 class="section-head">五大高价值智能体场景</h2>
+
+        <div class="grid-3" style="margin-bottom:18px;">
+          <div class="card accent">
+            <div class="card-tag">最易切入</div>
+            <h4>1. 文献智能体</h4>
+            <p>自动跟踪指定靶点最新文献/专利并生成结构化摘要；竞品管线情报监控秒级响应；内部实验报告 Q&A。</p>
+          </div>
+          <div class="card accent">
+            <div class="card-tag">内部提效王牌</div>
+            <h4>2. 药化知识助手</h4>
+            <p>"这个母核结构有没有在 DEL 库出现过类似的？"合成路线可行性、ADMET 预测一键查询。</p>
+          </div>
+          <div class="card">
+            <div class="card-tag">CRO 服务价值</div>
+            <h4>3. 客户项目协作</h4>
+            <p>自动拉取多系统数据生成多语言进度报告；基于历史项目给出实验方案参考建议。</p>
+          </div>
+          <div class="card">
+            <div class="card-tag">研发增效</div>
+            <h4>4. 实验设计辅助</h4>
+            <p>DEL 筛选方案参数推荐；异常结果自动分析；结果解读第一轮自动化。</p>
+          </div>
+          <div class="card">
+            <div class="card-tag">风控兜底</div>
+            <h4>5. 法规合规智能体</h4>
+            <p>GLP/GMP 合规检查要点提醒；专利申请前现有技术自查；IND 申报材料清单与模板匹配。</p>
+          </div>
+        </div>
+
+        <h3>支撑这些场景的模型组合</h3>
+        <div class="model-layer">
+          <div class="layer-tag base">自研基座</div>
+          <div class="layer-content">
+            <div>
+              <div class="name">豆包 Seed 大模型 · 企业私有化版</div>
+              <div class="desc">全链路自主可控，支持零随机合规配置（温度=0），确保输出可复现、可审计</div>
+            </div>
+            <div class="badge">满足 GLP</div>
+          </div>
+        </div>
+        <div class="model-layer">
+          <div class="layer-tag medical">医药垂类</div>
+          <div class="layer-content">
+            <div>
+              <div class="name">医药文献精调模型 + Uni-Mol 三维分子模型</div>
+              <div class="desc">深度理解靶点/DEL/ADMET等专业术语，精准解析化合物3D结构</div>
+            </div>
+            <div class="badge">CRO 场景适配</div>
+          </div>
+        </div>
+        <div class="model-layer">
+          <div class="layer-tag embed">双向量</div>
+          <div class="layer-content">
+            <div>
+              <div class="name">文本语义 + 化合物分子（ChemBERTa）双 Embedding</div>
+              <div class="desc">文献文本和化合物SMILES结构分别向量化，支撑数十亿级秒级相似检索</div>
+            </div>
+            <div class="badge">&lt;1.5s 响应</div>
+          </div>
+        </div>
+        <div class="model-layer">
+          <div class="layer-tag util">全流程</div>
+          <div class="layer-content">
+            <div>
+              <div class="name">OCR 文档解析 · 表格结构化 · 多语言翻译</div>
+              <div class="desc">纸质文档数字化、实验数据自动提取、多语言资料无障碍阅读</div>
+            </div>
+            <div class="badge">补齐全场景</div>
+          </div>
+        </div>
+
+        <div class="slide-foot">
+          <span>火山引擎 × 成都先导</span><span>3 / 5</span>
+        </div>
+      </div>
+
+      <!-- ═══════════ SLIDE 4: 私有化部署 + 性能保障 + 零随机 ═══════════ -->
+      <div class="slide">
+        <h2 class="section-head">安全、性能与合规：三位一体的私有化方案</h2>
+
+        <div class="insight">
+          私有化部署不是加分项，是准入门槛 &mdash; DEL 库自有 IP + 客户数据保密 + 专利窗口期，三重敏感数据叠加，绝不允许数据出内网。
+        </div>
+
+        <!-- Architecture diagram -->
+        <div style="background:#1f2937;border-radius:6px;padding:18px 24px;margin:16px 0;text-align:center;font-family:monospace;font-size:12px;color:#d1d5db;line-height:1.8;">
+          <span style="color:#fbbf24;">━━━━━━━━ 客户内网 / 专有云 ━━━━━━━━</span><br>
+          <br>
+          用户终端 ──→ <span style="color:#60a5fa;">LLM 推理</span>（本地 GPU）──→ <span style="color:#a78bfa;">向量数据库</span>（文档索引）<br>
+          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;│<br>
+          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;┌─────────┼─────────┐<br>
+          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;▼&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;▼&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;▼<br>
+          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ELN&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;DEL 库&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;SDMS<br>
+          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;电子实验记录&nbsp;&nbsp;化合物 DB&nbsp;&nbsp;科学数据管理<br>
+          <br>
+          <span style="color:#fbbf24;">━━━━━━━━━ 网络边界 · 数据不出外网 ━━━━━━━━━</span>
+        </div>
+
+        <div class="grid-2" style="margin-bottom:12px;">
+          <div>
+            <h3>性能保障：三层优化</h3>
+            <table class="mini">
+              <thead><tr><th>优化</th><th>手段</th><th>效果</th></tr></thead>
+              <tbody>
+                <tr><td>索引与量化</td><td>IVF-HNSW + FP16/INT8 量化</td><td>数十亿检索 &lt;1.5s</td></tr>
+                <tr><td>分层存储</td><td>热数据内存 / 冷数据磁盘</td><td>90%查询秒级响应</td></tr>
+                <tr><td>混合检索</td><td>结构化过滤 + 向量相似</td><td>速度提升10倍+</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div>
+            <h3>零随机参数：GLP 合规基石</h3>
+            <table class="mini">
+              <thead><tr><th>参数</th><th>设置</th><th>原因</th></tr></thead>
+              <tbody>
+                <tr><td>temperature</td><td><strong>0</strong></td><td>零随机，确保输出确定性</td></tr>
+                <tr><td>top_k</td><td><strong>1</strong></td><td>仅保留最高概率 token</td></tr>
+                <tr><td>seed</td><td><strong>固定值</strong></td><td>审计逐字可复现</td></tr>
+                <tr><td>frequency_penalty</td><td><strong>0</strong></td><td>化合物名称该重复就重复</td></tr>
+                <tr><td>presence_penalty</td><td><strong>0</strong></td><td>不引导"换说法"，避免信息丢失</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="insight" style="background:#f0fdf4;border-color:#059669;color:#065f46;margin-top:0;">
+          关键认知：知识库索引和模型推理必须在同一私有环境中完成 &mdash; 不存在"索引在本地、推理调公有云"的半吊子方案。
+        </div>
+
+        <div class="slide-foot">
+          <span>火山引擎 × 成都先导</span><span>4 / 5</span>
+        </div>
+      </div>
+
+      <!-- ═══════════ SLIDE 5: 为什么火山引擎 + 分阶段实施 + CLOSING ═══════════ -->
+      <div class="slide">
+        <h2 class="section-head">为什么是火山引擎？分阶段落地，立即见效</h2>
+
+        <!-- Competitive advantages -->
+        <div class="grid-2" style="margin-bottom:14px;">
+          <div class="card">
+            <h4>自研全栈 · 非拼凑方案</h4>
+            <p>字节跳动旗下 AI 服务商，豆包 Seed 日均万亿级 Token 打磨，向量数据库全链路自研可控。</p>
+          </div>
+          <div class="card">
+            <h4>海量数据 · 匹配 DEL 规模</h4>
+            <p>字节 EB 级数据处理经验，DiskANN+RaBitQ 算法原生支持数十亿级向量秒级检索。</p>
+          </div>
+          <div class="card">
+            <h4>低侵入 · 不改造现有系统</h4>
+            <p>轻量化只读接入 ELN/DEL/SDMS/LIMS，不改动研发流程，落地周期短。</p>
+          </div>
+          <div class="card">
+            <h4>长期运维 · 非一次性交付</h4>
+            <p>7×24h 运维 + 模型持续迭代 + 行业知识库更新，字节上市公司信用背书。</p>
+          </div>
+        </div>
+
+        <h3>分阶段实施路径</h3>
+        <div class="metric-row">
+          <div class="metric" style="border-color:var(--ve-red);border-width:2px;background:#fffbfb;">
+            <div class="num">1~2<span class="unit">月</span></div>
+            <div class="label"><strong>第一阶段 · 跑通高频场景</strong><br>2~3个高频靶点 + 近期项目 +<br>核心文献，文献智能体先行</div>
+          </div>
+          <div class="metric">
+            <div class="num">2~4<span class="unit">月</span></div>
+            <div class="label"><strong>第二阶段 · 扩展数据范围</strong><br>全量 DEL 库 + ELN 历史 +<br>SDMS/LIMS 系统接入</div>
+          </div>
+          <div class="metric">
+            <div class="num">持续<span class="unit">迭代</span></div>
+            <div class="label"><strong>第三阶段 · 深度业务融合</strong><br>定制智能体 + 模型微调 +<br>ADMET 预测 + 报告自动化</div>
+          </div>
+        </div>
+
+        <div class="insight" style="margin-top:8px;">
+          对辉瑞/默沙东客户：跨系统检索从数天→秒级，客户响应速度就是核心竞争壁垒。
+        </div>
+
+        <div class="insight" style="background:#f0fdf4;border-color:#059669;color:#065f46;margin-top:8px;">
+          知识产权保障：私有化模型完全隔离，数据不训练、不跨客户共享，模型权重和数据所有权全部归属贵司。
+        </div>
+
+        <div class="slide-foot">
+          <span>火山引擎 × 成都先导</span><span>5 / 5</span>
+        </div>
+      </div>
+
+    </div><!-- /slides-track -->
+  </div><!-- /slides-viewport -->
+
+</div><!-- /deck -->
+
+<script>
+(function() {
+  var track = document.getElementById('slidesTrack');
+  var btnPrev = document.getElementById('btnPrev');
+  var btnNext = document.getElementById('btnNext');
+  var dotsContainer = document.getElementById('pageDots');
+  var totalSlides = document.querySelectorAll('.slide').length;
+  var current = 0;
+
+  // Build dots
+  for (var i = 0; i < totalSlides; i++) {
+    var dot = document.createElement('span');
+    dot.className = 'dot' + (i === 0 ? ' active' : '');
+    dot.setAttribute('data-index', i);
+    dot.addEventListener('click', (function(idx) {
+      return function() { goTo(idx); };
+    })(i));
+    dotsContainer.appendChild(dot);
+  }
+
+  function goTo(index) {
+    if (index < 0 || index >= totalSlides) return;
+    current = index;
+    track.style.transform = 'translateX(-' + (current * 100) + '%)';
+    // Update dots
+    var dots = dotsContainer.querySelectorAll('.dot');
+    dots.forEach(function(d, i) {
+      d.classList.toggle('active', i === current);
+    });
+  }
+
+  btnPrev.addEventListener('click', function() { goTo(current - 1); });
+  btnNext.addEventListener('click', function() { goTo(current + 1); });
+
+  // Keyboard
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'ArrowLeft') { goTo(current - 1); }
+    if (e.key === 'ArrowRight') { goTo(current + 1); }
+  });
+
+  // Touch swipe support
+  var touchStartX = 0;
+  track.addEventListener('touchstart', function(e) {
+    touchStartX = e.touches[0].clientX;
+  });
+  track.addEventListener('touchend', function(e) {
+    var diff = touchStartX - e.changedTouches[0].clientX;
+    if (Math.abs(diff) > 50) {
+      goTo(current + (diff > 0 ? 1 : -1));
+    }
+  });
+})();
+</script>
+
+</body>
+</html>

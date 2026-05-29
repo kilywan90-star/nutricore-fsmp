@@ -1,0 +1,18 @@
+<!-- 消息页（TBD完整功能） -->
+<view class="page">
+  <view class="card" wx:for="{{conversations}}" wx:key="id">
+    <view class="flex">
+      <image class="avatar" src="{{item.avatar || '/static/default-avatar.png'}}" mode="aspectFill" />
+      <view class="flex-1" style="margin-left:16rpx">
+        <view class="flex-between">
+          <text class="text-bold">{{item.name}}</text>
+          <text class="text-sm text-muted">{{item.time}}</text>
+        </view>
+        <text class="text-sm text-muted mt-4">{{item.lastMessage}}</text>
+      </view>
+    </view>
+  </view>
+  <view wx:if="{{conversations.length === 0}}" class="text-center p-24 text-muted">
+    <text>暂无消息</text>
+  </view>
+</view>

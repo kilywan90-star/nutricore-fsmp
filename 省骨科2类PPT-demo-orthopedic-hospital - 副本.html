@@ -1,0 +1,1765 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MotionRehab — 全场景运动康复数字化平台</title>
+<style>
+/* ============================================
+   Design System — 融合风格 (International Clean + Domestic Data Viz)
+   References: Epic MyChart · 联影 uCloud · Mayo Clinic Portal · Apple Health
+   ============================================ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  /* Primary palette */
+  --p-50: #eff6ff; --p-100: #dbeafe; --p-200: #bfdbfe; --p-300: #93c5fd;
+  --p-400: #60a5fa; --p-500: #3b82f6; --p-600: #2563eb; --p-700: #1d4ed8; --p-800: #1e40af; --p-900: #1e3a8a;
+  /* Accent — teal */
+  --t-50: #f0fdfa; --t-100: #ccfbf1; --t-200: #99f6e4; --t-400: #2dd4bf; --t-500: #14b8a6; --t-600: #0d9488; --t-700: #0f766e;
+  /* Semantic */
+  --amber: #f59e0b; --amber-light: #fef3c7;
+  --rose: #f43f5e; --rose-light: #ffe4e6;
+  --emerald: #10b981; --emerald-light: #d1fae5;
+  /* Surfaces */
+  --bg: #f8fafc;
+  --bg-alt: #f1f5f9;
+  --surface: #ffffff;
+  --surface-glass: rgba(255,255,255,.72);
+  --border: #e2e8f0;
+  --border-light: #f1f5f9;
+  /* Text */
+  --text: #0f172a;
+  --text-secondary: #475569;
+  --text-tertiary: #94a3b8;
+  /* Shadows — refined multi-layer */
+  --shadow-xs: 0 1px 2px rgba(0,0,0,.04);
+  --shadow-sm: 0 1px 3px rgba(0,0,0,.06), 0 1px 2px rgba(0,0,0,.04);
+  --shadow-md: 0 4px 6px rgba(0,0,0,.04), 0 2px 4px rgba(0,0,0,.04);
+  --shadow-lg: 0 10px 15px -3px rgba(0,0,0,.06), 0 4px 6px -2px rgba(0,0,0,.04);
+  --shadow-xl: 0 20px 25px -5px rgba(0,0,0,.08), 0 10px 10px -5px rgba(0,0,0,.03);
+  --shadow-glow: 0 0 0 3px rgba(59,130,246,.12);
+  /* Radii */
+  --r-xs: 6px; --r-sm: 10px; --r-md: 14px; --r-lg: 20px; --r-xl: 28px;
+  /* Layout */
+  --sidebar-w: 250px;
+  --header-h: 0px;
+  /* Motion */
+  --ease-out: cubic-bezier(.16,1,.3,1);
+  --ease-in-out: cubic-bezier(.65,0,.35,1);
+  --duration-fast: 150ms;
+  --duration-normal: 300ms;
+  --duration-slow: 500ms;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Noto Sans SC", "Microsoft YaHei", sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.6;
+  display: flex;
+  min-height: 100vh;
+  overflow: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ===== Sidebar — Product App Style ===== */
+.sidebar {
+  width: var(--sidebar-w);
+  background: #0f172a;
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+  position: fixed;
+  top: 0; left: 0; bottom: 0;
+  z-index: 100;
+  overflow-y: auto;
+  scrollbar-width: none;
+}
+
+.sidebar::-webkit-scrollbar { display: none; }
+
+.sidebar-brand {
+  padding: 22px 20px 18px;
+  border-bottom: 1px solid rgba(255,255,255,.08);
+}
+
+.sidebar-brand .brand-name {
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: -.2px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.brand-dot {
+  width: 10px; height: 10px;
+  border-radius: 50%;
+  background: #22d3ee;
+  box-shadow: 0 0 10px rgba(34,211,238,.5);
+  animation: brandPulse 2s ease-in-out infinite;
+}
+
+@keyframes brandPulse {
+  0%, 100% { box-shadow: 0 0 8px rgba(34,211,238,.4); }
+  50% { box-shadow: 0 0 18px rgba(34,211,238,.8); }
+}
+
+.sidebar-brand .brand-ver {
+  font-size: 11px;
+  color: rgba(255,255,255,.35);
+  margin-top: 3px;
+  margin-left: 20px;
+}
+
+.sidebar-status {
+  margin: 14px 16px;
+  padding: 10px 14px;
+  background: rgba(16,185,129,.12);
+  border: 1px solid rgba(16,185,129,.2);
+  border-radius: var(--r-sm);
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.status-dot {
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: #10b981;
+  box-shadow: 0 0 6px rgba(16,185,129,.6);
+}
+
+.sidebar-nav { flex: 1; padding: 8px 0; }
+
+.nav-group {
+  padding: 14px 18px 6px;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  color: rgba(255,255,255,.28);
+  font-weight: 600;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 18px;
+  margin: 1px 10px;
+  cursor: pointer;
+  transition: all var(--duration-fast) var(--ease-out);
+  font-size: 13.5px;
+  color: rgba(255,255,255,.55);
+  border-radius: var(--r-sm);
+  text-decoration: none;
+  position: relative;
+}
+
+.nav-item:hover { background: rgba(255,255,255,.06); color: rgba(255,255,255,.85); }
+
+.nav-item.active {
+  background: rgba(59,130,246,.18);
+  color: #fff;
+  font-weight: 600;
+  box-shadow: inset 0 0 0 1px rgba(59,130,246,.25);
+}
+
+.nav-item .nav-icon { width: 20px; text-align: center; font-size: 15px; flex-shrink: 0; }
+
+/* ===== Main Area ===== */
+.main {
+  margin-left: var(--sidebar-w);
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  height: 100vh;
+  scroll-behavior: smooth;
+  scrollbar-width: thin;
+  scrollbar-color: #cbd5e1 transparent;
+}
+
+.page {
+  display: none;
+  padding: 36px 44px;
+  max-width: 1280px;
+  animation: pageIn .4s var(--ease-out);
+}
+
+.page.active { display: block; }
+
+@keyframes pageIn {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ===== Page Header ===== */
+.page-header {
+  margin-bottom: 28px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.page-header h1 {
+  font-size: 26px;
+  font-weight: 700;
+  letter-spacing: -.4px;
+  color: var(--text);
+}
+
+.page-header .page-desc {
+  font-size: 14px;
+  color: var(--text-secondary);
+  margin-top: 4px;
+}
+
+.page-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+  background: var(--p-50);
+  color: var(--p-600);
+}
+
+/* ===== Glass Cards ===== */
+.card {
+  background: var(--surface);
+  border-radius: var(--r-md);
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--border);
+  padding: 24px;
+  margin-bottom: 18px;
+  transition: box-shadow var(--duration-fast) var(--ease-out);
+}
+
+.card:hover { box-shadow: var(--shadow-md); }
+
+.card-glass {
+  background: var(--surface-glass);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(226,232,240,.6);
+}
+
+.card-accent-top { border-top: 3px solid var(--p-500); }
+.card-accent-teal { border-top: 3px solid var(--t-500); }
+.card-accent-amber { border-top: 3px solid var(--amber); }
+
+/* ===== Grids ===== */
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+.grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+.grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px; }
+
+/* ===== Stat Widgets ===== */
+.stat-widget {
+  background: var(--surface);
+  border-radius: var(--r-md);
+  box-shadow: var(--shadow-xs);
+  border: 1px solid var(--border);
+  padding: 18px 20px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  transition: all var(--duration-fast) var(--ease-out);
+  cursor: default;
+}
+
+.stat-widget:hover {
+  box-shadow: var(--shadow-lg);
+  transform: translateY(-1px);
+}
+
+.stat-icon {
+  width: 44px; height: 44px;
+  border-radius: var(--r-sm);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 22px;
+  flex-shrink: 0;
+}
+
+.stat-icon.blue { background: var(--p-50); }
+.stat-icon.teal { background: var(--t-50); }
+.stat-icon.amber { background: var(--amber-light); }
+.stat-icon.rose { background: var(--rose-light); }
+
+.stat-body .stat-value {
+  font-size: 24px;
+  font-weight: 700;
+  letter-spacing: -.5px;
+  line-height: 1.2;
+}
+
+.stat-body .stat-label {
+  font-size: 12.5px;
+  color: var(--text-secondary);
+}
+
+.stat-change {
+  font-size: 11px;
+  font-weight: 600;
+  margin-top: 2px;
+}
+
+.stat-change.up { color: var(--emerald); }
+.stat-change.warn { color: var(--amber); }
+
+/* ===== Data Tables ===== */
+.table-wrap { overflow-x: auto; margin: 8px 0; border-radius: var(--r-sm); }
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13.5px;
+}
+
+thead th {
+  background: var(--bg-alt);
+  padding: 11px 14px;
+  text-align: left;
+  font-weight: 600;
+  font-size: 12px;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: .3px;
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+}
+
+tbody td {
+  padding: 11px 14px;
+  border-bottom: 1px solid var(--border-light);
+  color: var(--text);
+}
+
+tbody tr:last-child td { border-bottom: none; }
+tbody tr:hover td { background: var(--p-50); }
+
+/* ===== Badges ===== */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 11.5px;
+  font-weight: 600;
+}
+
+.badge-red { background: var(--rose-light); color: var(--rose); }
+.badge-green { background: var(--emerald-light); color: var(--emerald); }
+.badge-blue { background: var(--p-50); color: var(--p-600); }
+.badge-amber { background: var(--amber-light); color: var(--amber); }
+
+/* ===== Compare Panels ===== */
+.compare-panels { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+
+.compare-panel {
+  padding: 22px;
+  border-radius: var(--r-md);
+  border: 2px solid;
+}
+
+.compare-panel.before { background: #fff5f5; border-color: #fecaca; }
+.compare-panel.after { background: #f0fdf4; border-color: #bbf7d0; }
+
+.compare-panel h4 {
+  font-size: 11px; text-transform: uppercase; letter-spacing: 1.2px;
+  margin-bottom: 14px; display: flex; align-items: center; gap: 6px;
+}
+
+.compare-panel.before h4 { color: #dc2626; }
+.compare-panel.after h4 { color: #16a34a; }
+
+.compare-row {
+  display: flex; align-items: flex-start; gap: 8px;
+  margin-bottom: 10px; font-size: 13.5px; line-height: 1.5;
+}
+
+.compare-row .indicator { flex-shrink: 0; width: 16px; font-size: 12px; margin-top: 1px; }
+.compare-panel.before .indicator { color: #ef4444; }
+.compare-panel.after .indicator { color: #22c55e; }
+
+/* ===== Flow Diagram ===== */
+.flow-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  padding: 10px 0;
+}
+
+.flow-node {
+  padding: 14px 20px;
+  border-radius: var(--r-sm);
+  font-weight: 600;
+  font-size: 13.5px;
+  text-align: center;
+  transition: all var(--duration-fast) var(--ease-out);
+  cursor: default;
+  background: var(--surface);
+  border: 2px solid var(--border);
+  min-width: 80px;
+}
+
+.flow-node:hover { border-color: var(--p-400); box-shadow: var(--shadow-glow); }
+
+.flow-node.accent { border-color: var(--t-400); background: var(--t-50); }
+.flow-node.primary { border-color: var(--p-400); background: var(--p-50); }
+
+.flow-arrow {
+  font-size: 20px;
+  color: var(--text-tertiary);
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.flow-arrow-down { text-align: center; font-size: 18px; color: var(--text-tertiary); padding: 4px 0; }
+
+/* ===== Layer Stack ===== */
+.layer-stack { display: flex; flex-direction: column; gap: 3px; }
+
+.layer-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 13px 20px;
+  border-radius: var(--r-sm);
+  cursor: pointer;
+  transition: all var(--duration-fast) var(--ease-out);
+  border: 2px solid transparent;
+  background: var(--surface);
+}
+
+.layer-row:hover {
+  transform: translateX(6px);
+  border-color: var(--p-200);
+  box-shadow: var(--shadow-sm);
+}
+
+.layer-dot {
+  width: 34px; height: 34px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 700; font-size: 13px;
+  color: #fff; flex-shrink: 0;
+}
+
+.layer-content { flex: 1; min-width: 0; }
+.layer-content .layer-title { font-weight: 600; font-size: 14px; }
+.layer-content .layer-tech { font-size: 12px; color: var(--text-tertiary); margin-top: 2px; font-family: "SF Mono","JetBrains Mono",monospace; }
+.layer-tag { font-size: 11px; color: var(--text-secondary); white-space: nowrap; }
+
+/* ===== Timeline ===== */
+.timeline {
+  position: relative;
+  padding: 8px 0;
+}
+
+.timeline::before {
+  content: '';
+  position: absolute;
+  left: 18px; top: 0; bottom: 0;
+  width: 2px;
+  background: linear-gradient(to bottom, var(--p-300), var(--t-300), var(--amber));
+  border-radius: 1px;
+}
+
+.tl-item {
+  position: relative;
+  padding-left: 48px;
+  padding-bottom: 26px;
+}
+
+.tl-item::before {
+  content: '';
+  position: absolute;
+  left: 11px; top: 4px;
+  width: 16px; height: 16px;
+  border-radius: 50%;
+  background: var(--surface);
+  border: 3px solid var(--p-500);
+  box-shadow: 0 0 0 3px rgba(59,130,246,.15);
+}
+
+.tl-item.current::before {
+  border-color: var(--amber);
+  box-shadow: 0 0 0 6px rgba(245,158,11,.15);
+  animation: tlPulse 2s ease-in-out infinite;
+}
+
+@keyframes tlPulse {
+  0%, 100% { box-shadow: 0 0 0 3px rgba(245,158,11,.12); }
+  50% { box-shadow: 0 0 0 10px rgba(245,158,11,.04); }
+}
+
+.tl-time { font-size: 11.5px; color: var(--text-tertiary); font-weight: 600; text-transform: uppercase; letter-spacing: .5px; }
+.tl-title { font-weight: 600; font-size: 14.5px; margin: 2px 0; }
+.tl-desc { font-size: 13px; color: var(--text-secondary); }
+
+/* ===== Pain Quadrant ===== */
+.pain-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+
+.pain-card {
+  padding: 20px 22px;
+  border-radius: var(--r-md);
+  border-left: 4px solid;
+  transition: all var(--duration-fast) var(--ease-out);
+  cursor: default;
+}
+
+.pain-card:hover { box-shadow: var(--shadow-md); transform: translateY(-1px); }
+
+.pain-card.q1 { background: #fffbeb; border-color: var(--amber); }
+.pain-card.q2 { background: #f0fdf4; border-color: var(--emerald); }
+.pain-card.q3 { background: #eff6ff; border-color: var(--p-500); }
+.pain-card.q4 { background: #fff1f2; border-color: var(--rose); }
+
+.pain-card h4 { font-size: 14.5px; margin-bottom: 5px; display: flex; align-items: center; gap: 8px; }
+.pain-card .pain-impact { font-size: 12px; color: var(--text-secondary); margin-top: 4px; }
+
+/* ===== Gantt Chart ===== */
+.gantt { margin: 8px 0; }
+.gantt-header { display: flex; margin-bottom: 10px; padding-left: 130px; font-size: 11px; color: var(--text-tertiary); }
+.gantt-header span { flex: 1; text-align: center; }
+.gantt-row { display: flex; align-items: center; margin-bottom: 5px; font-size: 13px; }
+.gantt-label { width: 120px; font-weight: 600; flex-shrink: 0; font-size: 12.5px; }
+.gantt-track { flex: 1; position: relative; height: 30px; background: var(--bg-alt); border-radius: 4px; }
+.gantt-bar {
+  position: absolute; top: 4px; height: 22px; border-radius: 4px;
+  display: flex; align-items: center; padding: 0 10px;
+  font-size: 11px; color: #fff; font-weight: 600; white-space: nowrap;
+}
+.gantt-bar.p1 { background: linear-gradient(135deg, #3b82f6, #2563eb); }
+.gantt-bar.p2 { background: linear-gradient(135deg, #14b8a6, #0d9488); }
+.gantt-bar.p3 { background: linear-gradient(135deg, #f59e0b, #d97706); }
+
+/* ===== Bar Chart ===== */
+.bar-section { margin-bottom: 12px; }
+.bar-header { display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 5px; }
+.bar-header .bar-name { font-weight: 500; }
+.bar-header .bar-values { display: flex; gap: 12px; font-size: 12px; }
+.bar-track { height: 8px; background: var(--bg-alt); border-radius: 4px; overflow: hidden; }
+.bar-fill { height: 100%; border-radius: 4px; transition: width 1.2s var(--ease-out); }
+.bar-fill.blue { background: linear-gradient(90deg, #3b82f6, #60a5fa); }
+.bar-fill.teal { background: linear-gradient(90deg, #14b8a6, #2dd4bf); }
+.bar-fill.amber { background: linear-gradient(90deg, #f59e0b, #fbbf24); }
+
+/* ===== Step Flow ===== */
+.steps { display: flex; gap: 12px; overflow-x: auto; padding: 8px 0; }
+.step {
+  flex: 1; min-width: 130px; text-align: center;
+  padding: 18px 14px;
+  border-radius: var(--r-md);
+  background: var(--surface);
+  border: 2px solid var(--border);
+  position: relative;
+  transition: all var(--duration-fast) var(--ease-out);
+}
+
+.step:hover { border-color: var(--p-300); box-shadow: var(--shadow-md); }
+
+.step::after {
+  content: '→';
+  position: absolute;
+  right: -16px; top: 50%;
+  transform: translateY(-50%);
+  font-size: 18px;
+  color: var(--text-tertiary);
+  z-index: 1;
+}
+
+.step:last-child::after { content: ''; }
+
+.step-num {
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  background: var(--p-100);
+  color: var(--p-700);
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 700; font-size: 15px;
+  margin: 0 auto 10px;
+}
+
+.step-label { font-size: 12.5px; font-weight: 600; }
+.step-sublabel { font-size: 11px; color: var(--text-tertiary); margin-top: 3px; }
+
+/* ===== Cover Dashboard ===== */
+.dashboard-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+
+.hero-card {
+  grid-column: 1 / -1;
+  background: linear-gradient(135deg, #0f172a 0%, #1e3a5f 50%, #0d9488 100%);
+  border-radius: var(--r-lg);
+  padding: 40px 44px;
+  color: #fff;
+  position: relative;
+  overflow: hidden;
+}
+
+.hero-card::after {
+  content: '';
+  position: absolute;
+  top: -60px; right: -60px;
+  width: 280px; height: 280px;
+  border-radius: 50%;
+  background: rgba(255,255,255,.03);
+  pointer-events: none;
+}
+
+.hero-card h1 { font-size: 30px; font-weight: 800; letter-spacing: -.5px; margin-bottom: 8px; }
+.hero-card .hero-sub { font-size: 15px; color: rgba(255,255,255,.65); margin-bottom: 24px; }
+
+.hero-metrics { display: flex; gap: 32px; flex-wrap: wrap; }
+.hero-metric .hm-value { font-size: 28px; font-weight: 800; }
+.hero-metric .hm-label { font-size: 12px; color: rgba(255,255,255,.55); margin-top: 2px; }
+
+/* ===== Code Block ===== */
+.code-block {
+  background: #1e293b;
+  color: #e2e8f0;
+  padding: 18px 22px;
+  border-radius: var(--r-sm);
+  font-family: "SF Mono","JetBrains Mono","Fira Code",monospace;
+  font-size: 13px;
+  line-height: 1.75;
+  overflow-x: auto;
+}
+
+.code-block .c { color: #64748b; }
+.code-block .k { color: #38bdf8; }
+.code-block .s { color: #fbbf24; }
+.code-block .p { color: #4ade80; }
+
+/* ===== Check List ===== */
+.checklist { list-style: none; }
+.checklist li {
+  padding: 7px 0; font-size: 13.5px;
+  display: flex; align-items: center; gap: 10px;
+}
+
+.checklist li::before {
+  content: '';
+  width: 18px; height: 18px;
+  background: var(--t-50);
+  border-radius: 50%;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%230d9488' stroke-width='3'%3E%3Cpolyline points='20 6 9 17 4 12'/%3E%3C/svg%3E");
+  background-position: center;
+  background-repeat: no-repeat;
+  flex-shrink: 0;
+}
+
+/* ===== Highight Box ===== */
+.hl-box {
+  background: linear-gradient(135deg, var(--p-50), var(--t-50));
+  border-radius: var(--r-md);
+  padding: 20px 24px;
+  border: 1px solid #bae6fd;
+}
+
+.hl-box h4 { font-size: 14px; color: var(--p-800); margin-bottom: 6px; }
+.hl-box p { font-size: 13.5px; color: var(--text-secondary); }
+
+/* ===== Scene Cards (clickable) ===== */
+.scene-card {
+  background: var(--surface);
+  border-radius: var(--r-md);
+  box-shadow: var(--shadow-xs);
+  border: 2px solid var(--border);
+  padding: 24px;
+  cursor: pointer;
+  transition: all var(--duration-fast) var(--ease-out);
+}
+
+.scene-card:hover {
+  border-color: var(--p-400);
+  box-shadow: var(--shadow-lg), var(--shadow-glow);
+  transform: translateY(-2px);
+}
+
+.scene-card .sc-icon { font-size: 32px; margin-bottom: 12px; }
+.scene-card h3 { font-size: 15px; margin-bottom: 6px; }
+.scene-card p { font-size: 12.5px; color: var(--text-secondary); line-height: 1.5; }
+
+/* ===== Milestone cards ===== */
+.milestone-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+
+.milestone {
+  background: var(--surface);
+  border-radius: var(--r-md);
+  box-shadow: var(--shadow-xs);
+  border: 1px solid var(--border);
+  padding: 18px 20px;
+  text-align: center;
+  transition: all var(--duration-fast) var(--ease-out);
+}
+
+.milestone:hover { box-shadow: var(--shadow-md); transform: translateY(-1px); }
+
+.milestone .ms-time { font-size: 20px; font-weight: 800; color: var(--p-600); }
+.milestone .ms-event { font-size: 13px; color: var(--text); margin-top: 6px; font-weight: 600; }
+
+/* ===== Responsive ===== */
+@media (max-width: 960px) {
+  .sidebar { transform: translateX(-100%); transition: transform var(--duration-normal) var(--ease-out); }
+  .sidebar.open { transform: translateX(0); }
+  .main { margin-left: 0; }
+  .page { padding: 20px 16px; }
+  .grid-2, .grid-3, .grid-4, .pain-grid, .compare-panels, .dashboard-grid, .milestone-row { grid-template-columns: 1fr; }
+  .hero-card { padding: 28px 24px; }
+  .hero-card h1 { font-size: 22px; }
+  .mobile-toggle { display: flex !important; }
+}
+
+.mobile-toggle {
+  display: none;
+  position: fixed; top: 14px; left: 14px;
+  z-index: 200;
+  width: 42px; height: 42px;
+  border-radius: 50%;
+  background: var(--p-600);
+  color: #fff;
+  border: none;
+  font-size: 18px;
+  cursor: pointer;
+  align-items: center; justify-content: center;
+  box-shadow: var(--shadow-lg);
+}
+
+/* ===== Print ===== */
+@media print {
+  .sidebar { display: none; }
+  .main { margin-left: 0; }
+  .page { display: block !important; break-inside: avoid; padding: 16px 0; }
+}
+</style>
+</head>
+<body>
+
+<button class="mobile-toggle" onclick="document.querySelector('.sidebar').classList.toggle('open')">☰</button>
+
+<!-- ==================== SIDEBAR ==================== -->
+<aside class="sidebar">
+  <div class="sidebar-brand">
+    <div class="brand-name"><span class="brand-dot"></span>MotionRehab</div>
+    <div class="brand-ver">全场景康复平台 v2.0</div>
+  </div>
+  <div class="sidebar-status">
+    <span class="status-dot"></span> 系统就绪 · 本地部署
+  </div>
+  <nav class="sidebar-nav">
+    <div class="nav-group">总览</div>
+    <a class="nav-item active" href="#cover" data-route="cover">
+      <span class="nav-icon">⌂</span> 工作台首页
+    </a>
+    <a class="nav-item" href="#pain-points" data-route="pain-points">
+      <span class="nav-icon">⊙</span> 临床痛点分析
+    </a>
+    <a class="nav-item" href="#panorama" data-route="panorama">
+      <span class="nav-icon">◷</span> 方案全景图
+    </a>
+    <a class="nav-item" href="#tech-arch" data-route="tech-arch">
+      <span class="nav-icon">⊞</span> 技术架构
+    </a>
+
+    <div class="nav-group">临床工作站</div>
+    <a class="nav-item" href="#scene1-exam" data-route="scene1-exam">
+      <span class="nav-icon">◈</span> 智能查体工作台
+    </a>
+    <a class="nav-item" href="#scene1-scoring" data-route="scene1-scoring">
+      <span class="nav-icon">◉</span> 量化评分引擎
+    </a>
+    <a class="nav-item" href="#scene2-prescription" data-route="scene2-prescription">
+      <span class="nav-icon">◫</span> 处方管理工作台
+    </a>
+    <a class="nav-item" href="#scene3-outreach" data-route="scene3-outreach">
+      <span class="nav-icon">◮</span> 院外保障指挥舱
+    </a>
+    <a class="nav-item" href="#scene4-followup" data-route="scene4-followup">
+      <span class="nav-icon">◷</span> 随访管理中心
+    </a>
+
+    <div class="nav-group">实施运维</div>
+    <a class="nav-item" href="#data-loop" data-route="data-loop">
+      <span class="nav-icon">⟲</span> 数据闭环中心
+    </a>
+    <a class="nav-item" href="#deployment" data-route="deployment">
+      <span class="nav-icon">⌨</span> 部署控制台
+    </a>
+    <a class="nav-item" href="#integration" data-route="integration">
+      <span class="nav-icon">⊞</span> 方案矩阵整合
+    </a>
+    <a class="nav-item" href="#implementation" data-route="implementation">
+      <span class="nav-icon">⟟</span> 实施路线图
+    </a>
+    <a class="nav-item" href="#roi" data-route="roi">
+      <span class="nav-icon">◉</span> 效能仪表盘
+    </a>
+    <a class="nav-item" href="#summary" data-route="summary">
+      <span class="nav-icon">✓</span> 交付与启动
+    </a>
+    <a class="nav-item" href="#appendix" data-route="appendix">
+      <span class="nav-icon">ⓘ</span> 技术参考手册
+    </a>
+  </nav>
+</aside>
+
+<!-- ==================== MAIN ==================== -->
+<main class="main" id="main-content">
+
+<!-- ===== PAGE: COVER - Product Dashboard ===== -->
+<section class="page active" id="page-cover">
+  <div class="dashboard-grid">
+    <div class="hero-card">
+      <h1>全场景运动康复数字化平台</h1>
+      <p class="hero-sub">从门诊查体到居家康复 · 从院内到院外 · 一套开源技术栈全打通</p>
+      <div class="hero-metrics">
+        <div class="hero-metric"><div class="hm-value">¥0</div><div class="hm-label">新增硬件</div></div>
+        <div class="hero-metric"><div class="hm-value">100%</div><div class="hm-label">全开源</div></div>
+        <div class="hero-metric"><div class="hm-value">离线</div><div class="hm-label">数据不出院</div></div>
+        <div class="hero-metric"><div class="hm-value">10min</div><div class="hm-label">一键部署</div></div>
+      </div>
+    </div>
+
+    <div class="stat-widget">
+      <div class="stat-icon blue">◈</div>
+      <div class="stat-body">
+        <div class="stat-value">&lt;2°</div>
+        <div class="stat-label">关节ROM量化误差</div>
+        <div class="stat-change up">↑ 精度达临床级</div>
+      </div>
+    </div>
+    <div class="stat-widget">
+      <div class="stat-icon teal">⌨</div>
+      <div class="stat-body">
+        <div class="stat-value">&lt;10s</div>
+        <div class="stat-label">AI查体报告生成</div>
+        <div class="stat-change up">↑ 效率提升 18x</div>
+      </div>
+    </div>
+    <div class="stat-widget">
+      <div class="stat-icon amber">⊙</div>
+      <div class="stat-body">
+        <div class="stat-value">80%+</div>
+        <div class="stat-label">处方配制效率提升</div>
+        <div class="stat-change up">↑ 治疗师减负</div>
+      </div>
+    </div>
+    <div class="stat-widget">
+      <div class="stat-icon rose">◷</div>
+      <div class="stat-body">
+        <div class="stat-value">&gt;60%</div>
+        <div class="stat-label">自动化随访率</div>
+        <div class="stat-change warn">← 现状 &lt;10%</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid-4" style="margin-top:18px;">
+    <div class="scene-card" onclick="navigateTo('scene1-exam')">
+      <div class="sc-icon">◈</div>
+      <h3>智能查体</h3>
+      <p>摄像头量化ROM · 自动生成结构化报告</p>
+    </div>
+    <div class="scene-card" onclick="navigateTo('scene2-prescription')">
+      <div class="sc-icon">◫</div>
+      <h3>智能处方</h3>
+      <p>AI推荐+治疗师微调 · 处方库自动匹配</p>
+    </div>
+    <div class="scene-card" onclick="navigateTo('scene3-outreach')">
+      <div class="sc-icon">◮</div>
+      <h3>院外保障</h3>
+      <p>便携离线查体 · 远程会诊 · 批量筛查</p>
+    </div>
+    <div class="scene-card" onclick="navigateTo('scene4-followup')">
+      <div class="sc-icon">◷</div>
+      <h3>随访管理</h3>
+      <p>全自动提醒+打卡 · 一键复诊预约</p>
+    </div>
+  </div>
+</section>
+
+<!-- ===== PAGE: Pain Points ===== -->
+<section class="page" id="page-pain-points">
+  <div class="page-header">
+    <div>
+      <h1>临床痛点分析</h1>
+      <p class="page-desc">数据断层 + 标准缺失 — 四个场景的共同矛盾</p>
+    </div>
+    <span class="page-badge">需求调研</span>
+  </div>
+
+  <div class="pain-grid">
+    <div class="pain-card q1">
+      <h4>◈ 门诊徒手查体</h4>
+      <p style="font-size:13px;">主观定性判断，无客观量化标准</p>
+      <p class="pain-impact">⚠ 评估误差大 · 不同医生结果不可比 · 纸质报告难追溯</p>
+    </div>
+    <div class="pain-card q2">
+      <h4>◫ 运动处方开具</h4>
+      <p style="font-size:13px;">纯人工配制，无个性化推荐</p>
+      <p class="pain-impact">⚠ 效率低 · 处方千人一面 · 无法基于量化数据个性化</p>
+    </div>
+    <div class="pain-card q3">
+      <h4>◮ 运动队院外保障</h4>
+      <p style="font-size:13px;">专家无法实时覆盖，院内外数据不通</p>
+      <p class="pain-impact">⚠ 疑难病例延误 · 伤病预警滞后 · 驻队与院内脱节</p>
+    </div>
+    <div class="pain-card q4">
+      <h4>◷ 复诊随访管理</h4>
+      <p style="font-size:13px;">随访率 <10%，数据完全缺失</p>
+      <p class="pain-impact">⚠ 无法评估长期疗效 · 科研无数据 · 医生私人微信随访</p>
+    </div>
+  </div>
+
+  <div class="hl-box" style="margin-top:20px;">
+    <h4>客户的四个共同诉求</h4>
+    <ul class="checklist">
+      <li>不需要改造现有HIS和业务流程</li>
+      <li>不需要额外采购硬件设备</li>
+      <li>需要可追溯、可对比、可存档的客观数据</li>
+      <li>需要降低医生负担，而非增加工作量</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ===== PAGE: Panorama ===== -->
+<section class="page" id="page-panorama">
+  <div class="page-header">
+    <div>
+      <h1>方案全景图</h1>
+      <p class="page-desc">四大模块协同，数据统一流转，而非孤立的四个工具</p>
+    </div>
+    <span class="page-badge">系统架构</span>
+  </div>
+
+  <div style="text-align:center;padding:10px 0;">
+    <div class="flow-row">
+      <div class="flow-node primary" style="min-width:120px;">◈ 智能查体<br><small style="color:var(--text-tertiary);">门诊评估</small></div>
+      <span class="flow-arrow">→</span>
+      <div class="flow-node primary" style="min-width:120px;">◫ 智能处方<br><small style="color:var(--text-tertiary);">处方生成</small></div>
+      <span class="flow-arrow">→</span>
+      <div class="flow-node primary" style="min-width:120px;">◮ 院外保障<br><small style="color:var(--text-tertiary);">远程协同</small></div>
+      <span class="flow-arrow">→</span>
+      <div class="flow-node primary" style="min-width:120px;">◷ 随访管理<br><small style="color:var(--text-tertiary);">康复追踪</small></div>
+    </div>
+    <div class="flow-arrow-down">↕ ↕ ↕ ↕</div>
+    <div class="flow-row">
+      <div class="flow-node accent" style="min-width:360px;">⊞ 统一数据中台 · FHIR标准化 · 离线优先同步</div>
+    </div>
+    <div class="flow-arrow-down">↕ ↕ ↕</div>
+    <div class="flow-row">
+      <div class="flow-node" style="font-size:12px;">院内HIS</div>
+      <div class="flow-node" style="font-size:12px;">运动测评系统</div>
+      <div class="flow-node" style="font-size:12px;">处方系统</div>
+    </div>
+  </div>
+
+  <div class="grid-4" style="margin-top:20px;">
+    <div class="scene-card" onclick="navigateTo('scene1-exam')">
+      <div class="sc-icon">◈</div><h3>智能查体模块</h3>
+      <p>摄像头量化ROM · 自动生成结构化报告</p>
+    </div>
+    <div class="scene-card" onclick="navigateTo('scene2-prescription')">
+      <div class="sc-icon">◫</div><h3>智能处方模块</h3>
+      <p>根据测评自动推荐 · 治疗师审核微调</p>
+    </div>
+    <div class="scene-card" onclick="navigateTo('scene3-outreach')">
+      <div class="sc-icon">◮</div><h3>院外保障模块</h3>
+      <p>便携离线查体 · 远程会诊 · 批量筛查</p>
+    </div>
+    <div class="scene-card" onclick="navigateTo('scene4-followup')">
+      <div class="sc-icon">◷</div><h3>随访管理模块</h3>
+      <p>全自动提醒+打卡 · 一键复诊预约</p>
+    </div>
+  </div>
+</section>
+
+<!-- ===== PAGE: Tech Architecture ===== -->
+<section class="page" id="page-tech-arch">
+  <div class="page-header">
+    <div>
+      <h1>技术架构</h1>
+      <p class="page-desc">7层开源架构 · 2026最新技术选型 · 全本地部署</p>
+    </div>
+    <span class="page-badge">技术白皮书</span>
+  </div>
+
+  <div class="layer-stack">
+    <div class="layer-row" style="background:#fffbeb;">
+      <div class="layer-dot" style="background:#f59e0b;">1</div>
+      <div class="layer-content">
+        <div class="layer-title">语音层 — 医生语音指令识别</div>
+        <div class="layer-tech">Whisper.cpp v1.8.4 + Silero VAD v6.2.0</div>
+      </div>
+      <div class="layer-tag">端侧离线 · 零流量</div>
+    </div>
+    <div class="layer-row" style="background:#f0fdf4;">
+      <div class="layer-dot" style="background:#10b981;">2</div>
+      <div class="layer-content">
+        <div class="layer-title">NLP层 — 报告生成 / 医患问答</div>
+        <div class="layer-tech">II-Medical-7B-Preview / Qwen2.5-7B-Instruct</div>
+      </div>
+      <div class="layer-tag">本地大模型 · 数据不出院</div>
+    </div>
+    <div class="layer-row" style="background:#eff6ff;">
+      <div class="layer-dot" style="background:#3b82f6;">3</div>
+      <div class="layer-content">
+        <div class="layer-title">视觉层 — 姿态估计 + ROM量化</div>
+        <div class="layer-tech">MediaPipe Pose + MMPose 1.3.2</div>
+      </div>
+      <div class="layer-tag">关节角度误差 &lt; 2°</div>
+    </div>
+    <div class="layer-row" style="background:#fff1f2;">
+      <div class="layer-dot" style="background:#f43f5e;">4</div>
+      <div class="layer-content">
+        <div class="layer-title">融合层 — 多模态时序对齐</div>
+        <div class="layer-tech">Python Timestamp + 轻量特征融合</div>
+      </div>
+      <div class="layer-tag">语音/视觉信号精确同步</div>
+    </div>
+    <div class="layer-row" style="background:#f5f3ff;">
+      <div class="layer-dot" style="background:#8b5cf6;">5</div>
+      <div class="layer-content">
+        <div class="layer-title">推理层 — 动作质量客观评分</div>
+        <div class="layer-tech">临床共识规则字典 + 评分函数</div>
+      </div>
+      <div class="layer-tag">100%客观 · 可互认</div>
+    </div>
+    <div class="layer-row" style="background:#fffbeb;">
+      <div class="layer-dot" style="background:#eab308;">6</div>
+      <div class="layer-content">
+        <div class="layer-title">质控层 — 异常数据检测</div>
+        <div class="layer-tech">PyOD + 3σ统计校验</div>
+      </div>
+      <div class="layer-tag">自动标记异常检测结果</div>
+    </div>
+    <div class="layer-row" style="background:#f0fdfa;">
+      <div class="layer-dot" style="background:#14b8a6;">7</div>
+      <div class="layer-content">
+        <div class="layer-title">数据层 — 存储 + 标准导出</div>
+        <div class="layer-tech">FHIR适配器 + Pandas + Excel</div>
+      </div>
+      <div class="layer-tag">离线优先 + 端到端加密</div>
+    </div>
+  </div>
+
+  <div class="grid-4" style="margin-top:18px;">
+    <div class="stat-widget">
+      <div class="stat-icon blue">◉</div>
+      <div class="stat-body"><div class="stat-value">&lt;2°</div><div class="stat-label">关节角度误差</div></div>
+    </div>
+    <div class="stat-widget">
+      <div class="stat-icon teal">⏻</div>
+      <div class="stat-body"><div class="stat-value">端侧</div><div class="stat-label">语音识别 · 零流量</div></div>
+    </div>
+    <div class="stat-widget">
+      <div class="stat-icon amber">⛨</div>
+      <div class="stat-body"><div class="stat-value">本地</div><div class="stat-label">NLP · 数据不出院</div></div>
+    </div>
+    <div class="stat-widget">
+      <div class="stat-icon rose">⟲</div>
+      <div class="stat-body"><div class="stat-value">加密</div><div class="stat-label">离线优先+端到端</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== PAGE: Scene 1 - Exam Workstation ===== -->
+<section class="page" id="page-scene1-exam">
+  <div class="page-header">
+    <div>
+      <h1>智能查体工作台</h1>
+      <p class="page-desc">从"肉眼看+手比划"到"摄像头量化+自动报告"</p>
+    </div>
+    <span class="page-badge">◈ 场景一</span>
+  </div>
+
+  <div class="compare-panels">
+    <div class="compare-panel before">
+      <h4>✕ 改造前 · 人工模式</h4>
+      <div class="compare-row"><span class="indicator">●</span> 目测角度 + 手写描述</div>
+      <div class="compare-row"><span class="indicator">●</span> 输出 "活动度大致正常"</div>
+      <div class="compare-row"><span class="indicator">●</span> 手工填写报告 2-3分钟</div>
+      <div class="compare-row"><span class="indicator">●</span> 纸质报告 · 难以追溯</div>
+    </div>
+    <div class="compare-panel after">
+      <h4>✓ 改造后 · AI辅助模式</h4>
+      <div class="compare-row"><span class="indicator">●</span> 语音说出动作名 · 摄像头自动拍摄</div>
+      <div class="compare-row"><span class="indicator">●</span> 左肩前屈178° · 右肩175° · 评分96分</div>
+      <div class="compare-row"><span class="indicator">●</span> AI自动生成报告 &lt;10秒</div>
+      <div class="compare-row"><span class="indicator">●</span> 结构化数据 · 支持复诊对比和科研</div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top:18px;">
+    <h4 style="margin-bottom:14px;">处理流水线</h4>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-label">摄像头捕捉</div>
+        <div class="step-sublabel">患者执行动作</div>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-label">姿态提取</div>
+        <div class="step-sublabel">33个关键点</div>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-label">角度计算</div>
+        <div class="step-sublabel">三点法几何</div>
+      </div>
+      <div class="step">
+        <div class="step-num">4</div>
+        <div class="step-label">ROM比对</div>
+        <div class="step-sublabel">标准ROM库</div>
+      </div>
+      <div class="step">
+        <div class="step-num">5</div>
+        <div class="step-label">报告生成</div>
+        <div class="step-sublabel">NLP大模型</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="hl-box">
+    <h4>部署要求</h4>
+    <p>现有电脑 + 普通USB摄像头即可，<strong>无需红外/深度相机</strong>，完全离线运行。医生只需多说一句口令、多看一眼屏幕，其余全自动。</p>
+  </div>
+</section>
+
+<!-- ===== PAGE: Scene 1 - Scoring Engine ===== -->
+<section class="page" id="page-scene1-scoring">
+  <div class="page-header">
+    <div>
+      <h1>量化评分引擎</h1>
+      <p class="page-desc">内置骨科共识标准 · 评分100%客观 · 标准可配置</p>
+    </div>
+    <span class="page-badge">◉ 评分机制</span>
+  </div>
+
+  <div class="card card-accent-top">
+    <h4 style="margin-bottom:10px;">评分公式</h4>
+    <div class="code-block">
+<span class="c">// 实测角度 vs 标准ROM → 计算偏差 → 百分制评分</span>
+<span class="c">// 例：肩关节前屈标准180°，实测170° → 偏差10°</span>
+评分 = <span class="s">100</span> - <span class="s">10</span> × <span class="s">1.2</span> = <span class="k">88分</span>
+    </div>
+  </div>
+
+  <div class="table-wrap" style="margin-top:14px;">
+    <table>
+      <thead><tr><th>动作</th><th>标准ROM</th><th>评分规则</th><th>正常阈值</th></tr></thead>
+      <tbody>
+        <tr><td>肩关节前屈</td><td>180°</td><td>偏差&lt;10° ≥90分</td><td><span class="badge badge-green">≥90分</span></td></tr>
+        <tr><td>膝关节伸直</td><td>0°</td><td>偏差&lt;5° ≥95分</td><td><span class="badge badge-green">≥95分</span></td></tr>
+        <tr><td>膝关节屈曲</td><td>135°</td><td>偏差&lt;10° ≥90分</td><td><span class="badge badge-green">≥90分</span></td></tr>
+        <tr><td>髋关节前屈</td><td>120°</td><td>偏差&lt;15° ≥85分</td><td><span class="badge badge-green">≥85分</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="grid-3" style="margin-top:16px;">
+    <div class="stat-widget">
+      <div class="stat-icon teal">✓</div>
+      <div class="stat-body">
+        <div class="stat-value" style="color:var(--emerald);">≥90分</div>
+        <div class="stat-label">关节活动度正常 · 动作标准</div>
+      </div>
+    </div>
+    <div class="stat-widget">
+      <div class="stat-icon amber">!</div>
+      <div class="stat-body">
+        <div class="stat-value" style="color:var(--amber);">70–89分</div>
+        <div class="stat-label">关节活动度轻度受限</div>
+      </div>
+    </div>
+    <div class="stat-widget">
+      <div class="stat-icon rose">✕</div>
+      <div class="stat-body">
+        <div class="stat-value" style="color:var(--rose);">&lt;70分</div>
+        <div class="stat-label">关节活动度明显受限</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="hl-box" style="margin-top:16px;">
+    <h4>关键设计</h4>
+    <p>标准可配置——科室可根据自身临床经验调整ROM参考值和评分阈值，系统不做硬编码。</p>
+  </div>
+</section>
+
+<!-- ===== PAGE: Scene 2 - Prescription Workstation ===== -->
+<section class="page" id="page-scene2-prescription">
+  <div class="page-header">
+    <div>
+      <h1>处方管理工作台</h1>
+      <p class="page-desc">从"人工配置"到"AI自动推荐 + 治疗师微调"</p>
+    </div>
+    <span class="page-badge">◫ 场景二</span>
+  </div>
+
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>环节</th><th>现有方式</th><th style="color:var(--emerald);">AI辅助方式</th></tr></thead>
+      <tbody>
+        <tr><td><strong>评估输入</strong></td><td>手动查阅测评报告</td><td>系统自动读取量化评估结果</td></tr>
+        <tr><td><strong>处方生成</strong></td><td>治疗师凭经验逐条配置</td><td>AI根据评估+知识库自动推荐</td></tr>
+        <tr><td><strong>内容制作</strong></td><td>自行拍摄/编写图文视频</td><td>从处方库自动匹配视频+图文</td></tr>
+        <tr><td><strong>患者获取</strong></td><td>扫码查看</td><td>扫码查看 + 手机端动作跟练反馈</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="card card-accent-teal" style="margin-top:16px;">
+    <h4 style="margin-bottom:12px;">系统对接流程</h4>
+    <div class="flow-row">
+      <div class="flow-node">运动测评<br>管理系统</div>
+      <span class="flow-arrow">→ 读取评估 →</span>
+      <div class="flow-node accent">AI处方<br>生成引擎</div>
+      <span class="flow-arrow">→ 回写处方 →</span>
+      <div class="flow-node">运动处方<br>系统</div>
+      <span class="flow-arrow">→ 扫码 →</span>
+      <div class="flow-node primary">患者端<br>查看跟练</div>
+    </div>
+  </div>
+
+  <div class="hl-box" style="margin-top:16px;">
+    <h4>核心价值</h4>
+    <p>不替代治疗师，而是把治疗师从重复劳动中解放出来——治疗师聚焦个性化调整和疑难病例，AI负责标准化推荐。工作量降低 <strong style="font-size:20px;color:var(--p-600);">80%</strong>。</p>
+  </div>
+</section>
+
+<!-- ===== PAGE: Scene 3 - Outreach Command Center ===== -->
+<section class="page" id="page-scene3-outreach">
+  <div class="page-header">
+    <div>
+      <h1>院外保障指挥舱</h1>
+      <p class="page-desc">专家资源下沉到训练基地 · 院内外数据实时同步</p>
+    </div>
+    <span class="page-badge">◮ 场景三</span>
+  </div>
+
+  <div class="grid-3">
+    <div class="card card-accent-top">
+      <h4 style="margin-bottom:8px;">◈ 驻队便携查体</h4>
+      <p style="font-size:13px;color:var(--text-secondary);"><strong>实现：</strong>笔记本+摄像头，离线运行</p>
+      <p style="font-size:13px;color:var(--text-secondary);margin-top:4px;"><strong>解决：</strong>徒手检查有量化标准，和院内统一</p>
+    </div>
+    <div class="card card-accent-teal">
+      <h4 style="margin-bottom:8px;">⏻ 远程实时会诊</h4>
+      <p style="font-size:13px;color:var(--text-secondary);"><strong>实现：</strong>加密视频通话+AI数据共享</p>
+      <p style="font-size:13px;color:var(--text-secondary);margin-top:4px;"><strong>解决：</strong>疑难病例一键连线专家，不延误</p>
+    </div>
+    <div class="card card-accent-amber">
+      <h4 style="margin-bottom:8px;">⊞ 批量伤病筛查</h4>
+      <p style="font-size:13px;color:var(--text-secondary);"><strong>实现：</strong>手机拍视频→批量AI分析→标记异常</p>
+      <p style="font-size:13px;color:var(--text-secondary);margin-top:4px;"><strong>解决：</strong>1小时处理100+人，专家只核异常</p>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top:16px;">
+    <h4 style="margin-bottom:10px;">数据同步机制</h4>
+    <div class="code-block">
+<span class="c">// 野外/基地环境：数据存本地SQLite，完全离线可用</span>
+<span class="c">// 有网络时：自动加密同步至院内服务器</span>
+<span class="c">// 专家巡诊前：提前同步运动员历史数据至本地</span>
+<span class="p">本地SQLite</span> ──<span class="k">加密同步</span>──→ <span class="p">院内服务器</span>
+<span class="p">院内服务器</span> ──<span class="k">预同步</span>──→ <span class="p">本地离线查看</span>
+    </div>
+  </div>
+
+  <div class="hl-box">
+    <p>和院内<strong>同一套标准、同一套数据格式</strong>——驻队查体结果回院可直接对比，解决院外保障"与院内脱节"的老问题。</p>
+  </div>
+</section>
+
+<!-- ===== PAGE: Scene 4 - Follow-up Center ===== -->
+<section class="page" id="page-scene4-followup">
+  <div class="page-header">
+    <div>
+      <h1>随访管理中心</h1>
+      <p class="page-desc">将随访率从 &lt;10% 提升至 60%+ · 医生零额外负担</p>
+    </div>
+    <span class="page-badge">◷ 场景四</span>
+  </div>
+
+  <div class="timeline">
+    <div class="tl-item">
+      <div class="tl-time">治疗结束当日</div>
+      <div class="tl-title">扫码加入随访计划</div>
+      <div class="tl-desc">患者收到欢迎信息+康复指导入口 · 医生端自动入组</div>
+    </div>
+    <div class="tl-item current">
+      <div class="tl-time">治疗后第3天</div>
+      <div class="tl-title">自动触发：康复提醒 + 训练视频推送</div>
+      <div class="tl-desc">患者收到推送 · 医生无需操作，系统全自动</div>
+    </div>
+    <div class="tl-item">
+      <div class="tl-time">治疗后第7天</div>
+      <div class="tl-title">自动触发：随访问卷（疼痛/功能评分）</div>
+      <div class="tl-desc">患者填写量表 · 医生查看汇总统计</div>
+    </div>
+    <div class="tl-item">
+      <div class="tl-time">治疗后第14天</div>
+      <div class="tl-title">自动触发：复诊提醒 + 一键预约</div>
+      <div class="tl-desc">患者收到复诊提醒+预约入口 · 医生收到复诊通知</div>
+    </div>
+    <div class="tl-item">
+      <div class="tl-time">异常情况 · 实时</div>
+      <div class="tl-title">预警触发：AI解答 + 转人工</div>
+      <div class="tl-desc">患者AI自动解答 · 医生收到异常预警，及时介入</div>
+    </div>
+  </div>
+
+  <div class="hl-box" style="margin-top:18px;">
+    <h4>关键设计</h4>
+    <p>沟通渠道：医院公众号/小程序统一入口，<strong>保护医生隐私</strong>，数据全程留痕。医生只需在治疗结束时让患者<strong>扫一个码</strong>——后续全自动。</p>
+  </div>
+</section>
+
+<!-- ===== PAGE: Data Loop ===== -->
+<section class="page" id="page-data-loop">
+  <div class="page-header">
+    <div>
+      <h1>数据闭环中心</h1>
+      <p class="page-desc">打通"查体→处方→训练→随访→复诊"全流程数据</p>
+    </div>
+    <span class="page-badge">⟲ 数据架构</span>
+  </div>
+
+  <div style="text-align:center;">
+    <div class="flow-row">
+      <div class="flow-node primary">◈ 门诊查体<br><small style="color:var(--text-tertiary);">ROM角度数据</small></div>
+      <span class="flow-arrow">→</span>
+      <div class="flow-node primary">◫ 处方开具<br><small style="color:var(--text-tertiary);">处方动作库</small></div>
+      <span class="flow-arrow">→</span>
+      <div class="flow-node primary">◮ 居家训练<br><small style="color:var(--text-tertiary);">训练完成度</small></div>
+      <span class="flow-arrow">→</span>
+      <div class="flow-node primary">◷ 复诊随访<br><small style="color:var(--text-tertiary);">随访评分</small></div>
+    </div>
+    <div class="flow-arrow-down">↓ ↓ ↓ ↓</div>
+    <div class="flow-row">
+      <div class="flow-node accent" style="min-width:360px;">⊞ 统一数据中台 · FHIR标准化存储 · 离线优先同步</div>
+    </div>
+    <div class="flow-arrow-down">↙ ↘</div>
+    <div class="flow-row" style="gap:40px;">
+      <div class="flow-node">◉ 复诊时一键调取<br><small style="color:var(--text-tertiary);">完整康复历程曲线</small></div>
+      <div class="flow-node">ⓘ 临床科研数据集<br><small style="color:var(--text-tertiary);">持续积累 · 自动归档</small></div>
+    </div>
+  </div>
+
+  <div class="grid-2" style="margin-top:20px;">
+    <div class="card card-accent-top">
+      <h4 style="margin-bottom:6px;">◉ 复诊数据价值</h4>
+      <p style="font-size:13px;color:var(--text-secondary);">医生可查看患者从初诊到当前完整康复曲线，直观对比每次评估结果。</p>
+    </div>
+    <div class="card card-accent-teal">
+      <h4 style="margin-bottom:6px;">ⓘ 科研数据价值</h4>
+      <p style="font-size:13px;color:var(--text-secondary);">自动积累标准化随访数据，无需手动录入，支撑论文和课题申报。</p>
+    </div>
+  </div>
+</section>
+
+<!-- ===== PAGE: Deployment ===== -->
+<section class="page" id="page-deployment">
+  <div class="page-header">
+    <div>
+      <h1>部署控制台</h1>
+      <p class="page-desc">现有设备直接使用 · 纯本地部署 · 10分钟上线</p>
+    </div>
+    <span class="page-badge">⌨ DevOps</span>
+  </div>
+
+  <div class="grid-2">
+    <div class="card">
+      <h4 style="margin-bottom:10px;">◉ 硬件要求</h4>
+      <ul class="checklist">
+        <li>门诊现有电脑 / 平板</li>
+        <li>普通USB摄像头（无需深度相机）</li>
+        <li>零新增硬件采购</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h4 style="margin-bottom:10px;">⏻ 网络要求</h4>
+      <ul class="checklist">
+        <li>查体/报告生成：完全离线</li>
+        <li>远程会诊/同步：4G/5G/WiFi</li>
+        <li>端到端加密传输</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top:16px;">
+    <h4 style="margin-bottom:10px;">一键部署指令</h4>
+    <div class="code-block">
+<span class="c"># 安装核心依赖</span>
+<span class="p">pip</span> install <span class="s">"mediapipe>=0.10.18"</span> <span class="s">"opencv-python>=4.8.0"</span> ollama pyod pandas fhir-resources
+
+<span class="c"># 拉取本地医疗大模型</span>
+<span class="p">ollama</span> pull <span class="s">qwen2.5:7b-instruct</span>
+
+<span class="c"># 可选：部署随访自动化引擎</span>
+<span class="p">docker</span> run -d --name n8n -p 5678:5678 <span class="s">n8nio/n8n</span>
+
+<span class="c"># 启动查体系统</span>
+<span class="p">python</span> <span class="s">clinic_app.py</span>
+    </div>
+  </div>
+
+  <div class="hl-box" style="margin-top:16px;">
+    <h4>数据合规保障</h4>
+    <p>全本地处理，语音/视频不传云端，符合医院数据隐私要求。不需要信息科大规模改造——<strong>零阻力落地</strong>。</p>
+  </div>
+</section>
+
+<!-- ===== PAGE: Integration ===== -->
+<section class="page" id="page-integration">
+  <div class="page-header">
+    <div>
+      <h1>方案矩阵整合</h1>
+      <p class="page-desc">五套方案协同 · 模块化分阶段部署 · 互不阻塞</p>
+    </div>
+    <span class="page-badge">⊞ 系统集成</span>
+  </div>
+
+  <div style="text-align:center;">
+    <div class="flow-row">
+      <div class="flow-node" style="border-color:var(--amber);background:var(--amber-light);min-width:260px;">
+        ◮ 院外保障方案<br><small style="color:var(--text-tertiary);">驻队查体 · 远程会诊 · 批量筛查</small>
+      </div>
+    </div>
+    <div class="flow-arrow-down">↕ 数据同步</div>
+    <div class="flow-row">
+      <div class="flow-node accent" style="min-width:240px;">⊞ 院内数据中台</div>
+    </div>
+    <div class="flow-arrow-down">↙ ↓ ↘</div>
+    <div class="flow-row" style="gap:14px;">
+      <div class="flow-node primary">◈ 智能查体<br><small style="color:var(--text-tertiary);">门诊检查</small></div>
+      <div class="flow-node primary">◫ 智能处方<br><small style="color:var(--text-tertiary);">处方生成</small></div>
+      <div class="flow-node primary">◷ 复诊随访<br><small style="color:var(--text-tertiary);">自动化</small></div>
+    </div>
+  </div>
+
+  <div class="grid-3" style="margin-top:20px;">
+    <div class="stat-widget">
+      <div class="stat-icon blue">→</div>
+      <div class="stat-body"><div class="stat-label">查体数据 → 处方生成输入</div></div>
+    </div>
+    <div class="stat-widget">
+      <div class="stat-icon teal">→</div>
+      <div class="stat-body"><div class="stat-label">处方结果 → 患者跟练</div></div>
+    </div>
+    <div class="stat-widget">
+      <div class="stat-icon amber">→</div>
+      <div class="stat-body"><div class="stat-label">跟练数据 → 随访监控</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== PAGE: Implementation ===== -->
+<section class="page" id="page-implementation">
+  <div class="page-header">
+    <div>
+      <h1>实施路线图</h1>
+      <p class="page-desc">分三阶段落地 · 最快2周见到效果</p>
+    </div>
+    <span class="page-badge">⟟ 项目管理</span>
+  </div>
+
+  <div class="gantt" style="margin-bottom:20px;">
+    <div class="gantt-row">
+      <div class="gantt-label">第一阶段</div>
+      <div class="gantt-track"><div class="gantt-bar p1" style="left:0%;width:16%;">第1-2周</div></div>
+    </div>
+    <div class="gantt-row">
+      <div class="gantt-label">第二阶段</div>
+      <div class="gantt-track"><div class="gantt-bar p2" style="left:16%;width:16%;">第3-4周</div></div>
+    </div>
+    <div class="gantt-row">
+      <div class="gantt-label">第三阶段</div>
+      <div class="gantt-track"><div class="gantt-bar p3" style="left:32%;width:40%;">第2-3月</div></div>
+    </div>
+    <div class="gantt-row">
+      <div class="gantt-label">持续优化</div>
+      <div class="gantt-track"><div style="position:absolute;left:72%;right:0;top:4px;height:22px;background:var(--bg-alt);border-radius:4px;display:flex;align-items:center;padding:0 10px;font-size:11px;color:var(--text-tertiary);">长期迭代</div></div>
+    </div>
+  </div>
+
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>阶段</th><th>时间</th><th>落地模块</th><th>预期效果</th></tr></thead>
+      <tbody>
+        <tr><td><span class="badge badge-blue">P1</span></td><td>第1–2周</td><td>智能查体模块</td><td>门诊检查100%量化，医生上手即用</td></tr>
+        <tr><td><span class="badge badge-green">P2</span></td><td>第3–4周</td><td>智能处方 + 随访</td><td>处方效率↑80%，随访率 &lt;10%→&gt;40%</td></tr>
+        <tr><td><span class="badge badge-amber">P3</span></td><td>第2–3月</td><td>院外保障模块</td><td>驻队与院内同标准，筛查效率×10</td></tr>
+        <tr><td><span class="badge badge-blue">∞</span></td><td>长期</td><td>数据积累+科研</td><td>自动积累标准数据集，支撑论文课题</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="milestone-row" style="margin-top:18px;">
+    <div class="milestone">
+      <div class="ms-time">第2周末</div>
+      <div class="ms-event">🏆 首份AI查体报告产出</div>
+    </div>
+    <div class="milestone">
+      <div class="ms-time">第4周末</div>
+      <div class="ms-event">🏆 首例自动化随访闭环</div>
+    </div>
+    <div class="milestone">
+      <div class="ms-time">第8周末</div>
+      <div class="ms-event">🏆 首例远程会诊完成</div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== PAGE: ROI Dashboard ===== -->
+<section class="page" id="page-roi">
+  <div class="page-header">
+    <div>
+      <h1>效能仪表盘</h1>
+      <p class="page-desc">量化预计效果 · 覆盖效率、质量、科研三重价值</p>
+    </div>
+    <span class="page-badge">◉ KPI</span>
+  </div>
+
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>维度</th><th>指标</th><th>现状</th><th>目标</th><th>方式</th></tr></thead>
+      <tbody>
+        <tr><td rowspan="3"><strong>诊疗效率</strong></td><td>查体报告耗时</td><td><span class="badge badge-red">2-3分钟</span></td><td><span class="badge badge-green">&lt;10秒</span></td><td>AI生成</td></tr>
+        <tr><td>处方配制效率</td><td><span class="badge badge-red">纯人工</span></td><td><span class="badge badge-green">↑80%</span></td><td>AI推荐</td></tr>
+        <tr><td>批量筛查效率</td><td><span class="badge badge-red">1人/次</span></td><td><span class="badge badge-green">100+/h</span></td><td>AI批处理</td></tr>
+        <tr><td rowspan="2"><strong>诊疗质量</strong></td><td>查体标准化率</td><td><span class="badge badge-red">0%</span></td><td><span class="badge badge-green">100%</span></td><td>量化评分</td></tr>
+        <tr><td>随访率</td><td><span class="badge badge-red">&lt;10%</span></td><td><span class="badge badge-green">&gt;60%</span></td><td>自动引擎</td></tr>
+        <tr><td><strong>科研</strong></td><td>标准化随访数据</td><td><span class="badge badge-red">0条</span></td><td><span class="badge badge-green">持续积累</span></td><td>自动存档</td></tr>
+        <tr><td><strong>资源</strong></td><td>专家远程时延</td><td><span class="badge badge-red">数天+</span></td><td><span class="badge badge-green">实时</span></td><td>远程系统</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="card" style="margin-top:16px;">
+    <h4 style="margin-bottom:14px;">核心指标：现状 → 目标</h4>
+    <div class="bar-section">
+      <div class="bar-header">
+        <span class="bar-name">查体报告耗时</span>
+        <span class="bar-values"><span style="color:var(--rose);">180s</span> → <span style="color:var(--emerald);">10s</span></span>
+      </div>
+      <div class="bar-track"><div class="bar-fill blue" style="width:5%;"></div></div>
+    </div>
+    <div class="bar-section">
+      <div class="bar-header">
+        <span class="bar-name">处方效率提升</span>
+        <span class="bar-values"><span style="color:var(--rose);">0%</span> → <span style="color:var(--emerald);">80%</span></span>
+      </div>
+      <div class="bar-track"><div class="bar-fill teal" style="width:80%;"></div></div>
+    </div>
+    <div class="bar-section">
+      <div class="bar-header">
+        <span class="bar-name">查体标准化率</span>
+        <span class="bar-values"><span style="color:var(--rose);">0%</span> → <span style="color:var(--emerald);">100%</span></span>
+      </div>
+      <div class="bar-track"><div class="bar-fill blue" style="width:100%;"></div></div>
+    </div>
+    <div class="bar-section">
+      <div class="bar-header">
+        <span class="bar-name">随访率</span>
+        <span class="bar-values"><span style="color:var(--rose);">&lt;10%</span> → <span style="color:var(--emerald);">&gt;60%</span></span>
+      </div>
+      <div class="bar-track"><div class="bar-fill teal" style="width:60%;"></div></div>
+    </div>
+    <div class="bar-section">
+      <div class="bar-header">
+        <span class="bar-name">批量筛查(人/小时)</span>
+        <span class="bar-values"><span style="color:var(--rose);">1</span> → <span style="color:var(--emerald);">100+</span></span>
+      </div>
+      <div class="bar-track"><div class="bar-fill amber" style="width:92%;"></div></div>
+    </div>
+  </div>
+
+  <div class="hl-box" style="margin-top:16px;">
+    <h4>非量化价值</h4>
+    <ul class="checklist">
+      <li>医生工作生活边界清晰（告别私人微信随访）</li>
+      <li>科室品牌与患者口碑（智能化服务体验）</li>
+      <li>数据资产持续积累（支撑课题申报）</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ===== PAGE: Summary ===== -->
+<section class="page" id="page-summary">
+  <div class="page-header">
+    <div>
+      <h1>交付与启动</h1>
+      <p class="page-desc">四个场景 · 一套架构 · 零成本落地</p>
+    </div>
+    <span class="page-badge">✓ 决策建议</span>
+  </div>
+
+  <div class="hl-box" style="margin-bottom:20px;font-size:15px;line-height:1.7;">
+    我们用2026年最新的开源技术，在<strong>不改变现有流程、不增加硬件投入、不侵犯数据隐私</strong>的前提下，帮科室构建覆盖"查体→处方→训练→随访→复诊"全流程的数字化康复体系。
+  </div>
+
+  <div class="grid-2">
+    <div class="card card-accent-top">
+      <h4 style="margin-bottom:10px;">已具备的条件</h4>
+      <ul class="checklist">
+        <li>所有技术选型经2026年5月最新版本验证</li>
+        <li>所有方案代码逻辑完整，可直接原型开发</li>
+        <li>五套方案模块化设计，支持分阶段落地</li>
+      </ul>
+    </div>
+    <div class="card card-accent-teal">
+      <h4 style="margin-bottom:10px;">下一步建议</h4>
+      <div class="steps">
+        <div class="step" style="min-width:100px;">
+          <div class="step-num" style="background:var(--t-100);color:var(--t-700);">1</div>
+          <div class="step-label">确认优先场景</div>
+          <div class="step-sublabel">建议从智能查体开始</div>
+        </div>
+        <div class="step" style="min-width:100px;">
+          <div class="step-num" style="background:var(--t-100);color:var(--t-700);">2</div>
+          <div class="step-label">安排现场演示</div>
+          <div class="step-sublabel">技术方案演示</div>
+        </div>
+        <div class="step" style="min-width:100px;">
+          <div class="step-num" style="background:var(--t-100);color:var(--t-700);">3</div>
+          <div class="step-label">确定试点</div>
+          <div class="step-sublabel">科室和时间节点</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div style="text-align:center;margin-top:32px;padding:36px;background:linear-gradient(135deg,#eff6ff,#f0fdfa);border-radius:var(--r-lg);border:1px solid #bae6fd;">
+    <p style="font-size:15px;font-weight:600;color:var(--p-800);margin-bottom:6px;">附录说明</p>
+    <p style="font-size:13px;color:var(--text-secondary);">技术附录包含所有组件的精确版本号、模型来源、部署细节和备选方案，供技术评审使用。</p>
+  </div>
+</section>
+
+<!-- ===== PAGE: Appendix ===== -->
+<section class="page" id="page-appendix">
+  <div class="page-header">
+    <div>
+      <h1>技术参考手册</h1>
+      <p class="page-desc">所有组件精确到版本号 · 含备选方案 · 供技术评审</p>
+    </div>
+    <span class="page-badge">ⓘ 附录</span>
+  </div>
+
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>组件</th><th>版本 / 名称</th><th>说明</th></tr></thead>
+      <tbody>
+        <tr><td>MediaPipe Pose</td><td><code>≥ 0.10.18</code></td><td>端侧轻量配置，model_complexity=0</td></tr>
+        <tr><td>MMPose</td><td><code>1.3.2</code></td><td>低活跃维护，可选组件</td></tr>
+        <tr><td>Whisper.cpp</td><td><code>v1.8.4</code></td><td>端侧离线中文语音识别</td></tr>
+        <tr><td>Silero VAD</td><td><code>v6.2.0</code></td><td>2MB轻量语音活动检测</td></tr>
+        <tr><td>医疗大模型</td><td><code>II-Medical-7B-Preview</code></td><td>基于Qwen2.5-7B微调</td></tr>
+        <tr><td>Jitsi Meet</td><td><code>2026发行版</code></td><td>加密视频通话</td></tr>
+        <tr><td>n8n</td><td><code>1.123.38</code></td><td>需PostgreSQL + Docker</td></tr>
+        <tr><td>Supabase</td><td><code>v1.26.03</code></td><td>BaaS，离线同步需二次开发</td></tr>
+        <tr><td>数据标准</td><td><code>FHIR R4/R5</code></td><td>fhir.resources + fhir-fast-parser</td></tr>
+        <tr><td>移动端</td><td><code>uni-app 3.9.10</code></td><td>Apache 2.0协议</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="grid-3" style="margin-top:18px;">
+    <div class="card card-accent-amber">
+      <h4 style="margin-bottom:6px;">⟲ 姿态估计备选</h4>
+      <p style="font-size:12.5px;color:var(--text-secondary);">OpenMMLab活跃项目，高精度场景可替换MediaPipe</p>
+    </div>
+    <div class="card card-accent-teal">
+      <h4 style="margin-bottom:6px;">⏻ 数据同步备选</h4>
+      <p style="font-size:12.5px;color:var(--text-secondary);">PouchDB + CouchDB 纯离线优先架构</p>
+    </div>
+    <div class="card card-accent-top">
+      <h4 style="margin-bottom:6px;">⊞ 工作流备选</h4>
+      <p style="font-size:12.5px;color:var(--text-secondary);">Apache Airflow / Temporal.io 可替代n8n</p>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<!-- ==================== SCRIPTS ==================== -->
+<script>
+const pages = document.querySelectorAll('.page');
+const navItems = document.querySelectorAll('.nav-item');
+const mainContent = document.getElementById('main-content');
+
+const routes = [
+  'cover','pain-points','panorama','tech-arch',
+  'scene1-exam','scene1-scoring','scene2-prescription',
+  'scene3-outreach','scene4-followup',
+  'data-loop','deployment','integration',
+  'implementation','roi','summary','appendix'
+];
+
+function navigateTo(route) {
+  navItems.forEach(item => item.classList.remove('active'));
+  const navItem = document.querySelector(`[data-route="${route}"]`);
+  if (navItem) navItem.classList.add('active');
+
+  pages.forEach(page => page.classList.remove('active'));
+  const page = document.getElementById(`page-${route}`);
+  if (page) { page.classList.add('active'); mainContent.scrollTop = 0; }
+
+  window.location.hash = route;
+  document.querySelector('.sidebar').classList.remove('open');
+
+  if (route === 'roi') setTimeout(animateBars, 120);
+}
+
+function handleHashChange() {
+  const hash = window.location.hash.slice(1) || 'cover';
+  navigateTo(hash);
+}
+
+window.addEventListener('hashchange', handleHashChange);
+
+navItems.forEach(item => {
+  item.addEventListener('click', (e) => {
+    e.preventDefault();
+    navigateTo(item.dataset.route);
+  });
+});
+
+if (window.location.hash) handleHashChange();
+
+function animateBars() {
+  document.querySelectorAll('.bar-fill').forEach(bar => {
+    const w = bar.style.width;
+    bar.style.width = '0%';
+    requestAnimationFrame(() => { requestAnimationFrame(() => { bar.style.width = w; }); });
+  });
+}
+
+// Keyboard navigation
+document.addEventListener('keydown', (e) => {
+  const currentRoute = window.location.hash.slice(1) || 'cover';
+  const idx = routes.indexOf(currentRoute);
+  if (e.key === 'ArrowRight' || e.key === 'PageDown') {
+    e.preventDefault(); if (idx < routes.length - 1) navigateTo(routes[idx + 1]);
+  } else if (e.key === 'ArrowLeft' || e.key === 'PageUp') {
+    e.preventDefault(); if (idx > 0) navigateTo(routes[idx - 1]);
+  } else if (e.key === 'Home') { e.preventDefault(); navigateTo(routes[0]); }
+  else if (e.key === 'End') { e.preventDefault(); navigateTo(routes[routes.length - 1]); }
+});
+
+console.log('MotionRehab v2.0 — 全场景运动康复数字化平台');
+console.log('16个产品界面 | 键盘导航 | Hash路由 | 融合设计风格');
+</script>
+</body>
+</html>

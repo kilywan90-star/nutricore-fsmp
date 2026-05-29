@@ -1,0 +1,110 @@
+<!-- 钓点详情页 -->
+<view class="page-detail">
+  <!-- 图片轮播 -->
+  <swiper class="photo-swiper" indicator-dots="{{spot.photos && spot.photos.length > 1}}">
+    <block wx:for="{{spot.photos || []}}" wx:key="*this">
+      <swiper-item>
+        <image src="{{item}}" mode="aspectFill" class="swiper-image" />
+      </swiper-item>
+    </block>
+    <swiper-item wx:if="{{!spot.photos || spot.photos.length === 0}}">
+      <view class="image-placeholder swiper-image">
+        <text>暂无图片</text>
+      </view>
+    </swiper-item>
+  </swiper>
+
+  <!-- 基本信息 -->
+  <view class="card">
+    <view class="flex-between">
+      <text class="text-xl text-bold">{{spot.name}}</text>
+      <view class="stars">⭐ {{spot.rating || '暂无'}}</view>
+    </view>
+    <view class="mt-8">
+      <text class="tag tag-green">{{spot.type || '其他'}}</text>
+      <text class="tag tag-blue" wx:if="{{spot.price_info && spot.price_info.mode}}">
+        {{spot.price_info.mode}} {{spot.price_info.amount || ''}}
+      </text>
+    </view>
+    <view class="mt-16 text-sm text-muted">
+      <text>📍 {{spot.address || '暂无地址信息'}}</text>
+    </view>
+    <view class="flex-between mt-8 text-sm text-muted">
+      <text>{{spot.city}} {{spot.district}}</text>
+      <text wx:if="{{spot.distance}}">{{spot.distance}}m</text>
+    </view>
+    <view wx:if="{{spot.tel}}" class="mt-8">
+      <text class="text-sm" style="color:#07C160" bindtap="callTel">📞 {{spot.tel}}</text>
+    </view>
+  </view>
+
+  <!-- 钓鱼指数（该钓点当前） -->
+  <view class="card" wx:if="{{fishingIndex}}">
+    <view class="flex-between">
+      <text class="text-lg text-bold">🎣 今日适钓指数</text>
+      <text class="text-xl text-bold {{indexClass}}">{{fishingIndex.score}}分</text>
+    </view>
+    <text class="mt-8 text-sm">{{fishingIndex.summary}}</text>
+
+    <view class="weather-mini mt-16" wx:if="{{weather}}">
+      <text>🌡 {{weather.temp}}°C</text>
+      <text>💧 {{weather.humidity}}%</text>
+      <text>🌬 {{weather.wind_speed}}km/h {{weather.wind_direction}}</text>
+      <text>🦟 蚊虫Lv.{{insect.level}}</text>
+    </view>
+
+    <!-- 装备推荐 -->
+    <view class="gear-section mt-16" wx:if="{{fishingIndex.gear_recommendations}}">
+      <view wx:for="{{fishingIndex.gear_recommendations}}" wx:key="category" class="gear-group mt-8">
+        <text class="text-sm text-bold">{{item.category}}</text>
+        <text class="text-sm text-muted">{{item.items}}</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 详细信息 -->
+  <view class="card">
+    <text class="text-lg text-bold">详细信息</text>
+    <view class="info-grid mt-16">
+      <view class="info-item">
+        <text class="info-label">鱼种</text>
+        <text class="info-value">
+          {{spot.fish_species && spot.fish_species.length > 0 ? spot.fish_species.join('、') : '暂无数据'}}
+        </text>
+      </view>
+      <view class="info-item">
+        <text class="info-label">水深</text>
+        <text class="info-value">{{spot.water_depth || '暂无数据'}}</text>
+      </view>
+      <view class="info-item">
+        <text class="info-label">水质</text>
+        <text class="info-value">{{spot.water_quality || '暂无数据'}}</text>
+      </view>
+      <view class="info-item">
+        <text class="info-label">拥挤度</text>
+        <text class="info-value">
+          {{spot.crowd_level ? '🔥' * spot.crowd_level : '暂无数据'}}
+        </text>
+      </view>
+    </view>
+    <view class="facilities mt-16" wx:if="{{spot.facilities}}">
+      <text class="info-label">设施</text>
+      <view class="mt-8">
+        <text class="tag tag-green" wx:if="{{spot.facilities.parking}}">🅿 停车</text>
+        <text class="tag tag-green" wx:if="{{spot.facilities.toilet}}">🚻 厕所</text>
+        <text class="tag tag-green" wx:if="{{spot.facilities.food}}">🍽 餐饮</text>
+        <text class="tag tag-green" wx:if="{{spot.facilities.accommodation}}">🏨 住宿</text>
+      </view>
+    </view>
+    <view class="mt-16" wx:if="{{spot.tips}}">
+      <text class="info-label">注意事项</text>
+      <text class="text-sm text-muted mt-8">{{spot.tips}}</text>
+    </view>
+  </view>
+
+  <!-- 操作按钮 -->
+  <view class="bottom-actions">
+    <button class="btn-outline flex-1" bindtap="goToYuediao">发起约钓</button>
+    <button class="btn-primary flex-1" style="margin-left:16rpx" bindtap="openNavigation">一键导航</button>
+  </view>
+</view>

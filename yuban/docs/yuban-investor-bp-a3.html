@@ -1,0 +1,634 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>渔伴 — 钓鱼社交服务平台 · 融资BP A3一页纸</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700;900&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Noto Sans SC', 'Microsoft YaHei', sans-serif;
+    background: #f0f2f5;
+    display: flex;
+    justify-content: center;
+    padding: 20px;
+  }
+
+  .a3 {
+    width: 1189px;
+    min-height: 1682px;
+    background: #fff;
+    padding: 24px 30px;
+    box-shadow: 0 4px 24px rgba(0,0,0,.12);
+    display: grid;
+    grid-template-rows: auto auto auto auto auto;
+    gap: 14px;
+  }
+
+  /* ── 标题栏 ── */
+  .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    border-bottom: 3px solid #07C160;
+    padding-bottom: 10px;
+  }
+  .header h1 {
+    font-size: 28px;
+    font-weight: 900;
+    color: #1a3a5c;
+    letter-spacing: 2px;
+  }
+  .header .subtitle {
+    font-size: 13px;
+    color: #07C160;
+    font-weight: 500;
+    margin-top: 2px;
+  }
+  .header .meta {
+    text-align: right;
+    font-size: 11px;
+    color: #666;
+    line-height: 1.6;
+  }
+
+  /* ── 背景栏 ── */
+  .context-bar {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 12px;
+  }
+  .context-box {
+    background: #e8f8ee;
+    border-left: 4px solid #07C160;
+    padding: 10px 14px;
+    border-radius: 4px;
+    font-size: 12px;
+    line-height: 1.6;
+    color: #1a3a5c;
+  }
+  .context-box strong { color: #00A650; }
+  .context-box.north {
+    background: #e8f0fe;
+    border-left-color: #1a73e8;
+  }
+  .context-box.north strong { color: #0d47a1; }
+  .context-box.orange {
+    background: #fff3e0;
+    border-left-color: #e65100;
+  }
+  .context-box.orange strong { color: #e65100; }
+
+  /* ── 矩阵总表 ── */
+  .section-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: #1a3a5c;
+    padding: 4px 0;
+    border-bottom: 1px solid #ddd;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 2px;
+  }
+  .section-title .num {
+    background: #07C160;
+    color: #fff;
+    border-radius: 50%;
+    width: 22px;
+    height: 22px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 10.5px;
+    line-height: 1.5;
+  }
+  thead th {
+    background: #1a3a5c;
+    color: #fff;
+    font-weight: 500;
+    padding: 6px 5px;
+    text-align: center;
+    font-size: 10.5px;
+    white-space: nowrap;
+  }
+  thead th:first-child { width: 26px; }
+  thead th:nth-child(2) { width: 72px; text-align: left; padding-left: 8px; }
+  thead th:nth-child(3) { width: 115px; text-align: left; padding-left: 8px; }
+  thead th:nth-child(4) { text-align: left; padding-left: 8px; }
+  thead th:nth-child(5) { width: 58px; }
+  thead th:nth-child(6) { width: 70px; }
+
+  tbody td {
+    padding: 5px 5px;
+    text-align: center;
+    border-bottom: 1px solid #eee;
+    vertical-align: middle;
+  }
+  tbody td:nth-child(2) { text-align: left; padding-left: 8px; }
+  tbody td:nth-child(3) { text-align: left; padding-left: 8px; font-size: 10px; }
+  tbody td:nth-child(4) { text-align: left; padding-left: 8px; font-size: 10px; color: #333; }
+  tbody tr:nth-child(even) { background: #f8f9fb; }
+  tbody tr:hover { background: #e8f8ee; }
+
+  .cat-tag {
+    display: inline-block;
+    padding: 2px 7px;
+    border-radius: 3px;
+    font-size: 9px;
+    font-weight: 700;
+    white-space: nowrap;
+  }
+  .cat-core   { background: #e8f5e9; color: #1b5e20; }
+  .cat-algo   { background: #e3f2fd; color: #0d47a1; }
+  .cat-social { background: #fce4ec; color: #880e4f; }
+  .cat-market  { background: #fff3e0; color: #e65100; }
+  .cat-monetize { background: #f3e5f5; color: #6a1b9a; }
+  .cat-trust { background: #e0f7fa; color: #006064; }
+
+  .priority {
+    display: inline-block;
+    width: 20px; height: 20px;
+    border-radius: 4px;
+    font-weight: 900; font-size: 10px;
+    color: #fff; line-height: 20px;
+  }
+  .pri-p0 { background: #d32f2f; }
+  .pri-p1 { background: #ef6c00; }
+  .pri-p2 { background: #1976d2; }
+
+  .rev-badge {
+    display: inline-block;
+    padding: 1px 6px;
+    border-radius: 3px;
+    font-size: 9px;
+    font-weight: 700;
+  }
+  .rev-high  { background: #c8e6c9; color: #1b5e20; }
+  .rev-mid   { background: #fff9c4; color: #f57f17; }
+  .rev-user  { background: #bbdefb; color: #0d47a1; }
+
+  /* ── 底部 ── */
+  .footer-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-top: 4px;
+  }
+  .footer-box {
+    background: #f8f9fb;
+    border: 1px solid #e0e0e0;
+    border-radius: 4px;
+    padding: 10px 14px;
+    font-size: 11px;
+    line-height: 1.6;
+  }
+  .footer-box.full {
+    grid-column: 1 / -1;
+    background: linear-gradient(135deg, #e8f8ee 0%, #e8f0fe 100%);
+    border-color: #90caf9;
+  }
+  .footer-box h4 {
+    font-size: 12px;
+    font-weight: 700;
+    color: #1a3a5c;
+    margin-bottom: 5px;
+  }
+
+  .roadmap {
+    display: flex;
+    gap: 8px;
+    margin-top: 6px;
+    flex-wrap: wrap;
+  }
+  .roadmap-stage {
+    flex: 1;
+    min-width: 150px;
+    background: #fff;
+    border-radius: 4px;
+    padding: 10px;
+    border-top: 3px solid #07C160;
+    font-size: 10px;
+    line-height: 1.6;
+  }
+  .roadmap-stage h5 { font-size: 11px; color: #1a3a5c; margin-bottom: 4px; }
+  .roadmap-stage ul { padding-left: 14px; }
+  .roadmap-stage.ph2 { border-top-color: #ef6c00; }
+  .roadmap-stage.ph3 { border-top-color: #1a73e8; }
+
+  /* ── 指标卡 ── */
+  .metrics-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+  }
+  .metric-card {
+    background: linear-gradient(135deg, #e8f8ee, #fff);
+    border: 1px solid #c8e6c9;
+    border-radius: 6px;
+    padding: 10px 14px;
+    text-align: center;
+  }
+  .metric-card .value {
+    font-size: 24px;
+    font-weight: 900;
+    color: #07C160;
+    line-height: 1.1;
+  }
+  .metric-card .label {
+    font-size: 10px;
+    color: #666;
+    margin-top: 2px;
+  }
+
+  .funding-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    margin-top: 6px;
+  }
+  .funding-item {
+    background: #fff;
+    border: 1px solid #e0e0e0;
+    border-radius: 4px;
+    padding: 8px 12px;
+    text-align: center;
+    font-size: 10px;
+  }
+  .funding-item .amount {
+    font-size: 18px;
+    font-weight: 900;
+    color: #07C160;
+  }
+  .funding-item .use {
+    font-size: 9px;
+    color: #666;
+    margin-top: 4px;
+    text-align: left;
+    line-height: 1.5;
+  }
+
+  /* ── 单位经济模型迷你表 ── */
+  .mini-table {
+    width: 100%;
+    font-size: 10px;
+    border-collapse: collapse;
+    margin-top: 6px;
+  }
+  .mini-table td {
+    padding: 3px 6px;
+    border-bottom: 1px solid #eee;
+  }
+  .mini-table td:last-child { text-align: right; font-weight: 700; }
+
+  @media print {
+    body { background: #fff; padding: 0; }
+    .a3 { box-shadow: none; width: 100%; page-break-after: avoid; }
+  }
+</style>
+</head>
+<body>
+<div class="a3">
+
+  <!-- ═══ 标题栏 ═══ -->
+  <div class="header">
+    <div>
+      <h1>渔伴 Yuban · 钓鱼社交服务平台</h1>
+      <div class="subtitle">"钓鱼版小红书+大众点评+滴滴打船" — 中国1.4亿钓鱼人的数字化第一站</div>
+    </div>
+    <div class="meta">
+      <div>版本 v1.0</div>
+      <div>日期 2026-05-24</div>
+      <div>密级 投资人参阅</div>
+      <div>轮次 天使轮</div>
+    </div>
+  </div>
+
+  <!-- ═══ 三要素背景栏 ═══ -->
+  <div class="context-bar">
+    <div class="context-box">
+      <strong>市场空白</strong><br>
+      国内1.4亿钓鱼人群，年消费规模超<b>3000亿</b>，
+      却没有一款整合"钓点情报+社交+陪钓服务"的数字平台。
+      现有产品要么是纯工具（天气/潮汐），
+      要么是纯内容（短视频），<b>信息孤岛严重</b>。
+    </div>
+    <div class="context-box north">
+      <strong>核心洞察</strong><br>
+      钓鱼决策链长且信息密集：去哪钓→天气如何→
+      带什么装备→跟谁去→附近有什么配套。
+      每个环节都是<b>独立的信息获取成本</b>。
+      渔伴把这条链压缩到一个App里。
+    </div>
+    <div class="context-box orange">
+      <strong>商业模式</strong><br>
+      前3个月免费获客 →
+      会员订阅（¥19.9/月）解锁无限钓点+AI装备推荐 →
+      陪钓服务市场抽佣15-20% →
+      广告（渔具品牌）/ 数据增值服务。
+      目标<b>6个月盈亏平衡</b>。
+    </div>
+  </div>
+
+  <!-- ═══ 核心指标卡 ═══ -->
+  <div class="metrics-row">
+    <div class="metric-card">
+      <div class="value">1.4<span style="font-size:14px">亿</span></div>
+      <div class="label">中国钓鱼人群（含休闲）</div>
+    </div>
+    <div class="metric-card">
+      <div class="value">3,000<span style="font-size:14px">亿/年</span></div>
+      <div class="label">钓鱼相关消费市场规模</div>
+    </div>
+    <div class="metric-card">
+      <div class="value">0<span style="font-size:14px">个</span></div>
+      <div class="label">现有整合型钓鱼服务平台</div>
+    </div>
+    <div class="metric-card">
+      <div class="value">15-20<span style="font-size:14px">%</span></div>
+      <div class="label">陪钓服务市场抽佣率</div>
+    </div>
+  </div>
+
+  <!-- ═══ 能力矩阵总表 ═══ -->
+  <div>
+    <div class="section-title"><span class="num">1</span> 15项核心能力矩阵（按商业价值排序）</div>
+    <table>
+      <thead>
+        <tr>
+          <th>#</th><th>模块</th><th>功能能力</th><th>用户价值 & 竞争优势</th>
+          <th>优先级</th><th>变现潜力</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>1</td><td><span class="cat-tag cat-core">钓点引擎</span></td><td>全维度钓点数据库</td>
+          <td>整合高德POI+UGC众包，覆盖地点/鱼种/收费/设施/风景/餐饮/停车，解决"去哪钓"决策盲区</td>
+          <td><span class="priority pri-p0">P0</span></td>
+          <td><span class="rev-badge rev-high">会员核心留存</span></td>
+        </tr>
+        <tr>
+          <td>2</td><td><span class="cat-tag cat-algo">算法引擎</span></td><td>钓鱼指数+蚊虫预报</td>
+          <td>7因子加权评分（温/压/风/湿/雨/虫/日照），国内首个整合蚊虫活跃度预报的产品。独家差异化壁垒</td>
+          <td><span class="priority pri-p0">P0</span></td>
+          <td><span class="rev-badge rev-high">会员付费墙</span></td>
+        </tr>
+        <tr>
+          <td>3</td><td><span class="cat-tag cat-algo">算法引擎</span></td><td>AI智能装备推荐</td>
+          <td>基于天气+鱼种+钓场类型+蚊虫等级，一键生成装备清单（竿/线/饵/防护）。新手粘性锚点</td>
+          <td><span class="priority pri-p0">P0</span></td>
+          <td><span class="rev-badge rev-high">电商导购佣金</span></td>
+        </tr>
+        <tr>
+          <td>4</td><td><span class="cat-tag cat-market">服务市场</span></td><td>陪钓服务双边平台</td>
+          <td>国内首个钓鱼陪钓/向导双边市场（类比FishingBooker中国版），含专业钓导+陪钓伴侣+专项服务(摄影/野炊/接送）</td>
+          <td><span class="priority pri-p0">P0</span></td>
+          <td><span class="rev-badge rev-high">15-20%抽佣</span></td>
+        </tr>
+        <tr>
+          <td>5</td><td><span class="cat-tag cat-social">社交社区</span></td><td>鱼获/风景动态Feed</td>
+          <td>照片+鱼种+重量+饵料+钓点结构化分享，算法推荐+LBS附近流。比FishAngler更懂中国钓法</td>
+          <td><span class="priority pri-p1">P1</span></td>
+          <td><span class="rev-badge rev-high">广告库存</span></td>
+        </tr>
+        <tr>
+          <td>6</td><td><span class="cat-tag cat-social">社交社区</span></td><td>LBS约钓匹配</td>
+          <td>附近钓友在线状态+按钓法/鱼种/时间筛选+拼车/拼装备。类"探探"滑动匹配降低组局门槛</td>
+          <td><span class="priority pri-p1">P1</span></td>
+          <td><span class="rev-badge rev-mid">会员增值</span></td>
+        </tr>
+        <tr>
+          <td>7</td><td><span class="cat-tag cat-core">钓点引擎</span></td><td>钓点AR实景导航</td>
+          <td>手机摄像头叠加虚拟箭头精准导航至隐蔽钓位（对标渔乐派AR功能）。技术壁垒+硬件生态入口</td>
+          <td><span class="priority pri-p2">P2</span></td>
+          <td><span class="rev-badge rev-mid">高级会员</span></td>
+        </tr>
+        <tr>
+          <td>8</td><td><span class="cat-tag cat-monetize">商业变现</span></td><td>会员订阅体系</td>
+          <td>免费试用90天→¥19.9/月会员。解锁无限钓点详情+钓鱼指数+AI装备推荐+陪钓折扣+专属徽章</td>
+          <td><span class="priority pri-p1">P1</span></td>
+          <td><span class="rev-badge rev-high">订阅收入</span></td>
+        </tr>
+        <tr>
+          <td>9</td><td><span class="cat-tag cat-market">服务市场</span></td><td>陪钓订单+支付</td>
+          <td>选服务→定时间→预付定金→行程分享+实时定位+一键报警→完成确认→双向互评。全流程闭环</td>
+          <td><span class="priority pri-p1">P1</span></td>
+          <td><span class="rev-badge rev-high">平台抽佣</span></td>
+        </tr>
+        <tr>
+          <td>10</td><td><span class="cat-tag cat-core">钓点引擎</span></td><td>钓点贡献+冷启动</td>
+          <td>首批50城市×15关键词爬取5,000-20,000个钓点，叠加种子用户邀请100KOL共创。PGC+UGC双轮驱动</td>
+          <td><span class="priority pri-p1">P1</span></td>
+          <td><span class="rev-badge rev-mid">内容壁垒</span></td>
+        </tr>
+        <tr>
+          <td>11</td><td><span class="cat-tag cat-social">社交社区</span></td><td>钓鱼圈子/俱乐部</td>
+          <td>按地区/钓法/鱼种建圈，圈内排名+活动+友谊赛。REELZO的俱乐部模式本土化。圈主激励机制</td>
+          <td><span class="priority pri-p2">P2</span></td>
+          <td><span class="rev-badge rev-mid">社群电商</span></td>
+        </tr>
+        <tr>
+          <td>12</td><td><span class="cat-tag cat-algo">算法引擎</span></td><td>鱼获AI识别+自动测量</td>
+          <td>拍照自动识别鱼种(300+种)+估算尺寸重量（对标FishAngler AI Fish ID+渔获APP）。降低记录门槛</td>
+          <td><span class="priority pri-p2">P2</span></td>
+          <td><span class="rev-badge rev-mid">会员功能</span></td>
+        </tr>
+        <tr>
+          <td>13</td><td><span class="cat-tag cat-market">服务市场</span></td><td>赛事+活动平台</td>
+          <td>官方赛事报名+自发约赛+线上打榜(周/月/地区榜)+赛事直播。渔界大陆模式+REELZO FishOff竞技化</td>
+          <td><span class="priority pri-p2">P2</span></td>
+          <td><span class="rev-badge rev-mid">赛事报名费</span></td>
+        </tr>
+        <tr>
+          <td>14</td><td><span class="cat-tag cat-trust">信任安全</span></td><td>信用评分+安全体系</td>
+          <td>实名认证+人脸识别+行程分享+实时定位+一键报警+双向互评。陪钓服务者资质审核+行为准则</td>
+          <td><span class="priority pri-p0">P0</span></td>
+          <td><span class="rev-badge rev-user">平台信任资产</span></td>
+        </tr>
+        <tr>
+          <td>15</td><td><span class="cat-tag cat-monetize">商业变现</span></td><td>渔具品牌广告+数据服务</td>
+          <td>精准投放渔具/饵料广告(基于用户钓法偏好)+钓点热力图/鱼情数据报告。长期B端收入第二曲线</td>
+          <td><span class="priority pri-p2">P2</span></td>
+          <td><span class="rev-badge rev-mid">B端收入</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ═══ 竞品矩阵 ═══ -->
+  <div>
+    <div class="section-title"><span class="num">2</span> 竞争格局 — 渔伴的差异化定位</div>
+    <table>
+      <thead>
+        <tr>
+          <th style="width:100px;text-align:left;padding-left:8px">产品</th>
+          <th style="text-align:left;padding-left:8px;width:300px">定位 & 优势</th>
+          <th style="text-align:left;padding-left:8px">缺失能力（渔伴的机会）</th>
+          <th style="width:50px">用户量</th>
+          <th style="width:90px">对标</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td style="text-align:left;padding-left:8px;font-weight:700;color:#07C160">渔伴 ⭐</td>
+          <td style="text-align:left;padding-left:8px;font-size:10px">钓点情报+钓鱼指数+蚊虫预报+社区+约钓+<b>陪钓服务市场</b>。唯一整合型平台</td>
+          <td style="text-align:left;padding-left:8px;font-size:10px;color:#07C160">— 全栈覆盖，暂无对标 —</td>
+          <td>MVP</td>
+          <td>小红书+大众点评+滴滴</td>
+        </tr>
+        <tr>
+          <td style="text-align:left;padding-left:8px">渔乐派</td>
+          <td style="text-align:left;padding-left:8px;font-size:10px">LBS雷达+AR导航+鱼情算法，技术派首选，200万+用户</td>
+          <td style="text-align:left;padding-left:8px;font-size:10px">无陪钓服务/无蚊虫预报/无社交Feed/无电商</td>
+          <td>200万+</td>
+          <td>Google Maps</td>
+        </tr>
+        <tr>
+          <td style="text-align:left;padding-left:8px">渔界大陆</td>
+          <td style="text-align:left;padding-left:8px;font-size:10px">赛事+钓场+社区+知识，20万+钓场，日均10万动态</td>
+          <td style="text-align:left;padding-left:8px;font-size:10px">无陪钓市场/无蚊虫/装备推荐弱/无智能指数</td>
+          <td>50万DAU</td>
+          <td>Keep+懂球帝</td>
+        </tr>
+        <tr>
+          <td style="text-align:left;padding-left:8px">FishAngler</td>
+          <td style="text-align:left;padding-left:8px;font-size:10px">全球最大社交钓鱼App，AI鱼种识别300+，Navionics海图</td>
+          <td style="text-align:left;padding-left:8px;font-size:10px">中国市场空白/无中文/无陪钓/无蚊虫/无中国钓场数据</td>
+          <td>500万+</td>
+          <td>Strava</td>
+        </tr>
+        <tr>
+          <td style="text-align:left;padding-left:8px">FishingBooker</td>
+          <td style="text-align:left;padding-left:8px;font-size:10px">全球最大钓鱼行程预订平台，2000+目的地，340万+用户</td>
+          <td style="text-align:left;padding-left:8px;font-size:10px"><b>完全未进入中国市场</b>，无中文。渔伴=中国版FishingBooker</td>
+          <td>340万+</td>
+          <td>Booking.com</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ═══ 底部：路线图 + 融资 + 风险 ═══ -->
+  <div class="footer-grid">
+
+    <!-- Phase Roadmap (全宽) -->
+    <div class="footer-box full">
+      <h4>三阶段发展路径</h4>
+      <div class="roadmap">
+        <div class="roadmap-stage">
+          <h5>Phase 1 — 产品验证 (0-3月)</h5>
+          <ul>
+            <li>✅ 小程序MVP上线</li>
+            <li>✅ 高德爬取5,000-20,000钓点</li>
+            <li>✅ 钓鱼指数+蚊虫预报+装备推荐</li>
+            <li>✅ 基础社区+约钓匹配</li>
+            <li>🎯 目标: 1万注册用户</li>
+            <li>💰 预算: 50万 RMB</li>
+          </ul>
+        </div>
+        <div class="roadmap-stage ph2">
+          <h5>Phase 2 — 商业化 (3-9月)</h5>
+          <ul>
+            <li>陪钓服务市场上线</li>
+            <li>会员订阅体系启动</li>
+            <li>微信支付集成</li>
+            <li>KOL种子用户运营</li>
+            <li>🎯 目标: 10万用户, 月GMV 50万</li>
+            <li>💰 预算: 150万 RMB</li>
+          </ul>
+        </div>
+        <div class="roadmap-stage ph3">
+          <h5>Phase 3 — 规模化 (9-18月)</h5>
+          <ul>
+            <li>AI鱼种识别+自动测量</li>
+            <li>AR导航+智能硬件生态</li>
+            <li>赛事平台+直播</li>
+            <li>渔具品牌广告+数据服务</li>
+            <li>🎯 目标: 100万用户, 月GMV 500万</li>
+            <li>💰 预算: 500万 RMB</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- 融资需求 -->
+    <div class="footer-box">
+      <h4>本轮融资计划（天使轮）</h4>
+      <div class="funding-grid">
+        <div class="funding-item">
+          <div class="amount">¥500<span style="font-size:11px">万</span></div>
+          <div>融资金额</div>
+          <div class="use">出让10-12%股权<br>估值5000万RMB</div>
+        </div>
+        <div class="funding-item">
+          <div class="amount">50%</div>
+          <div>产品研发</div>
+          <div class="use">后端+小程序+AI算法<br>陪钓服务市场搭建</div>
+        </div>
+        <div class="funding-item">
+          <div class="amount">30%</div>
+          <div>运营推广</div>
+          <div class="use">KOL合作+社区冷启动<br>钓点数据持续采集</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 单位经济模型 -->
+    <div class="footer-box">
+      <h4>单位经济模型（12月稳态预估）</h4>
+      <table class="mini-table">
+        <tr><td>CAC（用户获取成本）</td><td>≈ ¥8/人</td></tr>
+        <tr><td>会员月费</td><td>¥19.9/月</td></tr>
+        <tr><td>付费转化率</td><td>6-8%（保守）</td></tr>
+        <tr><td>月ARPU</td><td>¥1.6（免费）+ ¥19.9（会员）</td></tr>
+        <tr><td>陪钓单均交易额</td><td>¥300/单</td></tr>
+        <tr><td>平台抽佣</td><td>¥45-60/单（15-20%）</td></tr>
+        <tr><td>月均陪钓订单</td><td>1,600单（10万用户×1.6%下单率）</td></tr>
+        <tr><td>月营收预估</td><td style="color:#07C160">¥11.9万（会员7.96万+抽佣4万）</td></tr>
+        <tr><td>毛利率</td><td>75-80%（纯平台模式）</td></tr>
+        <tr><td>盈亏平衡点</td><td style="color:#e65100">~3万会员或5万月活</td></tr>
+      </table>
+    </div>
+
+    <!-- 核心风险 -->
+    <div class="footer-box">
+      <h4>关键风险与应对</h4>
+      <ul>
+        <li><b>用户冷启动</b>：种子钓点数据(高德POI)+100位KOL内测+前3月免费。对标小红书早期"探店"冷启策略</li>
+        <li><b>陪钓合规性</b>：实名认证+人脸识别+行程分享+一键报警+双向互评+平台担保，参照滴滴安全体系设计</li>
+        <li><b>小程序审核</b>：陪钓服务以"户外向导/钓导"定位申报，准备合规说明材料</li>
+        <li><b>巨头入场</b>：渔具垂直领域+陪钓双边网络效应+钓点数据壁垒，6个月窗口期建立先发优势</li>
+      </ul>
+    </div>
+
+    <div class="footer-box">
+      <h4>团队 & 退出路径</h4>
+      <ul>
+        <li><b>核心团队</b>：全栈技术+产品+运营，具备社交+平台型产品0-1经验</li>
+        <li><b>顾问资源</b>：钓鱼行业KOL+户外运动投资领域网络</li>
+        <li><b>退出路径1</b>：被渔具品牌巨头（如光威/迪卡侬）或户外平台(小红书/美团)收购</li>
+        <li><b>退出路径2</b>：A/B轮后对标FishingBooker估值模型，独立IPO或战略合并</li>
+      </ul>
+    </div>
+
+  </div>
+
+  <!-- ── 底部签名行 ── -->
+  <div style="display:flex;justify-content:space-between;font-size:9px;color:#999;border-top:1px solid #ddd;padding-top:8px;">
+    <span>编制: 渔伴创业团队 | 2026-05-24 | 天使轮BP · 投资人版本</span>
+    <span>核心定位: 中国1.4亿钓鱼人的数字化第一站 | P0=立即启动 P1=重点推进 P2=规划布局</span>
+    <span>对标: FishAngler(社交) + FishingBooker(预订) + 渔乐派(技术) = 渔伴(全栈)</span>
+  </div>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,688 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>沙湾区智慧医疗调研与规划汇报</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600;700;900&family=Noto+Sans+SC:wght@300;400;500;700&display=swap');
+
+  * { margin:0; padding:0; box-sizing:border-box; }
+
+  :root {
+    --paper:   #faf8f5;
+    --ink:     #1c1c1c;
+    --rose:    #c17d6b;
+    --rose-deep: #a85a48;
+    --sage:    #3d5a4b;
+    --stone:   #e8e0d5;
+    --sand:    #f0ebe0;
+    --muted:   #6b635b;
+    --soft:    #f5f1ea;
+    --line:    #d9d2c7;
+    --white:   #ffffff;
+    --shadow:  0 2px 20px rgba(0,0,0,.06);
+  }
+
+  body {
+    font-family: 'Noto Sans SC', 'Microsoft YaHei', 'PingFang SC', sans-serif;
+    background: #e6e1d8;
+    display: flex; justify-content: center; align-items: center;
+    min-height: 100vh; padding: 24px;
+  }
+
+  .deck { width: 1200px; }
+
+  .slide {
+    display: none;
+    width: 1200px; height: 675px;
+    background: var(--paper);
+    position: relative; overflow: hidden;
+    box-shadow: 0 4px 32px rgba(0,0,0,.10), 0 1px 4px rgba(0,0,0,.06);
+    border-radius: 1px;
+  }
+  .slide.active { display: block; animation: fadeIn .35s ease; }
+  @keyframes fadeIn { from { opacity:0; transform:translateY(6px); } to { opacity:1; transform:translateY(0); } }
+
+  /* ---- Cover slide accent (slide 1) ---- */
+  .slide-accent-left {
+    position: absolute; top:0; left:0; bottom:0; width: 6px;
+    background: var(--sage);
+  }
+
+  /* ---- Page number ---- */
+  .page-mark {
+    position: absolute; top: 28px; right: 48px;
+    font-family: 'Noto Serif SC', serif;
+    font-size: 13px; color: var(--sage); letter-spacing: 1px;
+    font-weight: 600;
+  }
+
+  /* ---- Layout ---- */
+  .s-head {
+    padding: 32px 56px 0 56px;
+    display: flex; justify-content: space-between; align-items: flex-end;
+    padding-bottom: 16px; margin: 0 56px;
+    border-bottom: 1px solid var(--line);
+  }
+  .s-head h1 {
+    font-family: 'Noto Serif SC', serif;
+    font-size: 22px; font-weight: 700; color: var(--ink);
+    letter-spacing: .5px;
+  }
+  .s-head .sub {
+    font-size: 11px; color: var(--muted); text-align: right;
+    line-height: 1.5; font-weight: 300;
+  }
+
+  .s-body { padding: 18px 56px 0 56px; }
+
+  .s-foot {
+    position: absolute; bottom: 0; left:0; right:0;
+    padding: 10px 56px;
+    display: flex; justify-content: space-between;
+    font-size: 10px; color: #b5aea5;
+    border-top: 1px solid var(--line);
+    font-weight: 300;
+  }
+
+  /* ---- Labels ---- */
+  .section-label {
+    font-family: 'Noto Sans SC', sans-serif;
+    font-size: 10px; font-weight: 500; color: var(--rose);
+    letter-spacing: 2px; text-transform: uppercase;
+    margin-bottom: 3px;
+  }
+  .section-title {
+    font-family: 'Noto Serif SC', serif;
+    font-size: 16px; font-weight: 700; color: var(--ink);
+    margin-bottom: 10px; padding-bottom: 8px;
+    border-bottom: 1px solid var(--line);
+    letter-spacing: .3px;
+  }
+
+  /* ===== SLIDE 1 ===== */
+  .stat-strip {
+    display: grid; grid-template-columns: repeat(6, 1fr); gap: 10px;
+    margin-bottom: 12px;
+  }
+  .stat-item {
+    text-align: center; padding: 10px 6px 8px;
+    background: var(--white);
+    border-radius: 3px;
+    box-shadow: var(--shadow);
+    border-bottom: 2px solid var(--stone);
+  }
+  .stat-item .val {
+    font-family: 'Noto Serif SC', serif;
+    font-size: 24px; font-weight: 900; color: var(--ink);
+    line-height: 1.1;
+  }
+  .stat-item .val small { font-size: 14px; font-weight: 400; color: var(--muted); }
+  .stat-item .tagline {
+    font-size: 10px; color: var(--muted); margin-top: 2px;
+    font-weight: 300;
+  }
+  .stat-item.accent { border-bottom-color: var(--rose); }
+  .stat-item.accent .val { color: var(--rose-deep); }
+
+  .dual-table {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 16px; margin-bottom: 10px;
+  }
+  .tbl-wrap {
+    background: var(--white);
+    border-radius: 4px;
+    box-shadow: var(--shadow);
+    padding: 10px 14px 8px;
+  }
+  .tbl-wrap h3 {
+    font-family: 'Noto Serif SC', serif;
+    font-size: 13px; font-weight: 600; color: var(--sage);
+    margin-bottom: 6px;
+    padding-left: 10px;
+    border-left: 2px solid var(--rose);
+    letter-spacing: .3px;
+  }
+  .mini-tbl {
+    width: 100%; border-collapse: collapse; font-size: 10px;
+  }
+  .mini-tbl thead th {
+    background: var(--sage); color: #fff;
+    padding: 5px 8px; font-weight: 500; font-size: 9px;
+    text-align: left; letter-spacing: .5px;
+  }
+  .mini-tbl tbody td {
+    padding: 4px 8px; border-bottom: 1px solid #f0ede7;
+    line-height: 1.45; color: var(--ink);
+  }
+  .mini-tbl tbody tr:nth-child(even) { background: #fdfcf9; }
+
+  .chip {
+    display: inline-block;
+    font-size: 9px; padding: 1px 6px; border-radius: 2px;
+    font-weight: 500; margin-left: 2px;
+  }
+  .chip.rose { background: #fbf0ec; color: var(--rose-deep); }
+  .chip.sage { background: #ecf3ef; color: var(--sage); }
+
+  .pain-row {
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px;
+  }
+  .pain-card {
+    background: var(--white);
+    border-radius: 4px;
+    box-shadow: var(--shadow);
+    padding: 14px 12px;
+    text-align: center;
+  }
+  .pain-card .dot-num {
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    margin: 0 auto 8px auto;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Noto Serif SC', serif;
+    font-size: 15px; font-weight: 700; color: #fff;
+  }
+  .pain-card .dot-num.c1 { background: var(--rose); }
+  .pain-card .dot-num.c2 { background: var(--sage); }
+  .pain-card .dot-num.c3 { background: #8b7355; }
+  .pain-card .p-title {
+    font-size: 12.5px; font-weight: 700; color: var(--ink);
+    margin-bottom: 4px;
+  }
+  .pain-card .p-desc {
+    font-size: 10px; color: var(--muted); line-height: 1.5;
+  }
+
+  /* ===== SLIDE 2 ===== */
+  .legend-bar {
+    display: flex; gap: 20px; align-items: center;
+    margin-bottom: 10px; font-size: 10.5px; color: var(--muted);
+  }
+  .legend-dot {
+    width: 9px; height: 9px; border-radius: 50%; display: inline-block; margin-right: 4px;
+  }
+  .legend-dot.p1 { background: var(--rose); }
+  .legend-dot.p2 { background: var(--sage); }
+  .legend-dot.ex  { background: #b5aea5; }
+
+  .arch-2col {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 12px; margin-bottom: 10px;
+  }
+  .mod {
+    background: var(--white);
+    border-radius: 4px;
+    box-shadow: var(--shadow);
+    margin-bottom: 8px;
+    overflow: hidden;
+  }
+  .mod-head {
+    padding: 6px 12px;
+    font-size: 10.5px; font-weight: 600; color: #fff;
+    letter-spacing: .4px;
+  }
+  .mod-head.h-rose { background: var(--rose); }
+  .mod-head.h-sage { background: var(--sage); }
+  .mod-head.h-amber { background: #8b7355; }
+
+  .mod-body {
+    padding: 6px 10px;
+    font-size: 9.5px; line-height: 1.6; color: var(--ink);
+  }
+  .mod-body b { color: var(--rose-deep); font-weight: 600; }
+  .mod-item {
+    display: inline-block;
+    padding: 2px 7px; margin: 1px 2px;
+    border-radius: 2px;
+    background: var(--soft);
+    font-size: 9.5px;
+  }
+  .mod-item._1 { border-left: 2px solid var(--rose); }
+  .mod-item._2 { border-left: 2px solid var(--sage); }
+  .mod-item._x { border-left: 2px solid #ccc; color: #999; }
+
+  .goal-strip {
+    margin-top: 0;
+    background: var(--sage);
+    color: #fff;
+    text-align: center;
+    padding: 10px;
+    border-radius: 4px;
+    font-family: 'Noto Serif SC', serif;
+    font-size: 16px; font-weight: 700;
+    letter-spacing: 1px;
+  }
+
+  /* ===== SLIDE 3 ===== */
+  .s3-cols {
+    display: grid; grid-template-columns: 1.1fr 1fr;
+    gap: 22px;
+  }
+  .invest-tbl {
+    width: 100%; border-collapse: collapse; font-size: 10.5px;
+  }
+  .invest-tbl thead th {
+    background: var(--sage); color: #fff;
+    padding: 6px 10px; font-weight: 500; font-size: 9.5px;
+    letter-spacing: .4px;
+  }
+  .invest-tbl thead th:first-child { text-align: left; }
+  .invest-tbl thead th:not(:first-child) { text-align: center; width: 70px; }
+
+  .invest-tbl tbody td {
+    padding: 5px 10px; border-bottom: 1px solid #f0ede7;
+  }
+  .invest-tbl tbody td:first-child { text-align: left; }
+  .invest-tbl tbody td:not(:first-child) { text-align: center; }
+  .invest-tbl tbody tr:nth-child(even) { background: #fdfcf9; }
+  .invest-tbl .sum-row td {
+    font-weight: 700; border-top: 2px solid var(--sage);
+    background: #f9f6f0;
+  }
+
+  .invest-note {
+    margin-top: 8px;
+    font-size: 9.5px; color: #8b7355;
+    background: #fdfaf5; border: 1px solid #e5d9c0;
+    padding: 8px 12px; border-radius: 3px;
+    line-height: 1.55;
+  }
+
+  .outcome-box {
+    background: var(--white);
+    border-radius: 4px;
+    box-shadow: var(--shadow);
+    padding: 14px 16px;
+  }
+  .outcome-box h3 {
+    font-family: 'Noto Serif SC', serif;
+    font-size: 14px; color: var(--sage);
+    margin-bottom: 10px;
+    padding-left: 10px;
+    border-left: 2px solid var(--rose);
+    letter-spacing: .3px;
+  }
+  .oc-list { list-style: none; }
+  .oc-list li {
+    display: flex; gap: 10px; align-items: flex-start;
+    padding: 8px 0; border-bottom: 1px solid #f0ede7;
+  }
+  .oc-list li:last-child { border: none; }
+  .oc-list .idx {
+    flex-shrink: 0;
+    width: 22px; height: 22px;
+    background: var(--rose); color: #fff;
+    border-radius: 50%;
+    text-align: center; line-height: 22px;
+    font-size: 11px; font-weight: 700;
+    font-family: 'Noto Serif SC', serif;
+  }
+  .oc-list .txt strong {
+    display: block; font-size: 11.5px; color: var(--ink);
+    margin-bottom: 2px;
+  }
+  .oc-list .txt span {
+    font-size: 9.5px; color: var(--muted); line-height: 1.55;
+  }
+
+  /* ---- Nav ---- */
+  .nav {
+    display: flex; justify-content: center; align-items: center;
+    gap: 20px; margin-top: 18px;
+  }
+  .nav button {
+    font-family: inherit; font-size: 12px; font-weight: 500;
+    padding: 7px 28px;
+    border: 1.5px solid var(--sage);
+    background: var(--paper); color: var(--sage);
+    border-radius: 3px; cursor: pointer;
+    letter-spacing: .5px; transition: all .15s;
+  }
+  .nav button:hover { background: var(--sage); color: #fff; }
+  .nav button:disabled { opacity: .25; cursor: default; }
+  .nav .dots { display: flex; gap: 7px; }
+  .nav .dot {
+    width: 8px; height: 8px;
+    border-radius: 50%; background: #d0cbc2;
+    cursor: pointer; transition: .15s;
+  }
+  .nav .dot.active { background: var(--rose); transform: scale(1.35); }
+
+  @media print {
+    body { background: #fff; padding: 0; }
+    .slide { box-shadow: none; page-break-after: always; display: block !important; height: auto; min-height: 100vh; }
+    .nav { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="deck">
+
+  <!-- ====== SLIDE 1 ====== -->
+  <div class="slide active" id="s1">
+    <div class="slide-accent-left"></div>
+    <div class="page-mark">01 / 04</div>
+
+    <div class="s-head">
+      <h1>沙湾区医疗信息化现状如何？</h1>
+      <div class="sub">乐山市沙湾区<br>智慧医疗调研与规划汇报</div>
+    </div>
+
+    <div class="s-body">
+
+      <div class="section-label">调研数据速览</div>
+      <div class="stat-strip">
+        <div class="stat-item"><div class="val">2</div><div class="tagline">公立医院（二甲）</div></div>
+        <div class="stat-item"><div class="val">5</div><div class="tagline">民营医院</div></div>
+        <div class="stat-item"><div class="val">9</div><div class="tagline">乡镇 / 社区机构</div></div>
+        <div class="stat-item accent"><div class="val">133</div><div class="tagline">村卫生室</div></div>
+        <div class="stat-item accent"><div class="val">14.5<span style="font-size:13px"> 万</span></div><div class="tagline">常住人口</div></div>
+        <div class="stat-item accent"><div class="val">3<span style="font-size:13px"> 万</span></div><div class="tagline">65 岁以上老人</div></div>
+      </div>
+
+      <div class="dual-table">
+        <div class="tbl-wrap">
+          <h3>区级医院 &mdash; 基础系统齐全，缺平台与智能</h3>
+          <table class="mini-tbl">
+            <thead><tr><th>机构</th><th>现状</th><th>缺口</th></tr></thead>
+            <tbody>
+              <tr><td>区人民医院<span class="chip rose">二甲</span></td><td>HIS / LIS / EMR / PACS / 手麻 / 移动医护齐全</td><td>无 CDR、集成平台、BI、大数据</td></tr>
+              <tr><td>区中医医院<span class="chip sage">二级</span></td><td>新成立，同人民医院，新建 HIS</td><td>其余模块共享</td></tr>
+              <tr><td>区妇幼保健院<span class="chip sage">二级</span></td><td>HIS / EMR / LIS / PACS / 手麻 / 体检</td><td>互联网医院、便民小程序</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="tbl-wrap">
+          <h3>基层机构 &mdash; 无自建系统，信息孤岛严重</h3>
+          <table class="mini-tbl">
+            <thead><tr><th>维度</th><th>现状与问题</th></tr></thead>
+            <tbody>
+              <tr><td>系统情况</td><td>除福禄镇外均<b>无自建系统</b>，依赖省统建云平台</td></tr>
+              <tr><td>村卫生室</td><td><b>133 个村卫生室无任何信息系统</b></td></tr>
+              <tr><td>数据互通</td><td>基层系统与公卫云<b>数据不通</b>，重复录入</td></tr>
+              <tr><td>年转诊量</td><td>约 100+ 人（福禄镇 200+），双向转诊无反馈</td></tr>
+              <tr><td>信息化投入</td><td>仅福禄镇自建"两只蜗牛"，年费约 10 万元</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="section-label">核心痛点</div>
+      <div class="pain-row">
+        <div class="pain-card">
+          <div class="dot-num c1">I</div>
+          <div class="p-title">数据孤岛</div>
+          <div class="p-desc">区级缺 CDR 与集成平台<br>基层与公卫数据不通、重复录入</div>
+        </div>
+        <div class="pain-card">
+          <div class="dot-num c2">II</div>
+          <div class="p-title">协同断层</div>
+          <div class="p-desc">双向转诊无反馈<br>远程会诊未建立，结果不互认</div>
+        </div>
+        <div class="pain-card">
+          <div class="dot-num c3">III</div>
+          <div class="p-title">基层薄弱</div>
+          <div class="p-desc">133 个村卫生室零信息化<br>8 个乡镇无自建系统</div>
+        </div>
+        <div class="pain-card">
+          <div class="dot-num c1">IV</div>
+          <div class="p-title">智慧缺失</div>
+          <div class="p-desc">无 AI 辅助、无 CDSS<br>无 BI 决策，距智慧三星差距大</div>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="s-foot">
+      <span>乐山市沙湾区卫生健康局</span>
+      <span>2026 年 6 月</span>
+    </div>
+  </div>
+
+  <!-- ====== SLIDE 2 ====== -->
+  <div class="slide" id="s2">
+    <div class="slide-accent-left"></div>
+    <div class="page-mark">02 / 04</div>
+
+    <div class="s-head">
+      <h1>怎么建智慧医疗？</h1>
+      <div class="sub">乐山市沙湾区<br>智慧医疗调研与规划汇报</div>
+    </div>
+
+    <div class="s-body">
+
+      <div class="section-label">建设策略</div>
+      <div class="legend-bar">
+        <span><i class="legend-dot p1"></i>一期统建</span>
+        <span><i class="legend-dot p2"></i>二期建设</span>
+        <span><i class="legend-dot ex"></i>已建 / 利旧对接</span>
+        <span style="margin-left: auto; font-weight: 500; color: var(--ink);">总预算 5,690 万元</span>
+      </div>
+
+      <div class="arch-2col">
+
+        <!-- Left column -->
+        <div>
+          <div class="mod">
+            <div class="mod-head h-rose">区域医疗大数据平台（一期统建）</div>
+            <div class="mod-body">
+              <b>基础平台</b>
+              <span class="mod-item _1">主索引与注册</span><span class="mod-item _1">统一认证</span><span class="mod-item _1">总线服务</span><span class="mod-item _1">API 网关</span><span class="mod-item _1">信息标准管理</span><br>
+              <b>数据服务</b>
+              <span class="mod-item _1">全方式采集</span><span class="mod-item _1">加密脱敏</span><span class="mod-item _1">数据治理</span><span class="mod-item _1">质量管理</span><span class="mod-item _1">完整性管理</span><br>
+              <b>资源中心</b>
+              <span class="mod-item _1">基础资源库</span><span class="mod-item _1">卫生资源库</span><span class="mod-item _1">电子病历库(58数据集)</span><span class="mod-item _1">健康档案库</span><br>
+              <b>集成门户</b>
+              <span class="mod-item _1">统一门户</span><span class="mod-item _1">单点登录</span><span class="mod-item _1">机构/人员管理</span><span class="mod-item _1">互联互通共享</span>
+            </div>
+          </div>
+
+          <div class="mod">
+            <div class="mod-head h-sage">基层服务能力提升</div>
+            <div class="mod-body">
+              <b>基本医疗</b>
+              <span class="mod-item _1">全结构化电子病历</span><span class="mod-item _1">区域 PACS + AI 肺结节</span><span class="mod-item _2">区域 LIS</span><br>
+              <b>公卫服务</b>
+              <span class="mod-item _x">妇幼 / 计免 / 公卫(已建)</span><span class="mod-item _1">健康档案统计</span><span class="mod-item _2">村医随访系统</span><br>
+              <b>质量管理</b>
+              <span class="mod-item _1">AI 病历质控</span><span class="mod-item _1">基层 CDSS 辅助决策</span>
+            </div>
+          </div>
+
+          <div class="mod">
+            <div class="mod-head h-amber">区域协同应用</div>
+            <div class="mod-body">
+              <b>便民协同</b>
+              <span class="mod-item _1">区域互联网医院</span><span class="mod-item _1">电子健康卡</span><span class="mod-item _1">统一预约/支付/查询</span><br>
+              <b>医疗协同</b>
+              <span class="mod-item _1">双向转诊</span><span class="mod-item _2">处方前置审核</span><span class="mod-item _2">区域 DRG</span><span class="mod-item _x">检查互认(市建)</span><br>
+              <b>管理协同</b>
+              <span class="mod-item _1">心电/影像(利旧)</span><span class="mod-item _1">消毒供应中心</span><span class="mod-item _2">HRP / 采购</span><span class="mod-item _2">ChatBI AI 卫健监管</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right column -->
+        <div>
+          <div class="mod">
+            <div class="mod-head h-rose">区级医院能力提升 &mdash; 电子病历 5 级</div>
+            <div class="mod-body">
+              <b>临床核心（二期）</b>
+              <span class="mod-item _2">门急诊 / 住院工作站</span><span class="mod-item _2">移动医护</span><span class="mod-item _2">临床路径</span><span class="mod-item _2">患者全息视图</span><span class="mod-item _2">业务闭环</span><br>
+              <b>医疗管理</b>
+              <span class="mod-item _1">智慧医务</span><span class="mod-item _1">院感 / 不良事件</span><span class="mod-item _2">护理 / 输血 / 重症</span><span class="mod-item _2">单病种 / 全病程</span><span class="mod-item _2">CA 认证</span><br>
+              <b>智慧病房（二期）</b>
+              <span class="mod-item _2">床旁交互</span><span class="mod-item _2">移动护理</span><span class="mod-item _2">物联网管控</span><span class="mod-item _2">护士站调度</span><br>
+              <b>智慧中医（二期）</b>
+              <span class="mod-item _2">智能辅助诊疗</span><span class="mod-item _2">治未病平台</span>
+            </div>
+          </div>
+
+          <div class="mod">
+            <div class="mod-head h-sage">医院集成平台 + 大数据中心（一期）</div>
+            <div class="mod-body">
+              <span class="mod-item _1">医院互联互通平台</span><span class="mod-item _1">CDR 临床数据中心</span><span class="mod-item _1">国考绩效指标管理</span><span class="mod-item _1">等级医院评审指标</span>
+            </div>
+          </div>
+
+          <div class="mod">
+            <div class="mod-head h-amber">综合决策监管（一期统建）</div>
+            <div class="mod-body">
+              <span class="mod-item _1">运营监控（人次、均费）</span><span class="mod-item _1">服务效能（医保、收支）</span><span class="mod-item _1">协同监控（转诊、影像、检验）</span><span class="mod-item _1">数据资源监控</span>
+            </div>
+          </div>
+
+          <div class="mod">
+            <div class="mod-head h-rose">急诊急救协同（一期）</div>
+            <div class="mod-body">
+              <span class="mod-item _1">胸痛中心</span><span class="mod-item _1">卒中中心</span><span class="mod-item _1">创伤中心</span><span class="mod-item _1">智慧急救平台</span><span class="mod-item _2">孕产 / 新生儿中心</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="goal-strip">
+        目标&ensp;·&ensp;电子病历 5 级&ensp;·&ensp;互联互通四级甲等&ensp;·&ensp;智慧三星&ensp;&mdash;&ensp;2028 年交付
+      </div>
+
+    </div>
+
+    <div class="s-foot">
+      <span>乐山市沙湾区卫生健康局</span>
+      <span>2026 年 6 月</span>
+    </div>
+  </div>
+
+  <!-- ====== SLIDE 3 ====== -->
+  <div class="slide" id="s3">
+    <div class="slide-accent-left"></div>
+    <div class="page-mark">03 / 03</div>
+
+    <div class="s-head">
+      <h1>花多少钱？值不值？</h1>
+      <div class="sub">乐山市沙湾区<br>智慧医疗调研与规划汇报</div>
+    </div>
+
+    <div class="s-body">
+
+      <div class="s3-cols">
+        <div>
+          <div class="section-label">投资概览</div>
+          <div class="section-title">智慧医疗总预算 5,690 万元</div>
+
+          <table class="invest-tbl">
+            <thead>
+              <tr><th>建设内容</th><th>方式</th><th>分期</th><th>预算</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>区域医疗大数据平台</td><td>统建</td><td>一期</td><td>含在总额</td></tr>
+              <tr><td>智慧医疗综合决策监管</td><td>统建</td><td>一期</td><td>含在总额</td></tr>
+              <tr><td>基层服务能力提升</td><td>统建</td><td>一 / 二期</td><td>含在总额</td></tr>
+              <tr><td>区级医院能力提升（含电子病历 5 级）</td><td>统建</td><td>一 / 二期</td><td>含在总额</td></tr>
+              <tr><td>医院集成平台 + 大数据中心</td><td>统建</td><td>一期</td><td>含在总额</td></tr>
+              <tr><td>区域协同应用</td><td>统建 + 利旧</td><td>一 / 二期</td><td>含在总额</td></tr>
+              <tr><td>系统接口与对接</td><td>统建</td><td>一期</td><td>含在总额</td></tr>
+              <tr class="sum-row"><td><b>合计</b></td><td></td><td></td><td><b>5,690 万元</b></td></tr>
+            </tbody>
+          </table>
+
+          <div class="invest-note">
+            <b>备注</b>&emsp;统建部分做预算；已建 / 自建系统利旧对接不另计费。区人民医院新院区专项预算 2,400 万元（2028 年交付）。
+          </div>
+        </div>
+
+        <div class="outcome-box">
+          <div class="section-label">预期成效</div>
+          <h3>建设前后对比</h3>
+          <ul class="oc-list">
+            <li>
+              <div class="idx">1</div>
+              <div class="txt">
+                <strong>数据贯通，一网共享</strong>
+                <span>建成区域大数据平台 + CDR，终结"烟囱"时代，全区病历、检验、影像、档案互联互通。</span>
+              </div>
+            </li>
+            <li>
+              <div class="idx">2</div>
+              <div class="txt">
+                <strong>基层从"零"到"有"</strong>
+                <span>133 个村卫生室 + 8 个乡镇首获电子病历、PACS、CDSS 和 AI 辅助，诊疗能力质的飞跃。</span>
+              </div>
+            </li>
+            <li>
+              <div class="idx">3</div>
+              <div class="txt">
+                <strong>区级达标"5-4-3"</strong>
+                <span>电子病历 5 级 + 互联互通四甲 + 智慧三星，跻身全省区县级医院第一梯队。</span>
+              </div>
+            </li>
+            <li>
+              <div class="idx">4</div>
+              <div class="txt">
+                <strong>便民惠民全覆盖</strong>
+                <span>互联网医院、电子健康卡、统一预约 / 支付 / 查询，居民一部手机管健康。</span>
+              </div>
+            </li>
+            <li>
+              <div class="idx">5</div>
+              <div class="txt">
+                <strong>AI 赋能精准决策</strong>
+                <span>AI 病历质控 + CDSS 辅助 + ChatBI 卫健监管，经验驱动转向数据驱动。</span>
+              </div>
+            </li>
+          </ul>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="s-foot">
+      <span>乐山市沙湾区卫生健康局</span>
+      <span>2026 年 6 月</span>
+    </div>
+  </div>
+
+  <!-- Nav -->
+  <div class="nav">
+    <button id="prevBtn" disabled>上一页</button>
+    <div class="dots">
+      <span class="dot active" data-i="0"></span>
+      <span class="dot" data-i="1"></span>
+      <span class="dot" data-i="2"></span>
+    </div>
+    <button id="nextBtn">下一页</button>
+  </div>
+
+</div>
+
+<script>
+  const slides = document.querySelectorAll('.slide');
+  const dots   = document.querySelectorAll('.dot');
+  const prev   = document.getElementById('prevBtn');
+  const next   = document.getElementById('nextBtn');
+  let cur = 0;
+
+  function show(i) {
+    slides.forEach(s => s.classList.remove('active'));
+    dots.forEach(d => d.classList.remove('active'));
+    slides[i].classList.add('active');
+    dots[i].classList.add('active');
+    prev.disabled = i === 0;
+    next.disabled = i === slides.length - 1;
+    cur = i;
+  }
+
+  prev.addEventListener('click', () => { if (cur > 0) show(cur - 1); });
+  next.addEventListener('click', () => { if (cur < slides.length - 1) show(cur + 1); });
+  dots.forEach(d => d.addEventListener('click', () => show(+d.dataset.i)));
+  document.addEventListener('keydown', e => {
+    if (e.key === 'ArrowLeft' || e.key === 'ArrowUp')   { e.preventDefault(); if (cur > 0) show(cur - 1); }
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown') { e.preventDefault(); if (cur < slides.length - 1) show(cur + 1); }
+  });
+</script>
+
+</body>
+</html>

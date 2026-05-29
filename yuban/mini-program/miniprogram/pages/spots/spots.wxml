@@ -1,0 +1,78 @@
+<!-- 钓点地图页 -->
+<view class="page-map">
+  <!-- 搜索栏 -->
+  <view class="search-bar">
+    <input class="search-input"
+      placeholder="搜索钓点名称、地点、鱼种..."
+      value="{{keyword}}"
+      bindinput="onSearchInput"
+      bindconfirm="onSearch" />
+    <view class="search-filters">
+      <picker mode="selector" range="{{typeFilters}}" bindchange="onTypeChange">
+        <view class="filter-chip">{{currentType || '全部类型'}}</view>
+      </picker>
+      <picker mode="selector" range="{{cityFilters}}" bindchange="onCityChange">
+        <view class="filter-chip">{{currentCity || '当前城市'}}</view>
+      </picker>
+      <view class="filter-chip" bindtap="toggleSort">
+        {{sortLabel}}
+      </view>
+    </view>
+  </view>
+
+  <!-- 地图 -->
+  <map id="spotMap"
+    class="map-view"
+    latitude="{{centerLat}}"
+    longitude="{{centerLng}}"
+    scale="12"
+    markers="{{markers}}"
+    bindmarkertap="onMarkerTap"
+    show-location="{{true}}">
+  </map>
+
+  <!-- 钓点列表（底部抽屉） -->
+  <view class="spot-drawer {{drawerExpanded ? 'expanded' : ''}}">
+    <view class="drawer-handle" bindtap="toggleDrawer">
+      <view class="handle-bar"></view>
+      <text class="text-sm text-muted">
+        附近 {{spots.length}} 个钓点
+        {{drawerExpanded ? '↓ 收起' : '↑ 展开'}}
+      </text>
+    </view>
+
+    <scroll-view class="spot-list" scroll-y="{{drawerExpanded}}">
+      <block wx:for="{{spots}}" wx:key="id">
+        <view class="spot-card card" bindtap="goToDetail" data-id="{{item.id}}">
+          <image class="spot-thumb" src="{{item.photos[0] || '/static/placeholder-spot.png'}}"
+            mode="aspectFill" />
+          <view class="flex-1">
+            <view class="flex-between">
+              <text class="text-bold">{{item.name}}</text>
+              <text class="text-sm" style="color:#07C160">{{item.distance}}m</text>
+            </view>
+            <view class="mt-8">
+              <text class="tag tag-green">{{item.type || '其他'}}</text>
+              <text class="tag tag-blue" wx:if="{{item.price_info.mode}}">
+                {{item.price_info.mode}} {{item.price_info.amount}}
+              </text>
+            </view>
+            <view class="mt-8 text-sm text-muted">
+              <text>{{item.address}}</text>
+            </view>
+            <view class="flex-between mt-8">
+              <view class="stars">
+                <text>⭐ {{item.rating || '暂无评分'}}</text>
+              </view>
+              <text class="text-sm text-muted">{{item.city}} {{item.district}}</text>
+            </view>
+          </view>
+        </view>
+      </block>
+
+      <view wx:if="{{spots.length === 0 && !loading}}" class="text-center p-24 text-muted">
+        <text>{{keyword ? '未找到相关钓点' : '附近暂无钓点数据'}}</text>
+      </view>
+    </scroll-view>
+  </view>
+</view>

@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>万锋 - 医疗信息化售前解决方案专家</title>
+<style>
+  @page { size: A4; margin: 14mm 16mm 14mm 16mm; }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: "PingFang SC", "Microsoft YaHei", "Hiragino Sans GB", "Noto Sans SC", sans-serif;
+    font-size: 12.5px;
+    line-height: 1.7;
+    color: #2c2c2c;
+    max-width: 210mm;
+    margin: 0 auto;
+    background: #fff;
+  }
+
+  /* ===== Header ===== */
+  .header {
+    text-align: center;
+    padding: 16px 0 10px 0;
+    border-bottom: 2.5px solid #1a3c5e;
+    margin-bottom: 13px;
+  }
+  .header .name {
+    font-size: 27px;
+    font-weight: 700;
+    color: #1a3c5e;
+    letter-spacing: 5px;
+    margin-bottom: 6px;
+  }
+  .header .meta {
+    font-size: 12px;
+    color: #555;
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 4px 18px;
+  }
+  .header .meta span { white-space: nowrap; }
+  .header .tagline {
+    margin-top: 6px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #1a3c5e;
+  }
+
+  /* ===== Section ===== */
+  .section { margin-bottom: 11px; }
+  .section-title {
+    font-size: 14.5px;
+    font-weight: 700;
+    color: #1a3c5e;
+    border-bottom: 1.5px solid #1a3c5e;
+    padding-bottom: 2px;
+    margin-bottom: 7px;
+    letter-spacing: 1px;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+  }
+  .section-title::before {
+    content: '';
+    display: inline-block;
+    width: 7px;
+    height: 7px;
+    background: #1a3c5e;
+    border-radius: 2px;
+    flex-shrink: 0;
+  }
+
+  /* ===== Summary ===== */
+  .summary p { margin-bottom: 3px; text-align: justify; }
+  .hl { color: #1a3c5e; font-weight: 600; }
+
+  /* ===== Achievement Table ===== */
+  .tbl {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 11.5px;
+    margin-bottom: 5px;
+  }
+  .tbl th {
+    background: #1a3c5e;
+    color: #fff;
+    padding: 5px 7px;
+    text-align: center;
+    font-weight: 500;
+    font-size: 11px;
+  }
+  .tbl td {
+    padding: 3.5px 7px;
+    border-bottom: 1px solid #e2e2e2;
+    text-align: center;
+  }
+  .tbl tbody tr:nth-child(even) td { background: #f6f8fa; }
+  .tbl .amt { color: #1a3c5e; font-weight: 600; }
+  .tbl .total td {
+    font-weight: 700;
+    border-top: 1.5px solid #1a3c5e;
+    background: #e8eef4;
+  }
+
+  /* ===== Work Item ===== */
+  .work { margin-bottom: 7px; }
+  .work-hd {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    flex-wrap: wrap;
+    margin-bottom: 1px;
+  }
+  .work-co { font-weight: 700; font-size: 13px; color: #1a3c5e; }
+  .work-role { font-weight: 600; font-size: 12px; color: #444; margin-left: 5px; }
+  .work-dur { font-size: 11.5px; color: #888; white-space: nowrap; }
+  .work-desc { padding-left: 15px; font-size: 12px; color: #444; }
+  .work-desc li { margin-bottom: 1.5px; position: relative; }
+  .work-desc li::before { content: '–'; position: absolute; left: -13px; color: #1a3c5e; }
+  .res { color: #1a3c5e; font-weight: 500; }
+
+  /* ===== Skills ===== */
+  .skills { display: grid; grid-template-columns: 1fr 1fr; gap: 3px 18px; font-size: 12px; }
+  .skills .lbl { font-weight: 600; color: #1a3c5e; }
+
+  /* ===== Print ===== */
+  @media print {
+    body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .no-print { display: none !important; }
+    .section { page-break-inside: avoid; }
+    .work { page-break-inside: avoid; }
+    .tbl { page-break-inside: avoid; }
+  }
+
+  /* ===== Button ===== */
+  .btn {
+    position: fixed; top: 12px; right: 16px;
+    background: #1a3c5e; color: #fff; border: none;
+    padding: 8px 20px; font-size: 13px; border-radius: 5px;
+    cursor: pointer; z-index: 999; letter-spacing: 1px;
+  }
+  .btn:hover { background: #244b72; }
+</style>
+</head>
+<body>
+
+<button class="btn no-print" onclick="window.print()">导出 PDF</button>
+
+<!-- ==================== Header ==================== -->
+<div class="header">
+  <div class="name">万&emsp;锋</div>
+  <div class="meta">
+    <span>男 | 38岁 | 本科 | 15年经验</span>
+    <span>18328474765</span>
+    <span>277076044@qq.com</span>
+    <span>现居成都</span>
+  </div>
+  <div class="tagline">求职意向：医疗信息化售前解决方案专家 / IT咨询顾问 &nbsp;|&nbsp; 期望薪资：18-25K</div>
+</div>
+
+<!-- ==================== 个人概述 ==================== -->
+<div class="section summary">
+  <div class="section-title">个人概述</div>
+  <p>
+    15年医疗信息化全流程经验，深耕<span class="hl">医共体整体解决方案</span>与<span class="hl">智慧医院整体解决方案</span>，
+    面向卫健委、医院及基层卫生院开展调研汇报与方案交付。累计主导及参与中标项目金额<span class="hl">超1.3亿元</span>，
+    覆盖四川、云南、河南、新疆、浙江、湖南等10+省市。精通电子病历评级（4-5级）、互联互通测评文审编制，熟悉四川/重庆智慧医院评审标准。
+  </p>
+  <p>
+    兼具<span class="hl">AI产品经理能力</span>——独立完成AI语音病历、智能导诊分诊、AI随访管理、RAG知识库等方案设计与高保真Demo搭建，
+    持有华为AI微认证及工信部AI应用工程师证书。具备3人售前团队管理经验。
+  </p>
+</div>
+
+<!-- ==================== 核心中标业绩 ==================== -->
+<div class="section">
+  <div class="section-title">核心中标业绩</div>
+  <table class="tbl">
+    <thead>
+      <tr><th>客户</th><th>项目类型</th><th>中标金额</th><th>角色</th><th>中标/交付年份</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>邹平人民医院</td><td>智慧医院整体建设</td><td class="amt">2,000万</td><td>售前负责人</td><td>2019</td></tr>
+      <tr><td>河南睢县中医院</td><td>智慧医院（融资租赁）</td><td class="amt">2,000万</td><td>售前负责人</td><td>2019</td></tr>
+      <tr><td>盐边县医共体</td><td>医共体信息化</td><td class="amt">2,000万</td><td>高级咨询顾问</td><td>2022</td></tr>
+      <tr><td>广安区医共体</td><td>医共体信息化</td><td class="amt">2,000万</td><td>高级咨询顾问</td><td>2022</td></tr>
+      <tr><td>浙江磐安县人民医院</td><td>智慧医院整体建设</td><td class="amt">1,700万</td><td>售前负责人</td><td>2019</td></tr>
+      <tr><td>达州中西医结合医院</td><td>信息化建设+项目管理</td><td class="amt">1,400万</td><td>项目经理</td><td>2015</td></tr>
+      <tr><td>四川九〇三医院</td><td>信息集成平台</td><td class="amt">840万</td><td>方案主导</td><td>2025</td></tr>
+      <tr><td>新疆五家渠人民医院</td><td>智慧医院建设</td><td class="amt">700万</td><td>售前负责人</td><td>2018</td></tr>
+      <tr><td>常德二院</td><td>智慧医院建设</td><td class="amt">900万</td><td>售前负责人</td><td>2018</td></tr>
+      <tr><td>荥阳市人民医院</td><td>信息集成平台</td><td class="amt">470万</td><td>方案主导</td><td>2025</td></tr>
+      <tr><td>长海县人民医院 / 宁南县医院 / 凉山州分院 等</td><td>信息化建设</td><td class="amt">累计2,500万+</td><td>售前/项目经理</td><td>2014-2017</td></tr>
+      <tr class="total"><td colspan="2">累计中标总金额</td><td class="amt">16,010万+</td><td colspan="2"></td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ==================== 工作经历 ==================== -->
+<div class="section">
+  <div class="section-title">工作经历</div>
+
+  <!-- 弦序 -->
+  <div class="work">
+    <div class="work-hd">
+      <span><span class="work-co">弦序人工智能科技（四川）有限公司</span><span class="work-role">— AI产品经理</span></span>
+      <span class="work-dur">2026.03 – 2026.05</span>
+    </div>
+    <ul class="work-desc">
+      <li>主导医疗与企业级AI智能体方案设计，覆盖<span class="res">高新卫健智慧导诊、省骨科医院AI随访、新潮传媒智能体、习酒集团16个企业级智能体、云南白药内容厨房</span>等10+项目</li>
+      <li>独立完成需求调研→方案设计→Demo原型搭建→投标文件编制→交付成本测算全流程</li>
+      <li>熟练运用Claude、Gemini、扣子等AI工具提升方案产出效率与演示质量</li>
+    </ul>
+  </div>
+
+  <!-- 自由顾问 + 超星 -->
+  <div class="work">
+    <div class="work-hd">
+      <span><span class="work-co">自由顾问 / 上海超星软件科技有限公司</span><span class="work-role">— 医疗信息化售前 & AI方案咨询</span></span>
+      <span class="work-dur">2024.10 – 2026.02</span>
+    </div>
+    <ul class="work-desc">
+      <li>以独立顾问及项目制合作形式，为医疗及企业客户提供AI方案设计与售前交付</li>
+      <li>主导<span class="res">四川九〇三医院（840万中标）</span>及<span class="res">荥阳市人民医院（470万中标）</span>售前全流程：调研、方案设计、演示汇报、投标</li>
+      <li>完成药店医保智能监测方案PRD、嘉诚汽车RAG知识库设计、新潮传媒销售材料智能体等企业级AI方案</li>
+      <li>独立开发视频编辑工具原型（类剪映/云雀），具备前端Demo搭建能力用于客户演示</li>
+    </ul>
+  </div>
+
+  <!-- 易联众 -->
+  <div class="work">
+    <div class="work-hd">
+      <span><span class="work-co">易联众信息技术股份有限公司</span><span class="work-role">— IT咨询顾问</span></span>
+      <span class="work-dur">2021.09 – 2024.10</span>
+    </div>
+    <ul class="work-desc">
+      <li>深入福建三明沙县总医院学习医共体模式1个月，形成可复制推广的方法论与方案模板</li>
+      <li>主导云南<span class="res">晋宁、大姚、武定、双柏、富民、宜良、屏边、盘龙、玉溪</span>等10+区县医共体项目售前推进</li>
+      <li>负责方案编写、PPT汇报、调研报告编制、建设清单规划、电子病历4-5级及互联互通文审材料编制</li>
+      <li>深度掌握HIS/电子病历/LIS/PACS/DIP/集成平台/云影像/医改监管平台/慢病一体化管理/全资源预约平台</li>
+    </ul>
+  </div>
+
+  <!-- 久远银海 -->
+  <div class="work">
+    <div class="work-hd">
+      <span><span class="work-co">四川久远银海软件股份有限公司</span><span class="work-role">— 售前技术支持</span></span>
+      <span class="work-dur">2020.03 – 2021.09</span>
+    </div>
+    <ul class="work-desc">
+      <li>负责医共体及智慧医院售前方案设计、调研交流、技术标书编写、产品报价及用户对接</li>
+      <li>参与<span class="res">盐边县医共体（2000万）、邛崃市医共体、广安区医共体（2000万）</span>方案设计、价格核算与投标，均已中标</li>
+      <li>掌握HRP全模块（人力/核算/资产/内控/审计/预算/成本/物资/绩效）及DIP/DRG医保控费</li>
+    </ul>
+  </div>
+
+  <!-- 和佳 -->
+  <div class="work">
+    <div class="work-hd">
+      <span><span class="work-co">珠海和佳信息技术有限公司</span><span class="work-role">— 售前工程师</span></span>
+      <span class="work-dur">2017.04 – 2020.01</span>
+    </div>
+    <ul class="work-desc">
+      <li>独立负责公司对外售前支持、客户沟通、方案设计及宣讲</li>
+      <li>累计中标<span class="res">邹平人民医院（2000万）、常德二院（900万）、磐安县人民医院（1700万）、五家渠人民医院（700万）</span>等项目，总金额超6,000万</li>
+    </ul>
+  </div>
+
+  <!-- 卫宁 + 天健（合并早期经历） -->
+  <div class="work">
+    <div class="work-hd">
+      <span>
+        <span class="work-co">卫宁健康四川分公司</span><span class="work-role">— 项目经理</span>
+        <span style="font-size:11px;color:#999;">（2014.04 – 2016.10）</span>
+        &nbsp;|&nbsp;
+        <span class="work-co">北京天健源达科技有限公司</span><span class="work-role">— 项目经理</span>
+        <span style="font-size:11px;color:#999;">（2010.09 – 2014.04）</span>
+      </span>
+    </div>
+    <ul class="work-desc">
+      <li>负责<span class="res">达州中西医结合医院（1400万）、宁南县人民医院（500万）、凉山州第一人民医院两个分院（1000万）</span>整体信息化建设实施，荣获<span class="res">2015年度优秀项目经理</span></li>
+      <li>服务成都三/四/五医院、成都妇女儿童中心医院、赤峰市医院、滕州市中心人民医院、鞍钢总医院等三甲医院</li>
+      <li>涵盖HIS/电子病历/LIS/PACS/护理病历/病案等核心系统从调试→实施→培训→上线→验收全流程</li>
+    </ul>
+  </div>
+</div>
+
+<!-- ==================== AI项目亮点 ==================== -->
+<div class="section">
+  <div class="section-title">AI 项目经验（2024-2026）</div>
+  <ul class="work-desc">
+    <li><strong>高新卫健智慧导诊分诊智能体</strong> — 方案设计、演示汇报</li>
+    <li><strong>四川省骨科医院</strong> — 动作姿态识别、AI语音病历草稿、AI随访管理Demo及方案</li>
+    <li><strong>新潮传媒智能体</strong> — 销售材料智能体设计及试用版搭建</li>
+    <li><strong>习酒集团</strong> — 16个企业级智能体方案设计</li>
+    <li><strong>嘉诚汽车</strong> — 企业级RAG知识库设计</li>
+    <li><strong>云南白药</strong> — 内容厨房智能体定制化设计</li>
+    <li><strong>药店医保违规行为智能监测</strong> — PRD撰写及方案设计</li>
+    <li><strong>资阳四医院 / 钦州影像云</strong> — AI语音病历识别、影像云方案设计及Demo</li>
+  </ul>
+</div>
+
+<!-- ==================== 技能 + 证书 + 教育 ==================== -->
+<div class="section">
+  <div class="section-title">专业技能 &amp; 资质</div>
+  <div class="skills">
+    <div><span class="lbl">行业标准：</span>电子病历评级（4-5级）、互联互通测评、智慧服务/管理评审、四川/重庆智慧医院标准</div>
+    <div><span class="lbl">核心系统：</span>HIS、电子病历、LIS、PACS、DIP/DRG、集成平台、云影像、HRP</div>
+    <div><span class="lbl">售前工具：</span>PPT方案设计与美化、投标文件编制、Figma/Axure高保真原型、项目成本测算</div>
+    <div><span class="lbl">AI工具链：</span>Claude/Gemini/扣子工作流、RAG知识库架构、智能体方案设计、AI语音病历</div>
+    <div><span class="lbl">管理能力：</span>3人售前团队管理、项目管理全流程（实施→验收）、团队培训</div>
+    <div><span class="lbl">领域知识：</span>医共体/医联体、DIP/DRG医保控费、慢病一体化管理、全资源预约</div>
+  </div>
+  <div style="margin-top:7px;font-size:12px;color:#555;display:flex;flex-wrap:wrap;gap:6px 24px;">
+    <span><strong>教育：</strong>武汉大学 · 计算机科学与技术 · 本科（2007-2011）</span>
+    <span><strong>证书：</strong>华为AI微认证 | 达摩院AI应用工程师（高级） | 工信部AI应用工程师</span>
+  </div>
+</div>
+
+</body>
+</html>

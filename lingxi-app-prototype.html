@@ -1,0 +1,1219 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>灵犀 - 一句话安排你的生活</title>
+<style>
+:root {
+  --orange: #FF6B35;
+  --orange-dark: #E55A2B;
+  --orange-light: #FFF0E8;
+  --yellow: #FFB800;
+  --blue: #007AFF;
+  --green: #34C759;
+  --red: #FF3B30;
+  --bg: #F2F2F7;
+  --card: #FFFFFF;
+  --text: #1C1C1E;
+  --text2: #3C3C43;
+  --text3: #8E8E93;
+  --sep: #E5E5EA;
+  --shadow: 0 2px 12px rgba(0,0,0,.08);
+  --radius: 14px;
+  --radius-sm: 10px;
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'SF Pro Display', sans-serif;
+  background: #1a1a1a;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+/* Phone frame */
+.phone {
+  width: 390px;
+  height: 844px;
+  background: var(--bg);
+  border-radius: 44px;
+  overflow: hidden;
+  position: relative;
+  box-shadow: 0 0 0 3px #333, 0 0 0 6px #1a1a1a, 0 20px 60px rgba(0,0,0,.5);
+  display: flex;
+  flex-direction: column;
+}
+
+/* Status bar */
+.status-bar {
+  height: 54px;
+  background: #fff;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  padding: 0 28px 8px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+  flex-shrink: 0;
+}
+.status-bar .time { font-size: 15px; font-weight: 600; }
+.status-icons { display:flex; gap:6px; align-items:center; }
+.status-icons svg { width:16px; height:16px; }
+
+/* Page stack */
+.page-stack {
+  flex: 1;
+  position: relative;
+  overflow: hidden;
+}
+
+.page {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: var(--bg);
+  display: flex;
+  flex-direction: column;
+  transition: transform .35s cubic-bezier(.25,.8,.25,1), opacity .3s ease;
+  will-change: transform;
+}
+.page.hidden-right { transform: translateX(100%); opacity: 0; pointer-events: none; }
+.page.hidden-left { transform: translateX(-40%); opacity: 0; pointer-events: none; }
+.page.active { transform: translateX(0); opacity: 1; }
+
+/* Scroll area */
+.scroll-area {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: 20px;
+}
+.scroll-area::-webkit-scrollbar { display:none; }
+
+/* Bottom tab bar */
+.tab-bar {
+  height: 84px;
+  background: #fff;
+  border-top: 1px solid var(--sep);
+  display: flex;
+  align-items: flex-start;
+  padding-top: 8px;
+  flex-shrink: 0;
+  padding-bottom: 20px;
+}
+.tab-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  cursor: pointer;
+  transition: .15s;
+}
+.tab-item span { font-size: 10px; color: var(--text3); font-weight: 500; }
+.tab-item.active span { color: var(--orange); }
+.tab-icon {
+  width: 26px; height: 26px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 20px;
+}
+
+/* ===== PAGE 1: HOME ===== */
+.home-header {
+  background: linear-gradient(160deg, #FF7B42 0%, #FF5722 100%);
+  padding: 20px 20px 28px;
+  border-radius: 0 0 28px 28px;
+  color: #fff;
+}
+.home-greeting { font-size: 13px; opacity: .85; margin-bottom: 4px; }
+.home-name { font-size: 22px; font-weight: 700; }
+.home-weather {
+  display: flex; align-items: center; gap: 6px;
+  font-size: 12px; opacity: .85; margin-top: 4px;
+}
+
+/* Voice orb */
+.voice-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: -14px 20px 0;
+  position: relative;
+  z-index: 2;
+}
+.voice-orb {
+  width: 100px; height: 100px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 8px 32px rgba(255,87,34,.35);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 40px;
+  cursor: pointer;
+  transition: .3s;
+  position: relative;
+}
+.voice-orb:active { transform: scale(.94); }
+.voice-orb.listening { animation: pulse 1.5s ease-in-out infinite; }
+@keyframes pulse {
+  0%,100% { box-shadow: 0 8px 32px rgba(255,87,34,.35); }
+  50% { box-shadow: 0 8px 32px rgba(255,87,34,.2), 0 0 0 24px rgba(255,87,34,.1), 0 0 0 48px rgba(255,87,34,.04); }
+}
+.voice-orb-text {
+  margin-top: 10px;
+  font-size: 13px;
+  color: var(--text2);
+  font-weight: 500;
+}
+.voice-wave {
+  display: none;
+  position: absolute;
+  top: -60px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 220px;
+  height: 220px;
+}
+.voice-orb.listening .voice-wave { display: block; }
+.wave-bar {
+  position: absolute;
+  bottom: 50%;
+  left: 50%;
+  width: 4px;
+  background: rgba(255,87,34,.3);
+  border-radius: 2px;
+  transform-origin: bottom center;
+  animation: wave 1.2s ease-in-out infinite;
+}
+@keyframes wave {
+  0%,100% { height: 20px; opacity: .4; }
+  50% { height: 60px; opacity: .9; }
+}
+
+/* Listening overlay */
+.listen-overlay {
+  display: none;
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,.5);
+  z-index: 100;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+.listen-overlay.show { display: flex; }
+.listen-text {
+  background: #fff;
+  padding: 20px 28px;
+  border-radius: 20px;
+  font-size: 16px;
+  color: var(--text);
+  text-align: center;
+  box-shadow: 0 20px 60px rgba(0,0,0,.2);
+  animation: textPulse 1.5s ease-in-out infinite;
+  max-width: 300px;
+}
+@keyframes textPulse {
+  0%,100% { transform: scale(1); }
+  50% { transform: scale(1.02); }
+}
+
+/* Quick suggestions */
+.section-title {
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--text);
+  padding: 20px 20px 10px;
+}
+.suggest-cards {
+  display: flex;
+  gap: 10px;
+  padding: 0 20px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+}
+.suggest-cards::-webkit-scrollbar { display:none; }
+.suggest-card {
+  min-width: 150px;
+  height: 110px;
+  border-radius: var(--radius);
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  cursor: pointer;
+  transition: .2s;
+  position: relative;
+  overflow: hidden;
+  flex-shrink: 0;
+  scroll-snap-align: start;
+}
+.suggest-card:active { transform: scale(.96); }
+.suggest-card .card-icon { font-size: 28px; margin-bottom: 6px; }
+.suggest-card .card-label { font-size: 12px; font-weight: 600; color: #fff; text-shadow: 0 1px 2px rgba(0,0,0,.2); }
+
+/* Recent/recommend cards */
+.rec-cards { padding: 0 20px; }
+.rec-card {
+  background: var(--card);
+  border-radius: var(--radius);
+  padding: 14px;
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  margin-bottom: 10px;
+  cursor: pointer;
+  transition: .15s;
+  box-shadow: var(--shadow);
+}
+.rec-card:active { transform: scale(.98); }
+.rec-card .rec-img {
+  width: 64px; height: 64px;
+  border-radius: var(--radius-sm);
+  flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 32px;
+}
+.rec-card .rec-info { flex:1; min-width:0; }
+.rec-card .rec-title { font-size: 14px; font-weight: 600; color: var(--text); margin-bottom: 2px; }
+.rec-card .rec-desc { font-size: 11px; color: var(--text3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.rec-card .rec-price { font-size: 13px; font-weight: 700; color: var(--orange); }
+.rec-card .rec-arrow { color: var(--text3); font-size: 16px; }
+
+/* ===== PAGE 2: TRIP RESULTS ===== */
+.results-header {
+  background: #fff;
+  padding: 0 20px;
+  height: 52px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border-bottom: 1px solid var(--sep);
+  flex-shrink: 0;
+}
+.results-header .back-btn {
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  background: var(--bg);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px;
+  cursor: pointer;
+  border: none;
+}
+.results-header .title { font-size: 17px; font-weight: 600; }
+.results-summary {
+  background: #fff;
+  margin: 12px 20px;
+  border-radius: var(--radius);
+  padding: 16px;
+  box-shadow: var(--shadow);
+}
+.results-summary .trip-meta { display:flex; gap:16px; align-items:center; margin-bottom:10px; }
+.results-summary .trip-city { font-size: 20px; font-weight: 700; }
+.results-summary .trip-date { font-size: 12px; color: var(--text3); }
+.results-summary .trip-cost-row { display:flex; justify-content:space-between; align-items:center; }
+.results-summary .total-label { font-size: 12px; color: var(--text3); }
+.results-summary .total-price { font-size: 26px; font-weight: 800; color: var(--orange); }
+.results-summary .total-price sub { font-size: 13px; font-weight: 500; }
+
+/* Tabs */
+.results-tabs {
+  display: flex;
+  gap: 0;
+  padding: 0 20px;
+  margin-bottom: 8px;
+}
+.results-tab {
+  padding: 8px 18px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text3);
+  cursor: pointer;
+  border-radius: 20px;
+  transition: .2s;
+  background: transparent;
+  border: none;
+}
+.results-tab.active {
+  background: var(--orange);
+  color: #fff;
+}
+
+/* Result cards */
+.result-cards { padding: 0 20px; }
+.result-card {
+  background: #fff;
+  border-radius: var(--radius);
+  margin-bottom: 10px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0,0,0,.05);
+  cursor: pointer;
+  transition: .15s;
+  display: flex;
+  gap: 12px;
+  padding: 12px;
+  align-items: center;
+}
+.result-card:active { transform: scale(.98); }
+.result-card .r-img {
+  width: 80px; height: 80px;
+  border-radius: var(--radius-sm);
+  flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 36px;
+  position: relative;
+}
+.result-card .r-badge {
+  position: absolute; top: 6px; left: 6px;
+  background: var(--orange); color: #fff;
+  font-size: 9px; padding: 2px 6px; border-radius: 4px;
+  font-weight: 600;
+}
+.result-card .r-info { flex:1; min-width:0; }
+.result-card .r-title { font-size: 14px; font-weight: 600; margin-bottom: 2px; }
+.result-card .r-sub { font-size: 11px; color: var(--text3); margin-bottom: 4px; }
+.result-card .r-stars { color: var(--yellow); font-size: 12px; }
+.result-card .r-price { text-align:right; }
+.result-card .r-price .p-num { font-size: 18px; font-weight: 700; color: var(--orange); }
+.result-card .r-price .p-unit { font-size: 10px; color: var(--text3); }
+.result-card .r-price .p-vs { font-size: 9px; color: var(--green); margin-top: 2px; }
+
+/* ===== PAGE 3: DETAIL ===== */
+.detail-hero {
+  height: 260px;
+  position: relative;
+  overflow: hidden;
+}
+.detail-hero .hero-img {
+  width: 100%; height: 100%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 80px;
+}
+.detail-hero .hero-back {
+  position: absolute; top: 12px; left: 16px;
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  background: rgba(0,0,0,.4);
+  backdrop-filter: blur(10px);
+  display: flex; align-items: center; justify-content: center;
+  color: #fff; font-size: 18px;
+  cursor: pointer; border: none;
+}
+.detail-hero .hero-dots {
+  position: absolute; bottom: 12px; left: 50%; transform: translateX(-50%);
+  display: flex; gap: 6px;
+}
+.hero-dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: rgba(255,255,255,.5);
+  transition: .2s;
+}
+.hero-dot.active { background: #fff; width: 20px; border-radius: 3px; }
+
+.detail-body { padding: 16px 20px; }
+.detail-body .d-title { font-size: 22px; font-weight: 700; margin-bottom: 4px; }
+.detail-body .d-rating { display:flex; gap:8px; align-items:center; margin-bottom:12px; }
+.detail-body .d-score { font-size: 18px; font-weight: 700; color: var(--orange); }
+.detail-body .d-review-count { font-size: 12px; color: var(--text3); }
+
+/* Room cards */
+.room-card {
+  background: #fff;
+  border-radius: var(--radius);
+  padding: 14px;
+  margin-bottom: 10px;
+  cursor: pointer;
+  box-shadow: 0 1px 3px rgba(0,0,0,.04);
+  display: flex;
+  gap: 12px;
+  transition: .15s;
+  border: 2px solid transparent;
+}
+.room-card:active { transform: scale(.98); }
+.room-card.selected { border-color: var(--orange); background: var(--orange-light); }
+.room-card .room-viz {
+  width: 70px; height: 70px;
+  border-radius: var(--radius-sm);
+  flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 30px;
+}
+.room-card .room-info { flex:1; }
+.room-card .room-name { font-size: 14px; font-weight: 600; margin-bottom: 2px; }
+.room-card .room-view { font-size: 11px; color: var(--text3); }
+.room-card .room-view-score { display:inline-block; background:#FFF3E0; color:var(--orange); font-size:10px; padding:2px 6px; border-radius:4px; font-weight:600; margin-top:4px; }
+.room-card .room-price { text-align:right; }
+.room-card .room-price .rp-num { font-size: 18px; font-weight: 700; color: var(--orange); }
+
+/* ===== PAGE 4: CONFIRMATION ===== */
+.confirm-section {
+  text-align: center;
+  padding: 30px 20px;
+}
+.confirm-check {
+  width: 72px; height: 72px;
+  border-radius: 50%;
+  background: var(--green);
+  display: flex; align-items: center; justify-content: center;
+  margin: 0 auto 16px;
+  font-size: 36px; color: #fff;
+  animation: popIn .4s cubic-bezier(.18,.89,.32,1.28);
+}
+@keyframes popIn {
+  0% { transform: scale(0); }
+  100% { transform: scale(1); }
+}
+.confirm-title { font-size: 22px; font-weight: 700; margin-bottom: 4px; }
+.confirm-sub { font-size: 13px; color: var(--text3); margin-bottom: 20px; }
+
+/* Trip timeline */
+.timeline { padding: 0 20px; }
+.timeline-item {
+  display: flex;
+  gap: 14px;
+  position: relative;
+  padding-bottom: 24px;
+}
+.timeline-item::before {
+  content: '';
+  position: absolute;
+  left: 15px;
+  top: 32px;
+  bottom: 0;
+  width: 2px;
+  background: var(--sep);
+}
+.timeline-item:last-child::before { display:none; }
+.timeline-dot {
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px;
+}
+.timeline-content { flex:1; }
+.timeline-content .tl-title { font-size: 14px; font-weight: 600; }
+.timeline-content .tl-desc { font-size: 12px; color: var(--text3); margin-top: 2px; }
+.timeline-content .tl-time { font-size: 11px; color: var(--orange); font-weight: 500; margin-top: 2px; }
+
+/* Order summary card */
+.order-card {
+  background: #fff;
+  border-radius: var(--radius);
+  margin: 12px 20px;
+  padding: 16px;
+  box-shadow: var(--shadow);
+}
+.order-row { display:flex; justify-content:space-between; padding: 6px 0; font-size:13px; }
+.order-row.total { border-top:1px solid var(--sep); margin-top:6px; padding-top:10px; font-size:16px; font-weight:700; }
+
+/* Buttons */
+.btn-primary {
+  display: block;
+  width: calc(100% - 40px);
+  margin: 16px 20px;
+  padding: 14px;
+  background: var(--orange);
+  color: #fff;
+  border: none;
+  border-radius: 25px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: .2s;
+  text-align: center;
+  letter-spacing: .5px;
+}
+.btn-primary:active { transform: scale(.97); background: var(--orange-dark); }
+.btn-outline {
+  display: block;
+  width: calc(100% - 40px);
+  margin: 0 20px 16px;
+  padding: 14px;
+  background: #fff;
+  color: var(--orange);
+  border: 2px solid var(--orange);
+  border-radius: 25px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  text-align: center;
+}
+.btn-outline:active { background: var(--orange-light); }
+
+/* Toast */
+.toast {
+  position: fixed; top: 60px; left: 50%; transform: translateX(-50%);
+  background: #333; color: #fff; padding: 10px 20px; border-radius: 20px;
+  font-size: 13px; z-index: 200; opacity: 0; transition: .3s;
+  pointer-events: none;
+}
+.toast.show { opacity: 1; }
+
+/* ===== DEMO TRIGGER ON HOME ===== */
+.demo-tap-area {
+  text-align: center;
+  padding: 30px 20px 10px;
+}
+.demo-btn {
+  display: inline-block;
+  background: var(--orange);
+  color: #fff;
+  border: none;
+  padding: 12px 32px;
+  border-radius: 24px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  letter-spacing: .5px;
+  box-shadow: 0 4px 16px rgba(255,107,53,.4);
+  transition: .2s;
+}
+.demo-btn:active { transform: scale(.95); }
+
+/* Hotel landscape image emulation via gradients */
+.hotel-img { background: linear-gradient(160deg, #87CEEB 0%, #4682B4 40%, #2F4F4F 100%); position:relative; overflow:hidden; }
+.hotel-img::after { content:'🏔️'; position:absolute; bottom:10px; right:50%; font-size:40px; transform:translateX(50%); }
+.food-img { background: linear-gradient(160deg, #FF8C00 0%, #FF6347 100%); }
+.flight-img { background: linear-gradient(160deg, #6A5ACD 0%, #87CEEB 100%); }
+.room-img-mountain { background: linear-gradient(160deg, #228B22 0%, #90EE90 40%, #87CEEB 100%); position:relative; }
+.room-img-mountain::after { content:'🏔️'; position:absolute; bottom:6px; right:8px; font-size:24px; }
+.room-img-city { background: linear-gradient(160deg, #2F4F4F 0%, #696969 40%, #FFD700 100%); position:relative; }
+.room-img-city::after { content:'🌃'; position:absolute; bottom:6px; right:8px; font-size:24px; }
+.room-img-garden { background: linear-gradient(160deg, #556B2F 0%, #8FBC8F 40%, #FFB6C1 100%); position:relative; }
+.room-img-garden::after { content:'🌿'; position:absolute; bottom:6px; right:8px; font-size:24px; }
+
+/* Phone notch */
+.phone-notch {
+  position: absolute;
+  top: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 120px;
+  height: 28px;
+  background: #1a1a1a;
+  border-radius: 0 0 18px 18px;
+  z-index: 10;
+}
+
+/* Responsive: if screen too small, scale down */
+@media (max-width: 420px) {
+  .phone { width: 100vw; height: 100vh; border-radius: 0; box-shadow: none; }
+  .phone-notch { display: none; }
+}
+@media (max-height: 860px) {
+  .phone { height: 100vh; }
+}
+</style>
+</head>
+<body>
+
+<div class="phone" id="phone">
+  <div class="phone-notch"></div>
+
+  <!-- Status Bar -->
+  <div class="status-bar">
+    <span class="time">9:41</span>
+    <span class="status-icons">
+      <svg viewBox="0 0 18 12"><rect x="0" y="7" width="2" height="5" rx=".5" fill="#1C1C1E"/><rect x="4" y="5" width="2" height="7" rx=".5" fill="#1C1C1E"/><rect x="8" y="3" width="2" height="9" rx=".5" fill="#1C1C1E"/><rect x="12" y="0" width="2" height="12" rx=".5" fill="#1C1C1E"/></svg>
+      <svg viewBox="0 0 28 18"><rect x="0" y="2" width="20" height="14" rx="3" stroke="#1C1C1E" stroke-width="1.5" fill="none"/><rect x="23" y="5" width="3" height="8" rx="1.5" fill="#1C1C1E"/><rect x="2" y="5" width="6" height="8" rx="1" fill="#1C1C1E"/></svg>
+    </span>
+  </div>
+
+  <!-- Page Stack -->
+  <div class="page-stack" id="pageStack">
+
+    <!-- ========== PAGE 1: HOME ========== -->
+    <div class="page active" id="page-home">
+      <div class="home-header">
+        <div class="home-greeting">下午好</div>
+        <div class="home-name">你好，我是灵犀</div>
+        <div class="home-weather">☀️ 上海 · 26°C · 晴 · 周末适合短途出行</div>
+      </div>
+
+      <div class="voice-section">
+        <div class="voice-orb" id="voiceOrb" onclick="startListening()">🎙️</div>
+        <div class="voice-orb-text">点击或说"灵犀灵犀"唤醒我</div>
+      </div>
+
+      <div class="demo-tap-area">
+        <button class="demo-btn" onclick="quickDemo()">💡 点击体验：周末去成都</button>
+      </div>
+
+      <div class="scroll-area">
+        <div class="section-title">✨ 本周热门推荐</div>
+        <div class="suggest-cards">
+          <div class="suggest-card" style="background:linear-gradient(135deg,#FF6B6B,#FF8E53);" onclick="quickDemo()">
+            <div class="card-icon">🍲</div>
+            <div class="card-label">成都·美食之旅</div>
+          </div>
+          <div class="suggest-card" style="background:linear-gradient(135deg,#4ECDC4,#44A08D);" onclick="quickDemo()">
+            <div class="card-icon">🏯</div>
+            <div class="card-label">京都·红叶季</div>
+          </div>
+          <div class="suggest-card" style="background:linear-gradient(135deg,#A8E6CF,#3E8E7E);" onclick="quickDemo()">
+            <div class="card-icon">🏖️</div>
+            <div class="card-label">三亚·暖冬计划</div>
+          </div>
+          <div class="suggest-card" style="background:linear-gradient(135deg,#FFD93D,#FF8C00);" onclick="quickDemo()">
+            <div class="card-icon">⛷️</div>
+            <div class="card-label">长白山·滑雪</div>
+          </div>
+        </div>
+
+        <div class="section-title">📋 最近搜索</div>
+        <div class="rec-cards">
+          <div class="rec-card" onclick="quickDemo()">
+            <div class="rec-img hotel-img" style="background:linear-gradient(135deg,#FF7F50,#FF6347);">🏨</div>
+            <div class="rec-info">
+              <div class="rec-title">上海→杭州 周末微旅行</div>
+              <div class="rec-desc">西湖景观酒店+灵隐寺+龙井茶道</div>
+              <div class="rec-price">¥1,280起</div>
+            </div>
+            <div class="rec-arrow">›</div>
+          </div>
+          <div class="rec-card" onclick="quickDemo()">
+            <div class="rec-img" style="background:linear-gradient(135deg,#87CEEB,#4682B4);">✈️</div>
+            <div class="rec-info">
+              <div class="rec-title">下周去深圳见客户</div>
+              <div class="rec-desc">商务接待+粤菜推荐+福田CBD酒店</div>
+              <div class="rec-price">¥3,200起</div>
+            </div>
+            <div class="rec-arrow">›</div>
+          </div>
+        </div>
+
+        <div class="section-title">🎯 场景直达</div>
+        <div style="display:flex;gap:10px;padding:0 20px;flex-wrap:wrap;">
+          <button style="flex:1;min-width:100px;padding:14px;border-radius:14px;border:none;background:#fff;font-size:13px;font-weight:600;cursor:pointer;box-shadow:0 1px 3px rgba(0,0,0,.05);" onclick="quickDemo()">👔 商务出差</button>
+          <button style="flex:1;min-width:100px;padding:14px;border-radius:14px;border:none;background:#fff;font-size:13px;font-weight:600;cursor:pointer;box-shadow:0 1px 3px rgba(0,0,0,.05);" onclick="quickDemo()">🎉 朋友聚会</button>
+          <button style="flex:1;min-width:100px;padding:14px;border-radius:14px;border:none;background:#fff;font-size:13px;font-weight:600;cursor:pointer;box-shadow:0 1px 3px rgba(0,0,0,.05);" onclick="quickDemo()">💑 情侣出游</button>
+          <button style="flex:1;min-width:100px;padding:14px;border-radius:14px;border:none;background:#fff;font-size:13px;font-weight:600;cursor:pointer;box-shadow:0 1px 3px rgba(0,0,0,.05);" onclick="quickDemo()">👨‍👩‍👧 家庭出行</button>
+        </div>
+        <div style="height:20px;"></div>
+      </div>
+
+      <!-- Bottom Tab Bar -->
+      <div class="tab-bar">
+        <div class="tab-item active"><div class="tab-icon">🏠</div><span>首页</span></div>
+        <div class="tab-item" onclick="navigateTo('page-results')"><div class="tab-icon">✈️</div><span>行程</span></div>
+        <div class="tab-item"><div class="tab-icon">🧭</div><span>发现</span></div>
+        <div class="tab-item"><div class="tab-icon">👤</div><span>我的</span></div>
+      </div>
+    </div>
+
+    <!-- ========== PAGE 2: TRIP RESULTS ========== -->
+    <div class="page hidden-right" id="page-results">
+      <div class="results-header">
+        <button class="back-btn" onclick="goBack()">‹</button>
+        <span class="title">成都 · 周末微旅行</span>
+      </div>
+      <div class="scroll-area">
+        <div class="results-summary">
+          <div class="trip-meta">
+            <span class="trip-city">🏙️ 上海 → 成都</span>
+            <span class="trip-date">📅 5月23日-25日 · 2晚3天</span>
+          </div>
+          <div class="trip-cost-row">
+            <span class="total-label">💰 方案总览（品质版）</span>
+            <span class="total-price"><sub>¥</sub>4,280</span>
+          </div>
+          <div style="display:flex;gap:8px;margin-top:10px;">
+            <span onclick="switchPlan('eco')" style="cursor:pointer;padding:6px 14px;border-radius:16px;font-size:11px;font-weight:600;background:#f0f0f0;color:#666;" id="btn-eco">经济版 ¥2,160</span>
+            <span onclick="switchPlan('prem')" style="cursor:pointer;padding:6px 14px;border-radius:16px;font-size:11px;font-weight:600;background:var(--orange);color:#fff;" id="btn-prem">品质版 ¥4,280</span>
+          </div>
+        </div>
+
+        <div class="results-tabs" id="resultsTabs">
+          <button class="results-tab active" onclick="filterResults('all',this)">全部</button>
+          <button class="results-tab" onclick="filterResults('flight',this)">✈️ 机票</button>
+          <button class="results-tab" onclick="filterResults('hotel',this)">🏨 酒店</button>
+          <button class="results-tab" onclick="filterResults('food',this)">🍽️ 美食</button>
+          <button class="results-tab" onclick="filterResults('fun',this)">🎯 玩乐</button>
+        </div>
+
+        <div class="result-cards" id="resultCards">
+          <!-- Flight -->
+          <div class="result-card" data-cat="flight" onclick="navigateTo('page-detail-flight')">
+            <div class="r-img flight-img" style="background:linear-gradient(135deg,#6A5ACD,#87CEEB);">✈️</div>
+            <div class="r-info">
+              <div class="r-title">东方航空 MU5401</div>
+              <div class="r-sub">5月23日 08:00→10:35 · 虹桥T1→双流T2</div>
+              <div class="r-stars">⭐ 4.8 · 准点率96%</div>
+            </div>
+            <div class="r-price">
+              <div class="p-num">¥860</div>
+              <div class="p-unit">经济舱</div>
+              <div class="p-vs">比携程便宜 ¥130</div>
+            </div>
+          </div>
+
+          <!-- Hotel 1 -->
+          <div class="result-card" data-cat="hotel" onclick="navigateTo('page-detail-hotel')">
+            <div class="r-img hotel-img" style="background:linear-gradient(135deg,#87CEEB,#4682B4);">🏨<span class="r-badge">灵犀精选</span></div>
+            <div class="r-info">
+              <div class="r-title">成都博舍酒店 · The Temple House</div>
+              <div class="r-sub">太古里商圈 · 设计感 · 景观房可看太古里全景</div>
+              <div class="r-stars">⭐ 4.9 · 窗景美学评分 9.2/10</div>
+            </div>
+            <div class="r-price">
+              <div class="p-num">¥1,680</div>
+              <div class="p-unit">/晚</div>
+              <div class="p-vs">比美团便宜 ¥200</div>
+            </div>
+          </div>
+
+          <!-- Hotel 2 -->
+          <div class="result-card" data-cat="hotel" onclick="navigateTo('page-detail-hotel')">
+            <div class="r-img" style="background:linear-gradient(135deg,#228B22,#90EE90);">🏯</div>
+            <div class="r-info">
+              <div class="r-title">成都群光君悦酒店</div>
+              <div class="r-sub">春熙路核心 · 高空城市景观 · 15楼以上</div>
+              <div class="r-stars">⭐ 4.7 · 窗景美学评分 8.8/10</div>
+            </div>
+            <div class="r-price">
+              <div class="p-num">¥1,280</div>
+              <div class="p-unit">/晚</div>
+              <div class="p-vs">含双早</div>
+            </div>
+          </div>
+
+          <!-- Food 1 -->
+          <div class="result-card" data-cat="food">
+            <div class="r-img" style="background:linear-gradient(135deg,#FF6347,#FF4500);">🍲</div>
+            <div class="r-info">
+              <div class="r-title">小龙坎老火锅（春熙路概念店）</div>
+              <div class="r-sub">成都火锅TOP3 · 人均¥120 · 排队预警</div>
+              <div class="r-stars">⭐ 4.8 · 本地人推荐 · 建议17:00前取号</div>
+            </div>
+            <div class="r-price">
+              <div class="p-num">¥120</div>
+              <div class="p-unit">人均</div>
+              <div class="p-vs">灵犀可代排队</div>
+            </div>
+          </div>
+
+          <!-- Food 2 -->
+          <div class="result-card" data-cat="food">
+            <div class="r-img" style="background:linear-gradient(135deg,#8B4513,#D2691E);">🥘</div>
+            <div class="r-info">
+              <div class="r-title">陈麻婆豆腐（骡马市总店）</div>
+              <div class="r-sub">百年老字号 · 人均¥65 · 正宗川菜</div>
+              <div class="r-stars">⭐ 4.6 · 必吃榜 · 麻婆豆腐发源地</div>
+            </div>
+            <div class="r-price">
+              <div class="p-num">¥65</div>
+              <div class="p-unit">人均</div>
+            </div>
+          </div>
+
+          <!-- Fun -->
+          <div class="result-card" data-cat="fun">
+            <div class="r-img" style="background:linear-gradient(135deg,#2F4F2F,#228B22);">🐼</div>
+            <div class="r-info">
+              <div class="r-title">大熊猫繁育研究基地</div>
+              <div class="r-sub">建议7:30入园避开人流 · 门票¥55</div>
+              <div class="r-stars">⭐ 4.9 · 最佳观赏时间：8:00-10:00</div>
+            </div>
+            <div class="r-price">
+              <div class="p-num">¥55</div>
+              <div class="p-unit">门票</div>
+            </div>
+          </div>
+
+          <div class="result-card" data-cat="fun">
+            <div class="r-img" style="background:linear-gradient(135deg,#8B4513,#A0522D);">💆</div>
+            <div class="r-info">
+              <div class="r-title">御手国医·SPA会馆（宽窄巷子店）</div>
+              <div class="r-sub">高端按摩SPA · 旅行放松首选 · 90分钟</div>
+              <div class="r-stars">⭐ 4.8 · 环境评分9.0/10</div>
+            </div>
+            <div class="r-price">
+              <div class="p-num">¥398</div>
+              <div class="p-unit">/人</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <button class="btn-primary" onclick="navigateTo('page-confirm')" style="margin:8px 20px;flex-shrink:0;">🚀 一键预订全部方案</button>
+    </div>
+
+    <!-- ========== PAGE 3a: HOTEL DETAIL ========== -->
+    <div class="page hidden-right" id="page-detail-hotel">
+      <div class="detail-hero hotel-img" style="background:linear-gradient(160deg,#87CEEB 0%,#4682B4 50%,#2F4F4F 100%);">
+        <button class="hero-back" onclick="goBack()">‹</button>
+        <div class="hero-dots"><span class="hero-dot active"></span><span class="hero-dot"></span><span class="hero-dot"></span></div>
+        <div style="position:absolute;bottom:20px;left:0;right:0;text-align:center;color:#fff;font-size:60px;text-shadow:0 2px 8px rgba(0,0,0,.2);">🏨</div>
+      </div>
+      <div class="scroll-area">
+        <div class="detail-body">
+          <div class="d-title">成都博舍酒店 · The Temple House</div>
+          <div class="d-rating">
+            <span class="d-score">4.9</span>
+            <span style="color:var(--yellow);">★★★★★</span>
+            <span class="d-review-count">2,847条评价 · 太古里商圈</span>
+          </div>
+          <p style="font-size:12px;color:var(--text3);line-height:1.6;margin-bottom:16px;">
+            博舍酒店由英国设计师事务所Make Architects设计，融合传统四合院与现代极简风格。位于成都远洋太古里核心位置，步行可达IFS、春熙路。酒店拥有全景健身房、地下泳池、谧寻水疗中心。
+          </p>
+
+          <div class="section-title" style="padding:0 0 10px;">🛏️ 可选房型（窗景评分）</div>
+
+          <div class="room-card selected" id="room1" onclick="selectRoom('room1')">
+            <div class="room-viz room-img-city" style="background:linear-gradient(135deg,#2F4F4F,#696969,#FFD700);"></div>
+            <div class="room-info">
+              <div class="room-name">城市景观套房 · 70㎡</div>
+              <div class="room-view">38楼 · 正对太古里+IFS · 180°全景落地窗</div>
+              <div class="room-view-score">🏆 窗景美学分 9.2/10 — 夜晚太古里灯光绝佳</div>
+            </div>
+            <div class="room-price"><div class="rp-num">¥1,680</div><span style="font-size:10px;color:var(--text3);">/晚</span></div>
+          </div>
+
+          <div class="room-card" id="room2" onclick="selectRoom('room2')">
+            <div class="room-viz room-img-garden" style="background:linear-gradient(135deg,#556B2F,#8FBC8F,#FFB6C1);"></div>
+            <div class="room-info">
+              <div class="room-name">庭院景观房 · 55㎡</div>
+              <div class="room-view">1楼 · 私家竹林庭院 · 日式禅意风格</div>
+              <div class="room-view-score">🏆 窗景美学分 8.9/10 — 清晨鸟鸣+竹林光影</div>
+            </div>
+            <div class="room-price"><div class="rp-num">¥1,380</div><span style="font-size:10px;color:var(--text3);">/晚</span></div>
+          </div>
+
+          <div class="room-card" id="room3" onclick="selectRoom('room3')">
+            <div class="room-viz room-img-mountain" style="background:linear-gradient(135deg,#228B22,#90EE90,#87CEEB);"></div>
+            <div class="room-info">
+              <div class="room-name">豪华大床房 · 45㎡</div>
+              <div class="room-view">25楼 · 侧观太古里 · 城市天际线</div>
+              <div class="room-view-score">窗景美学分 8.2/10</div>
+            </div>
+            <div class="room-price"><div class="rp-num">¥980</div><span style="font-size:10px;color:var(--text3);">/晚</span></div>
+          </div>
+
+          <div class="section-title" style="padding:0 0 10px;">📊 多平台比价</div>
+          <div style="display:flex;gap:8px;font-size:11px;margin-bottom:16px;">
+            <div style="flex:1;background:#fff;padding:10px;border-radius:10px;text-align:center;border:2px solid var(--orange);">
+              <div style="color:var(--text3);">携程</div><div style="font-weight:700;color:var(--orange);">¥1,880</div>
+            </div>
+            <div style="flex:1;background:#fff;padding:10px;border-radius:10px;text-align:center;">
+              <div style="color:var(--text3);">美团</div><div style="font-weight:700;">¥1,750</div>
+            </div>
+            <div style="flex:1;background:#fff;padding:10px;border-radius:10px;text-align:center;border:2px solid var(--green);">
+              <div style="color:var(--text3);">灵犀专享</div><div style="font-weight:700;color:var(--green);">¥1,680</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <button class="btn-primary" onclick="navigateTo('page-confirm')">选择城市景观套房 · ¥1,680/晚</button>
+    </div>
+
+    <!-- ========== PAGE 3b: FLIGHT DETAIL ========== -->
+    <div class="page hidden-right" id="page-detail-flight">
+      <div class="detail-hero flight-img" style="background:linear-gradient(160deg,#6A5ACD 0%,#87CEEB 50%,#fff 100%);">
+        <button class="hero-back" onclick="goBack()">‹</button>
+        <div style="position:absolute;bottom:20px;left:0;right:0;text-align:center;color:#fff;font-size:60px;text-shadow:0 2px 8px rgba(0,0,0,.2);">✈️</div>
+      </div>
+      <div class="scroll-area">
+        <div class="detail-body">
+          <div class="d-title">东方航空 MU5401</div>
+          <div class="d-rating">
+            <span class="d-score">4.8</span>
+            <span style="color:var(--yellow);">★★★★★</span>
+            <span class="d-review-count">准点率96% · 含20kg行李</span>
+          </div>
+          <div style="background:#fff;border-radius:var(--radius);padding:20px;text-align:center;margin-bottom:16px;box-shadow:var(--shadow);">
+            <div style="display:flex;justify-content:space-between;align-items:center;">
+              <div><div style="font-size:28px;font-weight:700;">08:00</div><div style="font-size:11px;color:var(--text3);">5月23日</div><div style="font-size:12px;">上海虹桥T1</div></div>
+              <div style="text-align:center;"><div style="font-size:11px;color:var(--text3);">2h35m</div><div style="width:80px;height:1px;background:var(--sep);margin:8px auto;position:relative;"><span style="position:absolute;top:-8px;left:50%;transform:translateX(-50%);">✈️</span></div><div style="font-size:10px;color:var(--green);">直飞</div></div>
+              <div style="text-align:right;"><div style="font-size:28px;font-weight:700;">10:35</div><div style="font-size:11px;color:var(--text3);">5月23日</div><div style="font-size:12px;">成都双流T2</div></div>
+            </div>
+          </div>
+          <div style="display:flex;gap:8px;font-size:11px;margin-bottom:16px;">
+            <div style="flex:1;background:#fff;padding:10px;border-radius:10px;text-align:center;"><div style="color:var(--text3);">携程</div><div style="font-weight:700;">¥990</div></div>
+            <div style="flex:1;background:#fff;padding:10px;border-radius:10px;text-align:center;"><div style="color:var(--text3);">途牛</div><div style="font-weight:700;">¥890</div></div>
+            <div style="flex:1;background:#fff;padding:10px;border-radius:10px;text-align:center;border:2px solid var(--green);"><div style="color:var(--text3);">灵犀专享</div><div style="font-weight:700;color:var(--green);">¥860</div></div>
+          </div>
+        </div>
+      </div>
+      <button class="btn-primary" onclick="navigateTo('page-confirm')">预订此航班 · ¥860</button>
+    </div>
+
+    <!-- ========== PAGE 4: CONFIRMATION ========== -->
+    <div class="page hidden-right" id="page-confirm">
+      <div class="results-header">
+        <button class="back-btn" onclick="goBack()">‹</button>
+        <span class="title">确认预订</span>
+      </div>
+      <div class="scroll-area">
+        <div class="confirm-section">
+          <div class="confirm-check">✓</div>
+          <div class="confirm-title">行程方案已就绪</div>
+          <div class="confirm-sub">灵犀已为您完成最优组合</div>
+        </div>
+
+        <div class="timeline">
+          <div class="timeline-item">
+            <div class="timeline-dot" style="background:#E8F0FE;">✈️</div>
+            <div class="timeline-content">
+              <div class="tl-title">上海 → 成都</div>
+              <div class="tl-desc">东方航空 MU5401 · 经济舱</div>
+              <div class="tl-time">5月23日 08:00-10:35</div>
+            </div>
+          </div>
+          <div class="timeline-item">
+            <div class="timeline-dot" style="background:#E8F5E9;">🏨</div>
+            <div class="timeline-content">
+              <div class="tl-title">成都博舍酒店 · 城市景观套房</div>
+              <div class="tl-desc">38楼 · 太古里全景 · 含双早</div>
+              <div class="tl-time">5月23日-25日 · 2晚</div>
+            </div>
+          </div>
+          <div class="timeline-item">
+            <div class="timeline-dot" style="background:#FFF3E0;">🍲</div>
+            <div class="timeline-content">
+              <div class="tl-title">小龙坎老火锅（春熙路概念店）</div>
+              <div class="tl-desc">灵犀已自动取号 · 5月23日18:00 · A23号</div>
+              <div class="tl-time">人均 ¥120</div>
+            </div>
+          </div>
+          <div class="timeline-item">
+            <div class="timeline-dot" style="background:#E8F5E9;">🐼</div>
+            <div class="timeline-content">
+              <div class="tl-title">大熊猫繁育研究基地</div>
+              <div class="tl-desc">电子门票已生成 · 建议7:30入园</div>
+              <div class="tl-time">5月24日 · ¥55</div>
+            </div>
+          </div>
+          <div class="timeline-item">
+            <div class="timeline-dot" style="background:#FCE4EC;">💆</div>
+            <div class="timeline-content">
+              <div class="tl-title">御手国医·SPA会馆</div>
+              <div class="tl-desc">已预约 · 90分钟全身按摩</div>
+              <div class="tl-time">5月24日 15:00 · ¥398</div>
+            </div>
+          </div>
+          <div class="timeline-item">
+            <div class="timeline-dot" style="background:#E8F0FE;">✈️</div>
+            <div class="timeline-content">
+              <div class="tl-title">成都 → 上海</div>
+              <div class="tl-desc">国航 CA4502 · 经济舱</div>
+              <div class="tl-time">5月25日 17:00-19:45</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="order-card">
+          <div class="order-row"><span>机票往返</span><span>¥1,720</span></div>
+          <div class="order-row"><span>酒店（2晚）</span><span>¥3,360</span></div>
+          <div class="order-row"><span>餐饮</span><span>¥380</span></div>
+          <div class="order-row"><span>门票+玩乐</span><span>¥453</span></div>
+          <div class="order-row"><span>市内交通预估</span><span>¥200</span></div>
+          <div class="order-row total"><span>合计（比分开预订省 ¥610）</span><span style="color:var(--orange);">¥4,893</span></div>
+        </div>
+      </div>
+      <button class="btn-primary" onclick="confirmBooking()" id="btnConfirm">✅ 确认预订 · ¥4,893</button>
+      <button class="btn-outline" onclick="showToast('行程已保存到「我的行程」')">📋 先保存，稍后决定</button>
+    </div>
+
+  </div>
+
+  <!-- Listening Overlay -->
+  <div class="listen-overlay" id="listenOverlay">
+    <div class="listen-text" id="listenText">我在听...</div>
+  </div>
+
+  <!-- Toast -->
+  <div class="toast" id="toast"></div>
+</div>
+
+<script>
+// ===== STATE =====
+const pageStack = [];
+const pages = ['page-home','page-results','page-detail-hotel','page-detail-flight','page-confirm'];
+
+function navigateTo(pageId) {
+  const currentPage = document.querySelector('.page.active');
+  const nextPage = document.getElementById(pageId);
+  if (!nextPage || currentPage === nextPage) return;
+
+  // Push current to stack
+  if (currentPage) {
+    pageStack.push(currentPage.id);
+    currentPage.classList.remove('active');
+    currentPage.classList.add('hidden-left');
+  }
+
+  // Show next
+  nextPage.classList.remove('hidden-right','hidden-left');
+  nextPage.classList.add('active');
+
+  // Reset scroll
+  const scroll = nextPage.querySelector('.scroll-area');
+  if (scroll) scroll.scrollTop = 0;
+}
+
+function goBack() {
+  if (pageStack.length === 0) return;
+
+  const currentPage = document.querySelector('.page.active');
+  const prevPageId = pageStack.pop();
+  const prevPage = document.getElementById(prevPageId);
+
+  if (currentPage) {
+    currentPage.classList.remove('active');
+    currentPage.classList.add('hidden-right');
+  }
+  if (prevPage) {
+    prevPage.classList.remove('hidden-left','hidden-right');
+    prevPage.classList.add('active');
+  }
+}
+
+// ===== VOICE SIMULATION =====
+let listeningTimer;
+
+function startListening() {
+  const orb = document.getElementById('voiceOrb');
+  const overlay = document.getElementById('listenOverlay');
+  const text = document.getElementById('listenText');
+
+  orb.classList.add('listening');
+  orb.textContent = '🔴';
+  overlay.classList.add('show');
+  text.textContent = '我在听...';
+
+  // Simulate voice recognition stages
+  clearTimeout(listeningTimer);
+  listeningTimer = setTimeout(() => {
+    text.textContent = '"周末想去成都...看熊猫...吃火锅...不要太累"';
+  }, 1200);
+
+  listeningTimer = setTimeout(() => {
+    text.textContent = '正在为您规划...';
+  }, 2800);
+
+  listeningTimer = setTimeout(() => {
+    stopListening();
+    navigateTo('page-results');
+  }, 3500);
+}
+
+function stopListening() {
+  const orb = document.getElementById('voiceOrb');
+  const overlay = document.getElementById('listenOverlay');
+  orb.classList.remove('listening');
+  orb.textContent = '🎙️';
+  overlay.classList.remove('show');
+}
+
+function quickDemo() {
+  const overlay = document.getElementById('listenOverlay');
+  const text = document.getElementById('listenText');
+  const orb = document.getElementById('voiceOrb');
+
+  orb.classList.add('listening');
+  orb.textContent = '🔴';
+  overlay.classList.add('show');
+  text.textContent = '"周末想去成都看熊猫吃火锅"';
+
+  clearTimeout(listeningTimer);
+  listeningTimer = setTimeout(() => {
+    text.textContent = '正在全网比价...规划最优方案...';
+  }, 1500);
+
+  listeningTimer = setTimeout(() => {
+    stopListening();
+    navigateTo('page-results');
+  }, 2300);
+}
+
+// ===== FILTER RESULTS =====
+function filterResults(cat, btn) {
+  // Update tab active
+  document.querySelectorAll('#resultsTabs .results-tab').forEach(t => t.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+
+  // Filter cards
+  const cards = document.querySelectorAll('#resultCards .result-card');
+  cards.forEach(card => {
+    if (cat === 'all' || card.dataset.cat === cat) {
+      card.style.display = 'flex';
+    } else {
+      card.style.display = 'none';
+    }
+  });
+}
+
+// ===== ROOM SELECTION =====
+function selectRoom(roomId) {
+  document.querySelectorAll('.room-card').forEach(r => r.classList.remove('selected'));
+  document.getElementById(roomId).classList.add('selected');
+}
+
+// ===== PLAN SWITCH =====
+function switchPlan(type) {
+  const eco = document.getElementById('btn-eco');
+  const prem = document.getElementById('btn-prem');
+  if (type === 'eco') {
+    eco.style.background = 'var(--orange)';
+    eco.style.color = '#fff';
+    prem.style.background = '#f0f0f0';
+    prem.style.color = '#666';
+    document.querySelector('.total-price').innerHTML = '<sub>¥</sub>2,160';
+  } else {
+    prem.style.background = 'var(--orange)';
+    prem.style.color = '#fff';
+    eco.style.background = '#f0f0f0';
+    eco.style.color = '#666';
+    document.querySelector('.total-price').innerHTML = '<sub>¥</sub>4,280';
+  }
+}
+
+// ===== BOOKING CONFIRMATION =====
+function confirmBooking() {
+  const btn = document.getElementById('btnConfirm');
+  btn.textContent = '⏳ 正在处理...';
+  btn.style.pointerEvents = 'none';
+  btn.style.opacity = '.7';
+
+  setTimeout(() => {
+    btn.textContent = '✅ 预订成功！';
+    btn.style.background = 'var(--green)';
+    btn.style.opacity = '1';
+    showToast('🎉 全部预订成功！行程已同步到日历');
+  }, 1800);
+}
+
+// ===== TOAST =====
+function showToast(msg) {
+  const toast = document.getElementById('toast');
+  toast.textContent = msg;
+  toast.classList.add('show');
+  clearTimeout(toast._t);
+  toast._t = setTimeout(() => toast.classList.remove('show'), 2500);
+}
+
+// ===== CLOSE OVERLAY ON TAP =====
+document.getElementById('listenOverlay').addEventListener('click', () => {
+  stopListening();
+  clearTimeout(listeningTimer);
+});
+
+// ===== INIT =====
+console.log('🦊 灵犀 App 原型已就绪');
+console.log('  - 点击语音球或"点击体验"按钮开始演示');
+console.log('  - 4级页面：首页 → 行程方案 → 详情 → 确认预订');
+console.log('  - 支持Tab筛选、房型选择、方案切换');
+</script>
+</body>
+</html>

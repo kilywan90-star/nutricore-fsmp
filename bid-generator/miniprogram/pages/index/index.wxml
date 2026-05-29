@@ -1,0 +1,46 @@
+<!-- 首页：行业选择 + 快速开始 -->
+<view class="container">
+  <view class="hero">
+    <view class="hero-title">AI 智能标书助手</view>
+    <view class="hero-desc">基于 DeepSeek 大模型，快速生成专业投标文件</view>
+  </view>
+
+  <!-- 行业选择 -->
+  <view class="section">
+    <view class="section-title">选择行业</view>
+    <scroll-view scroll-x class="industry-scroll">
+      <view class="industry-item {{currentIndustry === '政府采购' ? 'active' : ''}}"
+            wx:for="{{industries}}" wx:key="*this"
+            bindtap="selectIndustry" data-industry="{{item}}">
+        <view class="industry-icon">{{industryIcons[item] || '📋'}}</view>
+        <view class="industry-name">{{item}}</view>
+      </view>
+    </scroll-view>
+  </view>
+
+  <!-- 标书类型 -->
+  <view class="section" wx:if="{{currentIndustry}}">
+    <view class="section-title">标书类型</view>
+    <view class="type-grid">
+      <view class="type-item {{currentType === item ? 'active' : ''}}"
+            wx:for="{{bidTypes}}" wx:key="*this"
+            bindtap="selectType" data-type="{{item}}">
+        {{item}}
+      </view>
+    </view>
+  </view>
+
+  <!-- 快速开始 -->
+  <view class="actions">
+    <button class="btn-primary" bindtap="startGenerate" disabled="{{!currentIndustry}}">
+      开始制作标书
+    </button>
+    <view class="recent-projects" wx:if="{{projects.length > 0}}">
+      <view class="section-title">最近项目</view>
+      <view class="project-item" wx:for="{{projects}}" wx:key="id" bindtap="openProject" data-id="{{item.id}}">
+        <view class="project-name">{{item.name}}</view>
+        <view class="project-meta">{{item.industry}} · {{item.status}} · {{item.updated_at}}</view>
+      </view>
+    </view>
+  </view>
+</view>

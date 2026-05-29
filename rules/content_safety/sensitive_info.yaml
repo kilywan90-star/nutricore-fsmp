@@ -1,0 +1,6 @@
+plugin: sensitive_info
+config:
+  custom_patterns:
+    employee_id: 'E\d{6}'
+  detect_types: ["phone", "id_card", "email", "employee_id"]
+```

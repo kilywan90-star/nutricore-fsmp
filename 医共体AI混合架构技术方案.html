@@ -1,0 +1,736 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>医共体AI混合架构技术方案</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700;900&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Noto Sans SC', 'Microsoft YaHei', sans-serif;
+    background: #0f1923;
+    display: flex;
+    justify-content: center;
+    padding: 20px;
+  }
+
+  .page {
+    width: 1300px;
+    min-height: 1700px;
+    background: #fff;
+    padding: 32px 36px;
+    box-shadow: 0 8px 48px rgba(0,0,0,.3);
+  }
+
+  /* ── 标题 ── */
+  .title-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    border-bottom: 3px solid #1a3a5c;
+    padding-bottom: 14px;
+    margin-bottom: 20px;
+  }
+  .title-bar h1 { font-size: 26px; font-weight: 900; color: #1a3a5c; }
+  .title-bar .sub { font-size: 14px; color: #666; margin-top: 4px; }
+  .title-bar .meta { text-align: right; font-size: 11px; color: #888; }
+
+  /* ═══════════════════════════════ */
+  /* 总体架构图 - 同心圆布局       */
+  /* ═══════════════════════════════ */
+
+  .arch-container {
+    position: relative;
+    width: 100%;
+    height: 680px;
+    margin-bottom: 20px;
+    background: linear-gradient(135deg, #f8fafc 0%, #eef2f7 100%);
+    border-radius: 12px;
+    border: 1px solid #dde;
+    overflow: hidden;
+  }
+
+  /* 4个同心层级 */
+  .ring {
+    position: absolute;
+    border-radius: 50%;
+    border: 2px dashed #c5cae9;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* 核心 - 数据中台 */
+  .ring-core {
+    width: 200px; height: 200px;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    border: 3px solid #1a3a5c;
+    border-style: solid;
+    background: linear-gradient(135deg, #1a3a5c 0%, #283593 100%);
+    color: #fff;
+    text-align: center;
+    z-index: 10;
+    box-shadow: 0 8px 32px rgba(26,58,92,.35);
+    flex-direction: column;
+    gap: 6px;
+  }
+  .ring-core .icon { font-size: 36px; }
+  .ring-core h3 { font-size: 17px; font-weight: 900; }
+  .ring-core p { font-size: 10px; opacity: .85; line-height: 1.5; }
+
+  /* 内环 - 专业医疗AI */
+  .ring-inner {
+    width: 520px; height: 520px;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    border-color: #c62828;
+    border-style: solid;
+    border-width: 2px;
+    background: rgba(255,235,238,.15);
+    z-index: 5;
+  }
+  .ring-inner-label {
+    position: absolute;
+    top: 45px; left: 55px;
+    background: #c62828;
+    color: #fff;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 3px 16px;
+    border-radius: 12px;
+    white-space: nowrap;
+    z-index: 6;
+  }
+
+  /* 外环 - Coze 平台 */
+  .ring-outer {
+    width: 780px; height: 780px;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    border-color: #2e7d32;
+    border-style: solid;
+    border-width: 2px;
+    background: rgba(232,245,233,.12);
+    z-index: 4;
+  }
+  .ring-outer-label {
+    position: absolute;
+    bottom: 30px; right: 55px;
+    background: #2e7d32;
+    color: #fff;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 3px 16px;
+    border-radius: 12px;
+    white-space: nowrap;
+    z-index: 6;
+  }
+
+  /* 最外环 - 传统系统对接层 */
+  .ring-sys {
+    width: 950px; height: 950px;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    border-color: #546e7a;
+    border-style: dashed;
+    background: rgba(207,216,220,.08);
+    z-index: 2;
+  }
+  .ring-sys-label {
+    position: absolute;
+    top: 45px; right: 55px;
+    background: #455a64;
+    color: #fff;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 3px 16px;
+    border-radius: 12px;
+    white-space: nowrap;
+    z-index: 3;
+  }
+
+  /* 节点卡片 */
+  .node {
+    position: absolute;
+    background: #fff;
+    border-radius: 8px;
+    padding: 8px 12px;
+    font-size: 11px;
+    text-align: center;
+    box-shadow: 0 2px 8px rgba(0,0,0,.1);
+    z-index: 8;
+    line-height: 1.5;
+    transition: all .2s;
+  }
+  .node:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0,0,0,.18);
+    z-index: 20;
+  }
+  .node .name { font-weight: 700; font-size: 12px; }
+  .node .desc { font-size: 9px; color: #999; margin-top: 2px; }
+  .node .badge {
+    display: inline-block;
+    font-size: 9px;
+    padding: 1px 6px;
+    border-radius: 8px;
+    font-weight: 500;
+    margin-top: 3px;
+  }
+  .badge.self  { background: #c62828; color: #fff; }
+  .badge.agent { background: #2e7d32; color: #fff; }
+  .badge.both  { background: #ef6c00; color: #fff; }
+
+  /* 内环节点定位（用top/left百分比，相对arch-container） */
+  .node-diag    { top: 28%; left: 28%; }
+  .node-img     { top: 22%; left: 58%; }
+  .node-presc   { top: 58%; left: 22%; }
+  .node-insur   { top: 62%; left: 62%; }
+  .node-ecg     { top: 42%; left: 14%; }
+
+  /* 外环节点 */
+  .node-chronic { top: 10%; left: 50%; }
+  .node-follow  { top: 22%; left: 80%; }
+  .node-doctor  { top: 45%; left: 88%; }
+  .node-edu     { top: 68%; left: 80%; }
+  .node-mental  { top: 82%; left: 56%; }
+  .node-train   { top: 75%; left: 22%; }
+  .node-mch     { top: 56%; left: 82%; }
+  .node-triage  { top: 34%; left: 82%; }
+  .node-voice   { top: 16%; left: 28%; }
+  .node-er      { top: 7%;  left: 68%; }
+  .node-druginv { top: 88%; left: 30%; }
+  .node-code    { top: 48%; left: 8%;  }
+
+  /* 系统对接层节点 */
+  .node-his     { top: 2%;  left: 8%;  }
+  .node-emr     { top: 2%;  left: 78%; }
+  .node-pacs    { top: 92%; left: 8%;  }
+  .node-insur-s { top: 92%; left: 78%; }
+  .node-phr     { top: 50%; left: -2%; }
+  .node-tele    { top: 50%; left: 93%; }
+
+  /* 连接线用SVG */
+  .arch-svg {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    pointer-events: none;
+    z-index: 3;
+  }
+
+  /* ── 下半部分 ── */
+
+  .section-title {
+    font-size: 15px;
+    font-weight: 700;
+    color: #1a3a5c;
+    padding: 8px 0 6px;
+    border-bottom: 2px solid #e0e0e0;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .section-title .num {
+    background: #1a3a5c; color: #fff;
+    width: 24px; height: 24px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px; font-weight: 700;
+  }
+
+  /* 对比表 */
+  .compare-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 11px;
+    margin-bottom: 16px;
+  }
+  .compare-table thead th {
+    background: #1a3a5c;
+    color: #fff;
+    padding: 8px 10px;
+    font-weight: 500;
+    font-size: 11px;
+  }
+  .compare-table thead th:nth-child(1) { width: 18%; }
+  .compare-table thead th:nth-child(2) { width: 41%; }
+  .compare-table thead th:nth-child(3) { width: 41%; }
+  .compare-table tbody td {
+    padding: 7px 10px;
+    border-bottom: 1px solid #eee;
+    vertical-align: top;
+    line-height: 1.6;
+  }
+  .compare-table tbody tr:nth-child(even) { background: #f8f9fb; }
+  .compare-table tbody td:first-child { font-weight: 700; color: #1a3a5c; text-align: center; }
+
+  /* 数据流图 */
+  .flow-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+  .flow-card {
+    background: #f8f9fb;
+    border-radius: 8px;
+    padding: 14px;
+    text-align: center;
+    border-top: 3px solid #1a73e8;
+    font-size: 11px;
+    line-height: 1.7;
+  }
+  .flow-card.c2 { border-top-color: #ef6c00; }
+  .flow-card.c3 { border-top-color: #2e7d32; }
+  .flow-card.c4 { border-top-color: #6a1b9a; }
+  .flow-card h4 { font-size: 13px; color: #1a3a5c; margin-bottom: 6px; }
+  .flow-arrow {
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px; color: #90a4ae;
+  }
+
+  /* 底部总览表 */
+  .summary-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 14px;
+  }
+  .summary-card {
+    background: #f8f9fb;
+    border-radius: 8px;
+    padding: 14px 16px;
+    border: 1px solid #e0e0e0;
+    font-size: 11px;
+    line-height: 1.7;
+  }
+  .summary-card h4 {
+    font-size: 13px;
+    color: #1a3a5c;
+    margin-bottom: 8px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid #e0e0e0;
+  }
+  .summary-card ul { padding-left: 16px; }
+  .summary-card li { margin-bottom: 3px; }
+
+  .highlight { background: #fff3e0; padding: 1px 4px; border-radius: 2px; font-weight: 700; color: #e65100; }
+
+  @media print {
+    body { background: #fff; padding: 0; }
+    .page { box-shadow: none; width: 100%; page-break-after: avoid; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <!-- ═══ 标题 ═══ -->
+  <div class="title-bar">
+    <div>
+      <h1>医共体AI混合架构技术方案</h1>
+      <div class="sub">Coze「外环」+ 专业医疗AI「内环」+ 统一数据中台 — 三层解耦、能力互补</div>
+    </div>
+    <div class="meta">
+      <div>版本 v1.0 | 2026-05-19</div>
+      <div>丰田A3一页纸</div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════ -->
+  <!-- 同心圆架构图                  -->
+  <!-- ═══════════════════════════════ -->
+  <div class="arch-container">
+
+    <svg class="arch-svg" viewBox="0 0 1228 680">
+      <!-- 核心连线到内环节点 -->
+      <line x1="614" y1="280" x2="344" y2="190" stroke="#c62828" stroke-width="1.5" stroke-dasharray="4,3" opacity=".5"/>
+      <line x1="614" y1="280" x2="712" y2="150" stroke="#c62828" stroke-width="1.5" stroke-dasharray="4,3" opacity=".5"/>
+      <line x1="614" y1="380" x2="270" y2="394" stroke="#c62828" stroke-width="1.5" stroke-dasharray="4,3" opacity=".5"/>
+      <line x1="614" y1="380" x2="761" y2="422" stroke="#c62828" stroke-width="1.5" stroke-dasharray="4,3" opacity=".5"/>
+      <line x1="614" y1="330" x2="172" y2="286" stroke="#c62828" stroke-width="1.5" stroke-dasharray="4,3" opacity=".5"/>
+
+      <!-- 核心连线到外环节点 -->
+      <line x1="614" y1="280" x2="614" y2="68" stroke="#2e7d32" stroke-width="1.5" stroke-dasharray="4,3" opacity=".4"/>
+      <line x1="614" y1="280" x2="982" y2="150" stroke="#2e7d32" stroke-width="1.5" stroke-dasharray="4,3" opacity=".4"/>
+      <line x1="614" y1="380" x2="1081" y2="286" stroke="#2e7d32" stroke-width="1.5" stroke-dasharray="4,3" opacity=".4"/>
+      <line x1="614" y1="380" x2="1081" y2="462" stroke="#2e7d32" stroke-width="1.5" stroke-dasharray="4,3" opacity=".4"/>
+      <line x1="614" y1="380" x2="982" y2="557" stroke="#2e7d32" stroke-width="1.5" stroke-dasharray="4,3" opacity=".4"/>
+      <line x1="614" y1="380" x2="614" y2="612" stroke="#2e7d32" stroke-width="1.5" stroke-dasharray="4,3" opacity=".4"/>
+      <line x1="614" y1="280" x2="270" y2="510" stroke="#2e7d32" stroke-width="1.5" stroke-dasharray="4,3" opacity=".4"/>
+      <line x1="614" y1="280" x2="1006" y2="231" stroke="#2e7d32" stroke-width="1.5" stroke-dasharray="4,3" opacity=".4"/>
+      <line x1="614" y1="280" x2="344" y2="109" stroke="#2e7d32" stroke-width="1.5" stroke-dasharray="4,3" opacity=".4"/>
+      <line x1="614" y1="280" x2="835" y2="82" stroke="#2e7d32" stroke-width="1.5" stroke-dasharray="4,3" opacity=".4"/>
+      <line x1="614" y1="280" x2="98" y2="326" stroke="#2e7d32" stroke-width="1.5" stroke-dasharray="4,3" opacity=".4"/>
+      <line x1="614" y1="380" x2="368" y2="598" stroke="#2e7d32" stroke-width="1.5" stroke-dasharray="4,3" opacity=".4"/>
+
+      <!-- 内环节点到外环节点: CDSS→慢性管理 -->
+      <line x1="420" y1="218" x2="520" y2="100" stroke="#7986cb" stroke-width="1" stroke-dasharray="3,4" opacity=".35"/>
+
+      <!-- 系统对接层连线 -->
+      <line x1="98"  y1="14"  x2="614" y2="68" stroke="#546e7a" stroke-width="1" stroke-dasharray="2,4" opacity=".25"/>
+      <line x1="958" y1="14"  x2="614" y2="68" stroke="#546e7a" stroke-width="1" stroke-dasharray="2,4" opacity=".25"/>
+      <line x1="98"  y1="626" x2="614" y2="612" stroke="#546e7a" stroke-width="1" stroke-dasharray="2,4" opacity=".25"/>
+      <line x1="958" y1="626" x2="614" y2="612" stroke="#546e7a" stroke-width="1" stroke-dasharray="2,4" opacity=".25"/>
+
+    </svg>
+
+    <!-- 核心节点 -->
+    <div class="ring ring-core">
+      <div class="icon">&#9881;</div>
+      <h3>统一数据中台</h3>
+      <p>患者主索引 | 健康档案<br>数据治理 | API网关</p>
+    </div>
+
+    <!-- 内环 - 专业医疗AI（5个节点） -->
+    <div class="ring ring-inner"></div>
+    <div class="ring-inner-label">内环：专业医疗AI（自研/采购）</div>
+
+    <div class="node node-diag" style="top:28%;left:28%;">
+      <div class="name">AI辅助诊断CDSS</div>
+      <div class="desc">症状→鉴别诊断 | 急危重症预警</div>
+      <div class="badge self">自研/采购</div>
+    </div>
+    <div class="node node-img" style="top:22%;left:58%;">
+      <div class="name">影像AI辅助诊断</div>
+      <div class="desc">肺结节 | 骨折 | 脑出血</div>
+      <div class="badge self">专业厂商</div>
+    </div>
+    <div class="node node-presc" style="top:58%;left:22%;">
+      <div class="name">AI处方前置审核</div>
+      <div class="desc">剂量 | 相互作用 | 禁忌</div>
+      <div class="badge self">自研/采购</div>
+    </div>
+    <div class="node node-insur" style="top:62%;left:62%;">
+      <div class="name">医保AI智能审核</div>
+      <div class="desc">规则+ML双重拦截</div>
+      <div class="badge self">自研/采购</div>
+    </div>
+    <div class="node node-ecg" style="top:42%;left:14%;">
+      <div class="name">心电/超声AI</div>
+      <div class="desc">心律失常 | 结构异常</div>
+      <div class="badge self">专业厂商</div>
+    </div>
+
+    <!-- 外环 - Coze平台（12个节点） -->
+    <div class="ring ring-outer"></div>
+    <div class="ring-outer-label">外环：Coze 智能体平台（低代码搭建）</div>
+
+    <div class="node node-voice" style="top:13%;left:28%;">
+      <div class="name">AI语音电子病历</div>
+      <div class="desc">语音→结构化病历</div>
+      <div class="badge agent">Coze+ASR</div>
+    </div>
+    <div class="node node-chronic" style="top:7%;left:50%;">
+      <div class="name">AI慢病主动管理</div>
+      <div class="desc">分层 | 计划 | 预警</div>
+      <div class="badge agent">Coze Agent</div>
+    </div>
+    <div class="node node-er" style="top:4%;left:68%;">
+      <div class="name">AI院前急救指导</div>
+      <div class="desc">视频识别 | 步骤指导</div>
+      <div class="badge agent">Coze Agent</div>
+    </div>
+    <div class="node node-follow" style="top:20%;left:80%;">
+      <div class="name">AI语音随访</div>
+      <div class="desc">外呼 | 采集 | 回写</div>
+      <div class="badge agent">Coze+语音</div>
+    </div>
+    <div class="node node-triage" style="top:34%;left:82%;">
+      <div class="name">AI智能分诊转诊</div>
+      <div class="desc">病情评估 | 科室推荐</div>
+      <div class="badge agent">Coze Agent</div>
+    </div>
+    <div class="node node-doctor" style="top:45%;left:88%;">
+      <div class="name">数字医生分身</div>
+      <div class="desc">健康咨询 | 分诊引导</div>
+      <div class="badge agent">Coze Agent</div>
+    </div>
+    <div class="node node-mch" style="top:56%;left:82%;">
+      <div class="name">孕产妇儿童保健</div>
+      <div class="desc">高危分层 | 节点提醒</div>
+      <div class="badge agent">Coze Agent</div>
+    </div>
+    <div class="node node-edu" style="top:68%;left:80%;">
+      <div class="name">AI个性化健康教育</div>
+      <div class="desc">标签→内容生成</div>
+      <div class="badge agent">Coze Agent</div>
+    </div>
+    <div class="node node-mental" style="top:82%;left:56%;">
+      <div class="name">AI心理健康筛查</div>
+      <div class="desc">量表 | 情绪识别 | CBT</div>
+      <div class="badge agent">Coze Agent</div>
+    </div>
+    <div class="node node-train" style="top:75%;left:22%;">
+      <div class="name">AI基层医生培训</div>
+      <div class="desc">模拟问诊 | 评分 | 推送</div>
+      <div class="badge agent">Coze Agent</div>
+    </div>
+    <div class="node node-druginv" style="top:88%;left:30%;">
+      <div class="name">AI药品库存优化</div>
+      <div class="desc">预测 | 效期预警</div>
+      <div class="badge agent">Coze Agent</div>
+    </div>
+    <div class="node node-code" style="top:48%;left:8%;">
+      <div class="name">AI病案编码/DRG</div>
+      <div class="desc">自动编码 | 入组预测</div>
+      <div class="badge both">Coze+专业知识库</div>
+    </div>
+
+    <!-- 最外环 - 传统系统对接 -->
+    <div class="ring ring-sys"></div>
+    <div class="ring-sys-label">对接层：院内现有系统（API/HL7/FHIR）</div>
+
+    <div class="node node-his" style="position:absolute;top:2%;left:8%;background:#eceff1;font-size:10px;padding:5px 10px;border-radius:4px;">
+      <span style="font-weight:700;color:#37474f;">HIS</span>
+      <span style="color:#78909c;font-size:9px;"> 挂号/收费/药房</span>
+    </div>
+    <div class="node node-emr" style="position:absolute;top:2%;left:78%;background:#eceff1;font-size:10px;padding:5px 10px;border-radius:4px;">
+      <span style="font-weight:700;color:#37474f;">EMR</span>
+      <span style="color:#78909c;font-size:9px;"> 电子病历</span>
+    </div>
+    <div class="node node-pacs" style="position:absolute;top:92%;left:8%;background:#eceff1;font-size:10px;padding:5px 10px;border-radius:4px;">
+      <span style="font-weight:700;color:#37474f;">PACS/LIS</span>
+      <span style="color:#78909c;font-size:9px;"> 影像/检验</span>
+    </div>
+    <div class="node node-insur-s" style="position:absolute;top:92%;left:78%;background:#eceff1;font-size:10px;padding:5px 10px;border-radius:4px;">
+      <span style="font-weight:700;color:#37474f;">医保平台</span>
+      <span style="color:#78909c;font-size:9px;"> 结算/DRG</span>
+    </div>
+    <div class="node node-phr" style="position:absolute;top:48%;left:-2%;background:#eceff1;font-size:10px;padding:5px 10px;border-radius:4px;">
+      <span style="font-weight:700;color:#37474f;">公卫平台</span>
+      <span style="color:#78909c;font-size:9px;"> 慢病/妇幼</span>
+    </div>
+    <div class="node node-tele" style="position:absolute;top:48%;left:93%;background:#eceff1;font-size:10px;padding:5px 10px;border-radius:4px;">
+      <span style="font-weight:700;color:#37474f;">远程会诊</span>
+      <span style="color:#78909c;font-size:9px;"> 上级医院</span>
+    </div>
+
+  </div>
+
+  <!-- ═══ 第二部分：内环 vs 外环 详细对比 ═══ -->
+  <div class="section-title"><span class="num">2</span> 内环 vs 外环：技术选型与分工</div>
+  <table class="compare-table">
+    <thead>
+      <tr>
+        <th>维度</th>
+        <th>内环：专业医疗AI（自研 / 采购专业厂商）</th>
+        <th>外环：Coze 智能体平台（低代码搭建）</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>核心定位</td>
+        <td>诊疗核心决策 —— 直接影响诊断、用药、医保结算的准确性和安全性</td>
+        <td>患者触达 + 管理提效 —— 健康咨询、随访、健教、文书、培训等"减负"场景</td>
+      </tr>
+      <tr>
+        <td>覆盖能力项</td>
+        <td>影像AI(#1)、CDSS(#3)、处方审核(#5)、医保审核(#6)、心电/超声(#7)</td>
+        <td>慢病管理(#4,10)、语音病历(#8)、随访(#11)、妇幼(#12)、心理(#14)、急救(#15)、分诊(#16)、数字分身(#19)、健教(#20)、培训(#18)、药品库存(#17)</td>
+      </tr>
+      <tr>
+        <td>技术栈</td>
+        <td>专用医疗模型（CNN/ViT/信号处理） + 医学知识图谱 + 规则引擎 + HL7/FHIR接口</td>
+        <td>Coze Agent + Workflow + 知识库(RAG) + 插件 + 语音/视觉API</td>
+      </tr>
+      <tr>
+        <td>数据要求</td>
+        <td>DICOM影像、HL7检验数据、结构化处方、医保结算单 —— 需要院内PACS/LIS/HIS实时对接</td>
+        <td>患者标签、健康档案摘要、随访记录、健康知识库 —— 可通过API批量同步，延迟和精度要求低</td>
+      </tr>
+      <tr>
+        <td>合规门槛</td>
+        <td><span class="highlight">NMPA三类医疗器械认证</span>（辅助诊断类）、数据不出院（本地化部署）</td>
+        <td>患者知情同意、数据脱敏、等保二级/三级。作为"辅助工具"可规避医疗器械认证</td>
+      </tr>
+      <tr>
+        <td>部署方式</td>
+        <td><span class="highlight">院内/县域私有化部署</span> —— 数据安全底线要求</td>
+        <td>Coze云端SaaS + 数据脱敏网关。非敏感数据可上云，敏感数据通过API中转</td>
+      </tr>
+      <tr>
+        <td>开发周期</td>
+        <td>影像AI：12-18个月（含认证）；CDSS/处方：6-12个月（含知识库建设）</td>
+        <td>单个Agent：<span class="highlight">2-4周可上线MVP</span>；全外环12项：4-6个月</td>
+      </tr>
+      <tr>
+        <td>年成本估算</td>
+        <td>影像AI约¥10-30万/病种/年；CDSS约¥15-25万/年；处方审核约¥8-15万/年</td>
+        <td>Coze企业版 ¥3-8万/年 + API Token ¥5-20万/年</td>
+      </tr>
+      <tr>
+        <td>迭代速度</td>
+        <td>慢 —— 模型更新需重新验证/认证，知识库更新需医学审核</td>
+        <td>快 —— Prompt/Workflow可视化调整，知识库实时更新，当天上线</td>
+      </tr>
+      <tr>
+        <td>灰色地带项</td>
+        <td colspan="2" style="text-align:center;background:#fff8e1;">
+          <b>皮肤病/眼底筛查(#8) + 病案编码/DRG(#9) + 传染病预警(#13)</b> —— 需要混合方案：Coze做前端交互和轻度推理，专业API做核心推断
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- ═══ 第三部分：数据流转路径 ═══ -->
+  <div class="section-title"><span class="num">3</span> 数据流转路径（4条关键链路）</div>
+  <div class="flow-grid">
+    <div class="flow-card">
+      <h4>链路A：诊疗闭环</h4>
+      <p style="color:#78909c;font-size:10px;">患者就诊全程</p>
+      <p>
+        HIS挂号 → CDSS辅助问诊<br>
+        → 影像AI判读 → 处方AI审核<br>
+        → 医保AI审核 → 语音病历生成<br>
+        → 慢病随访计划
+      </p>
+      <p style="color:#1a73e8;font-size:10px;margin-top:4px;">内环(诊断决策) + 外环(文书/随访)</p>
+    </div>
+    <div class="flow-card c2">
+      <h4>链路B：慢病管理闭环</h4>
+      <p style="color:#78909c;font-size:10px;">离院后的持续管理</p>
+      <p>
+        出院 → AI慢病分层<br>
+        → 个性化管理计划<br>
+        → 语音随访 + 指标预警<br>
+        → 异常自动分诊<br>
+        → 复诊 → 方案调优
+      </p>
+      <p style="color:#ef6c00;font-size:10px;margin-top:4px;">外环(Coze) + 内环(CDSS调方案)</p>
+    </div>
+    <div class="flow-card c3">
+      <h4>链路C：公卫管理闭环</h4>
+      <p style="color:#78909c;font-size:10px;">妇幼 + 传染病 + 心理</p>
+      <p>
+        建档 → 高危自动分层<br>
+        → 节点智能提醒<br>
+        → AI健康宣教推送<br>
+        → 异常数据触发预警<br>
+        → 公卫数据自动上报
+      </p>
+      <p style="color:#2e7d32;font-size:10px;margin-top:4px;">外环(Coze Agent)为主</p>
+    </div>
+    <div class="flow-card c4">
+      <h4>链路D：患者自助闭环</h4>
+      <p style="color:#78909c;font-size:10px;">居民自主健康管理</p>
+      <p>
+        数字医生咨询<br>
+        → 轻症：健康指导<br>
+        → 中症：引导基层就诊<br>
+        → 重症：AI分诊转诊<br>
+        → 就诊后：随访+健教
+      </p>
+      <p style="color:#6a1b9a;font-size:10px;margin-top:4px;">外环(Coze Agent)为主</p>
+    </div>
+  </div>
+
+  <!-- ═══ 第四部分：实施路径 + 风险 ═══ -->
+  <div class="section-title"><span class="num">4</span> 分阶段实施路线图</div>
+
+  <div class="summary-grid">
+    <div class="summary-card">
+      <h4>Phase 1 — 快速见效（0-6月）<br><span style="font-size:10px;color:#2e7d32;font-weight:400;">外环优先，Coze低代码快速上线</span></h4>
+      <ul>
+        <li><b>数字医生分身</b> — 2周MVP，先覆盖Top20常见问题</li>
+        <li><b>AI语音随访</b> — 1个月，对接公卫随访任务</li>
+        <li><b>AI个性化健教</b> — 2周，对接慢病患者标签</li>
+        <li><b>AI基层医生培训</b> — 1个月，3个常见病种模拟</li>
+        <li><b>AI药品库存优化</b> — 2周，数据驱动采购建议</li>
+      </ul>
+      <p style="color:#999;font-size:10px;margin-top:6px;">此阶段全部用Coze搭建，零专业厂商依赖</p>
+    </div>
+
+    <div class="summary-card">
+      <h4>Phase 2 — 核心能力（6-18月）<br><span style="font-size:10px;color:#c62828;font-weight:400;">内环启动，专业厂商+自研</span></h4>
+      <ul>
+        <li><b>AI处方前置审核</b> — 采购/自研，药品知识库建设</li>
+        <li><b>AI辅助诊断CDSS</b> — 对接EMR，本地化知识库</li>
+        <li><b>影像AI辅助诊断</b> — 选择1-2家专业影像AI厂商</li>
+        <li><b>AI语音电子病历</b> — Coze+医学ASR（与Phase1衔接）</li>
+        <li><b>AI慢病主动管理</b> — Coze搭建管理引擎</li>
+        <li><b>统一数据中台v1.0</b> — 患者主索引+基础API网关</li>
+      </ul>
+    </div>
+
+    <div class="summary-card">
+      <h4>Phase 3 — 生态闭环（18-36月）<br><span style="font-size:10px;color:#1565c0;font-weight:400;">内外环打通，数据驱动闭环</span></h4>
+      <ul>
+        <li><b>医保AI智能审核</b> — 规则+ML，对接医保平台</li>
+        <li><b>AI心电/超声辅助</b> — 引入专业信号处理AI</li>
+        <li><b>AI多重共病管理</b> — Coze多指南RAG引擎</li>
+        <li><b>AI孕产妇/儿童保健</b> — Coze妇幼Agent</li>
+        <li><b>AI心理健康筛查</b> — Coze数字疗法Agent</li>
+        <li><b>传染病AI预警</b> — 多源数据监测</li>
+        <li><b>AI院前急救指导</b> — Coze视频+急救知识库</li>
+        <li><b>AI病案编码/DRG</b> — Coze+ICD知识库</li>
+        <li><b>统一数据中台v2.0</b> — 全量数据打通</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="section-title" style="margin-top:16px;"><span class="num">5</span> 核心风险与缓解策略</div>
+
+  <table class="compare-table" style="font-size:10px;">
+    <thead>
+      <tr>
+        <th style="width:20%;">风险</th>
+        <th style="width:8%;">等级</th>
+        <th style="width:36%;">具体表现</th>
+        <th style="width:36%;">缓解措施</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>数据隐私合规</td>
+        <td style="text-align:center;"><span style="background:#d32f2f;color:#fff;padding:2px 8px;border-radius:3px;font-size:10px;">高</span></td>
+        <td>Coze云端SaaS vs 患者隐私数据不出院的法律要求</td>
+        <td>敏感数据经脱敏网关处理后再上传；内环全部本地部署；Coze仅接触匿名化数据；建立数据安全影响评估(DSIA)</td>
+      </tr>
+      <tr>
+        <td>模型幻觉</td>
+        <td style="text-align:center;"><span style="background:#d32f2f;color:#fff;padding:2px 8px;border-radius:3px;font-size:10px;">高</span></td>
+        <td>LLM生成不准确的医学建议或编码，导致临床风险或医保纠纷</td>
+        <td>关键场景(诊断/处方/医保)使用确定性规则引擎而非LLM；Coze场景设置置信度阈值+人工复核入口；所有输出标注"AI建议仅供参考"</td>
+      </tr>
+      <tr>
+        <td>医疗器械认证</td>
+        <td style="text-align:center;"><span style="background:#d32f2f;color:#fff;padding:2px 8px;border-radius:3px;font-size:10px;">高</span></td>
+        <td>CDSS、影像AI等辅助诊断功能可能需NMPA三类认证，周期长(1-2年)、成本高(50-200万)</td>
+        <td>初期定位为"医生参考工具"而非"辅助诊断系统"；优先选择已获证的影像AI厂商；法务前置评估每项功能的认证边界</td>
+      </tr>
+      <tr>
+        <td>系统对接复杂度</td>
+        <td style="text-align:center;"><span style="background:#ef6c00;color:#fff;padding:2px 8px;border-radius:3px;font-size:10px;">中</span></td>
+        <td>基层HIS/EMR厂商分散、接口标准不统一，对接成本可能远超AI本身</td>
+        <td>优先选择接口规范的HIS厂商合作；通过统一数据中台屏蔽异构系统差异；Phase1的外环场景降低对接要求</td>
+      </tr>
+      <tr>
+        <td>医生接受度</td>
+        <td style="text-align:center;"><span style="background:#ef6c00;color:#fff;padding:2px 8px;border-radius:3px;font-size:10px;">中</span></td>
+        <td>基层医生对AI缺乏信任、担心被替代、使用意愿低</td>
+        <td>从"减负"场景切入(语音病历)——先让医生感受到价值；聘请基层"种子医生"参与设计；AI定位为"助手"而非"替代"</td>
+      </tr>
+      <tr>
+        <td>Coze平台锁定</td>
+        <td style="text-align:center;"><span style="background:#1976d2;color:#fff;padding:2px 8px;border-radius:3px;font-size:10px;">低</span></td>
+        <td>过度依赖Coze，未来迁移成本高</td>
+        <td>Agent逻辑以标准Workflow描述存档；知识库独立维护；预留Dify/LangGraph等开源替代方案接口</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div style="display:flex;justify-content:space-between;font-size:10px;color:#999;border-top:1px solid #ddd;padding-top:10px;margin-top:16px;">
+    <span>编制: 医共体AI架构规划组 | 版本 v1.0 | 2026-05-19</span>
+    <span>核心原则: 内环兜底安全，外环提质增效 | 三层解耦，渐进式建设</span>
+    <span style="color:#c62828;">机密 — 仅限项目内部</span>
+  </div>
+
+</div>
+</body>
+</html>

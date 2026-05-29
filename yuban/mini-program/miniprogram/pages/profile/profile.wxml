@@ -1,0 +1,83 @@
+<!-- 个人中心 -->
+<view class="page-profile">
+  <!-- 用户头部 -->
+  <view class="profile-header">
+    <image class="profile-avatar" src="{{user.avatar || '/static/default-avatar.png'}}" mode="aspectFill" />
+    <view class="mt-16 text-center">
+      <text class="text-xl" style="color:#fff;font-weight:bold">{{user.nickname || '钓鱼佬'}}</text>
+    </view>
+    <view class="flex-center mt-8">
+      <text class="tag tag-green" wx:if="{{user.is_member}}">会员</text>
+      <text class="tag tag-orange" wx:else>免费试用中</text>
+      <text class="text-sm" style="color:rgba(255,255,255,0.8);margin-left:8rpx">
+        Lv.{{user.level || 1}}
+      </text>
+    </view>
+    <!-- 数据统计 -->
+    <view class="stats-row mt-24">
+      <view class="stat-item">
+        <text class="stat-value">{{user.total_catches || 0}}</text>
+        <text class="stat-label">总鱼获</text>
+      </view>
+      <view class="stat-item">
+        <text class="stat-value">{{user.max_record || 0}}斤</text>
+        <text class="stat-label">最大记录</text>
+      </view>
+      <view class="stat-item">
+        <text class="stat-value">{{user.favorite_methods ? user.favorite_methods.length : 0}}</text>
+        <text class="stat-label">擅长钓法</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 会员信息 -->
+  <view class="card member-card" wx:if="{{!user.is_member}}">
+    <view class="flex-between">
+      <view>
+        <text class="text-bold">🎁 新用户免费试用</text>
+        <text class="text-sm text-muted mt-4">{{remainingDays}}天后到期</text>
+      </view>
+      <button class="btn-primary" style="font-size:24rpx;padding:8rpx 20rpx" bindtap="upgradeMember">
+        升级会员
+      </button>
+    </view>
+    <view class="mt-8 text-sm text-muted">
+      <text>会员特权: 无限查看钓点详情 · 优先约钓 · 陪钓折扣 · 专属装备清单</text>
+    </view>
+  </view>
+
+  <!-- 功能菜单 -->
+  <view class="card menu-card mt-24">
+    <view class="menu-item" bindtap="goToOrders">
+      <text>📋 我的订单</text>
+      <text class="text-muted">></text>
+    </view>
+    <view class="menu-item" bindtap="goToCollections">
+      <text>⭐ 收藏钓点</text>
+      <text class="text-muted">></text>
+    </view>
+    <view class="menu-item" bindtap="goToFishingLog">
+      <text>📖 钓鱼日志</text>
+      <text class="text-muted">></text>
+    </view>
+    <view class="menu-item" bindtap="goToAchievements">
+      <text>🏆 成就徽章</text>
+      <text class="text-muted">></text>
+    </view>
+    <view class="menu-item" bindtap="goToCompanionProfile">
+      <text>👤 陪钓服务管理</text>
+      <text class="text-muted">></text>
+    </view>
+  </view>
+
+  <view class="card menu-card mt-24">
+    <view class="menu-item" bindtap="goToSettings">
+      <text>⚙ 设置</text>
+      <text class="text-muted">></text>
+    </view>
+    <view class="menu-item" bindtap="goToAbout">
+      <text>ℹ 关于渔伴</text>
+      <text class="text-muted">></text>
+    </view>
+  </view>
+</view>

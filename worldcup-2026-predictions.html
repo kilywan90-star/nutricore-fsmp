@@ -1,0 +1,905 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>2026世界杯 — 全球综合分析 & 完整比分预测表</title>
+<style>
+  :root { --bg:#0f172a; --card:#1e293b; --border:#334155; --text:#e2e8f0; --muted:#94a3b8;
+          --accent:#38bdf8; --gold:#fbbf24; --green:#4ade80; --red:#f87171; --orange:#fb923c; }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body { background:var(--bg); color:var(--text); font-family:'Segoe UI',system-ui,sans-serif; line-height:1.6; padding:20px; max-width:1400px; margin:0 auto; }
+  h1 { font-size:2.2em; text-align:center; color:var(--gold); margin:20px 0 10px; }
+  h2 { color:var(--accent); font-size:1.5em; border-bottom:2px solid var(--border); padding-bottom:8px; margin:30px 0 20px; }
+  h3 { color:var(--orange); font-size:1.15em; margin:20px 0 10px; }
+  h4 { color:var(--text); margin:15px 0 8px; font-size:1em; }
+  .disclaimer { background:#7f1d1d; border:2px solid #dc2626; border-radius:12px; padding:20px; margin:20px 0; font-size:0.95em; }
+  .disclaimer strong { color:#fca5a5; }
+  .card { background:var(--card); border-radius:10px; padding:18px; margin:15px 0; border-left:4px solid var(--accent); }
+  .card.gold { border-left-color:var(--gold); }
+  .card.green { border-left-color:var(--green); }
+  .card.red { border-left-color:var(--red); }
+  table { width:100%; border-collapse:collapse; margin:15px 0; font-size:0.88em; }
+  th { background:#0f172a; color:var(--gold); padding:10px 8px; text-align:left; font-weight:700; position:sticky; top:0; z-index:1; }
+  td { padding:8px; border-bottom:1px solid var(--border); }
+  tr:hover td { background:rgba(56,189,248,0.05); }
+  .score { font-family:'Cascadia Code',monospace; font-weight:700; color:var(--green); }
+  .score2 { font-family:'Cascadia Code',monospace; font-weight:700; color:var(--accent); }
+  .win { color:var(--green); font-weight:600; }
+  .draw { color:var(--orange); font-weight:600; }
+  .lose { color:var(--red); font-weight:600; }
+  .tag { display:inline-block; padding:2px 8px; border-radius:4px; font-size:0.78em; font-weight:700; margin:0 3px; }
+  .tag-fav { background:#166534; color:#4ade80; }
+  .tag-dark { background:#713f12; color:#fbbf24; }
+  .tag-inj { background:#7f1d1d; color:#fca5a5; }
+  .tag-host { background:#1e3a5f; color:#38bdf8; }
+  .group-header { background:linear-gradient(135deg, #1e293b, #0f172a); }
+  .analysis-grid { display:grid; grid-template-columns: repeat(auto-fit, minmax(380px, 1fr)); gap:15px; margin:15px 0; }
+  .strategy-box { background:linear-gradient(135deg, #1a2e1a, #0f172a); border:2px solid var(--green); border-radius:12px; padding:20px; margin:20px 0; }
+  .toc { background:var(--card); border-radius:10px; padding:18px; margin:20px 0; columns:2; }
+  .toc a { color:var(--accent); text-decoration:none; display:block; padding:3px 0; }
+  .toc a:hover { text-decoration:underline; }
+  @media (max-width:768px) { body { padding:10px; } table { font-size:0.75em; } .analysis-grid { grid-template-columns:1fr; } .toc { columns:1; } }
+</style>
+</head>
+<body>
+
+<h1>2026 FIFA世界杯 — 全球综合分析 & 完整比分预测表</h1>
+<p style="text-align:center;color:var(--muted);margin-bottom:25px;">
+  基于Opta超级计算机、球队阵容、教练战术、最近热身赛、伤病情报的综合预测<br>
+  生成日期: 2026年5月29日 | 距开幕还有 <strong style="color:var(--gold)">13天</strong>
+</p>
+
+<!-- DISCLAIMER -->
+<div class="disclaimer">
+  <strong>风险提示</strong><br>
+  足球比赛结果受红牌、伤病、裁判判罚、天气等数百个变量影响。精确比分预测的长期准确率不超过10-15%。以下预测仅供分析参考，<strong>不构成任何投注建议</strong>。竞彩存在固有风险，请理性对待。<br><br>
+  <strong>核心事实</strong>: 没有任何个人、网站或模型能持续准确预测足球比分。博彩交易所的市场隐含概率（汇集全球数百万真实资金判断）在统计上优于任何单个"专家"预测。
+</div>
+
+<!-- TABLE OF CONTENTS -->
+<h2>目录</h2>
+<div class="toc">
+  <a href="#sources">1. 全球分析来源排名</a>
+  <a href="#groupA">2. A组: 墨西哥·南非·韩国·捷克</a>
+  <a href="#groupB">3. B组: 加拿大·波黑·卡塔尔·瑞士</a>
+  <a href="#groupC">4. C组: 巴西·摩洛哥·海地·苏格兰</a>
+  <a href="#groupD">5. D组: 美国·巴拉圭·澳大利亚·土耳其</a>
+  <a href="#groupE">6. E组: 德国·库拉索·科特迪瓦·厄瓜多尔</a>
+  <a href="#groupF">7. F组: 荷兰·日本·瑞典·突尼斯</a>
+  <a href="#groupG">8. G组: 比利时·埃及·伊朗·新西兰</a>
+  <a href="#groupH">9. H组: 西班牙·佛得角·沙特·乌拉圭</a>
+  <a href="#groupI">10. I组: 法国·塞内加尔·伊拉克·挪威</a>
+  <a href="#groupJ">11. J组: 阿根廷·阿尔及利亚·奥地利·约旦</a>
+  <a href="#groupK">12. K组: 葡萄牙·刚果(金)·乌兹别克·哥伦比亚</a>
+  <a href="#groupL">13. L组: 英格兰·克罗地亚·加纳·巴拿马</a>
+  <a href="#knockout">14. 淘汰赛预测路径</a>
+  <a href="#strategy">15. 竞彩75倍回报策略分析</a>
+  <a href="#betting">16. 具体投注组合建议</a>
+</div>
+
+<!-- SECTION 1: SOURCES -->
+<h2 id="sources">1. 全球分析来源排名</h2>
+
+<div class="analysis-grid">
+  <div class="card green">
+    <h4>第一梯队: 量化模型 / 博彩交易所 (可信度最高)</h4>
+    <table>
+      <tr><th>平台</th><th>方法论</th><th>透明度</th><th>2022世界杯准确率</th></tr>
+      <tr><td>Opta Analyst</td><td>事件数据+泊松分布模拟10000次</td><td>高,模型可查</td><td>胜负~65% / 比分~12%</td></tr>
+      <tr><td>FiveThirtyEight SPI</td><td>SPI指数+Elo评级+泊松</td><td>高,开源</td><td>胜负~62% / 比分~10%</td></tr>
+      <tr><td>Betfair Exchange</td><td>全球真实资金博弈→隐含概率</td><td>中,市场数据公开</td><td>长期优于所有模型</td></tr>
+      <tr><td>Gracenote (Nielsen)</td><td>Elo变体+球员价值加权</td><td>中</td><td>胜负~60%</td></tr>
+    </table>
+  </div>
+
+  <div class="card gold">
+    <h4>第二梯队: 专业分析媒体</h4>
+    <table>
+      <tr><th>来源</th><th>特点</th><th>短板</th></tr>
+      <tr><td>The Athletic / ESPN FC</td><td>深度战术+更衣室情报</td><td>英美中心视角</td></tr>
+      <tr><td>SofaScore / WhoScored</td><td>数据驱动的球员评分</td><td>无法量化战术配合</td></tr>
+      <tr><td>Transfermarkt</td><td>球员身价数据库</td><td>身价≠表现,滞后性强</td></tr>
+    </table>
+  </div>
+
+  <div class="card red">
+    <h4>第三梯队: 社交平台 / 网红 (可信度极低)</h4>
+    <table>
+      <tr><th>类型</th><th>问题</th></tr>
+      <tr><td>YouTube/TikTok "预测大神"</td><td>幸存者偏差——只展示猜中的,删掉猜错的。无统计显著性</td></tr>
+      <tr><td>Twitter/X "内幕消息"</td><td>多为编造。真正内幕(如首发阵容)不会公开发布</td></tr>
+      <tr><td>Telegram/微信群 "收费推荐"</td><td>商业模式依赖用户持续输钱后继续购买。无独立审计</td></tr>
+    </table>
+  </div>
+</div>
+
+<div class="card">
+  <h4>核心结论</h4>
+  <p><strong>Betfair交易所赔率 &gt; Opta模型 &gt; FiveThirtyEight &gt; 专业媒体 &gt;&gt;&gt; 社交媒体网红</strong></p>
+  <p style="margin-top:10px;color:var(--muted);">市场价格已经汇集了所有公开信息（阵容、伤病、战术、历史对战）。个人预测者不可能持续跑赢这个集体智慧系统。</p>
+</div>
+
+<!-- SECTION 2-13: GROUP STAGE PREDICTIONS -->
+<h2 id="groupstage">2. 小组赛72场 — 完整预测 (每场2个比分)</h2>
+
+<!-- GROUP A -->
+<h2 id="groupA">A组: 🇲🇽墨西哥 · 🇿🇦南非 · 🇰🇷韩国 · 🇨🇿捷克</h2>
+<div class="card">
+  <h4>小组形势分析</h4>
+  <p>墨西哥作为东道主+阿吉雷执教,近期6场不败(含2-0加纳)。<span class="tag tag-host">东道主</span> 南非风格直接但防守有漏洞(1-2巴拿马)。韩国技术好但缺少顶级终结者。捷克时隔20年重返世界杯,75岁老帅库贝克带队。<br>
+  <strong>预测小组出线: 墨西哥(1)、韩国(2)、捷克(3,可能晋级)</strong></p>
+</div>
+<table>
+<tr class="group-header"><th>日期</th><th>对阵</th><th>预测比分1</th><th>预测比分2</th><th>实力差</th><th>关键因素</th></tr>
+<tr>
+  <td>6/11</td><td>🇲🇽 墨西哥 vs 南非 🇿🇦</td>
+  <td class="score">2-0</td><td class="score2">2-1</td>
+  <td>墨+1.5</td>
+  <td>开幕战主场气势;阿兹特克高原;墨西哥6场不败</td>
+</tr>
+<tr>
+  <td>6/11</td><td>🇰🇷 韩国 vs 捷克 🇨🇿</td>
+  <td class="score">1-1</td><td class="score2">2-1</td>
+  <td>均</td>
+  <td>捷克缺乏大赛经验;韩国中场控制力占优</td>
+</tr>
+<tr>
+  <td>6/18</td><td>🇨🇿 捷克 vs 南非 🇿🇦</td>
+  <td class="score">1-0</td><td class="score2">1-1</td>
+  <td>捷+0.5</td>
+  <td>捷克防守组织;南非锋线终结能力不足</td>
+</tr>
+<tr>
+  <td>6/18</td><td>🇲🇽 墨西哥 vs 韩国 🇰🇷</td>
+  <td class="score">2-1</td><td class="score2">1-0</td>
+  <td>墨+1</td>
+  <td>墨西哥连续主场作战;韩国体能优势存疑</td>
+</tr>
+<tr>
+  <td>6/24</td><td>🇨🇿 捷克 vs 墨西哥 🇲🇽</td>
+  <td class="score">0-2</td><td class="score2">1-2</td>
+  <td>墨+1.5</td>
+  <td>墨西哥已锁定出线可能轮换;捷克争取第三名</td>
+</tr>
+<tr>
+  <td>6/24</td><td>🇿🇦 南非 vs 韩国 🇰🇷</td>
+  <td class="score">1-2</td><td class="score2">0-2</td>
+  <td>韩+1</td>
+  <td>韩国争出线必须赢;南非已出局</td>
+</tr>
+</table>
+
+<!-- GROUP B -->
+<h2 id="groupB">B组: 🇨🇦加拿大 · 🇧🇦波黑 · 🇶🇦卡塔尔 · 🇨🇭瑞士</h2>
+<div class="card">
+  <h4>小组形势分析</h4>
+  <p>加拿大戴维斯伤病成疑,但马什"枫叶逼抢"体系成型,6场不败但半数0进球。<span class="tag tag-inj">戴维斯腿筋伤</span> 瑞士大赛经验最丰富,体系成熟。波黑哲科最后一舞。卡塔尔实力最弱(0-1爱尔兰)。<br>
+  <strong>预测小组出线: 瑞士(1)、加拿大(2)、波黑(3,待定)</strong></p>
+</div>
+<table>
+<tr class="group-header"><th>日期</th><th>对阵</th><th>预测比分1</th><th>预测比分2</th><th>实力差</th><th>关键因素</th></tr>
+<tr>
+  <td>6/12</td><td>🇨🇦 加拿大 vs 波黑 🇧🇦</td>
+  <td class="score">1-0</td><td class="score2">1-1</td>
+  <td>加+0.5</td>
+  <td>加拿大主场;BMO Field人造草皮;加拿大进球难</td>
+</tr>
+<tr>
+  <td>6/13</td><td>🇶🇦 卡塔尔 vs 瑞士 🇨🇭</td>
+  <td class="score">0-2</td><td class="score2">0-3</td>
+  <td>瑞+2</td>
+  <td>瑞士攻防均衡;卡塔尔红牌问题(上场10人)</td>
+</tr>
+<tr>
+  <td>6/18</td><td>🇨🇭 瑞士 vs 波黑 🇧🇦</td>
+  <td class="score">2-0</td><td class="score2">2-1</td>
+  <td>瑞+1.5</td>
+  <td>瑞士控场能力强;波黑老化防线</td>
+</tr>
+<tr>
+  <td>6/18</td><td>🇨🇦 加拿大 vs 卡塔尔 🇶🇦</td>
+  <td class="score">1-0</td><td class="score2">2-0</td>
+  <td>加+1</td>
+  <td>加拿大拿分最佳机会;卡塔尔实力差距</td>
+</tr>
+<tr>
+  <td>6/24</td><td>🇨🇭 瑞士 vs 加拿大 🇨🇦</td>
+  <td class="score">1-1</td><td class="score2">2-1</td>
+  <td>瑞+0.5</td>
+  <td>瑞士轮换可能;加拿大死拼出线</td>
+</tr>
+<tr>
+  <td>6/24</td><td>🇧🇦 波黑 vs 卡塔尔 🇶🇦</td>
+  <td class="score">1-0</td><td class="score2">2-1</td>
+  <td>波+0.5</td>
+  <td>荣誉之战;波黑整体实力稍优</td>
+</tr>
+</table>
+
+<!-- GROUP C -->
+<h2 id="groupC">C组: 🇧🇷巴西 · 🇲🇦摩洛哥 · 🇭🇹海地 · 🏴󠁧󠁢󠁳󠁣󠁴󠁿苏格兰</h2>
+<div class="card">
+  <h4>小组形势分析</h4>
+  <p>死亡之组!安切洛蒂首掌巴西,但<span class="tag tag-inj">米利唐+罗德里戈伤缺</span>,内马尔存疑。摩洛哥2025非洲杯冠军+新帅瓦赫比转型高压,5-0布隆迪状态火热。苏格兰时隔28年重返世界杯,门将戈登43岁。海地实力最弱。<br>
+  <strong>预测小组出线: 巴西(1)、摩洛哥(2)、苏格兰(3,有竞争力)</strong></p>
+</div>
+<table>
+<tr class="group-header"><th>日期</th><th>对阵</th><th>预测比分1</th><th>预测比分2</th><th>实力差</th><th>关键因素</th></tr>
+<tr>
+  <td>6/13</td><td>🇧🇷 巴西 vs 摩洛哥 🇲🇦</td>
+  <td class="score">1-1</td><td class="score2">2-1</td>
+  <td>巴+0.5</td>
+  <td>摩洛哥防守体系+高压;巴西锋线缺终结者</td>
+</tr>
+<tr>
+  <td>6/13</td><td>🇭🇹 海地 vs 苏格兰 🏴󠁧󠁢󠁳󠁣󠁴󠁿</td>
+  <td class="score">0-2</td><td class="score2">0-1</td>
+  <td>苏+1.5</td>
+  <td>苏格兰重返世界杯首战;海地实力最弱</td>
+</tr>
+<tr>
+  <td>6/19</td><td>🏴󠁧󠁢󠁳󠁣󠁴󠁿 苏格兰 vs 摩洛哥 🇲🇦</td>
+  <td class="score">0-1</td><td class="score2">1-2</td>
+  <td>摩+1</td>
+  <td>摩洛哥非洲冠军底蕴;苏格兰防线老化</td>
+</tr>
+<tr>
+  <td>6/19</td><td>🇧🇷 巴西 vs 海地 🇭🇹</td>
+  <td class="score">3-0</td><td class="score2">4-0</td>
+  <td>巴+3</td>
+  <td>实力悬殊;巴西刷净胜球</td>
+</tr>
+<tr>
+  <td>6/24</td><td>🏴󠁧󠁢󠁳󠁣󠁴󠁿 苏格兰 vs 巴西 🇧🇷</td>
+  <td class="score">0-2</td><td class="score2">1-3</td>
+  <td>巴+1.5</td>
+  <td>巴西需赢确保头名;苏格兰身体对抗</td>
+</tr>
+<tr>
+  <td>6/24</td><td>🇲🇦 摩洛哥 vs 海地 🇭🇹</td>
+  <td class="score">3-0</td><td class="score2">2-0</td>
+  <td>摩+2</td>
+  <td>摩洛哥锁定出线;实力碾压</td>
+</tr>
+</table>
+
+<!-- GROUP D -->
+<h2 id="groupD">D组: 🇺🇸美国 · 🇵🇾巴拉圭 · 🇦🇺澳大利亚 · 🇹🇷土耳其</h2>
+<div class="card">
+  <h4>小组形势分析</h4>
+  <p>美国主场+波切蒂诺执教,普利西奇领衔,阵容深度是A组队伍中最强。<span class="tag tag-host">东道主</span> 土耳其恰尔汗奥卢核心但防守不稳定。巴拉圭传统防守反击。澳大利亚身体对抗强但技术粗糙。<br>
+  <strong>预测小组出线: 美国(1)、土耳其(2)、澳大利亚(3,待定)</strong></p>
+</div>
+<table>
+<tr class="group-header"><th>日期</th><th>对阵</th><th>预测比分1</th><th>预测比分2</th><th>实力差</th><th>关键因素</th></tr>
+<tr>
+  <td>6/12</td><td>🇺🇸 美国 vs 巴拉圭 🇵🇾</td>
+  <td class="score">2-0</td><td class="score2">1-0</td>
+  <td>美+1.5</td>
+  <td>美国索菲球场主场;巴拉圭进攻乏力</td>
+</tr>
+<tr>
+  <td>6/13</td><td>🇦🇺 澳大利亚 vs 土耳其 🇹🇷</td>
+  <td class="score">0-1</td><td class="score2">1-2</td>
+  <td>土+0.5</td>
+  <td>土耳其中场优势;澳大利亚锋无力</td>
+</tr>
+<tr>
+  <td>6/19</td><td>🇺🇸 美国 vs 澳大利亚 🇦🇺</td>
+  <td class="score">2-1</td><td class="score2">3-1</td>
+  <td>美+1.5</td>
+  <td>美国连续主场;澳大利亚体力消耗大</td>
+</tr>
+<tr>
+  <td>6/19</td><td>🇹🇷 土耳其 vs 巴拉圭 🇵🇾</td>
+  <td class="score">1-0</td><td class="score2">1-1</td>
+  <td>土+0.5</td>
+  <td>土耳其创造机会多;巴拉圭防线稳固</td>
+</tr>
+<tr>
+  <td>6/25</td><td>🇹🇷 土耳其 vs 美国 🇺🇸</td>
+  <td class="score">1-2</td><td class="score2">0-1</td>
+  <td>美+1</td>
+  <td>争头名;美国整体更强;土耳其防线漏洞</td>
+</tr>
+<tr>
+  <td>6/25</td><td>🇵🇾 巴拉圭 vs 澳大利亚 🇦🇺</td>
+  <td class="score">0-0</td><td class="score2">1-1</td>
+  <td>均</td>
+  <td>两支身体型球队;低比分闷平概率大</td>
+</tr>
+</table>
+
+<!-- GROUP E -->
+<h2 id="groupE">E组: 🇩🇪德国 · 🇨🇼库拉索 · 🇨🇮科特迪瓦 · 🇪🇨厄瓜多尔</h2>
+<div class="card">
+  <h4>小组形势分析</h4>
+  <p>德国纳格尔斯曼重建,维尔茨+穆夏拉双核,<span class="tag tag-inj">诺伊尔40岁复出</span>有隐患。科特迪瓦非洲强队但大赛波动大。厄瓜多尔南美预选赛表现出色。库拉索首次世界杯,老帅阿德沃卡特带队。<br>
+  <strong>预测小组出线: 德国(1)、厄瓜多尔(2)、科特迪瓦(3,待定)</strong></p>
+</div>
+<table>
+<tr class="group-header"><th>日期</th><th>对阵</th><th>预测比分1</th><th>预测比分2</th><th>实力差</th><th>关键因素</th></tr>
+<tr>
+  <td>6/14</td><td>🇩🇪 德国 vs 库拉索 🇨🇼</td>
+  <td class="score">4-0</td><td class="score2">5-0</td>
+  <td>德+4</td>
+  <td>实力碾压;库拉索首次世界杯经验不足</td>
+</tr>
+<tr>
+  <td>6/14</td><td>🇨🇮 科特迪瓦 vs 厄瓜多尔 🇪🇨</td>
+  <td class="score">0-1</td><td class="score2">1-1</td>
+  <td>厄+0.5</td>
+  <td>厄瓜多尔南美高强度对抗经验占优</td>
+</tr>
+<tr>
+  <td>6/20</td><td>🇩🇪 德国 vs 科特迪瓦 🇨🇮</td>
+  <td class="score">3-1</td><td class="score2">2-0</td>
+  <td>德+2</td>
+  <td>德国进攻火力;科特迪瓦防守不够紧凑</td>
+</tr>
+<tr>
+  <td>6/20</td><td>🇪🇨 厄瓜多尔 vs 库拉索 🇨🇼</td>
+  <td class="score">2-0</td><td class="score2">3-1</td>
+  <td>厄+2</td>
+  <td>厄瓜多尔抢分出线;库拉索实力差距</td>
+</tr>
+<tr>
+  <td>6/25</td><td>🇪🇨 厄瓜多尔 vs 德国 🇩🇪</td>
+  <td class="score">0-2</td><td class="score2">1-2</td>
+  <td>德+1.5</td>
+  <td>德国轮换也可能;厄瓜多尔全力争第三名出线</td>
+</tr>
+<tr>
+  <td>6/25</td><td>🇨🇼 库拉索 vs 科特迪瓦 🇨🇮</td>
+  <td class="score">0-2</td><td class="score2">0-3</td>
+  <td>科+2</td>
+  <td>科特迪瓦抢净胜球争取第三名晋级</td>
+</tr>
+</table>
+
+<!-- GROUP F -->
+<h2 id="groupF">F组: 🇳🇱荷兰 · 🇯🇵日本 · 🇸🇪瑞典 · 🇹🇳突尼斯</h2>
+<div class="card">
+  <h4>小组形势分析</h4>
+  <p>死亡之组。荷兰科曼大换血(13人变动),但范戴克+德容核心仍在。日本<span class="tag tag-inj">南野拓实ACL缺阵</span>,远藤航脚伤存疑,但2022击败德国西班牙证明上限。瑞典于厄克雷斯状态火热。突尼斯防守组织好。<br>
+  <strong>预测小组出线: 荷兰(1)、瑞典(2)、日本(3,有竞争力)</strong></p>
+</div>
+<table>
+<tr class="group-header"><th>日期</th><th>对阵</th><th>预测比分1</th><th>预测比分2</th><th>实力差</th><th>关键因素</th></tr>
+<tr>
+  <td>6/14</td><td>🇳🇱 荷兰 vs 日本 🇯🇵</td>
+  <td class="score">2-0</td><td class="score2">1-0</td>
+  <td>荷+1</td>
+  <td>日本伤病严重;荷兰人员大换血但个人能力占优</td>
+</tr>
+<tr>
+  <td>6/14</td><td>🇸🇪 瑞典 vs 突尼斯 🇹🇳</td>
+  <td class="score">1-0</td><td class="score2">2-1</td>
+  <td>瑞+1</td>
+  <td>瑞典于厄克雷斯终结能力强;突尼斯防守反击</td>
+</tr>
+<tr>
+  <td>6/20</td><td>🇳🇱 荷兰 vs 瑞典 🇸🇪</td>
+  <td class="score">1-1</td><td class="score2">2-1</td>
+  <td>荷+0.5</td>
+  <td>小组头名争夺;五五开局</td>
+</tr>
+<tr>
+  <td>6/20</td><td>🇹🇳 突尼斯 vs 日本 🇯🇵</td>
+  <td class="score">0-1</td><td class="score2">0-2</td>
+  <td>日+0.5</td>
+  <td>世界杯第1000场;日本技术优势;突尼斯进攻乏力</td>
+</tr>
+<tr>
+  <td>6/25</td><td>🇯🇵 日本 vs 瑞典 🇸🇪</td>
+  <td class="score">1-2</td><td class="score2">0-1</td>
+  <td>瑞+0.5</td>
+  <td>日本抢出线生死战;瑞典身体对抗占优</td>
+</tr>
+<tr>
+  <td>6/25</td><td>🇹🇳 突尼斯 vs 荷兰 🇳🇱</td>
+  <td class="score">0-2</td><td class="score2">0-1</td>
+  <td>荷+1.5</td>
+  <td>荷兰需赢确保头名;突尼斯已出局</td>
+</tr>
+</table>
+
+<!-- GROUP G -->
+<h2 id="groupG">G组: 🇧🇪比利时 · 🇪🇬埃及 · 🇮🇷伊朗 · 🇳🇿新西兰</h2>
+<div class="card">
+  <h4>小组形势分析</h4>
+  <p>比利时加西亚执教,<span class="tag tag-inj">卢卡库仅5次联赛出场</span>状态堪忧。埃及萨拉赫+马尔穆什双核,1-0俄罗斯(无萨拉赫)状态不错。伊朗塔雷米+阿兹蒙经验丰富。新西兰伍德身体型中锋但整体弱。<br>
+  <strong>预测小组出线: 比利时(1)、埃及(2)、伊朗(3,待定)</strong></p>
+</div>
+<table>
+<tr class="group-header"><th>日期</th><th>对阵</th><th>预测比分1</th><th>预测比分2</th><th>实力差</th><th>关键因素</th></tr>
+<tr>
+  <td>6/15</td><td>🇧🇪 比利时 vs 埃及 🇪🇬</td>
+  <td class="score">1-1</td><td class="score2">2-1</td>
+  <td>比+0.5</td>
+  <td>卢卡库状态成疑;埃及萨拉赫回归</td>
+</tr>
+<tr>
+  <td>6/15</td><td>🇮🇷 伊朗 vs 新西兰 🇳🇿</td>
+  <td class="score">2-0</td><td class="score2">3-1</td>
+  <td>伊+1.5</td>
+  <td>伊朗大赛经验丰富;新西兰实力有限</td>
+</tr>
+<tr>
+  <td>6/21</td><td>🇧🇪 比利时 vs 伊朗 🇮🇷</td>
+  <td class="score">1-0</td><td class="score2">2-1</td>
+  <td>比+0.5</td>
+  <td>比利时需反弹;伊朗防守强硬</td>
+</tr>
+<tr>
+  <td>6/21</td><td>🇳🇿 新西兰 vs 埃及 🇪🇬</td>
+  <td class="score">0-2</td><td class="score2">0-3</td>
+  <td>埃+2</td>
+  <td>埃及轻松取胜;萨拉赫刷数据</td>
+</tr>
+<tr>
+  <td>6/26</td><td>🇪🇬 埃及 vs 伊朗 🇮🇷</td>
+  <td class="score">2-1</td><td class="score2">1-0</td>
+  <td>埃+0.5</td>
+  <td>争小组第二;埃及锋线双核更强</td>
+</tr>
+<tr>
+  <td>6/26</td><td>🇳🇿 新西兰 vs 比利时 🇧🇪</td>
+  <td class="score">0-3</td><td class="score2">0-2</td>
+  <td>比+2</td>
+  <td>比利时刷净胜球确保头名</td>
+</tr>
+</table>
+
+<!-- GROUP H -->
+<h2 id="groupH">H组: 🇪🇸西班牙 · 🇨🇻佛得角 · 🇸🇦沙特 · 🇺🇾乌拉圭</h2>
+<div class="card">
+  <h4>小组形势分析</h4>
+  <p>西班牙欧锦赛冠军,<span class="tag tag-inj">首次无皇马球员入选</span>,亚马尔+佩德里青年军极致传控。乌拉圭贝尔萨逼抢体系,努涅斯+巴尔韦德双核。沙特亚洲杯表现一般。佛得角首次世界杯。<br>
+  <strong>预测小组出线: 西班牙(1)、乌拉圭(2)、沙特(3,竞争弱)</strong></p>
+</div>
+<table>
+<tr class="group-header"><th>日期</th><th>对阵</th><th>预测比分1</th><th>预测比分2</th><th>实力差</th><th>关键因素</th></tr>
+<tr>
+  <td>6/15</td><td>🇪🇸 西班牙 vs 佛得角 🇨🇻</td>
+  <td class="score">4-0</td><td class="score2">5-0</td>
+  <td>西+4</td>
+  <td>实力碾压;佛得角首次世界杯</td>
+</tr>
+<tr>
+  <td>6/15</td><td>🇸🇦 沙特 vs 乌拉圭 🇺🇾</td>
+  <td class="score">0-3</td><td class="score2">0-2</td>
+  <td>乌+2.5</td>
+  <td>乌拉圭贝尔萨高压;沙特难抵挡</td>
+</tr>
+<tr>
+  <td>6/21</td><td>🇪🇸 西班牙 vs 沙特 🇸🇦</td>
+  <td class="score">3-0</td><td class="score2">2-0</td>
+  <td>西+2.5</td>
+  <td>西班牙控场;沙特难有进攻机会</td>
+</tr>
+<tr>
+  <td>6/21</td><td>🇺🇾 乌拉圭 vs 佛得角 🇨🇻</td>
+  <td class="score">3-0</td><td class="score2">2-0</td>
+  <td>乌+2.5</td>
+  <td>乌拉圭轻松取胜;锁定出线</td>
+</tr>
+<tr>
+  <td>6/26</td><td>🇺🇾 乌拉圭 vs 西班牙 🇪🇸</td>
+  <td class="score">0-1</td><td class="score2">1-2</td>
+  <td>西+0.5</td>
+  <td>小组头名之战;西班牙控球压制</td>
+</tr>
+<tr>
+  <td>6/26</td><td>🇨🇻 佛得角 vs 沙特 🇸🇦</td>
+  <td class="score">0-1</td><td class="score2">1-2</td>
+  <td>沙+0.5</td>
+  <td>荣誉之战;沙特技术稍优</td>
+</tr>
+</table>
+
+<!-- GROUP I -->
+<h2 id="groupI">I组: 🇫🇷法国 · 🇸🇳塞内加尔 · 🇮🇶伊拉克 · 🇳🇴挪威</h2>
+<div class="card">
+  <h4>小组形势分析</h4>
+  <p>超级死亡之组!法国德尚最后一届,姆巴佩队长(大腿伤),<span class="tag tag-inj">格列兹曼+卡马文加落选</span>。塞内加尔非洲最均衡球队。挪威<span class="tag tag-dark">哈兰德预选赛16球</span>+厄德高,预选赛8战全胜!伊拉克实力最弱。<br>
+  <strong>预测小组出线: 法国(1)、挪威(2)、塞内加尔(3,强第三名)</strong></p>
+</div>
+<table>
+<tr class="group-header"><th>日期</th><th>对阵</th><th>预测比分1</th><th>预测比分2</th><th>实力差</th><th>关键因素</th></tr>
+<tr>
+  <td>6/16</td><td>🇫🇷 法国 vs 塞内加尔 🇸🇳</td>
+  <td class="score">2-1</td><td class="score2">1-0</td>
+  <td>法+1</td>
+  <td>法国个人能力;塞内加尔节奏对抗</td>
+</tr>
+<tr>
+  <td>6/16</td><td>🇮🇶 伊拉克 vs 挪威 🇳🇴</td>
+  <td class="score">0-3</td><td class="score2">0-4</td>
+  <td>挪+3</td>
+  <td>哈兰德帽子戏法?伊拉克难以防住</td>
+</tr>
+<tr>
+  <td>6/22</td><td>🇫🇷 法国 vs 伊拉克 🇮🇶</td>
+  <td class="score">4-0</td><td class="score2">3-0</td>
+  <td>法+3</td>
+  <td>法国刷净胜球;伊拉克实力差距</td>
+</tr>
+<tr>
+  <td>6/22</td><td>🇳🇴 挪威 vs 塞内加尔 🇸🇳</td>
+  <td class="score">2-1</td><td class="score2">1-1</td>
+  <td>挪+0.5</td>
+  <td>出线关键战;哈兰德vs马内;五五开</td>
+</tr>
+<tr>
+  <td>6/26</td><td>🇳🇴 挪威 vs 法国 🇫🇷</td>
+  <td class="score">1-2</td><td class="score2">2-2</td>
+  <td>法+0.5</td>
+  <td>头名之争;哈兰德检验法国防线</td>
+</tr>
+<tr>
+  <td>6/26</td><td>🇸🇳 塞内加尔 vs 伊拉克 🇮🇶</td>
+  <td class="score">2-0</td><td class="score2">3-0</td>
+  <td>塞+2</td>
+  <td>塞内加尔争第三名出线需净胜球</td>
+</tr>
+</table>
+
+<!-- GROUP J -->
+<h2 id="groupJ">J组: 🇦🇷阿根廷 · 🇩🇿阿尔及利亚 · 🇦🇹奥地利 · 🇯🇴约旦</h2>
+<div class="card">
+  <h4>小组形势分析</h4>
+  <p>阿根廷卫冕冠军,<span class="tag tag-dark">梅西40岁第6届世界杯</span>,阿尔瓦雷斯+恩佐当打之年,迪马利亚已退出。奥地利朗尼克逼抢体系,欧洲预选赛表现出色。<span class="tag tag-dark">真正黑马</span> 阿尔及利亚马赫雷斯最后一舞。约旦首次世界杯。<br>
+  <strong>预测小组出线: 阿根廷(1)、奥地利(2)、阿尔及利亚(3,待定)</strong></p>
+</div>
+<table>
+<tr class="group-header"><th>日期</th><th>对阵</th><th>预测比分1</th><th>预测比分2</th><th>实力差</th><th>关键因素</th></tr>
+<tr>
+  <td>6/16</td><td>🇦🇷 阿根廷 vs 阿尔及利亚 🇩🇿</td>
+  <td class="score">2-0</td><td class="score2">3-1</td>
+  <td>阿+2</td>
+  <td>阿根廷卫冕首战;梅西灵感</td>
+</tr>
+<tr>
+  <td>6/17</td><td>🇦🇹 奥地利 vs 约旦 🇯🇴</td>
+  <td class="score">3-0</td><td class="score2">2-0</td>
+  <td>奥+2</td>
+  <td>朗尼克高压逼抢;约旦难以适应</td>
+</tr>
+<tr>
+  <td>6/22</td><td>🇦🇷 阿根廷 vs 奥地利 🇦🇹</td>
+  <td class="score">1-0</td><td class="score2">1-1</td>
+  <td>阿+0.5</td>
+  <td>小组头名之战;奥地利逼抢考验阿根廷后防</td>
+</tr>
+<tr>
+  <td>6/22</td><td>🇯🇴 约旦 vs 阿尔及利亚 🇩🇿</td>
+  <td class="score">0-2</td><td class="score2">0-1</td>
+  <td>阿+1.5</td>
+  <td>阿尔及利亚争第三;约旦实力最弱</td>
+</tr>
+<tr>
+  <td>6/27</td><td>🇩🇿 阿尔及利亚 vs 奥地利 🇦🇹</td>
+  <td class="score">0-1</td><td class="score2">1-2</td>
+  <td>奥+1</td>
+  <td>奥地利争出线;阿尔及利亚老将体力堪忧</td>
+</tr>
+<tr>
+  <td>6/27</td><td>🇯🇴 约旦 vs 阿根廷 🇦🇷</td>
+  <td class="score">0-3</td><td class="score2">0-4</td>
+  <td>阿+3</td>
+  <td>阿根廷锁定头名;梅西可能轮换半场</td>
+</tr>
+</table>
+
+<!-- GROUP K -->
+<h2 id="groupK">K组: 🇵🇹葡萄牙 · 🇨🇩刚果(金) · 🇺🇿乌兹别克 · 🇨🇴哥伦比亚</h2>
+<div class="card">
+  <h4>小组形势分析</h4>
+  <p>葡萄牙B费+B席中场,<span class="tag tag-dark">C罗41岁</span>角色已转为精神领袖。哥伦比亚美洲杯亚军,洛伦佐体系不败纪录,实力强劲。<span class="tag tag-dark">真正黑马</span> 刚果(金)52年重返世界杯。乌兹别克亚洲新势力。<br>
+  <strong>预测小组出线: 哥伦比亚(1)、葡萄牙(2)、刚果(金)(3,待定)</strong></p>
+</div>
+<table>
+<tr class="group-header"><th>日期</th><th>对阵</th><th>预测比分1</th><th>预测比分2</th><th>实力差</th><th>关键因素</th></tr>
+<tr>
+  <td>6/17</td><td>🇵🇹 葡萄牙 vs 刚果(金) 🇨🇩</td>
+  <td class="score">2-0</td><td class="score2">3-1</td>
+  <td>葡+1.5</td>
+  <td>葡萄牙技术优势;刚果大赛经验不足</td>
+</tr>
+<tr>
+  <td>6/17</td><td>🇺🇿 乌兹别克 vs 哥伦比亚 🇨🇴</td>
+  <td class="score">0-2</td><td class="score2">0-3</td>
+  <td>哥+2</td>
+  <td>哥伦比亚不败金身;乌兹别克实力差距</td>
+</tr>
+<tr>
+  <td>6/23</td><td>🇵🇹 葡萄牙 vs 乌兹别克 🇺🇿</td>
+  <td class="score">2-0</td><td class="score2">3-0</td>
+  <td>葡+2</td>
+  <td>葡萄牙锁定出线;实力碾压</td>
+</tr>
+<tr>
+  <td>6/23</td><td>🇨🇴 哥伦比亚 vs 刚果(金) 🇨🇩</td>
+  <td class="score">2-0</td><td class="score2">1-0</td>
+  <td>哥+1.5</td>
+  <td>哥伦比亚防守稳固;刚果进攻受限</td>
+</tr>
+<tr>
+  <td>6/27</td><td>🇨🇴 哥伦比亚 vs 葡萄牙 🇵🇹</td>
+  <td class="score">1-1</td><td class="score2">2-1</td>
+  <td>均</td>
+  <td>头名之争!本届小组赛最强对决之一</td>
+</tr>
+<tr>
+  <td>6/27</td><td>🇨🇩 刚果(金) vs 乌兹别克 🇺🇿</td>
+  <td class="score">1-1</td><td class="score2">2-1</td>
+  <td>均</td>
+  <td>争第三名;刚果身体对抗优势</td>
+</tr>
+</table>
+
+<!-- GROUP L -->
+<h2 id="groupL">L组: 🏴󠁧󠁢󠁥󠁮󠁧󠁿英格兰 · 🇭🇷克罗地亚 · 🇬🇭加纳 · 🇵🇦巴拿马</h2>
+<div class="card">
+  <h4>小组形势分析</h4>
+  <p>英格兰图赫尔执教,<span class="tag tag-inj">福登/帕尔默/TAA/马奎尔全部落选</span>,贝林厄姆成为新核心,但极度依赖凯恩。克罗地亚莫德里奇(40)+科瓦契奇最后一舞,世界杯血统深厚。加纳新帅奎罗斯,0-2墨西哥状态差。巴拿马2-1南非状态不错。<br>
+  <strong>预测小组出线: 英格兰(1)、克罗地亚(2)、巴拿马(3,待定)</strong></p>
+</div>
+<table>
+<tr class="group-header"><th>日期</th><th>对阵</th><th>预测比分1</th><th>预测比分2</th><th>实力差</th><th>关键因素</th></tr>
+<tr>
+  <td>6/17</td><td>🏴󠁧󠁢󠁥󠁮󠁧󠁿 英格兰 vs 克罗地亚 🇭🇷</td>
+  <td class="score">1-0</td><td class="score2">2-1</td>
+  <td>英+0.5</td>
+  <td>英格兰个人能力;克罗地亚中场控制</td>
+</tr>
+<tr>
+  <td>6/17</td><td>🇬🇭 加纳 vs 巴拿马 🇵🇦</td>
+  <td class="score">0-1</td><td class="score2">1-1</td>
+  <td>均</td>
+  <td>巴拿马2-1南非状态好;加纳新帅磨合不足</td>
+</tr>
+<tr>
+  <td>6/23</td><td>🏴󠁧󠁢󠁥󠁮󠁧󠁿 英格兰 vs 加纳 🇬🇭</td>
+  <td class="score">2-0</td><td class="score2">3-0</td>
+  <td>英+2</td>
+  <td>英格兰锁定出线;加纳状态差</td>
+</tr>
+<tr>
+  <td>6/23</td><td>🇵🇦 巴拿马 vs 克罗地亚 🇭🇷</td>
+  <td class="score">0-1</td><td class="score2">0-2</td>
+  <td>克+1.5</td>
+  <td>克罗地亚争头名;巴拿马防守反击</td>
+</tr>
+<tr>
+  <td>6/27</td><td>🇵🇦 巴拿马 vs 英格兰 🏴󠁧󠁢󠁥󠁮󠁧󠁿</td>
+  <td class="score">0-2</td><td class="score2">0-1</td>
+  <td>英+1.5</td>
+  <td>英格兰轮换;巴拿马难破英式防线</td>
+</tr>
+<tr>
+  <td>6/27</td><td>🇭🇷 克罗地亚 vs 加纳 🇬🇭</td>
+  <td class="score">2-0</td><td class="score2">1-0</td>
+  <td>克+1.5</td>
+  <td>克罗地亚争头名;加纳已出局</td>
+</tr>
+</table>
+
+<!-- SECTION 14: KNOCKOUT PREDICTIONS -->
+<h2 id="knockout">14. 淘汰赛预测路径 (基于小组赛预测)</h2>
+
+<div class="card gold">
+  <h4>小组出线预测汇总</h4>
+  <table>
+    <tr><th>组别</th><th>小组第一</th><th>小组第二</th><th>最佳第三</th></tr>
+    <tr><td>A</td><td>🇲🇽 墨西哥</td><td>🇰🇷 韩国</td><td>🇨🇿 捷克</td></tr>
+    <tr><td>B</td><td>🇨🇭 瑞士</td><td>🇨🇦 加拿大</td><td>🇧🇦 波黑</td></tr>
+    <tr><td>C</td><td>🇧🇷 巴西</td><td>🇲🇦 摩洛哥</td><td>🏴󠁧󠁢󠁳󠁣󠁴󠁿 苏格兰</td></tr>
+    <tr><td>D</td><td>🇺🇸 美国</td><td>🇹🇷 土耳其</td><td>🇦🇺 澳大利亚</td></tr>
+    <tr><td>E</td><td>🇩🇪 德国</td><td>🇪🇨 厄瓜多尔</td><td>🇨🇮 科特迪瓦</td></tr>
+    <tr><td>F</td><td>🇳🇱 荷兰</td><td>🇸🇪 瑞典</td><td>🇯🇵 日本</td></tr>
+    <tr><td>G</td><td>🇧🇪 比利时</td><td>🇪🇬 埃及</td><td>🇮🇷 伊朗</td></tr>
+    <tr><td>H</td><td>🇪🇸 西班牙</td><td>🇺🇾 乌拉圭</td><td>🇸🇦 沙特</td></tr>
+    <tr><td>I</td><td>🇫🇷 法国</td><td>🇳🇴 挪威</td><td>🇸🇳 塞内加尔 ⭐</td></tr>
+    <tr><td>J</td><td>🇦🇷 阿根廷</td><td>🇦🇹 奥地利</td><td>🇩🇿 阿尔及利亚</td></tr>
+    <tr><td>K</td><td>🇨🇴 哥伦比亚</td><td>🇵🇹 葡萄牙</td><td>🇨🇩 刚果(金)</td></tr>
+    <tr><td>L</td><td>🏴󠁧󠁢󠁥󠁮󠁧󠁿 英格兰</td><td>🇭🇷 克罗地亚</td><td>🇵🇦 巴拿马</td></tr>
+  </table>
+  <p style="margin-top:10px;color:var(--muted);">⭐ = 最有竞争力的第三名出线队 | 8个第三名晋级名额中的前8名</p>
+</div>
+
+<div class="card">
+  <h4>淘汰赛预测路径</h4>
+  <table>
+    <tr><th>轮次</th><th>日期</th><th>对阵</th><th>预测</th></tr>
+    <tr><td>R32</td><td>6/28</td><td>A2🇰🇷 vs B2🇨🇦</td><td class="score">🇰🇷 1-0 (加时)</td></tr>
+    <tr><td>R32</td><td>6/29</td><td>E1🇩🇪 vs 3rd🇨🇮</td><td class="score">🇩🇪 3-0</td></tr>
+    <tr><td>R32</td><td>6/29</td><td>F1🇳🇱 vs C2🇲🇦</td><td class="score">🇳🇱 1-1 (点球🇲🇦胜) ⚡爆冷</td></tr>
+    <tr><td>R32</td><td>6/29</td><td>C1🇧🇷 vs F2🇸🇪</td><td class="score">🇧🇷 2-1</td></tr>
+    <tr><td>R32</td><td>6/30</td><td>I1🇫🇷 vs 3rd🇸🇳</td><td class="score">🇫🇷 2-0</td></tr>
+    <tr><td>R32</td><td>6/30</td><td>E2🇪🇨 vs I2🇳🇴</td><td class="score">🇳🇴 3-1 (哈兰德双响)</td></tr>
+    <tr><td>R32</td><td>6/30</td><td>A1🇲🇽 vs 3rd🇯🇵</td><td class="score">🇲🇽 1-1 (点球🇲🇽胜)</td></tr>
+    <tr><td>R32</td><td>7/1</td><td>L1🏴󠁧󠁢󠁥󠁮󠁧󠁿 vs 3rd🇨🇿</td><td class="score">🏴󠁧󠁢󠁥󠁮󠁧󠁿 2-0</td></tr>
+    <tr><td>R32</td><td>7/1</td><td>D1🇺🇸 vs 3rd🇦🇺</td><td class="score">🇺🇸 2-0</td></tr>
+    <tr><td>R32</td><td>7/1</td><td>G1🇧🇪 vs 3rd🇩🇿</td><td class="score">🇧🇪 1-0</td></tr>
+    <tr><td>R32</td><td>7/2</td><td>K2🇵🇹 vs L2🇭🇷</td><td class="score">🇭🇷 1-1 (点球🇭🇷胜) ⚡</td></tr>
+    <tr><td>R32</td><td>7/2</td><td>H1🇪🇸 vs J2🇦🇹</td><td class="score">🇪🇸 2-0</td></tr>
+    <tr><td>R32</td><td>7/2</td><td>B1🇨🇭 vs 3rd🇧🇦</td><td class="score">🇨🇭 1-0</td></tr>
+    <tr><td>R32</td><td>7/3</td><td>J1🇦🇷 vs H2🇺🇾</td><td class="score">🇦🇷 2-1</td></tr>
+    <tr><td>R32</td><td>7/3</td><td>K1🇨🇴 vs 3rd🏴󠁧󠁢󠁳󠁣󠁴󠁿</td><td class="score">🇨🇴 2-0</td></tr>
+    <tr><td>R32</td><td>7/3</td><td>D2🇹🇷 vs G2🇪🇬</td><td class="score">🇪🇬 1-1 (点球🇪🇬胜)</td></tr>
+  </table>
+</div>
+
+<div class="card">
+  <h4>16强 → 8强 → 4强 → 决赛</h4>
+  <table>
+    <tr><th>R16</th><th>QF</th><th>SF</th><th>Final</th></tr>
+    <tr>
+      <td>🇩🇪德国 3-1 🇰🇷韩国<br>🇲🇦摩洛哥 1-0 🇧🇷巴西</td>
+      <td>🇩🇪德国 2-1 🇲🇦摩洛哥</td>
+      <td rowspan="4">🇩🇪德国 vs 🇪🇸西班牙<br><span class="score">1-2</span></td>
+      <td rowspan="8" style="text-align:center;font-size:1.3em;font-weight:700;">🏆 🇪🇸西班牙<br>vs<br>🇫🇷法国<br><br><span class="score" style="font-size:1.1em;">2-1 (加时)</span><br>或<br><span class="score2">1-1 (点球)</span><br><br>冠军:🇪🇸西班牙</td>
+    </tr>
+    <tr>
+      <td>🇫🇷法国 2-1 🇳🇴挪威<br>🇲🇽墨西哥 1-0 🏴󠁧󠁢󠁥󠁮󠁧󠁿英格兰</td>
+      <td>🇫🇷法国 3-1 🇲🇽墨西哥</td>
+    </tr>
+    <tr>
+      <td>🇪🇸西班牙 2-0 🇭🇷克罗地亚<br>🇨🇭瑞士 1-0 🇧🇪比利时</td>
+      <td>🇪🇸西班牙 2-0 🇨🇭瑞士</td>
+    </tr>
+    <tr>
+      <td>🇦🇷阿根廷 2-0 🇺🇸美国<br>🇨🇴哥伦比亚 1-0 🇪🇬埃及</td>
+      <td>🇦🇷阿根廷 2-0 🇨🇴哥伦比亚</td>
+      <td rowspan="4">🇫🇷法国 vs 🇦🇷阿根廷<br><span class="score">2-1</span></td>
+    </tr>
+  </table>
+</div>
+
+<!-- SECTION 15: BETTING STRATEGY -->
+<h2 id="strategy">15. 竞彩75倍回报 — 数学现实分析</h2>
+
+<div class="strategy-box">
+  <h3>75倍回报的数学含义</h3>
+  <p>竞彩"比分"玩法中,单场精确比分赔率通常在<strong>6倍-30倍</strong>之间:</p>
+  <ul style="margin-left:20px;line-height:2;">
+    <li>1-0 / 2-0 / 2-1 → 6-10倍 (常见比分)</li>
+    <li>3-1 / 3-2 / 0-0 / 1-1 → 10-18倍</li>
+    <li>3-3 / 4-2 / 4-3 → 25-40倍</li>
+    <li>4-4 / 5-3等 → 50倍+</li>
+  </ul>
+  <p style="margin-top:12px;"><strong>75倍 = 你需要串关2场比分,或单押极冷门比分</strong></p>
+</div>
+
+<div class="card red">
+  <h4>三条路径的数学期望值</h4>
+  <table>
+    <tr><th>策略</th><th>组合</th><th>理论中奖率</th><th>75倍难度</th><th>期望值</th></tr>
+    <tr>
+      <td>串2场2-1比分</td>
+      <td>两场各~8倍 → 64倍</td>
+      <td>~1/400 (0.25%)</td>
+      <td>需再加1场</td>
+      <td class="lose">-60%至-70%</td>
+    </tr>
+    <tr>
+      <td>串2场冷门比分</td>
+      <td>一场3-2(18倍)×一场3-1(14倍) → 252倍</td>
+      <td>~1/2500 (0.04%)</td>
+      <td>远超75倍</td>
+      <td class="lose">-70%至-80%</td>
+    </tr>
+    <tr>
+      <td>串3场常见比分</td>
+      <td>2-0(7)×2-1(8)×1-0(6.5) → 364倍</td>
+      <td>~1/8000 (0.0125%)</td>
+      <td>远超75倍</td>
+      <td class="lose">-75%至-85%</td>
+    </tr>
+    <tr>
+      <td>单场搏冷</td>
+      <td>3-3 / 4-2 → 单场30-50倍</td>
+      <td>~2-4%</td>
+      <td>需要额外串关达到75倍</td>
+      <td class="lose">-25%至-35%</td>
+    </tr>
+  </table>
+  <p style="margin-top:15px;color:var(--red);"><strong>核心结论: 75倍回报的本质是用极高风险换取的极低概率事件。长期重复,你的资金会稳定归零。</strong></p>
+  <p style="color:var(--muted);">竞彩的理论返奖率约65-75%。这意味着每投入100元,数学上你只能拿回65-75元。75倍回报目标的隐含概率远低于1%,对赌的是"万一中了"的幻想,而非可重复的正期望值策略。</p>
+</div>
+
+<!-- SECTION 16: SPECIFIC BETTING SUGGESTIONS -->
+<h2 id="betting">16. 如果要买——相对"理性"的竞彩组合策略</h2>
+
+<div class="card green">
+  <h4>策略A: 低风险低回报 (长期存活)</h4>
+  <p><strong>只买"胜平负"单关</strong>,不串比分。单关返奖率最高(约70%),是竞彩中唯一长期期望值相对友好的玩法。</p>
+  <p>推荐: 小组赛初期,挑选实力悬殊的比赛(德国vs库拉索、西班牙vs佛得角),单关买"让球胜"。</p>
+  <p style="color:var(--muted);">预期回报率: -15%至-25%/每注 (长期仍为负)</p>
+</div>
+
+<div class="card gold">
+  <h4>策略B: 中风险 — 高赔率比分单关 + 小注</h4>
+  <p>只买<strong>单场比赛的精确比分</strong>,不串关。选赔率20-30倍的比分:</p>
+  <table>
+    <tr><th>比赛</th><th>投注比分</th><th>逻辑</th><th>预估赔率</th></tr>
+    <tr><td>🇲🇦摩洛哥 vs 🇧🇷巴西 (6/13)</td><td class="score">1-1</td><td>安切洛蒂巴西缺终结者;摩洛哥非洲冠军防守好</td><td>~8-10倍</td></tr>
+    <tr><td>🇳🇴挪威 vs 🇸🇳塞内加尔 (6/22)</td><td class="score">2-2</td><td>哈兰德+马内双锋对攻;防守都有漏洞</td><td>~15-18倍</td></tr>
+    <tr><td>🇨🇴哥伦比亚 vs 🇵🇹葡萄牙 (6/27)</td><td class="score">1-1</td><td>最强小组对决;哥伦比亚防守+葡萄牙控球</td><td>~7-8倍</td></tr>
+    <tr><td>🇳🇴挪威 vs 🇫🇷法国 (6/26)</td><td class="score">2-2</td><td>哈兰德检验法国防线;小组头名战开放打法</td><td>~15-20倍</td></tr>
+    <tr><td>🇲🇽墨西哥 vs 🇰🇷韩国 (6/18)</td><td class="score">2-1</td><td>墨西哥主场;韩国技术好能进1球</td><td>~8-10倍</td></tr>
+  </table>
+  <p style="margin-top:10px;">每注50-100元,分散5-8场比赛。即使只中1场也有利润。总投入500-800元。</p>
+</div>
+
+<div class="card">
+  <h4>策略C: 最接近75倍的"合理"串关组合</h4>
+  <p>如果一定要追求75倍,用<strong>胜平负(SP较低)+比分(SP较高)混合串关</strong>,而非纯比分串关:</p>
+  <table>
+    <tr><th>场次</th><th>投注</th><th>预估SP</th></tr>
+    <tr><td>1. 德国 vs 库拉索 (6/14)</td><td>德国让球胜(-3)</td><td>~1.8</td></tr>
+    <tr><td>2. 巴西 vs 海地 (6/19)</td><td>巴西让球胜(-3)</td><td>~1.6</td></tr>
+    <tr><td>3. 西班牙 vs 佛得角 (6/15)</td><td>西班牙让球胜(-3)</td><td>~1.7</td></tr>
+  </table>
+  <p style="margin-top:5px;">SP = 1.8 × 1.6 × 1.7 = <strong>~4.9倍</strong> → 远不够75倍</p>
+  <p style="margin-top:10px;color:var(--orange);"><strong>要实现75倍,至少需要串4-5场让球胜或2场比分。每多串1场,中奖概率至少减半。</strong></p>
+</div>
+
+<div class="disclaimer" style="margin-top:30px;">
+  <strong>最重要的建议</strong><br><br>
+  <ol style="margin-left:20px;line-height:2;">
+    <li><strong>不要用"需要赢的钱"去投注。</strong>竞彩是娱乐,不是投资策略。</li>
+    <li><strong>不要把赢钱归因于"自己预测准"。</strong>短期回报几乎完全是随机因素驱动的。</li>
+    <li><strong>不要追回损失。</strong>输钱后增加投注额度是走向灾难的最快路径。</li>
+    <li><strong>设定预算上限并严格执行。</strong>无论输赢,到达预算后停止。</li>
+    <li><strong>任何承诺"稳定盈利"的预测服务都是误导。</strong>足球比分预测在统计上不可能长期盈利。</li>
+    <li><strong>如果看到社交媒体上的"连中N场"截图:</strong> 选择性展示 + 幸存者偏差。失败的预测被删除,成功的被放大。</li>
+  </ol>
+</div>
+
+<h2>附录: Opta超级计算机 2026世界杯夺冠概率 Top 10</h2>
+<table>
+  <tr><th>排名</th><th>球队</th><th>夺冠概率</th><th>核心优势</th><th>核心风险</th></tr>
+  <tr><td>1</td><td>🇪🇸 西班牙</td><td>15.43%</td><td>欧锦赛冠军;亚马尔+佩德里+罗德里三线核心;传控代差</td><td>无皇马球员;莫拉塔年龄;进攻端缺超级中锋</td></tr>
+  <tr><td>2</td><td>🇫🇷 法国</td><td>12.54%</td><td>姆巴佩+登贝莱+奥利塞;德尚体系成熟;深度惊人</td><td>格列兹曼落选;卡马文加缺阵;姆巴佩大腿伤</td></tr>
+  <tr><td>3</td><td>🏴󠁧󠁢󠁥󠁮󠁧󠁿 英格兰</td><td>10.88%</td><td>图赫尔战术纪律;贝林厄姆;凯恩终结能力</td><td>福登/帕尔默/TAA落选;无凯恩即无威胁</td></tr>
+  <tr><td>4</td><td>🇦🇷 阿根廷</td><td>10.28%</td><td>卫冕冠军;梅西魔法;阿尔瓦雷斯+恩佐当打之年</td><td>梅西40岁;边后卫深度不足;迪马利亚已退出</td></tr>
+  <tr><td>5</td><td>🇵🇹 葡萄牙</td><td>6.73%</td><td>B费+B席中场;人才储备仅次于法国</td><td>C罗41岁出场时间有限;防守转换有漏洞</td></tr>
+  <tr><td>6</td><td>🇧🇷 巴西</td><td>6.62%</td><td>维尼修斯;安切洛蒂;技术天赋</td><td>无9号中锋;米利唐+罗德里戈伤缺;防守不稳</td></tr>
+  <tr><td>7</td><td>🇩🇪 德国</td><td>5.89%</td><td>维尔茨+穆夏拉;纳格尔斯曼体系;主场氛围</td><td>诺伊尔40岁回归;防线深度不足</td></tr>
+  <tr><td>8</td><td>🇳🇱 荷兰</td><td>4.21%</td><td>范戴克+德容;科曼战术灵活</td><td>13人变动;磨合不足;锋线终结不确定</td></tr>
+  <tr><td>9</td><td>🇨🇴 哥伦比亚</td><td>3.55%</td><td>美洲杯亚军;不败纪录;洛伦佐体系</td><td>大赛压力;欧洲强队检验不足</td></tr>
+  <tr><td>10</td><td>🇳🇴 挪威</td><td>2.87%</td><td>哈兰德+厄德高;预选赛8战全胜;进攻火力</td><td>死亡之组;防守端缺乏顶级后卫;大赛经验少</td></tr>
+</table>
+
+<div class="card gold" style="margin-top:25px;">
+  <h4>我的决赛预测: 🇪🇸西班牙 2-1 🇫🇷法国 (加时)</h4>
+  <p><strong>为什么是西班牙?</strong></p>
+  <ul style="margin-left:20px;line-height:1.8;">
+    <li>欧锦赛冠军→世界杯冠军的历史传承路径已验证</li>
+    <li>亚马尔(18岁)+佩德里(23岁)+加维(21岁)三核已到巅峰年龄</li>
+    <li>传控体系在48队赛事中消耗最小(控场降低体力消耗)</li>
+    <li>罗德里作为世界最佳后腰的屏障作用</li>
+    <li>无皇马球员=更衣室空前团结</li>
+  </ul>
+  <p style="margin-top:8px;"><strong>为什么是法国?</strong></p>
+  <ul style="margin-left:20px;line-height:1.8;">
+    <li>姆巴佩+登贝莱+奥利塞组成最强锋线</li>
+    <li>德尚最后带队,全队向心力</li>
+    <li>萨利巴+于帕梅卡诺的防守组合</li>
+    <li>即使多人缺阵,阵容深度仍是世界第一</li>
+  </ul>
+  <p style="margin-top:8px;"><strong>比分预测: 西班牙 2-1 法国 (加时赛亚马尔绝杀)</strong></p>
+  <p style="color:var(--muted);">备选: 1-1 进入点球大战,西班牙点球胜</p>
+</div>
+
+<p style="text-align:center;color:var(--muted);margin-top:40px;font-size:0.85em;">
+  本预测表基于公开数据分析生成,不构成投注建议。足球充满不确定性,这正是它的魅力所在。<br>
+  Enjoy the beautiful game. 🏆
+</p>
+
+</body>
+</html>

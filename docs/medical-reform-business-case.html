@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>医疗改革智能体 — 商业分析一页纸</title>
+<style>
+  :root {
+    --bg: #f5f5f0;
+    --card: #fff;
+    --text: #1a1a1a;
+    --text-secondary: #555;
+    --red: #c0392b;
+    --green: #1e8449;
+    --blue: #1a5276;
+    --gold: #b8860b;
+    --border: #e0dcd5;
+    --tag-bg: #f0ede6;
+    --accent: #f8f4e8;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Noto Sans SC", sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ── Print ── */
+  @media print {
+    body { background: #fff; }
+    .page { box-shadow: none; max-width: 100%; margin: 0; }
+    .card { break-inside: avoid; }
+    .hero { break-after: avoid; }
+  }
+
+  .page {
+    max-width: 1200px;
+    margin: 24px auto;
+    padding: 0 16px;
+  }
+
+  /* ── Hero ── */
+  .hero {
+    background: linear-gradient(135deg, #1a3c34 0%, #1a5276 50%, #1a3c34 100%);
+    color: #fff;
+    padding: 28px 32px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    gap: 32px;
+    margin-bottom: 16px;
+  }
+  .hero-badge {
+    background: rgba(255,255,255,0.12);
+    border: 1px solid rgba(255,255,255,0.25);
+    padding: 10px 20px;
+    border-radius: 8px;
+    text-align: center;
+    white-space: nowrap;
+    font-size: 13px;
+    letter-spacing: 0.5px;
+    flex-shrink: 0;
+  }
+  .hero-badge strong { display: block; font-size: 28px; font-weight: 700; }
+  .hero h1 { font-size: 24px; font-weight: 700; letter-spacing: 0.5px; }
+  .hero p { font-size: 13px; opacity: 0.85; margin-top: 4px; }
+  .hero .tags { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
+  .hero .tag {
+    background: rgba(255,255,255,0.15);
+    padding: 3px 10px;
+    border-radius: 99px;
+    font-size: 12px;
+    letter-spacing: 0.3px;
+  }
+
+  /* ── Grid ── */
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px; }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; margin-bottom: 14px; }
+  .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 14px; }
+  .grid-1-2 { display: grid; grid-template-columns: 1fr 2fr; gap: 14px; margin-bottom: 14px; }
+
+  /* ── Cards ── */
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 18px 20px;
+  }
+  .card-full { grid-column: 1 / -1; }
+
+  .card h2 {
+    font-size: 15px;
+    font-weight: 700;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    letter-spacing: 0.3px;
+  }
+  .card h2 .dot {
+    width: 8px; height: 8px; border-radius: 50%; display: inline-block; flex-shrink: 0;
+  }
+  .card h3 { font-size: 13px; font-weight: 700; margin: 10px 0 6px; }
+
+  /* ── KPI row ── */
+  .kpi-row { display: flex; gap: 14px; margin-bottom: 14px; }
+  .kpi {
+    flex: 1;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 16px 18px;
+    text-align: center;
+  }
+  .kpi .num { font-size: 28px; font-weight: 800; letter-spacing: -0.5px; }
+  .kpi .label { font-size: 12px; color: var(--text-secondary); margin-top: 2px; }
+  .kpi .sub { font-size: 11px; color: #999; margin-top: 1px; }
+
+  /* ── Table ── */
+  table { width: 100%; border-collapse: collapse; font-size: 12px; }
+  th {
+    background: #f8f6f0;
+    text-align: left;
+    padding: 7px 10px;
+    font-weight: 600;
+    border-bottom: 2px solid var(--border);
+    font-size: 11px;
+    letter-spacing: 0.3px;
+    color: var(--text-secondary);
+  }
+  td {
+    padding: 6px 10px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: top;
+  }
+  tr:last-child td { border-bottom: none; }
+  .num-col { text-align: right; font-weight: 600; font-variant-numeric: tabular-nums; }
+  .highlight-row { background: #fdfcf7; }
+
+  /* ── Price card ── */
+  .price-tier {
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 12px 14px;
+    text-align: center;
+    background: #fdfcf8;
+  }
+  .price-tier .tier-name { font-size: 13px; font-weight: 700; }
+  .price-tier .tier-price { font-size: 22px; font-weight: 800; color: var(--blue); margin: 4px 0; }
+  .price-tier .tier-desc { font-size: 11px; color: var(--text-secondary); line-height: 1.5; }
+
+  /* ── Tags / labels ── */
+  .pill {
+    display: inline-block;
+    font-size: 10px;
+    padding: 2px 7px;
+    border-radius: 99px;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+    margin-right: 4px;
+  }
+  .pill-green { background: #d4edda; color: var(--green); }
+  .pill-red { background: #f8d7da; color: var(--red); }
+  .pill-blue { background: #d6eaf8; color: var(--blue); }
+  .pill-amber { background: #fff3cd; color: var(--gold); }
+
+  /* ── Flow ── */
+  .flow-row {
+    display: flex; gap: 0; align-items: stretch; margin: 8px 0;
+  }
+  .flow-step {
+    flex: 1; text-align: center; padding: 10px 8px; font-size: 11px;
+    border: 1px solid var(--border); position: relative;
+    background: #fdfcf8;
+  }
+  .flow-step:first-child { border-radius: 6px 0 0 6px; }
+  .flow-step:last-child { border-radius: 0 6px 6px 0; }
+  .flow-step strong { display: block; font-size: 12px; margin-bottom: 2px; }
+
+  .check-list { list-style: none; font-size: 12px; }
+  .check-list li { padding: 3px 0; }
+  .check-list li::before { content: "✓ "; color: var(--green); font-weight: 700; }
+  .warn-list { list-style: none; font-size: 12px; }
+  .warn-list li { padding: 3px 0; }
+  .warn-list li::before { content: "⚠ "; color: var(--gold); }
+
+  /* ── Footnote ── */
+  .footnote { font-size: 10px; color: #999; margin-top: 12px; text-align: center; }
+
+  /* ── Responsive ── */
+  @media (max-width: 900px) {
+    .grid-2, .grid-3, .grid-4, .grid-1-2 { grid-template-columns: 1fr; }
+    .hero { flex-direction: column; text-align: center; }
+    .kpi-row { flex-wrap: wrap; }
+    .kpi { min-width: 45%; }
+    .flow-row { flex-direction: column; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+<!-- ═══════════ HERO ═══════════ -->
+<div class="hero">
+  <div class="hero-badge">
+    <strong>3,099</strong>
+    县已建医共体
+  </div>
+  <div>
+    <h1>医疗改革智能体 · 商业分析</h1>
+    <p>AI驱动的县域医改决策支持系统 — 市场规模、定价策略、商业模式、合法性评估</p>
+    <div class="tags">
+      <span class="tag">市场窗口期 2026-2027</span>
+      <span class="tag">政策强制驱动</span>
+      <span class="tag">供给侧空白</span>
+      <span class="tag">G2B-SaaS</span>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ KPI STRIP ═══════════ -->
+<div class="kpi-row">
+  <div class="kpi">
+    <div class="num" style="color:#1a5276;">2,860</div>
+    <div class="label">全国县级行政区划</div>
+    <div class="sub">2027年底医共体全覆盖</div>
+  </div>
+  <div class="kpi">
+    <div class="num" style="color:#1e8449;">3,099</div>
+    <div class="label">已建紧密型医共体</div>
+    <div class="sub">覆盖 9.24 亿人口</div>
+  </div>
+  <div class="kpi">
+    <div class="num" style="color:#b8860b;">12.5 亿</div>
+    <div class="label">TAM 年度总市场</div>
+    <div class="sub">2,500县 × 均50万/年</div>
+  </div>
+  <div class="kpi">
+    <div class="num" style="color:#c0392b;">2,400万-9,000万</div>
+    <div class="label">SOM 5年目标收入</div>
+    <div class="sub">保守5% — 乐观15%渗透率</div>
+  </div>
+  <div class="kpi">
+    <div class="num" style="color:#1a3c34;">50-60%</div>
+    <div class="label">单客毛利率</div>
+    <div class="sub">成熟期·直销模式</div>
+  </div>
+</div>
+
+<!-- ═══════════ ROW 1: 市场机会 + 竞争格局 ═══════════ -->
+<div class="grid-2">
+  <div class="card">
+    <h2><span class="dot" style="background:#c0392b;"></span>为什么现在是窗口期</h2>
+    <table>
+      <tr><td style="width:18px;"><span class="pill pill-red">1</span></td><td><strong>政策强制力</strong>：2027年底医共体全覆盖是硬指标（国卫基层发〔2023〕41号），2026-2027是冲刺期</td></tr>
+      <tr><td><span class="pill pill-red">2</span></td><td><strong>资金已到位</strong>：《医疗卫生强基工程实施方案》（2025.08）+ 三部门14条（2026.03），明确信息化和软性服务可列支</td></tr>
+      <tr><td><span class="pill pill-red">3</span></td><td><strong>认知突破</strong>：2025年DeepSeek/大模型让政府决策层对AI辅助决策接受度大幅提升</td></tr>
+      <tr><td><span class="pill pill-amber">4</span></td><td><strong>同行已在采购</strong>：2024-2026年陕西/江西/湖北/黑龙江至少7个县市通过政府采购同类咨询服务，成交价48-486万</td></tr>
+    </table>
+  </div>
+
+  <div class="card">
+    <h2><span class="dot" style="background:#1a5276;"></span>竞争格局：供给侧空白</h2>
+    <table>
+      <tr><th style="width:28%;">竞品类型</th><th>代表</th><th>核心缺陷</th></tr>
+      <tr><td>传统咨询</td><td>麦肯锡、毕马威、地方智库</td><td>贵(30-200万/次)、慢(2-4周)、一次性、案例靠个人经验</td></tr>
+      <tr><td>信息化厂商</td><td>卫宁、东软、创业慧康</td><td>做系统不做决策，不提供改革建议</td></tr>
+      <tr><td>AI辅诊厂商</td><td>科大讯飞、推想科技</td><td>只做临床单点（影像/心电），不碰管理和政策</td></tr>
+      <tr><td>高校/研究机构</td><td>北大公卫、复旦医管所</td><td>学术导向，不产品化，不持续服务</td></tr>
+      <tr class="highlight-row"><td><strong>本产品</strong></td><td colspan="2"><strong>管理决策 + 改革设计 + PDCA持续监测 = 市场唯一全链条AI产品</strong></td></tr>
+    </table>
+  </div>
+</div>
+
+<!-- ═══════════ ROW 2: 定价策略 ═══════════ -->
+<div class="card card-full">
+  <h2><span class="dot" style="background:#1e8449;"></span>定价策略：SaaS订阅制（年度服务）</h2>
+  <div class="grid-4" style="margin-bottom:0;">
+    <div class="price-tier">
+      <div class="tier-name">基础版</div>
+      <div class="tier-price">29.8<span style="font-size:14px;font-weight:400;"> 万/年</span></div>
+      <div class="tier-desc">数据诊断 + 医共体评估<br>方案生成 + PDCA追踪</div>
+    </div>
+    <div class="price-tier" style="border-color:#1a5276; border-width:2px;">
+      <div class="tier-name">标准版 <span class="pill pill-blue">推荐</span></div>
+      <div class="tier-price">49.8<span style="font-size:14px;font-weight:400;"> 万/年</span></div>
+      <div class="tier-desc">基础版 + 三医联动 + 医防融合<br>绩效考核 + 案例匹配</div>
+    </div>
+    <div class="price-tier">
+      <div class="tier-name">完整版</div>
+      <div class="tier-price">69.8<span style="font-size:14px;font-weight:400;"> 万/年</span></div>
+      <div class="tier-desc">标准版 + 信息化规划 + 费用估算<br>风险预警 + 政策合规</div>
+    </div>
+    <div class="price-tier">
+      <div class="tier-name">旗舰版</div>
+      <div class="tier-price">129.8<span style="font-size:14px;font-weight:400;"> 万/年</span></div>
+      <div class="tier-desc">完整版 + 私有化部署<br>定制知识库 + 专属客服</div>
+    </div>
+  </div>
+  <p style="font-size:11px;color:var(--text-secondary);margin-top:10px;">
+    <strong>定价逻辑</strong>：传统咨询1次费用(30-80万) ≈ 标准版<strong>1-1.6年</strong>订阅费，但本产品提供全年12个月PDCA持续跟踪 + 全国案例对标 + 政策实时更新。<br>
+    <strong>混合模式（推荐）</strong>：首年项目交付费39.8万（一次性诊断+方案）+ 年度服务费29.8万/年起（续费）= 兼顾"仪式感"和持续收入。
+  </p>
+</div>
+
+<!-- ═══════════ ROW 3: 真实市场验证 + 合法性 ═══════════ -->
+<div class="grid-1-2">
+  <div class="card">
+    <h2><span class="dot" style="background:#b8860b;"></span>市场已验证：真实采购案例 (2024-2026)</h2>
+    <table>
+      <tr><th>采购单位</th><th>项目类型</th><th class="num-col">金额(万)</th></tr>
+      <tr><td>襄阳市卫健委</td><td>公立医院改革示范项目全流程管理 (3年)</td><td class="num-col">486</td></tr>
+      <tr><td>哈尔滨市卫健委</td><td>公立医院改革信息化全过程咨询</td><td class="num-col">316</td></tr>
+      <tr><td>湖口县卫健委</td><td>医共体绩效管理体系设计咨询</td><td class="num-col">169.8</td></tr>
+      <tr><td>紫阳县医院</td><td>17家分院绩效管理体系建设咨询</td><td class="num-col">95</td></tr>
+      <tr><td>宁陕县医院</td><td>医共体绩效分配方案咨询</td><td class="num-col">75.95</td></tr>
+      <tr><td>吴起县卫健局</td><td>医共体绩效考核管理体系</td><td class="num-col">54.48</td></tr>
+      <tr><td>富县卫健局</td><td>乡镇卫生院绩效考核方案编制</td><td class="num-col">50.2</td></tr>
+      <tr><td>石泉县卫生机构</td><td>医共体分院绩效分配及考核方案</td><td class="num-col">48</td></tr>
+      <tr style="background:#fdfcf7;"><td colspan="2"><strong>价格区间</strong></td><td class="num-col"><strong>48-486</strong></td></tr>
+    </table>
+    <p style="font-size:11px;color:var(--text-secondary);margin-top:8px;">
+      活跃省份：陕西（最活跃，5县）· 江西 · 湖北 · 黑龙江。中标方均为专业咨询公司（广州易策、广东知恩康龙、西安当代医院管理研究院等），<strong>无大型信息化厂商</strong>。
+    </p>
+  </div>
+
+  <div class="card">
+    <h2><span class="dot" style="background:#1e8449;"></span>合法性评估：三重制度保障</h2>
+
+    <h3>法律依据</h3>
+    <table>
+      <tr><td style="width:52%;">财政部令第102号《政府购买服务管理办法》</td><td>2020.03施行，允许采购"履职辅助性服务"</td></tr>
+      <tr><td>卫健委政府购买服务指导性目录</td><td>明确含：政策评估、绩效评价、咨询、课题研究、监测服务、统计分析</td></tr>
+      <tr><td>公立医院改革示范项目资金管理办法</td><td>中央财政补助可列支：方案设计、绩效监测、第三方评估、培训</td></tr>
+    </table>
+
+    <h3>资金合规来源</h3>
+    <table>
+      <tr><td style="width:52%;">公立医院改革示范项目专项资金</td><td>中央财政2025年第二批即达20亿元</td></tr>
+      <tr><td>医疗卫生强基工程配套资金</td><td>2025.08国务院通过，含信息化+人才培养</td></tr>
+      <tr><td>地方财政卫生健康事业费</td><td>每县每年常规预算，可列支咨询/软件服务</td></tr>
+    </table>
+
+    <h3>采购方式</h3>
+    <div style="font-size:12px;margin-top:6px;">
+      <span class="pill pill-green">竞争性磋商</span> 咨询类 &lt;100万 · 流程简单<br>
+      <span class="pill pill-blue">公开招标</span> 信息化类 &gt;100万<br>
+      <span class="pill pill-amber">框架协议采购</span> 省级集采覆盖全省各县
+    </div>
+
+    <h3>数据安全</h3>
+    <p style="font-size:12px;color:var(--green);margin-top:4px;">
+      ✓ 仅需12项汇总统计数据，<strong>零患者个体数据</strong>。政务外网可公开/半公开信息，无数据外泄合规风险。
+    </p>
+  </div>
+</div>
+
+<!-- ═══════════ ROW 4: 销售路径 + 商业模型 ═══════════ -->
+<div class="grid-2">
+  <div class="card">
+    <h2><span class="dot" style="background:#1a5276;"></span>四条销售路径</h2>
+
+    <div style="font-size:12px;">
+      <p style="margin-bottom:6px;"><span class="pill pill-green">路径1</span> <strong>从上往下打（最有效）</strong></p>
+      <p style="margin-left:24px;margin-bottom:10px;color:var(--text-secondary);">
+        国家/省级卫健委推荐或集采 → 列入"医共体建设推荐工具"目录 → 省统一采购覆盖全省县区。<br>
+        类似"国家医保局统一采购DRG分组器，各省使用"模式。
+      </p>
+
+      <p style="margin-bottom:6px;"><span class="pill pill-blue">路径2</span> <strong>从下往上攻</strong></p>
+      <p style="margin-left:24px;margin-bottom:10px;color:var(--text-secondary);">
+        标杆县深度合作（3-5县免费/低价试用3-6月） → 产出量化效果数据 → 申报省级/国家级典型案例 → 反向影响省和国家决策。
+      </p>
+
+      <p style="margin-bottom:6px;"><span class="pill pill-amber">路径3</span> <strong>学术+政策背书</strong></p>
+      <p style="margin-left:24px;margin-bottom:10px;color:var(--text-secondary);">
+        与国家卫健委卫生发展研究中心、北大、复旦合作 → 联合发布《中国县域医共体建设白皮书》 → 产品作为数据采集和分析工具嵌入。
+      </p>
+
+      <p style="margin-bottom:6px;"><span class="pill" style="background:#e8daef;color:#6c3483;">路径4</span> <strong>嵌入信息化厂商生态</strong></p>
+      <p style="margin-left:24px;color:var(--text-secondary);">
+        与卫宁/东软/创业慧康等医共体平台厂商合作 → "AI决策模块"嵌入其平台 → 渠道分成，获客零成本。
+      </p>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2><span class="dot" style="background:#1a3c34;"></span>单位经济模型 &amp; 收入预测</h2>
+
+    <h3>单客经济（成熟期·标准版 49.8万/年）</h3>
+    <table style="margin-bottom:10px;">
+      <tr><td>云基础设施</td><td class="num-col">1-2 万</td></tr>
+      <tr><td>知识库更新维护（分摊）</td><td class="num-col">2-3 万</td></tr>
+      <tr><td>客户成功/运营（分摊）</td><td class="num-col">3-5 万</td></tr>
+      <tr><td>研发摊销</td><td class="num-col">8-12 万</td></tr>
+      <tr><td>销售获客摊销</td><td class="num-col">直销 5-8 万 / 集采 1-2 万</td></tr>
+      <tr style="font-weight:700;border-top:2px solid var(--border);"><td>单客毛利</td><td class="num-col" style="color:var(--green);">25-30 万 (50-60%)</td></tr>
+    </table>
+
+    <h3>SOM 收入预测（5年目标）</h3>
+    <table>
+      <tr><th>渗透率</th><th>客户数</th><th class="num-col">年收入（均50万）</th></tr>
+      <tr><td>保守 5%</td><td>60 县</td><td class="num-col">2,400 万</td></tr>
+      <tr><td>中等 10%</td><td>120 县</td><td class="num-col">6,000 万</td></tr>
+      <tr style="font-weight:700;"><td>乐观 15%</td><td>180 县</td><td class="num-col" style="color:var(--blue);">9,000 万</td></tr>
+      <tr><td colspan="3" style="font-size:11px;color:var(--text-secondary);padding-top:6px;">叠加省级集采效应：1个省统一采购80县 ≈ 2,000-4,000万/年</td></tr>
+    </table>
+
+    <h3>收入结构（成熟期）</h3>
+    <div class="flow-row" style="margin-top:8px;">
+      <div class="flow-step"><strong>省级集采 60%</strong>稳定、批量</div>
+      <div class="flow-step"><strong>单县直销 25%</strong>高客单价、高粘性</div>
+      <div class="flow-step"><strong>项目/课题 10%</strong>品牌背书</div>
+      <div class="flow-step"><strong>增值服务 5%</strong>培训、考察、定制报告</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ ROW 5: 可接受性 + 风险 ═══════════ -->
+<div class="grid-2">
+  <div class="card">
+    <h2><span class="dot" style="background:#1e8449;"></span>可接受性：五个角度</h2>
+    <table>
+      <tr><td style="width:26%;"><strong>卫健委主任/副县长</strong></td><td>会接受。2027硬考核 + 14项指标上报 + 周边县已在采购 → 强烈动机。一次考察差旅5-10万，同样价格买全年AI对标。</td></tr>
+      <tr><td><strong>采购流程</strong></td><td>已走通。前表7个真实成交案例证明：公告→磋商→中标→合同→验收→付款全流程畅通。</td></tr>
+      <tr><td><strong>审计风险</strong></td><td>合规。条件：正规采购程序 + 价格对标同类 + 可验收交付物（盖章报告）。关键：把交付物做实——每周期产出可归档备查的报告。</td></tr>
+      <tr><td><strong>与信息化采购的关系</strong></td><td>互补而非竞争。信息化平台是"路和车"，智能体是"导航仪"。信息化厂商可能是渠道伙伴。</td></tr>
+      <tr><td><strong>数据安全顾虑</strong></td><td>已内置解决。仅需12项汇总数据，零患者隐私。汇总数据在政务外网属可公开/半公开信息。</td></tr>
+    </table>
+  </div>
+
+  <div class="card">
+    <h2><span class="dot" style="background:#c0392b;"></span>风险矩阵与应对</h2>
+    <table>
+      <tr><th style="width:30%;">风险</th><th style="width:12%;">概率</th><th style="width:12%;">影响</th><th>应对</th></tr>
+      <tr>
+        <td>大型厂商推出类似功能</td>
+        <td><span class="pill pill-amber">中高</span></td>
+        <td><span class="pill pill-red">高</span></td>
+        <td>保持12-18月先发优势，深度绑定标杆客户。从功能竞争转向数据网络效应竞争。</td>
+      </tr>
+      <tr>
+        <td>政府预算紧缩</td>
+        <td><span class="pill pill-amber">中</span></td>
+        <td><span class="pill pill-amber">中</span></td>
+        <td>强调ROI：1年服务费=1次出差考察费，性价比远超传统咨询。</td>
+      </tr>
+      <tr>
+        <td>采购决策周期长 (6-18月)</td>
+        <td><span class="pill pill-red">高</span></td>
+        <td><span class="pill pill-amber">中</span></td>
+        <td>从省级集采突破，单县直销聚焦"改革急迫"的县。</td>
+      </tr>
+      <tr>
+        <td>各县不愿共享数据</td>
+        <td><span class="pill pill-amber">中高</span></td>
+        <td><span class="pill pill-red">高</span></td>
+        <td>产品设计已规避：仅需12项汇总统计，不需个体数据。可用统计年鉴公开数据出初版诊断。</td>
+      </tr>
+      <tr>
+        <td>政策方向变化</td>
+        <td><span class="pill pill-green">低</span></td>
+        <td><span class="pill pill-red">高</span></td>
+        <td>知识库48h更新机制，紧跟国家最新文件。</td>
+      </tr>
+      <tr>
+        <td>"AI做的方案能信吗"</td>
+        <td><span class="pill pill-amber">中</span></td>
+        <td><span class="pill pill-amber">中</span></td>
+        <td>定位"辅助决策"——最终拍板的是人。类比：CT机出影像，医生出诊断。</td>
+      </tr>
+    </table>
+  </div>
+</div>
+
+<!-- ═══════════ ROW 6: 商业逻辑总结 ═══════════ -->
+<div class="card card-full" style="background:linear-gradient(135deg, #fdfcf7 0%, #f8f4e8 100%);">
+  <h2 style="text-align:center;font-size:16px;">
+    <span class="dot" style="background:#1a3c34;"></span>核心商业逻辑
+  </h2>
+  <p style="text-align:center;font-size:15px;font-weight:700;color:#1a3c34;margin:8px 0;">
+    "用AI规模化替代「每个县花50-200万请咨询公司做一次医改诊断」这件事，<br>
+    同时提供咨询公司做不到的PDCA持续跟踪和全国实时对标。"
+  </p>
+  <p style="text-align:center;font-size:13px;color:var(--text-secondary);">
+    市场处于 <strong>供给侧空白 × 需求侧政策强驱动</strong> 的窗口期。<br>
+    核心挑战不在需求端——而在销售路径的选择：<br>
+    能否通过<strong>省级集采</strong>或<strong>标杆案例</strong>快速打开局面，决定从年收入几千万走向几个亿，还是止步于小而美。
+  </p>
+</div>
+
+<div class="footnote">
+  数据来源：中国政府采购网、各省公共资源交易平台、国家卫健委官网、财政部官网。中标数据截至2026年5月。
+</div>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,650 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>火山引擎 × 成都先导 — AI驱动药物研发智能体方案</title>
+<style>
+  :root {
+    --ve-primary: #1a1a2e;
+    --ve-accent: #ff4d2e;
+    --ve-blue: #1565c0;
+    --bg: #f2f3f7;
+    --card: #ffffff;
+    --text: #1a1a2e;
+    --muted: #6b7280;
+    --border: #e5e7eb;
+    --tag-bg: #eef2ff;
+    --tag-text: #3730a3;
+    --highlight: #fef3c7;
+    --green: #059669;
+    --table-head: #1a1a2e;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: "PingFang SC", "Microsoft YaHei", "Helvetica Neue", -apple-system, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.75;
+    font-size: 15px;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  /* ===== PAGE STRUCTURE ===== */
+  .slide {
+    max-width: 1100px;
+    margin: 0 auto 40px;
+    background: var(--card);
+    border-radius: 2px;
+    box-shadow: 0 1px 8px rgba(0,0,0,0.06);
+    overflow: hidden;
+    page-break-after: always;
+  }
+  .slide:last-child { page-break-after: auto; }
+  .slide-body { padding: 48px 56px 40px; }
+
+  /* ===== SLIDE 1: COVER ===== */
+  .cover {
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+    color: #fff;
+    text-align: center;
+    padding: 80px 56px 60px;
+    min-height: 500px;
+    display: flex; flex-direction: column; justify-content: center; align-items: center;
+  }
+  .cover .brand-line {
+    font-size: 14px; letter-spacing: 6px; text-transform: uppercase;
+    color: var(--ve-accent); margin-bottom: 24px;
+  }
+  .cover h1 {
+    font-size: 38px; font-weight: 800; letter-spacing: 2px;
+    margin-bottom: 16px; max-width: 700px;
+  }
+  .cover .subtitle {
+    font-size: 20px; color: #a5b4fc; font-weight: 400;
+    margin-bottom: 40px;
+  }
+  .cover .meta {
+    font-size: 14px; color: #94a3b8;
+    border-top: 1px solid rgba(255,255,255,0.15);
+    padding-top: 24px; max-width: 500px;
+  }
+
+  /* ===== TYPOGRAPHY ===== */
+  h2.section-head {
+    font-size: 24px; font-weight: 800; color: var(--ve-primary);
+    border-bottom: 3px solid var(--ve-accent);
+    padding-bottom: 10px; margin-bottom: 24px;
+    display: flex; align-items: center; gap: 12px;
+  }
+  h2.section-head .num {
+    background: var(--ve-accent); color: #fff; font-size: 16px;
+    width: 32px; height: 32px; border-radius: 2px; display: flex;
+    align-items: center; justify-content: center; flex-shrink: 0;
+  }
+  h3 {
+    font-size: 18px; font-weight: 700; color: var(--ve-primary);
+    margin: 28px 0 12px;
+  }
+
+  /* ===== KEY VALUE STRIP (one-line insight) ===== */
+  .insight-strip {
+    background: linear-gradient(135deg, #fff7ed 0%, #fef3c7 100%);
+    border-left: 4px solid var(--ve-accent);
+    padding: 16px 24px; margin: 16px 0 24px;
+    font-size: 15px; font-weight: 600; color: #7c2d12;
+  }
+
+  /* ===== GLOSSARY GRID ===== */
+  .glossary-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(310px, 1fr));
+    gap: 14px; margin-bottom: 8px;
+  }
+  .glossary-card {
+    background: #fafafa; border: 1px solid var(--border);
+    border-radius: 6px; padding: 16px 18px;
+  }
+  .glossary-card .term {
+    font-size: 16px; font-weight: 700; color: var(--ve-primary);
+    display: flex; align-items: center; gap: 8px; margin-bottom: 6px;
+  }
+  .glossary-card .term-en {
+    font-size: 11px; font-weight: 500; color: var(--muted); text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .glossary-card .desc { font-size: 14px; color: #4b5563; }
+
+  /* ===== TABLES ===== */
+  .data-table {
+    width: 100%; border-collapse: collapse; font-size: 14px; margin: 16px 0;
+  }
+  .data-table thead th {
+    background: var(--table-head); color: #fff; padding: 12px 16px;
+    text-align: left; font-weight: 600; font-size: 13px; white-space: nowrap;
+  }
+  .data-table tbody td {
+    padding: 12px 16px; border-bottom: 1px solid var(--border); vertical-align: top;
+  }
+  .data-table tbody tr { background: #fff; }
+  .data-table tbody tr:nth-child(even) { background: #f9fafb; }
+  .data-table .highlight-cell { font-weight: 700; color: var(--ve-accent); }
+
+  /* ===== ADVANTAGE CARDS ===== */
+  .adv-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px; margin: 16px 0;
+  }
+  .adv-card {
+    border: 1px solid var(--border); border-radius: 8px;
+    padding: 24px; background: #fff; position: relative;
+  }
+  .adv-card .adv-num {
+    position: absolute; top: -14px; left: 20px;
+    background: var(--ve-accent); color: #fff;
+    font-size: 13px; font-weight: 800; width: 28px; height: 28px;
+    border-radius: 50%; display: flex; align-items: center; justify-content: center;
+  }
+  .adv-card h4 { font-size: 16px; font-weight: 700; margin-bottom: 8px; color: var(--ve-primary); }
+  .adv-card p { font-size: 14px; color: #4b5563; line-height: 1.65; }
+
+  /* ===== COMPETITIVE TABLE HIGHLIGHT ===== */
+  .vs-table {
+    width: 100%; border-collapse: collapse; font-size: 14px; margin: 16px 0;
+  }
+  .vs-table thead th {
+    padding: 14px 16px; text-align: center; font-weight: 700;
+    border: 1px solid var(--border); font-size: 13px;
+  }
+  .vs-table thead th.ve-col {
+    background: var(--ve-accent); color: #fff; font-size: 14px;
+  }
+  .vs-table thead th.dim { background: #f3f4f6; color: var(--muted); }
+  .vs-table thead th.comp { background: #f9fafb; color: var(--muted); }
+  .vs-table tbody td {
+    padding: 12px 16px; border: 1px solid var(--border); text-align: center;
+  }
+  .vs-table tbody td:first-child { text-align: left; font-weight: 600; }
+  .vs-table .check { color: var(--green); font-weight: 700; }
+  .vs-table .cross { color: #d1d5db; }
+
+  /* ===== ROADMAP ===== */
+  .roadmap {
+    display: flex; gap: 0; margin: 16px 0; position: relative;
+    align-items: stretch;
+  }
+  .roadmap .phase {
+    flex: 1; padding: 28px 20px; text-align: center; position: relative;
+    border: 1px solid var(--border);
+  }
+  .roadmap .phase:first-child { border-radius: 8px 0 0 8px; }
+  .roadmap .phase:last-child { border-radius: 0 8px 8px 0; }
+  .roadmap .phase.current { background: #fff7ed; border-color: var(--ve-accent); border-width: 2px; z-index: 1; }
+  .roadmap .phase .phase-num {
+    font-size: 12px; font-weight: 800; color: var(--ve-accent); letter-spacing: 1px; margin-bottom: 8px;
+  }
+  .roadmap .phase h4 { font-size: 16px; font-weight: 700; margin-bottom: 8px; }
+  .roadmap .phase p { font-size: 13px; color: #6b7280; line-height: 1.6; }
+  .roadmap .phase .tag-list { margin-top: 10px; }
+  .roadmap .phase .tag-list span {
+    display: inline-block; background: #eef2ff; color: #3730a3;
+    font-size: 11px; padding: 2px 8px; border-radius: 3px; margin: 2px;
+  }
+
+  .arrow-sep {
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px; color: var(--ve-accent); flex-shrink: 0; width: 24px;
+  }
+
+  /* ===== FOOTER ===== */
+  .slide-footer {
+    background: #fafafa; border-top: 1px solid var(--border);
+    padding: 16px 56px; display: flex; justify-content: space-between;
+    align-items: center; font-size: 12px; color: var(--muted);
+  }
+
+  /* ===== PAIN POINT QUOTE ===== */
+  .pain-quote {
+    background: #fef2f2; border: 1px solid #fecaca; border-radius: 6px;
+    padding: 18px 24px; margin: 16px 0;
+    font-size: 15px; color: #7f1d1d;
+  }
+  .pain-quote strong { color: #b91c1c; }
+
+  /* ===== METRIC BADGES ===== */
+  .metric-row {
+    display: flex; gap: 20px; margin: 20px 0; flex-wrap: wrap;
+  }
+  .metric-badge {
+    flex: 1 1 200px; text-align: center; padding: 20px 12px;
+    border: 2px solid var(--border); border-radius: 8px; background: #fff;
+  }
+  .metric-badge .big-num {
+    font-size: 36px; font-weight: 800; color: var(--ve-accent); line-height: 1.2;
+  }
+  .metric-badge .unit { font-size: 16px; font-weight: 400; }
+  .metric-badge .label { font-size: 13px; color: var(--muted); margin-top: 6px; }
+
+  /* ===== CLOSING STRIP ===== */
+  .closing-strip {
+    background: var(--ve-primary); color: #fff; text-align: center;
+    padding: 48px 56px; border-radius: 2px;
+  }
+  .closing-strip h2 { font-size: 28px; font-weight: 800; margin-bottom: 12px; }
+  .closing-strip p { font-size: 16px; color: #a5b4fc; max-width: 600px; margin: 0 auto; }
+
+  /* ===== PRINT ===== */
+  @media print {
+    body { background: #fff; }
+    .slide { box-shadow: none; margin: 0 auto; page-break-after: always; }
+    .slide:last-child { page-break-after: auto; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ============ SLIDE 1: COVER ============ -->
+<div class="slide">
+  <div class="cover">
+    <div class="brand-line">Volcano Engine &times; HitGen</div>
+    <h1>AI 驱动药物研发智能体方案</h1>
+    <div class="subtitle">让数十亿级 DEL 数据与海量文献，<br>一句话即可洞察</div>
+    <div class="meta">
+      火山引擎 &nbsp;|&nbsp; 面向成都先导药物开发股份有限公司<br>
+      2026 年 5 月
+    </div>
+  </div>
+</div>
+
+<!-- ============ SLIDE 2: 我们理解的业务 ============ -->
+<div class="slide">
+  <div class="slide-body">
+    <h2 class="section-head"><span class="num">01</span> 我们理解的药物研发核心概念</h2>
+
+    <div class="insight-strip">
+      成都先导是 DEL 技术全球领军者 —— 这些术语是我们方案设计的出发点和业务锚点。
+    </div>
+
+    <div class="glossary-grid">
+      <div class="glossary-card">
+        <div class="term">靶点 <span class="term-en">Target</span></div>
+        <div class="desc">药物在体内作用的特定生物分子（绝大多数为蛋白质）。找到好靶点是新药研发的起点，也是智能体文献检索的核心锚点。</div>
+      </div>
+      <div class="glossary-card">
+        <div class="term">Hit 化合物 <span class="term-en">Hit Compound</span></div>
+        <div class="desc">早期筛选中命中靶点并显示预期活性的化合物。活性尚需优化，是药物化学优化的起点，也是 AI 辅助分子设计的切入点。</div>
+      </div>
+      <div class="glossary-card">
+        <div class="term">ADMET</div>
+        <div class="desc">吸收 / 分布 / 代谢 / 排泄 / 毒性 —— 决定候选药物能否成药的五项核心指标。AI 预测 ADMET 可大幅降低后期失败率。</div>
+      </div>
+      <div class="glossary-card">
+        <div class="term">DEL <span class="term-en">DNA-Encoded Library</span></div>
+        <div class="desc">DNA 编码化合物库 —— 贵司核心技术。将小分子与 DNA 条形码连接，混合筛选数十亿化合物后通过测序定位活性分子。</div>
+      </div>
+      <div class="glossary-card">
+        <div class="term">ELN <span class="term-en">Electronic Lab Notebook</span></div>
+        <div class="desc">电子实验记录本。记录实验全流程数据，是 GLP 合规的硬性要求，也是智能体获取实验上下文的关键数据源。</div>
+      </div>
+      <div class="glossary-card">
+        <div class="term">GLP <span class="term-en">Good Laboratory Practice</span></div>
+        <div class="desc">药物非临床研究质量管理规范。国际通行的质量体系，确保研究结果的真实性、完整性和可靠性 —— 也是我们私有化方案的合规基线。</div>
+      </div>
+    </div>
+  </div>
+  <div class="slide-footer">
+    <span>火山引擎 × 成都先导</span><span>p.2</span>
+  </div>
+</div>
+
+<!-- ============ SLIDE 3: 数据现状 ============ -->
+<div class="slide">
+  <div class="slide-body">
+    <h2 class="section-head"><span class="num">02</span> 贵司数据资产现状：已电子化，但未打通</h2>
+
+    <div class="insight-strip">
+      我们充分理解：贵司核心实验数据已全部在受控系统中结构化存储，这为智能体方案提供了天然的数据基础，无需从零建设。
+    </div>
+
+    <table class="data-table">
+      <thead>
+        <tr><th>业务环节</th><th>现有系统</th><th>数据内容</th><th>特点</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>DEL 筛选 / 化合物管理</strong></td>
+          <td>内部 DEL 数据库、SDMS</td>
+          <td>化合物结构、筛选活性、hit 活性曲线、ADMET 结果</td>
+          <td>数十亿级数据量，客户项目受保密协议约束</td>
+        </tr>
+        <tr>
+          <td><strong>实验过程记录</strong></td>
+          <td>ELN 电子实验记录本</td>
+          <td>实验步骤、试剂批次、仪器参数、原始图谱、结论</td>
+          <td>GLP 合规要求：留痕、不可篡改、可审计</td>
+        </tr>
+        <tr>
+          <td><strong>项目与客户交付</strong></td>
+          <td>LIMS、项目管理系统</td>
+          <td>客户项目进度、批次记录、报告审核、合规文档</td>
+          <td>需"数据-报告-审计"全链路打通</td>
+        </tr>
+        <tr>
+          <td><strong>文献 / 专利情报</strong></td>
+          <td>内部知识库、专利监控系统</td>
+          <td>靶点文献、竞品管线、专利全文</td>
+          <td>人工阅读跟不上更新速度</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="pain-quote">
+      <strong>我们观察到的核心痛点：</strong>研究员要查一个靶点的历史数据，需要分别登录 ELN、DEL 库、SDMS 等多个系统，跨部门汇总数据动辄数天。数据在系统里，但缺少统一检索入口 —— <strong>这是 AI 智能体最擅长解决的问题。</strong>
+    </div>
+
+    <h3>智能体方案如何改变这一现状？</h3>
+    <table class="data-table">
+      <thead>
+        <tr><th>使用场景</th><th>当前方式</th><th>智能体介入后</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>查阅某靶点近期 DEL 筛选数据</td><td>登录 DEL 库 → 手动筛选 → 导出 Excel → 汇总</td>
+          <td class="highlight-cell">"把这个靶点近半年的 DEL 筛数据汇总成表格" → 秒级输出</td>
+        </tr>
+        <tr>
+          <td>追踪竞品某靶点专利布局</td><td>登录专利系统 → 关键词检索 → 逐篇阅读筛选</td>
+          <td class="highlight-cell">"分析竞品在 KRAS G12D 上的专利布局" → 结构化报告</td>
+        </tr>
+        <tr>
+          <td>准备客户项目进度汇报</td><td>从 LIMS/ELN 分别提取 → 手动整合</td>
+          <td class="highlight-cell">"生成项目 XYZ 的本周进展摘要" → 一键生成</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="slide-footer">
+    <span>火山引擎 × 成都先导</span><span>p.3</span>
+  </div>
+</div>
+
+<!-- ============ SLIDE 4: 技术方案 ============ -->
+<div class="slide">
+  <div class="slide-body">
+    <h2 class="section-head"><span class="num">03</span> 数十亿数据如何做到秒级检索？</h2>
+
+    <div class="insight-strip">
+      答案：向量化 + 向量数据库。传统关系型数据库只能精确匹配，而药物研发需要的是"相似性检索" —— 找结构相似、活性相近的化合物，找主题相关的文献。向量化是唯一解。
+    </div>
+
+    <h3>为什么传统数据库在 DEL 场景下失效？</h3>
+    <table class="data-table">
+      <thead>
+        <tr><th>挑战</th><th>传统 SQL 数据库</th><th>向量数据库方案</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>数十亿高维化合物数据</td>
+          <td>索引只能精确匹配，模糊查询退化为全表扫描（几十分钟~几小时）</td>
+          <td>化合物的结构/属性转为高维向量，相似分子在向量空间中自然聚集，通过 HNSW / IVF 索引快速定位</td>
+        </tr>
+        <tr>
+          <td>研究员需要"相似性检索"</td>
+          <td>只能查"完全一致"，无法找"结构相似""活性相近"</td>
+          <td>专用索引算法在数十亿向量中检索最近的 Top-N 结果</td>
+        </tr>
+        <tr>
+          <td>海量非结构化文献/报告</td>
+          <td>关键词匹配，无法理解语义</td>
+          <td>领域预训练模型将文本转为语义向量，"靶点X抑制剂" 能匹配 "Target X antagonist"</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h3>性能保障：三层优化</h3>
+    <div class="metric-row">
+      <div class="metric-badge">
+        <div class="big-num">&lt; 1.5<span class="unit">s</span></div>
+        <div class="label">数十亿级单次检索响应</div>
+      </div>
+      <div class="metric-badge">
+        <div class="big-num">90<span class="unit">%</span></div>
+        <div class="label">日常查询命中内存热点</div>
+      </div>
+      <div class="metric-badge">
+        <div class="big-num">10<span class="unit">x+</span></div>
+        <div class="label">混合检索比全量检索提速</div>
+      </div>
+    </div>
+
+    <table class="data-table">
+      <thead>
+        <tr><th>优化层面</th><th>技术手段</th><th>效果</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>索引与量化</strong></td>
+          <td>IVF-HNSW 混合索引 + FP16/INT8 量化</td>
+          <td>存储体积减半，检索速度提升 2~3 倍，精度无损</td>
+        </tr>
+        <tr>
+          <td><strong>分层存储</strong></td>
+          <td>热门数据（近期项目/热门靶点）存内存，冷数据存磁盘按需加载</td>
+          <td>90% 日常查询秒级响应，同时控制硬件成本</td>
+        </tr>
+        <tr>
+          <td><strong>混合检索</strong></td>
+          <td>先结构化过滤（"仅 2024 年后 GLP 项目"），再向量相似检索</td>
+          <td>缩小检索范围后再匹配，速度提升 10 倍以上</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="slide-footer">
+    <span>火山引擎 × 成都先导</span><span>p.4</span>
+  </div>
+</div>
+
+<!-- ============ SLIDE 5: WHY US ============ -->
+<div class="slide">
+  <div class="slide-body">
+    <h2 class="section-head"><span class="num">04</span> 为什么选择火山引擎？</h2>
+
+    <div class="insight-strip">
+      我们不是通用 AI 厂商，而是具备自研全栈能力、海量数据处理经验、医药级合规能力的 AI 基础设施服务商。
+    </div>
+
+    <div class="adv-grid">
+      <div class="adv-card">
+        <div class="adv-num">1</div>
+        <h4>自研全栈 AI 底座，非第三方拼凑</h4>
+        <p>字节跳动旗下企业级 AI 服务商。底层的豆包 Seed 大模型日均万亿级 Token 调用打磨成熟，向量数据库、智能体平台全链路自研，完全可控。不是外购第三方模型拼凑。</p>
+      </div>
+      <div class="adv-card">
+        <div class="adv-num">2</div>
+        <h4>千亿级海量数据检索，先天匹配 DEL</h4>
+        <p>字节常年处理 EB 级非结构化数据，向量数据库内置 DiskANN + RaBitQ 优化算法，原生支持数十亿、上百亿级数据秒级相似检索 —— 恰好匹配贵司 DEL 化合物库的规模。</p>
+      </div>
+      <div class="adv-card">
+        <div class="adv-num">3</div>
+        <h4>全内网私有化部署，从根源合规</h4>
+        <p>模型推理、向量检索、知识库全部运行在贵司自有服务器/VPC 内，化合物结构、客户项目数据完全不出内网边界。完整审计日志、权限管控、操作留痕、零随机可复现，满足 GLP 和跨国药企审计要求。</p>
+      </div>
+      <div class="adv-card">
+        <div class="adv-num">4</div>
+        <h4>低侵入对接，不改造现有系统</h4>
+        <p>轻量化只读接入 ELN、DEL 数据库、SDMS、LIMS，低代码集成。不改动现有研发流程、不停工适配，落地周期短，IT 改造成本低。</p>
+      </div>
+      <div class="adv-card">
+        <div class="adv-num">5</div>
+        <h4>懂药物研发，不是通用 AI 套壳</h4>
+        <p>深度理解靶点、DEL 筛选、hit 化合物、ADMET、GLP 等行业术语和业务逻辑。智能体能听懂研究员专业提问，不是"能聊天但不能干活"的通用助手。</p>
+      </div>
+      <div class="adv-card">
+        <div class="adv-num">6</div>
+        <h4>长期运维兜底，非一次性交付</h4>
+        <p>7×24 小时本地化运维支持，模型版本持续迭代，行业知识库定期更新。字节跳动上市公司的信用背书，不会出现小厂商倒闭、无人维护的情况。</p>
+      </div>
+    </div>
+  </div>
+  <div class="slide-footer">
+    <span>火山引擎 × 成都先导</span><span>p.5</span>
+  </div>
+</div>
+
+<!-- ============ SLIDE 6: COMPETITIVE COMPARISON ============ -->
+<div class="slide">
+  <div class="slide-body">
+    <h2 class="section-head"><span class="num">05</span> 与同行的本质差异</h2>
+
+    <table class="vs-table">
+      <thead>
+        <tr>
+          <th class="dim">对比维度</th>
+          <th class="comp">普通 AI 创业公司</th>
+          <th class="comp">通用云厂商</th>
+          <th class="ve-col">火山引擎</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>模型底座</td>
+          <td>外购 / 开源模型拼凑</td>
+          <td>有算力，无自研大模型</td>
+          <td class="check">自研 Seed 大模型，日均万亿级 Token</td>
+        </tr>
+        <tr>
+          <td>海量数据性能</td>
+          <td>缺乏大规模验证</td>
+          <td>通用方案，未针对性优化</td>
+          <td class="check">字节 EB 级数据处理经验，百亿级向量检索</td>
+        </tr>
+        <tr>
+          <td>私有化与合规</td>
+          <td>能力弱甚至不可用</td>
+          <td>合规审计适配不足</td>
+          <td class="check">全内网离线，GLP 合规适配，审计全链路</td>
+        </tr>
+        <tr>
+          <td>行业理解</td>
+          <td>不懂医药</td>
+          <td>无行业智能体落地经验</td>
+          <td class="check">深度理解靶点/DEL/ADMET/GLP 业务逻辑</td>
+        </tr>
+        <tr>
+          <td>系统对接</td>
+          <td>需大量定制开发</td>
+          <td>标准接口，灵活性差</td>
+          <td class="check">轻量化只读接入，不改现有系统</td>
+        </tr>
+        <tr>
+          <td>长期服务</td>
+          <td>跑路风险高</td>
+          <td>标准化，少有定制运维</td>
+          <td class="check">7×24h 运维 + 模型迭代 + 知识库更新</td>
+        </tr>
+        <tr>
+          <td>知识产权</td>
+          <td>数据可能被用于训练</td>
+          <td>条款复杂，边界模糊</td>
+          <td class="check">模型完全隔离，数据不训练、不跨客户共享</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="insight-strip" style="margin-top:24px;">
+      一句话总结：通用云厂商有算力无场景，AI 创业公司有想法无底座。火山引擎是少数能同时做到 <strong>自研大模型 + 海量数据性能 + 医药合规 + 行业懂行 + 快速落地 + 长期运维</strong> 的全栈服务商。
+    </div>
+  </div>
+  <div class="slide-footer">
+    <span>火山引擎 × 成都先导</span><span>p.6</span>
+  </div>
+</div>
+
+<!-- ============ SLIDE 7: ROADMAP ============ -->
+<div class="slide">
+  <div class="slide-body">
+    <h2 class="section-head"><span class="num">06</span> 分阶段实施建议</h2>
+
+    <div class="insight-strip">
+      我们建议分阶段推进，让贵司在最小投入下先看到效果，再逐步扩展至全量数据。
+    </div>
+
+    <div class="roadmap">
+      <div class="phase current">
+        <div class="phase-num">第一阶段 &middot; 1~2 个月</div>
+        <h4>跑通高频场景</h4>
+        <p>选取 2~3 个高频靶点、近期项目数据、核心文献库作为试点</p>
+        <div class="tag-list">
+          <span>文献智能体</span><span>药化知识助手</span><span>项目摘要生成</span>
+        </div>
+      </div>
+      <div class="arrow-sep">&#9654;</div>
+      <div class="phase">
+        <div class="phase-num">第二阶段 &middot; 2~4 个月</div>
+        <h4>扩展数据范围</h4>
+        <p>接入全量 DEL 库、ELN 历史数据、SDMS、LIMS 系统</p>
+        <div class="tag-list">
+          <span>全靶点覆盖</span><span>合规自查</span><span>竞品情报</span>
+        </div>
+      </div>
+      <div class="arrow-sep">&#9654;</div>
+      <div class="phase">
+        <div class="phase-num">第三阶段 &middot; 持续迭代</div>
+        <h4>深度业务融合</h4>
+        <p>定制化智能体、模型微调、知识库持续更新</p>
+        <div class="tag-list">
+          <span>ADMET 预测</span><span>分子生成</span><span>客户报告自动化</span>
+        </div>
+      </div>
+    </div>
+
+    <h3 style="margin-top:32px;">每一阶段的风险控制</h3>
+    <table class="data-table">
+      <thead>
+        <tr><th>风险点</th><th>我们的应对</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>数据不出内网</td>
+          <td>全程私有化部署，向量化、模型推理均在贵司服务器完成，不调用任何外部 API</td>
+        </tr>
+        <tr>
+          <td>结果可复现</td>
+          <td>模型配置零随机参数，同一查询两次结果完全一致，通过 GLP 审计</td>
+        </tr>
+        <tr>
+          <td>知识产权归属</td>
+          <td>私有化部署的模型权重和所有数据完全归属贵司，不会用于训练或跨客户共享</td>
+        </tr>
+        <tr>
+          <td>历史数据不规范</td>
+          <td>预处理 Pipeline 自动清洗、标准化；混合检索（语义 + 关键词 + 结构化）互补兜底</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="slide-footer">
+    <span>火山引擎 × 成都先导</span><span>p.7</span>
+  </div>
+</div>
+
+<!-- ============ SLIDE 8: CLOSING ============ -->
+<div class="slide">
+  <div class="closing-strip">
+    <h2>让每一位研究员<br>都拥有 AI 副驾驶</h2>
+    <p style="margin-bottom:32px;">
+      数十亿 DEL 数据、海量文献、跨系统实验记录 —<br>
+      一句话提问，秒级洞察，安全合规。
+    </p>
+    <p style="font-size:14px; color:#94a3b8;">
+      火山引擎 &nbsp;|&nbsp; 企业级 AI 全栈服务商<br>
+      期待与成都先导深入交流
+    </p>
+  </div>
+</div>
+
+</body>
+</html>

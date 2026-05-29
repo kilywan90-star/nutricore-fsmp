@@ -11,10 +11,10 @@
 - 🎭 **对抗性输入检测**: 提示注入检测、越狱攻击检测、对抗样本检测
 
 ### 使用场景
-- ✅ 开发阶段安全测试: 集成到CI/CD流水线，在开发阶段发现安全问题
-- ⚡ 实时请求拦截: 作为中间件部署在智能体服务前，实时拦截风险请求
-- 📊 批量安全审计: 对历史对话数据进行批量安全审计，发现潜在风险
-- 📈 运行时安全监控: 对接监控系统，持续监控智能体运行安全状态
+- ✅ **开发阶段安全测试**: 集成到CI/CD流水线，在开发阶段发现安全问题
+- ⚡ **实时请求拦截**: 作为中间件部署在智能体服务前，实时拦截风险请求
+- 📊 **批量安全审计**: 对历史对话数据进行批量安全审计，发现潜在风险
+- 📈 **运行时安全监控**: 对接监控系统，持续监控智能体运行安全状态
 
 ### 核心优势
 - 🔌 **插件化架构**: 所有检测能力模块化，支持灵活扩展自定义检测规则
@@ -76,6 +76,82 @@ asd detect -i input.json -o output.json
 
 # 指定规则目录
 asd detect -i input.json -r ./rules -f text
+```
+
+#### 作为HTTP中间件使用
+
+```python
+from fastapi import FastAPI
+from agent_security_detector.adapters.http_middleware import SecurityMiddleware
+
+app = FastAPI()
+
+# 添加安全检测中间件
+app.add_middleware(
+    SecurityMiddleware,
+    rule_dirs=["rules"],
+    block_risk=True,  # 拦截风险请求
+    risk_threshold="MEDIUM"  # 中等以上风险拦截
+)
+
+# 你的智能体服务接口
+@app.post("/chat")
+async def chat():
+    # 智能体处理逻辑
+    return {"response": "你好！"}
+```
+
+## 配置和规则
+
+### 内置规则
+
+内置规则位于 `rules/` 目录下，包含常见的检测规则。你可以直接使用，也可以根据需要修改。
+
+### 自定义规则
+
+你可以创建YAML格式的自定义规则文件，放在规则目录下，检测器会自动加载。
+
+示例规则文件 `rules/my_rule.yaml`:
+```yaml
+plugin: sensitive_info
+config:
+  custom_patterns:
+    employee_id: 'E\d{6}'  # 自定义工号检测规则
+  detect_types: ["phone", "email", "employee_id"]
+```
+
+### 配置参数
+
+```python
+detector = SecurityDetector(
+    config={
+        "min_confidence": 0.6,  # 最低置信度阈值，低于此值的结果会被过滤
+        "max_workers": 10,  # 并行检测最大线程数
+        "duplicate_dedup": True,  # 是否去重重复的检测结果
+    }
+)
+```
+
+## 开发
+
+### 安装开发依赖
+
+```bash
+pip install -e ".[dev]"
+```
+
+### 运行测试
+
+```bash
+pytest tests/ -v
+```
+
+### 代码风格检查
+
+```bash
+black src/ tests/
+flake8 src/ tests/
+mypy src/
 ```
 
 ## 许可证

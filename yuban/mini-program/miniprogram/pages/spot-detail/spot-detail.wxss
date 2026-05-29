@@ -1,0 +1,58 @@
+/* 钓点详情 */
+
+.photo-swiper {
+  width: 100%;
+  height: 400rpx;
+}
+
+.swiper-image {
+  width: 100%;
+  height: 100%;
+}
+
+.weather-mini {
+  display: flex;
+  gap: 24rpx;
+  font-size: 24rpx;
+  color: #666;
+}
+
+.info-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16rpx;
+}
+
+.info-item {
+  background: #f8f8f8;
+  border-radius: 8rpx;
+  padding: 16rpx;
+}
+
+.info-label {
+  font-size: 22rpx;
+  color: #999;
+  display: block;
+  margin-bottom: 4rpx;
+}
+
+.info-value {
+  font-size: 28rpx;
+  font-weight: bold;
+}
+
+.gear-group {
+  border-left: 3px solid #07C160;
+  padding-left: 16rpx;
+}
+
+.bottom-actions {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: #fff;
+  padding: 16rpx 24rpx 32rpx;
+  display: flex;
+  box-shadow: 0 -2rpx 12rpx rgba(0,0,0,0.06);
+}

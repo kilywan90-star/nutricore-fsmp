@@ -1,0 +1,1698 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>四川省骨科医院 · AI 智能随访系统</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+:root{
+  --primary:#0D47A1; --primary-light:#1565C0; --primary-bg:#E3F2FD;
+  --secondary:#00897B; --secondary-light:#00BFA5;
+  --bg:#F0F4F8; --card:#FFFFFF; --text:#1A2332; --text2:#5A6C7D; --text3:#8899AA;
+  --border:#E8EDF2; --shadow:0 2px 12px rgba(0,0,0,.06);
+  --radius:12px; --radius-sm:8px;
+  --green:#10B981; --yellow:#F59E0B; --red:#EF4444; --blue:#3B82F6; --purple:#8B5CF6;
+  --orange:#F97316; --pink:#EC4899;
+  --sidebar-w:240px;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif;background:var(--bg);color:var(--text);font-size:14px;display:flex;min-height:100vh;overflow-x:hidden}
+a{text-decoration:none;color:inherit}
+
+/* ===== SIDEBAR ===== */
+.sidebar{position:fixed;left:0;top:0;bottom:0;width:var(--sidebar-w);background:linear-gradient(180deg,#0D47A1 0%,#0A3A8A 100%);color:#fff;z-index:100;display:flex;flex-direction:column;transition:transform .3s}
+.sidebar-brand{padding:24px 20px 20px;border-bottom:1px solid rgba(255,255,255,.1)}
+.sidebar-brand .logo{font-size:20px;font-weight:700;display:flex;align-items:center;gap:10px}
+.sidebar-brand .logo i{font-size:26px;color:#4FC3F7}
+.sidebar-brand .sub{font-size:12px;opacity:.7;margin-top:4px;padding-left:36px}
+.sidebar-nav{flex:1;padding:12px 0;overflow-y:auto}
+.sidebar-nav .nav-group{padding:0 12px;margin-top:8px}
+.sidebar-nav .nav-group:first-child{margin-top:0}
+.sidebar-nav .nav-label{font-size:11px;text-transform:uppercase;opacity:.5;padding:8px 12px 4px;letter-spacing:.5px}
+.nav-item{display:flex;align-items:center;gap:12px;padding:10px 16px;border-radius:8px;cursor:pointer;transition:all .2s;margin:2px 0;font-size:14px;color:rgba(255,255,255,.75);position:relative}
+.nav-item:hover{background:rgba(255,255,255,.12);color:#fff}
+.nav-item.active{background:rgba(255,255,255,.18);color:#fff;font-weight:600}
+.nav-item i{width:20px;text-align:center;font-size:16px}
+.nav-item .alert-dot{width:8px;height:8px;border-radius:50%;position:absolute;right:12px;top:50%;margin-top:-4px}
+.nav-item .alert-dot.red{background:var(--red);animation:pulse 2s infinite}
+.sidebar-footer{padding:16px 20px;border-top:1px solid rgba(255,255,255,.1);font-size:12px;opacity:.6;text-align:center}
+
+/* ===== MAIN ===== */
+.main{margin-left:var(--sidebar-w);flex:1;min-height:100vh}
+.header{background:var(--card);padding:16px 28px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);position:sticky;top:0;z-index:50}
+.header h2{font-size:18px;font-weight:600}
+.header-right{display:flex;align-items:center;gap:16px}
+.header-right .badge{background:var(--red);color:#fff;font-size:11px;padding:2px 8px;border-radius:12px;margin-left:4px}
+.header-right .time{color:var(--text2);font-size:13px}
+.content{padding:24px 28px}
+
+/* ===== PAGE SYSTEM ===== */
+.page{display:none;animation:fadeIn .35s ease}
+.page.active{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+
+/* ===== CARDS ===== */
+.card{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);padding:20px;margin-bottom:20px}
+.card-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
+.card-header h3{font-size:16px;font-weight:600}
+.card-header .tag{font-size:12px;padding:2px 10px;border-radius:12px;background:var(--primary-bg);color:var(--primary)}
+.row{display:grid;gap:20px}
+.row-2{grid-template-columns:1fr 1fr}
+.row-3{grid-template-columns:1fr 1fr 1fr}
+.row-4{grid-template-columns:repeat(4,1fr)}
+@media(max-width:1024px){.row-4{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:768px){.row-2,.row-3,.row-4{grid-template-columns:1fr}}
+
+/* ===== STAT CARDS ===== */
+.stat-card{padding:20px;border-radius:var(--radius);background:var(--card);box-shadow:var(--shadow)}
+.stat-card .stat-icon{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px;margin-bottom:12px}
+.stat-card .stat-label{font-size:13px;color:var(--text2);margin-bottom:4px}
+.stat-card .stat-value{font-size:26px;font-weight:700}
+.stat-card .stat-change{font-size:12px;margin-top:4px;display:flex;align-items:center;gap:4px}
+.stat-card .stat-sub{font-size:12px;color:var(--text3);margin-top:2px}
+
+/* ===== COMPARE BAR ===== */
+.compare-bar{display:flex;align-items:center;gap:16px;margin:4px 0}
+.compare-bar .bar-track{flex:1;height:8px;background:#E8EDF2;border-radius:4px;overflow:hidden;position:relative}
+.compare-bar .bar-fill{height:100%;border-radius:4px;transition:width .8s ease}
+.compare-bar .bar-label{font-size:13px;min-width:60px;font-weight:500}
+
+/* ===== TABLE ===== */
+.table-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{text-align:left;padding:10px 12px;color:var(--text2);font-weight:500;border-bottom:2px solid var(--border);font-size:12px;text-transform:uppercase;letter-spacing:.3px;white-space:nowrap}
+th .ck{width:16px;height:16px;accent-color:var(--primary);cursor:pointer}
+td{padding:10px 12px;border-bottom:1px solid var(--border);vertical-align:middle}
+tr:hover td{background:#F8FAFC}
+.status-tag{display:inline-block;padding:2px 10px;border-radius:12px;font-size:12px;font-weight:500}
+.status-tag.green{background:#D1FAE5;color:#065F46}
+.status-tag.yellow{background:#FEF3C7;color:#92400E}
+.status-tag.red{background:#FEE2E2;color:#991B1B}
+.status-tag.blue{background:#DBEAFE;color:#1E40AF}
+.status-tag.purple{background:#EDE9FE;color:#5B21B6}
+.status-tag.gray{background:#F1F5F9;color:#475569}
+.status-tag.orange{background:#FFEDD5;color:#9A3412}
+.status-tag.pink{background:#FCE7F3;color:#9D174D}
+
+/* ===== ALERT TIERS ===== */
+.alert-tier{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:12px;font-size:12px;font-weight:600}
+.alert-tier.red{background:#FEE2E2;color:#991B1B;border:1px solid #FECACA}
+.alert-tier.red::before{content:'⬤';font-size:8px;color:#EF4444}
+.alert-tier.orange{background:#FFEDD5;color:#9A3412;border:1px solid #FED7AA}
+.alert-tier.orange::before{content:'⬤';font-size:8px;color:#F97316}
+.alert-tier.yellow{background:#FEF3C7;color:#92400E;border:1px solid #FDE68A}
+.alert-tier.yellow::before{content:'⬤';font-size:8px;color:#F59E0B}
+
+/* ===== FORM ===== */
+.form-group{margin-bottom:14px}
+.form-group label{display:block;font-size:13px;font-weight:500;margin-bottom:4px;color:var(--text2)}
+.form-group input,.form-group select,.form-group textarea{width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:var(--radius-sm);font-size:13px;outline:none;transition:border .2s;background:#fff}
+.form-group input:focus,.form-group select:focus,.form-group textarea:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(13,71,161,.1)}
+.form-group textarea{min-height:70px;resize:vertical}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.btn{padding:8px 20px;border:none;border-radius:var(--radius-sm);font-size:13px;font-weight:500;cursor:pointer;transition:all .2s;display:inline-flex;align-items:center;gap:6px}
+.btn-primary{background:var(--primary);color:#fff}
+.btn-primary:hover{background:var(--primary-light)}
+.btn-secondary{background:var(--bg);color:var(--text)}
+.btn-secondary:hover{background:var(--border)}
+.btn-success{background:var(--green);color:#fff}
+.btn-success:hover{opacity:.9}
+.btn-danger{background:var(--red);color:#fff}
+.btn-danger:hover{opacity:.9}
+.btn-warning{background:var(--orange);color:#fff}
+.btn-warning:hover{opacity:.9}
+.btn-outline{background:transparent;border:1px solid var(--border);color:var(--text2)}
+.btn-outline:hover{border-color:var(--primary);color:var(--primary)}
+.btn-sm{padding:4px 12px;font-size:12px}
+.btn-icon{width:32px;height:32px;padding:0;justify-content:center;border-radius:8px}
+.btn-lg{padding:12px 28px;font-size:15px}
+.flex{display:flex;align-items:center;gap:8px}
+.flex-between{display:flex;justify-content:space-between;align-items:center}
+.gap-4{gap:4px}
+.mt-12{margin-top:12px}
+.mt-16{margin-top:16px}
+.mb-8{margin-bottom:8px}
+.mb-16{margin-bottom:16px}
+.text-center{text-align:center}
+.text-sm{font-size:12px;color:var(--text3)}
+.text-muted{color:var(--text2)}
+
+/* ===== SEARCH BAR ===== */
+.search-bar{display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap}
+.search-bar input{flex:1;min-width:200px;padding:8px 14px;border:1px solid var(--border);border-radius:var(--radius-sm);font-size:13px;outline:none}
+.search-bar input:focus{border-color:var(--primary)}
+.search-bar select{padding:8px 12px;border:1px solid var(--border);border-radius:var(--radius-sm);font-size:13px;outline:none;background:#fff}
+
+/* ===== BATCH BAR ===== */
+.batch-bar{display:none;align-items:center;gap:12px;padding:10px 16px;background:#DBEAFE;border-radius:var(--radius-sm);margin-bottom:12px;font-size:13px;animation:slideDown .25s ease}
+.batch-bar.show{display:flex}
+@keyframes slideDown{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)}}
+.batch-bar .count{font-weight:600;color:var(--primary)}
+
+/* ===== FLOW CHART ===== */
+.flow-steps{display:flex;align-items:flex-start;justify-content:space-between;padding:20px 0;flex-wrap:wrap;gap:12px}
+.flow-step{text-align:center;flex:1;min-width:100px}
+.flow-step .step-icon{width:56px;height:56px;border-radius:50%;margin:0 auto 8px;display:flex;align-items:center;justify-content:center;font-size:22px;color:#fff;position:relative}
+.flow-step .step-icon.pulse{animation:pulse 2s infinite}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(13,71,161,.4)}70%{box-shadow:0 0 0 12px rgba(13,71,161,0)}100%{box-shadow:0 0 0 0 rgba(13,71,161,0)}}
+.flow-step .step-label{font-size:12px;font-weight:500;color:var(--text2)}
+.flow-step .step-desc{font-size:11px;color:var(--text3);margin-top:2px}
+
+/* ===== CLOSED-LOOP ===== */
+.closed-loop{display:flex;align-items:center;justify-content:center;gap:0;padding:10px 0;flex-wrap:wrap}
+.loop-node{text-align:center;min-width:90px;padding:12px 8px}
+.loop-node .node-icon{width:48px;height:48px;border-radius:50%;margin:0 auto 6px;display:flex;align-items:center;justify-content:center;font-size:18px;color:#fff;position:relative}
+.loop-node .node-label{font-size:11px;font-weight:500;color:var(--text2)}
+.loop-arrow{color:var(--text3);font-size:14px;padding:0 4px}
+
+/* ===== TIMELINE ===== */
+.timeline{position:relative;padding-left:28px}
+.timeline::before{content:'';position:absolute;left:8px;top:4px;bottom:4px;width:2px;background:var(--border)}
+.timeline-item{position:relative;padding:0 0 20px 16px}
+.timeline-item::before{content:'';position:absolute;left:-24px;top:6px;width:10px;height:10px;border-radius:50%;background:var(--primary);border:2px solid var(--primary-bg)}
+.timeline-item.green::before{background:var(--green)}
+.timeline-item.yellow::before{background:var(--yellow)}
+.timeline-item.red::before{background:var(--red)}
+.timeline-item.orange::before{background:var(--orange)}
+.timeline-item .tl-time{font-size:11px;color:var(--text3);margin-bottom:2px}
+.timeline-item .tl-title{font-weight:500;font-size:14px}
+.timeline-item .tl-desc{font-size:12px;color:var(--text2);margin-top:2px}
+
+/* ===== COMPARISON ===== */
+.comparison-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+@media(max-width:768px){.comparison-grid{grid-template-columns:1fr}}
+.comp-card{border-radius:var(--radius);padding:20px}
+.comp-card.before{background:#FEF2F2;border:1px solid #FECACA}
+.comp-card.after{background:#ECFDF5;border:1px solid #A7F3D0}
+.comp-card h4{font-size:14px;margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.comp-item{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid rgba(0,0,0,.05)}
+.comp-item:last-child{border-bottom:none}
+.comp-item .label{font-size:13px;color:var(--text2)}
+.comp-item .value{font-weight:600;font-size:15px}
+
+/* ===== MODAL ===== */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:200;align-items:center;justify-content:center}
+.modal-overlay.show{display:flex}
+.modal{background:var(--card);border-radius:var(--radius);padding:24px;width:90%;max-width:560px;max-height:80vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.15)}
+.modal h3{font-size:17px;margin-bottom:16px}
+
+/* ===== MISC ===== */
+.alert{background:#FEF3C7;border:1px solid #FDE68A;border-radius:var(--radius-sm);padding:12px 16px;font-size:13px;color:#92400E;margin-bottom:16px;display:flex;align-items:center;gap:8px}
+.alert.info{background:#DBEAFE;border-color:#93C5FD;color:#1E40AF}
+.alert.success{background:#D1FAE5;border-color:#6EE7B7;color:#065F46}
+.alert.danger{background:#FEE2E2;border-color:#FECACA;color:#991B1B}
+.tag-group{display:flex;flex-wrap:wrap;gap:6px}
+.tag{display:inline-block;padding:2px 10px;border-radius:12px;font-size:12px;background:var(--bg);color:var(--text2)}
+.tag.primary{background:var(--primary-bg);color:var(--primary)}
+.tag.green{background:#D1FAE5;color:#065F46}
+.tag.yellow{background:#FEF3C7;color:#92400E}
+.tag.red{background:#FEE2E2;color:#991B1B}
+.tag.orange{background:#FFEDD5;color:#9A3412}
+.tag.purple{background:#EDE9FE;color:#5B21B6}
+
+/* ===== SIMULATE BTN ===== */
+.simulate-area{text-align:center;padding:30px 20px}
+.simulate-btn{width:80px;height:80px;border-radius:50%;border:none;background:linear-gradient(135deg,var(--primary),var(--primary-light));color:#fff;font-size:32px;cursor:pointer;transition:all .3s;box-shadow:0 4px 20px rgba(13,71,161,.3)}
+.simulate-btn:hover{transform:scale(1.08);box-shadow:0 6px 28px rgba(13,71,161,.4)}
+.simulate-btn:active{transform:scale(.95)}
+.simulate-btn.running{animation:simPulse 1.5s infinite}
+@keyframes simPulse{0%{box-shadow:0 0 0 0 rgba(13,71,161,.4)}50%{box-shadow:0 0 0 20px rgba(13,71,161,0)}100%{box-shadow:0 0 0 0 rgba(13,71,161,0)}}
+.sim-log{background:#1A2332;color:#E8EDF2;border-radius:var(--radius-sm);padding:12px 16px;font-family:'Courier New',monospace;font-size:12px;line-height:1.8;max-height:200px;overflow-y:auto;text-align:left;margin-top:16px}
+.sim-log .line{opacity:0;animation:logIn .3s forwards}
+.sim-log .line.info{color:#60A5FA}
+.sim-log .line.success{color:#34D399}
+.sim-log .line.warn{color:#FBBF24}
+.sim-log .line.phone{color:#C084FC}
+.sim-log .line.alert-red{color:#F87171}
+@keyframes logIn{to{opacity:1}}
+
+/* ===== UPLOAD ZONE ===== */
+.upload-zone{border:2px dashed var(--border);border-radius:var(--radius-sm);padding:24px;text-align:center;cursor:pointer;transition:all .2s;margin-bottom:12px}
+.upload-zone:hover{border-color:var(--primary);background:var(--primary-bg)}
+.upload-zone i{font-size:28px;color:var(--text3);margin-bottom:8px}
+.upload-zone p{font-size:13px;color:var(--text2)}
+
+/* ===== VOICE BTN ===== */
+.voice-btn{width:36px;height:36px;border-radius:50%;border:1px solid var(--border);background:#fff;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;color:var(--text2);transition:all .2s}
+.voice-btn:hover{border-color:var(--primary);color:var(--primary)}
+.voice-btn.recording{background:var(--red);color:#fff;border-color:var(--red);animation:micPulse 1s infinite}
+@keyframes micPulse{0%{box-shadow:0 0 0 0 rgba(239,68,68,.4)}50%{box-shadow:0 0 0 8px rgba(239,68,68,0)}100%{box-shadow:0 0 0 0 rgba(239,68,68,0)}}
+
+/* ===== CHATBOT ===== */
+.chat-container{display:flex;flex-direction:column;height:480px;border:1px solid var(--border);border-radius:var(--radius);overflow:hidden}
+.chat-header{background:linear-gradient(135deg,var(--primary),var(--primary-light));color:#fff;padding:14px 20px;display:flex;align-items:center;gap:12px}
+.chat-header .doc-avatar{width:40px;height:40px;border-radius:50%;background:rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;font-size:20px}
+.chat-header .doc-info h4{font-size:14px}
+.chat-header .doc-info span{font-size:11px;opacity:.8}
+.chat-messages{flex:1;overflow-y:auto;padding:16px;background:#F8FAFC;display:flex;flex-direction:column;gap:12px}
+.chat-msg{max-width:80%;padding:10px 14px;border-radius:12px;font-size:13px;line-height:1.5;animation:chatIn .3s ease}
+.chat-msg.bot{align-self:flex-start;background:var(--card);border:1px solid var(--border);border-bottom-left-radius:4px}
+.chat-msg.user{align-self:flex-end;background:var(--primary);color:#fff;border-bottom-right-radius:4px}
+.chat-msg .msg-time{font-size:10px;opacity:.6;margin-top:4px;display:block}
+.chat-msg.bot .msg-time{color:var(--text3)}
+.chat-msg.user .msg-time{text-align:right}
+@keyframes chatIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.chat-input{display:flex;padding:12px;border-top:1px solid var(--border);gap:8px;background:var(--card)}
+.chat-input input{flex:1;padding:8px 14px;border:1px solid var(--border);border-radius:20px;font-size:13px;outline:none}
+.chat-input input:focus{border-color:var(--primary)}
+.chat-input .chat-send{width:36px;height:36px;border-radius:50%;border:none;background:var(--primary);color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.chat-input .chat-send:hover{background:var(--primary-light)}
+.quick-reply{display:flex;gap:6px;flex-wrap:wrap;padding:0 16px 12px;background:#F8FAFC}
+.quick-reply button{font-size:11px;padding:4px 12px;border-radius:14px;border:1px solid var(--border);background:var(--card);color:var(--text2);cursor:pointer;transition:all .2s}
+.quick-reply button:hover{border-color:var(--primary);color:var(--primary)}
+
+/* ===== RISK TAGS ===== */
+.risk-cloud{display:flex;flex-wrap:wrap;gap:8px;padding:8px 0}
+.risk-tag{display:inline-flex;align-items:center;gap:4px;padding:4px 14px;border-radius:16px;font-size:12px;font-weight:500;cursor:default;transition:all .2s}
+.risk-tag.high{background:#FEE2E2;color:#991B1B;border:1px solid #FECACA}
+.risk-tag.medium{background:#FFEDD5;color:#9A3412;border:1px solid #FED7AA}
+.risk-tag.low{background:#FEF3C7;color:#92400E;border:1px solid #FDE68A}
+.risk-tag .count{font-size:10px;opacity:.7}
+
+/* ===== DOCTOR CARD ===== */
+.doc-card{display:flex;align-items:center;gap:16px;padding:16px;background:linear-gradient(135deg,#E3F2FD,#F0F4F8);border-radius:var(--radius);margin-bottom:16px}
+.doc-card .avatar{width:60px;height:60px;border-radius:50%;background:linear-gradient(135deg,var(--primary),var(--primary-light));color:#fff;display:flex;align-items:center;justify-content:center;font-size:26px}
+.doc-card .info h3{font-size:15px;margin-bottom:2px}
+.doc-card .info p{font-size:12px;color:var(--text2)}
+
+/* ===== INTERNATIONAL TABLE ===== */
+.intl-table{width:100%;border-collapse:collapse;font-size:12px;margin:8px 0}
+.intl-table th{background:var(--primary-bg);padding:8px 10px;font-weight:600;color:var(--primary);text-align:center;border:1px solid #CBD5E1;font-size:11px}
+.intl-table td{padding:8px 10px;text-align:center;border:1px solid #E2E8F0;font-size:12px}
+.intl-table tr:nth-child(even){background:#F8FAFC}
+
+/* ===== MOBILE TOGGLE ===== */
+.mobile-toggle{display:none;position:fixed;top:12px;left:12px;z-index:150;width:40px;height:40px;border-radius:8px;background:var(--card);border:1px solid var(--border);box-shadow:var(--shadow);cursor:pointer;align-items:center;justify-content:center;font-size:18px}
+.alert-history{max-height:300px;overflow-y:auto}
+.alert-row{display:flex;align-items:flex-start;gap:12px;padding:10px 0;border-bottom:1px solid var(--border);font-size:13px}
+.alert-row:last-child{border-bottom:none}
+.alert-row .al-time{min-width:70px;font-size:11px;color:var(--text3)}
+.alert-row .al-content{flex:1}
+.alert-row .al-content .al-title{font-weight:500}
+.alert-row .al-content .al-desc{font-size:12px;color:var(--text2);margin-top:2px}
+/* Profile */
+.profile-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px}
+.profile-item{text-align:center;padding:14px;background:#F8FAFC;border-radius:var(--radius-sm)}
+.profile-item .pi-value{font-size:20px;font-weight:700;color:var(--primary)}
+.profile-item .pi-label{font-size:11px;color:var(--text3);margin-top:2px}
+.profile-item .pi-bar{height:4px;background:#E8EDF2;border-radius:2px;margin-top:6px;overflow:hidden}
+.profile-item .pi-bar .pi-fill{height:100%;border-radius:2px}
+
+/* ===== WORKFLOW MODAL ===== */
+.modal-wide{max-width:780px}
+.wf-header{display:flex;align-items:center;gap:16px;padding:16px 0;border-bottom:1px solid var(--border);margin-bottom:16px}
+.wf-header .wf-title{font-size:16px;font-weight:600}
+.wf-badge{padding:2px 10px;border-radius:12px;font-size:11px}
+.wf-badge.running{background:#DBEAFE;color:#1E40AF}
+.wf-badge.done{background:#D1FAE5;color:#065F46}
+.wf-progress{height:10px;background:#E8EDF2;border-radius:5px;overflow:hidden;margin:8px 0}
+.wf-progress .wf-progress-fill{height:100%;border-radius:5px;background:linear-gradient(90deg,var(--primary),var(--secondary));transition:width .5s ease}
+.wf-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:12px 0}
+.wf-stat{text-align:center;padding:10px;border-radius:8px;background:#F8FAFC}
+.wf-stat .wf-stat-val{font-size:22px;font-weight:700}
+.wf-stat .wf-stat-lbl{font-size:11px;color:var(--text3);margin-top:2px}
+.wf-log{background:#1A2332;color:#E8EDF2;border-radius:8px;padding:10px 14px;font-family:'Courier New',monospace;font-size:11px;line-height:1.7;max-height:160px;overflow-y:auto;margin:12px 0}
+.wf-log .l{opacity:0;animation:logIn .3s forwards}
+.wf-log .l.info{color:#60A5FA}
+.wf-log .l.ok{color:#34D399}
+.wf-log .l.warn{color:#FBBF24}
+.wf-log .l.err{color:#F87171}
+.wf-patient-list{max-height:200px;overflow-y:auto;margin:12px 0}
+.wf-patient-row{display:flex;align-items:center;gap:10px;padding:6px 0;border-bottom:1px solid var(--border);font-size:12px}
+.wf-patient-row:last-child{border-bottom:none}
+.wf-patient-row .wf-pname{width:60px;font-weight:500}
+.wf-patient-row .wf-pstatus{flex:1;font-size:11px}
+.wf-patient-row .wf-pbar{width:80px}
+.wf-patient-row .wf-pbar .wf-pbar-track{height:6px;background:#E8EDF2;border-radius:3px;overflow:hidden}
+.wf-patient-row .wf-pbar .wf-pbar-fill{height:100%;border-radius:3px;transition:width .5s}
+/* Rule Editor */
+.re-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.re-full{grid-column:1/-1}
+.re-nodes{margin:12px 0}
+.re-node{display:grid;grid-template-columns:1fr 60px 1fr 1fr;gap:8px;padding:8px;background:#F8FAFC;border-radius:6px;margin-bottom:6px;align-items:center}
+.re-node input,.re-node select{padding:4px 8px;border:1px solid var(--border);border-radius:4px;font-size:12px;outline:none;background:#fff}
+.re-node input:focus,.re-node select:focus{border-color:var(--primary)}
+.wf-history-table{width:100%;border-collapse:collapse;font-size:13px}
+.wf-history-table th{padding:8px 10px;background:var(--primary-bg);color:var(--primary);font-weight:600;text-align:left;font-size:12px;border-bottom:2px solid #CBD5E1}
+.wf-history-table td{padding:8px 10px;border-bottom:1px solid var(--border)}
+.wf-history-table tr:hover td{background:#F8FAFC}
+.wf-tabs{display:flex;gap:2px;margin-bottom:12px;background:#F1F5F9;border-radius:8px;padding:3px}
+.wf-tab{padding:6px 16px;border-radius:6px;font-size:12px;font-weight:500;cursor:pointer;border:none;background:transparent;color:var(--text2);transition:all .2s}
+.wf-tab.active{background:var(--card);color:var(--primary);box-shadow:0 1px 3px rgba(0,0,0,.08)}
+.wf-panel{display:none}
+.wf-panel.active{display:block}
+
+@media(max-width:768px){
+  .mobile-toggle{display:flex}
+  .sidebar{transform:translateX(-100%)}
+  .sidebar.open{transform:translateX(0)}
+  .main{margin-left:0}
+  .content{padding:16px}
+  .header{padding:12px 16px}
+  .header h2{font-size:16px;margin-left:36px}
+  .form-row{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<button class="mobile-toggle" onclick="toggleSidebar()"><i class="fas fa-bars"></i></button>
+
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-brand">
+    <div class="logo"><i class="fas fa-robot"></i> AI 随访系统</div>
+    <div class="sub">四川省骨科医院</div>
+  </div>
+  <nav class="sidebar-nav">
+    <div class="nav-group">
+      <div class="nav-label">概览</div>
+      <div class="nav-item active" data-page="dashboard" onclick="navigate('dashboard')"><i class="fas fa-chart-pie"></i> 总览大盘</div>
+      <div class="nav-item" data-page="alertboard" onclick="navigate('alertboard')"><i class="fas fa-bell"></i> 预警看板 <span class="alert-dot red"></span></div>
+    </div>
+    <div class="nav-group">
+      <div class="nav-label">核心功能</div>
+      <div class="nav-item" data-page="followup" onclick="navigate('followup')"><i class="fas fa-brain"></i> AI 随访引擎</div>
+      <div class="nav-item" data-page="doctor" onclick="navigate('doctor')"><i class="fas fa-user-md"></i> 随访虚拟医生</div>
+      <div class="nav-item" data-page="patients" onclick="navigate('patients')"><i class="fas fa-users"></i> 患者管理</div>
+      <div class="nav-item" data-page="rules" onclick="navigate('rules')"><i class="fas fa-list-check"></i> 随访规则库</div>
+    </div>
+    <div class="nav-group">
+      <div class="nav-label">数据价值</div>
+      <div class="nav-item" data-page="profile" onclick="navigate('profile')"><i class="fas fa-heartbeat"></i> 群体健康画像</div>
+      <div class="nav-item" data-page="insights" onclick="navigate('insights')"><i class="fas fa-flask"></i> 科研数据舱</div>
+      <div class="nav-item" data-page="revenue" onclick="navigate('revenue')"><i class="fas fa-chart-line"></i> 创收分析</div>
+    </div>
+    <div class="nav-group">
+      <div class="nav-label">系统</div>
+      <div class="nav-item" data-page="settings" onclick="navigate('settings')"><i class="fas fa-cog"></i> 系统配置</div>
+    </div>
+  </nav>
+  <div class="sidebar-footer">v3.0 · 全自动随访闭环 · AI-Powered</div>
+</aside>
+
+<div class="main">
+  <header class="header">
+    <h2 id="pageTitle">总览大盘</h2>
+    <div class="header-right">
+      <span class="time" onclick="navigate('alertboard')" style="cursor:pointer"><i class="far fa-bell"></i> <span class="badge" id="alertBadge">3</span></span>
+      <span class="time" id="headerTime"></span>
+      <span style="color:var(--text2);font-size:13px"><i class="far fa-user-circle"></i> 骨科医师 · 系统管理员</span>
+    </div>
+  </header>
+  <div class="content">
+    <div class="page active" id="page-dashboard"></div>
+    <div class="page" id="page-alertboard"></div>
+    <div class="page" id="page-followup"></div>
+    <div class="page" id="page-doctor"></div>
+    <div class="page" id="page-patients"></div>
+    <div class="page" id="page-rules"></div>
+    <div class="page" id="page-profile"></div>
+    <div class="page" id="page-insights"></div>
+    <div class="page" id="page-revenue"></div>
+    <div class="page" id="page-settings"></div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal" id="modalContent"></div>
+</div>
+
+<script>
+/* ===================================================================
+   DATA
+   =================================================================== */
+const SURGERIES = ['腰椎间盘突出术后','全膝关节置换术后','全髋关节置换术后','颈椎前路减压术后','脊柱侧弯矫形术后','半月板修复术后','肩袖损伤修复术后','骨折内固定术后'];
+const SURGERY_RULES = {
+  '腰椎间盘突出术后':[{name:'术后1周',day:7,channel:'电话',tasks:'疼痛评分、切口情况、神经功能'},{name:'术后1月',day:30,channel:'电话+微信',tasks:'功能恢复、用药依从性、康复指导'},{name:'术后3月',day:90,channel:'微信',tasks:'影像复查提醒、功能评估量表'},{name:'术后6月',day:180,channel:'微信+短信',tasks:'远期疗效评估、生活质量问卷'},{name:'术后12月',day:365,channel:'电话',tasks:'年度复查提醒、满意度调查'}],
+  '全膝关节置换术后':[{name:'术后2周',day:14,channel:'电话',tasks:'切口愈合、疼痛管理、ROM评估'},{name:'术后1月',day:30,channel:'电话+微信',tasks:'康复训练指导、用药调整'},{name:'术后3月',day:90,channel:'微信',tasks:'功能评分(KSS)、影像复查'},{name:'术后6月',day:180,channel:'微信+短信',tasks:'中期功能评估、并发症筛查'},{name:'术后12月',day:365,channel:'电话',tasks:'年度随访、满意度调查、X线复查'}],
+  '全髋关节置换术后':[{name:'术后2周',day:14,channel:'电话',tasks:'切口检查、体位指导、疼痛评估'},{name:'术后1月',day:30,channel:'电话+微信',tasks:'脱位预防教育、康复评估'},{name:'术后3月',day:90,channel:'微信',tasks:'Harris评分、影像复查'},{name:'术后6月',day:180,channel:'微信+短信',tasks:'功能评估、生活质量评价'},{name:'术后12月',day:365,channel:'电话',tasks:'年度随访、X线复查、满意度'}],
+  '默认':[{name:'术后1周',day:7,channel:'电话',tasks:'基本情况评估'},{name:'术后1月',day:30,channel:'电话',tasks:'恢复评估'},{name:'术后3月',day:90,channel:'微信',tasks:'中期评估'},{name:'术后6月',day:180,channel:'微信+短信',tasks:'功能评估'},{name:'术后12月',day:365,channel:'电话',tasks:'年度随访'}]
+};
+const RISK_TAGS = [{name:'术后感染高风险',level:'high',count:0},{name:'深静脉血栓风险',level:'high',count:0},{name:'疼痛控制不佳',level:'high',count:0},{name:'切口愈合不良',level:'medium',count:0},{name:'康复依从性差',level:'medium',count:0},{name:'关节僵硬倾向',level:'medium',count:0},{name:'用药不规律',level:'medium',count:0},{name:'跌倒风险',level:'medium',count:0},{name:'营养不良',level:'low',count:0},{name:'焦虑/抑郁倾向',level:'low',count:0},{name:'低血压风险',level:'low',count:0},{name:'体重控制不佳',level:'low',count:0}];
+const ALERTS_DATA = [
+  {tier:'red',title:'疼痛评分异常升高',patient:'张伟',time:'10 分钟前',desc:'腰椎间盘突出术后患者 VAS 评分从 3→8，建议紧急干预'},
+  {tier:'red',title:'切口感染高风险',patient:'李强',time:'32 分钟前',desc:'全膝关节置换术后切口红肿渗液，CRP 升高'},
+  {tier:'orange',title:'失联超 7 天',patient:'赵敏',time:'1 小时前',desc:'AI 多通道触达失败，需启动人工干预流程'},
+  {tier:'orange',title:'康复训练停滞',patient:'王芳',time:'2 小时前',desc:'术后功能评估连续 2 次无改善，建议调整方案'},
+  {tier:'yellow',title:'用药依从性下降',patient:'刘洋',time:'4 小时前',desc:'抗凝药漏服 3 次，需加强用药提醒'},
+  {tier:'yellow',title:'复查逾期 2 天',patient:'陈静',time:'6 小时前',desc:'术后 3 月影像复查未完成，已发送提醒'},
+  {tier:'yellow',title:'满意度评分偏低',patient:'杨磊',time:'8 小时前',desc:'随访满意度 3/10，建议了解原因并改进'}
+];
+const CHAT_SCENARIOS = [
+  {q:'我最近膝盖有点疼，正常吗？',a:'您好！术后出现一定程度的疼痛是正常的恢复过程，但需要关注疼痛程度。请问您的疼痛评分是几分（0-10分）？如果超过 5 分或持续加重，建议提前来院复查。' +
+    '<br><br>同时建议您：<br>① 坚持遵医嘱进行康复训练<br>② 避免过度负重<br>③ 按时服用消炎镇痛药物'},
+  {q:'什么时候可以下地走路？',a:'根据您的术式（全膝关节置换术后），标准康复流程如下：<br><br>• 术后第 1 天：在助行器辅助下站立<br>• 术后 1-2 周：室内短距离行走<br>• 术后 4-6 周：逐渐增加活动量<br>• 术后 3 个月：恢复正常行走<br><br>具体进度请以您的主治医师评估为准，建议拍摄行走视频上传至我科微信服务号便于评估。'},
+  {q:'我的复查时间是多久？',a:'为您查询到随访计划如下：<br><br>📅 术后 2 周：切口检查、拆线<br>📅 术后 1 月：康复评估、用药调整<br>📅 术后 3 月：功能评分(KSS)、影像复查<br>📅 术后 6 月：中期功能评估<br>📅 术后 12 月：年度随访<br><br>系统会在每个节点前 3 天自动发送提醒，请保持电话畅通。'},
+  {q:'我的药还需要吃多久？',a:'术后的药物方案通常包括：<br><br>💊 抗凝药物：一般使用 4-6 周（具体遵医嘱）<br>💊 消炎镇痛药：根据疼痛情况逐步减量<br>💊 钙剂+维生素D：建议长期补充<br><br>⚠️ 请不要自行停药，尤其是抗凝药物！我将在下次随访时提醒您的主管医师进行评估。'},
+  {q:'康复训练要注意什么？',a:'术后康复训练要点：<br><br>✅ <strong>踝泵运动</strong>：每天 500-1000 次（预防血栓）<br>✅ <strong>股四头肌等长收缩</strong>：每天 3-4 组<br>✅ <strong>关节活动度训练</strong>：循序渐进，勿暴力<br><br>❌ 避免：<br>• 3 个月内避免跑跳<br>• 6 个月内避免重体力劳动<br>• 避免长时间同一姿势<br><br>推荐关注我科微信视频号，有专业康复师示范视频。'}
+];
+
+const PATIENTS = [];
+const NAMES = ['张伟','王芳','李强','赵敏','刘洋','陈静','杨磊','周婷','吴刚','郑茜','孙鹏','钱红','黄凯','朱莉','何斌','林雪','马超','胡蝶','郭峰','唐雅'];
+function rand(min,max){return Math.floor(Math.random()*(max-min+1))+min}
+function pick(arr){return arr[rand(0,arr.length-1)]}
+const TODAY = new Date(2026,4,5);
+
+// Assign risk tags to patients
+for(let i=1;i<=48;i++){
+  const surgery = pick(SURGERIES);
+  const daysSince = rand(5,400);
+  const d = new Date(TODAY); d.setDate(d.getDate()-daysSince);
+  const st = Math.random()<.25?'已完成':Math.random()<.3?'待执行':Math.random()<.15?'已失联':Math.random()<.2?'进行中':'已逾期';
+  const patientRiskTags = [];
+  const tagCount = rand(0,3);
+  const shuffledTags = [...RISK_TAGS].sort(()=>Math.random()-.5);
+  for(let t=0;t<tagCount;t++) {
+    patientRiskTags.push(shuffledTags[t].name);
+    const found = RISK_TAGS.find(rt=>rt.name===shuffledTags[t].name);
+    if(found) found.count++;
+  }
+  PATIENTS.push({
+    id:'SC'+(10000+i), name:pick(NAMES), age:rand(22,78), gender:Math.random()>.5?'男':'女',
+    surgery, phone:'138'+rand(10000000,99999999),
+    dischargeDate:d.toISOString().slice(0,10),
+    doctor:pick(['王主任','李副主任','张主治','刘医师','陈医师']),
+    status:st,
+    nextFollowup:st==='已完成'?'-':new Date(TODAY.getTime()+rand(1,60)*86400000).toISOString().slice(0,10),
+    channel:st==='已完成'?'-':pick(['短信','微信','电话','微信+短信','电话+微信']),
+    reachRate:rand(30,95),
+    riskTags:patientRiskTags
+  });
+}
+
+// Alert counts for badge
+let alertCount = ALERTS_DATA.length;
+// Follow-up history
+let followupHistory = [];
+let wfTimer = null;
+
+/* ===================================================================
+   ROUTER
+   =================================================================== */
+const PAGE_TITLES = {
+  dashboard:'总览大盘',alertboard:'预警看板',followup:'AI 随访引擎',doctor:'随访虚拟医生',
+  patients:'患者管理',rules:'随访规则库',profile:'群体健康画像',
+  insights:'科研数据舱',revenue:'创收分析',settings:'系统配置'
+};
+let currentPage = 'dashboard';
+
+function navigate(page){
+  currentPage = page;
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById('page-'+page).classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  const item = document.querySelector(`.nav-item[data-page="${page}"]`);
+  if(item) item.classList.add('active');
+  document.getElementById('pageTitle').textContent = PAGE_TITLES[page];
+  window.scrollTo(0,0);
+  renderPage(page);
+  if(window.innerWidth<=768) document.getElementById('sidebar').classList.remove('open');
+}
+function toggleSidebar(){document.getElementById('sidebar').classList.toggle('open')}
+
+function renderPage(page){
+  const fns = {
+    dashboard:renderDashboard, alertboard:renderAlertBoard, followup:renderFollowUp,
+    doctor:renderDoctor, patients:renderPatients, rules:renderRules,
+    profile:renderProfile, insights:renderInsights, revenue:renderRevenue, settings:renderSettings
+  };
+  if(fns[page]) fns[page]();
+}
+
+/* ===================================================================
+   DASHBOARD
+   =================================================================== */
+let dashCharts = {};
+
+function renderDashboard(){
+  const el = document.getElementById('page-dashboard');
+  const total = PATIENTS.length;
+  const completed = PATIENTS.filter(p=>p.status==='已完成').length;
+  const lost = PATIENTS.filter(p=>p.status==='已失联').length;
+  const pending = PATIENTS.filter(p=>p.status==='待执行'||p.status==='进行中').length;
+  const overdue = PATIENTS.filter(p=>p.status==='已逾期').length;
+  const avgRate = Math.round(PATIENTS.reduce((s,p)=>s+p.reachRate,0)/total);
+
+  el.innerHTML = `
+    <div class="row row-4 mb-16">
+      <div class="stat-card">
+        <div class="stat-icon" style="background:#DBEAFE;color:var(--primary)"><i class="fas fa-hospital-user"></i></div>
+        <div class="stat-label">出院患者总数</div>
+        <div class="stat-value">${total}</div>
+        <div class="stat-change" style="color:var(--text3)">本月新增 ${rand(8,15)} 人</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon" style="background:#D1FAE5;color:var(--green)"><i class="fas fa-check-circle"></i></div>
+        <div class="stat-label">随访完成</div>
+        <div class="stat-value">${completed}</div>
+        <div class="stat-change" style="color:var(--green)"><i class="fas fa-arrow-up"></i> 覆盖率 ${Math.round(completed/total*100)}%</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon" style="background:#FEE2E2;color:var(--red)"><i class="fas fa-exclamation-triangle"></i></div>
+        <div class="stat-label">预警事件</div>
+        <div class="stat-value">${alertCount}</div>
+        <div class="stat-change" style="color:var(--red)"><i class="fas fa-circle"></i> 红色 ${ALERTS_DATA.filter(a=>a.tier==='red').length} · 橙色 ${ALERTS_DATA.filter(a=>a.tier==='orange').length} · 黄色 ${ALERTS_DATA.filter(a=>a.tier==='yellow').length}</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon" style="background:#EDE9FE;color:var(--purple)"><i class="fas fa-phone-volume"></i></div>
+        <div class="stat-label">综合触达率</div>
+        <div class="stat-value">${avgRate}%</div>
+        <div class="stat-change" style="color:var(--green)"><i class="fas fa-arrow-up"></i> 较上月 +${rand(3,8)}%</div>
+      </div>
+    </div>
+
+    <div class="row row-2">
+      <div class="card">
+        <div class="card-header"><h3><i class="fas fa-exchange-alt" style="color:var(--primary)"></i> 升级前后对比</h3><span class="tag">效果验证</span></div>
+        <div class="comparison-grid">
+          <div class="comp-card before">
+            <h4><i class="fas fa-times-circle" style="color:var(--red)"></i> 传统人工随访</h4>
+            <div class="comp-item"><span class="label">日覆盖患者</span><span class="value" style="color:var(--red)">8-12 人</span></div>
+            <div class="comp-item"><span class="label">触达成功率</span><span class="value" style="color:var(--red)">&lt;40%</span></div>
+            <div class="comp-item"><span class="label">人均耗时</span><span class="value" style="color:var(--red)">3-4 小时/天</span></div>
+            <div class="comp-item"><span class="label">数据结构化</span><span class="value" style="color:var(--red)">手工录入</span></div>
+            <div class="comp-item"><span class="label">预警响应</span><span class="value" style="color:var(--red)">被动延迟</span></div>
+          </div>
+          <div class="comp-card after">
+            <h4><i class="fas fa-check-circle" style="color:var(--green)"></i> AI 智能随访</h4>
+            <div class="comp-item"><span class="label">日覆盖患者</span><span class="value" style="color:var(--green)">200-500 人</span></div>
+            <div class="comp-item"><span class="label">触达成功率</span><span class="value" style="color:var(--green)">92%</span></div>
+            <div class="comp-item"><span class="label">人均耗时</span><span class="value" style="color:var(--green)">5 分钟/天</span></div>
+            <div class="comp-item"><span class="label">数据结构化</span><span class="value" style="color:var(--green)">AI 自动采集</span></div>
+            <div class="comp-item"><span class="label">预警响应</span><span class="value" style="color:var(--green)">实时分级推送</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header"><h3><i class="fas fa-chart-bar" style="color:var(--primary)"></i> 随访状态分布</h3></div>
+        <div style="height:260px"><canvas id="dashStatusChart"></canvas></div>
+      </div>
+    </div>
+    <div class="row row-2">
+      <div class="card">
+        <div class="card-header"><h3><i class="fas fa-wave-square" style="color:var(--secondary)"></i> 近7日随访趋势</h3></div>
+        <div style="height:220px"><canvas id="dashTrendChart"></canvas></div>
+      </div>
+      <div class="card">
+        <div class="card-header"><h3><i class="fas fa-bolt" style="color:var(--yellow)"></i> 多通道触达效率</h3></div>
+        <div style="margin:8px 0">
+          <div class="compare-bar"><span class="bar-label"><i class="fas fa-sms" style="color:var(--blue)"></i></span><div class="bar-track"><div class="bar-fill" style="width:94%;background:var(--blue)"></div></div><span>94%</span></div>
+          <div class="compare-bar"><span class="bar-label"><i class="fab fa-weixin" style="color:var(--green)"></i></span><div class="bar-track"><div class="bar-fill" style="width:89%;background:var(--green)"></div></div><span>89%</span></div>
+          <div class="compare-bar"><span class="bar-label"><i class="fas fa-phone" style="color:var(--purple)"></i></span><div class="bar-track"><div class="bar-fill" style="width:76%;background:var(--purple)"></div></div><span>76%</span></div>
+        </div>
+        <div class="text-sm mt-12">* 基于 AI 多渠道并行触达策略，72h 内全覆盖</div>
+      </div>
+    </div>
+    <div class="alert danger"><i class="fas fa-exclamation-circle"></i> <strong>红色预警 ${ALERTS_DATA.filter(a=>a.tier==='red').length} 项：</strong>${ALERTS_DATA.filter(a=>a.tier==='red').map(a=>a.patient+'·'+a.title).join('；')} <a href="#" onclick="navigate('alertboard');return false" style="color:var(--primary);text-decoration:underline;margin-left:8px">查看详情 →</a></div>
+  `;
+
+  setTimeout(()=>{
+    Object.values(dashCharts).forEach(c=>c.destroy()); dashCharts = {};
+    const c1 = document.getElementById('dashStatusChart');
+    if(c1) dashCharts.status = new Chart(c1,{
+      type:'doughnut',
+      data:{labels:['已完成','待执行','进行中','已失联','已逾期'],
+        datasets:[{data:[
+          PATIENTS.filter(p=>p.status==='已完成').length,
+          PATIENTS.filter(p=>p.status==='待执行').length,
+          PATIENTS.filter(p=>p.status==='进行中').length,
+          PATIENTS.filter(p=>p.status==='已失联').length,
+          PATIENTS.filter(p=>p.status==='已逾期').length
+        ],backgroundColor:['#10B981','#3B82F6','#F59E0B','#EF4444','#8B5CF6'],borderWidth:0}]
+      },
+      options:{cutout:'70%',plugins:{legend:{position:'bottom',labels:{padding:12,usePointStyle:true}}}}
+    });
+    const c2 = document.getElementById('dashTrendChart');
+    if(c2) dashCharts.trend = new Chart(c2,{
+      type:'line',
+      data:{labels:['05/01','05/02','05/03','05/04','05/05','05/06','05/07'],
+        datasets:[
+          {label:'AI 自动触达',data:[18,22,25,28,32,30,35],borderColor:'#0D47A1',backgroundColor:'rgba(13,71,161,.08)',fill:true,tension:.3,pointRadius:4},
+          {label:'人工触达',data:[12,11,10,9,8,7,6],borderColor:'#8899AA',backgroundColor:'rgba(136,153,170,.08)',fill:true,tension:.3,pointRadius:4,borderDash:[4,4]}]
+      },
+      options:{plugins:{legend:{position:'top',labels:{usePointStyle:true}}},scales:{y:{beginAtZero:true,title:{display:true,text:'随访人次'}}}}
+    });
+  },50);
+}
+
+/* ===================================================================
+   ALERT BOARD
+   =================================================================== */
+function renderAlertBoard(){
+  const el = document.getElementById('page-alertboard');
+  const red = ALERTS_DATA.filter(a=>a.tier==='red');
+  const orange = ALERTS_DATA.filter(a=>a.tier==='orange');
+  const yellow = ALERTS_DATA.filter(a=>a.tier==='yellow');
+  el.innerHTML = `
+    <div class="row row-3 mb-16">
+      <div class="stat-card">
+        <div class="stat-icon" style="background:#FEE2E2;color:var(--red)"><i class="fas fa-times-circle"></i></div>
+        <div class="stat-label">红色预警 (紧急)</div>
+        <div class="stat-value" style="color:var(--red)">${red.length}</div>
+        <div class="stat-sub">需立即处理</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon" style="background:#FFEDD5;color:var(--orange)"><i class="fas fa-exclamation-circle"></i></div>
+        <div class="stat-label">橙色预警 (重要)</div>
+        <div class="stat-value" style="color:var(--orange)">${orange.length}</div>
+        <div class="stat-sub">需在 24h 内处理</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon" style="background:#FEF3C7;color:var(--yellow)"><i class="fas fa-info-circle"></i></div>
+        <div class="stat-label">黄色预警 (关注)</div>
+        <div class="stat-value" style="color:var(--yellow)">${yellow.length}</div>
+        <div class="stat-sub">需在 72h 内处理</div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-header">
+        <h3><i class="fas fa-list" style="color:var(--red)"></i> 实时预警列表</h3>
+        <button class="btn btn-outline btn-sm" onclick="alert('✅ 已刷新预警数据')"><i class="fas fa-sync-alt"></i> 刷新</button>
+      </div>
+      <div class="text-sm mb-8">共 ${ALERTS_DATA.length} 条预警 · 按严重程度排序</div>
+      <div class="alert-history">
+        ${ALERTS_DATA.map(a=>`
+          <div class="alert-row">
+            <span class="alert-tier ${a.tier}">${a.tier==='red'?'紧急':a.tier==='orange'?'重要':'关注'}</span>
+            <div class="al-content">
+              <div class="al-title">${a.title} <span class="text-muted" style="font-weight:400">— ${a.patient}</span></div>
+              <div class="al-desc">${a.desc}</div>
+            </div>
+            <span class="al-time">${a.time}</span>
+          </div>
+        `).join('')}
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-header"><h3><i class="fas fa-chart-bar" style="color:var(--orange)"></i> 预警分类统计</h3></div>
+      <div style="height:200px"><canvas id="alertChart"></canvas></div>
+    </div>
+  `;
+  setTimeout(()=>{
+    const ac = document.getElementById('alertChart');
+    if(ac) new Chart(ac,{
+      type:'bar',
+      data:{
+        labels:['疼痛异常','感染风险','失联预警','康复问题','用药问题','依从性','其他'],
+        datasets:[{label:'预警数量',data:[2,1,2,1,1,1,1],backgroundColor:['#EF4444','#EF4444','#F97316','#F97316','#F59E0B','#F59E0B','#8B5CF6'],borderRadius:4}]
+      },
+      options:{plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,title:{display:true,text:'数量'}}}}
+    });
+  },50);
+}
+
+/* ===================================================================
+   FOLLOWUP ENGINE — International Architecture + Closed Loop
+   =================================================================== */
+let simRunning = false, simTimer = null;
+
+function renderFollowUp(){
+  const el = document.getElementById('page-followup');
+  el.innerHTML = `
+    <div class="alert info"><i class="fas fa-globe"></i> <strong>国际领先架构：</strong>融合美国 Epic 智能随访引擎、欧盟 GDPR 合规数据治理、中国本土化多渠道触达策略，实现全自动随访闭环。</div>
+
+    <!-- Closed-Loop Architecture -->
+    <div class="card">
+      <div class="card-header"><h3><i class="fas fa-infinity" style="color:var(--secondary)"></i> 全自动随访闭环架构</h3><span class="tag">24/7 运行</span></div>
+      <div class="closed-loop">
+        <div class="loop-node"><div class="node-icon" style="background:var(--primary)"><i class="fas fa-user-injured"></i></div><div class="node-label">患者出院<br><small style="color:var(--text3)">自动入组</small></div></div>
+        <div class="loop-arrow"><i class="fas fa-arrow-right"></i></div>
+        <div class="loop-node"><div class="node-icon" style="background:var(--blue)"><i class="fas fa-robot"></i></div><div class="node-label">AI 规则引擎<br><small style="color:var(--text3)">术式匹配</small></div></div>
+        <div class="loop-arrow"><i class="fas fa-arrow-right"></i></div>
+        <div class="loop-node"><div class="node-icon" style="background:var(--secondary)"><i class="fas fa-random"></i></div><div class="node-label">智能通道优选<br><small style="color:var(--text3)">短信/微信/电话</small></div></div>
+        <div class="loop-arrow"><i class="fas fa-arrow-right"></i></div>
+        <div class="loop-node"><div class="node-icon" style="background:var(--purple)"><i class="fas fa-comments"></i></div><div class="node-label">AI 交互对话<br><small style="color:var(--text3)">NLP 采集</small></div></div>
+        <div class="loop-arrow"><i class="fas fa-arrow-right"></i></div>
+        <div class="loop-node"><div class="node-icon" style="background:var(--orange)"><i class="fas fa-exclamation-triangle"></i></div><div class="node-label">异常预警分级<br><small style="color:var(--text3)">红/橙/黄</small></div></div>
+        <div class="loop-arrow"><i class="fas fa-arrow-right"></i></div>
+        <div class="loop-node"><div class="node-icon" style="background:var(--green)"><i class="fas fa-database"></i></div><div class="node-label">数据归档+画像<br><small style="color:var(--text3)">科研级数据</small></div></div>
+        <div class="loop-arrow"><i class="fas fa-arrow-left" style="transform:rotate(180deg)"></i></div>
+        <div class="loop-node"><div class="node-icon" style="background:var(--pink)"><i class="fas fa-sync-alt"></i></div><div class="node-label">闭环反馈<br><small style="color:var(--text3)">持续优化</small></div></div>
+      </div>
+    </div>
+
+    <!-- International Comparison -->
+    <div class="card">
+      <div class="card-header"><h3><i class="fas fa-globe-asia" style="color:var(--primary)"></i> 全球领先架构对比</h3><span class="tag">Best Practice</span></div>
+      <div class="table-wrap">
+        <table class="intl-table">
+          <tr><th style="width:15%">维度</th><th style="width:28%">🇺🇸 美国 (Epic/Mayo)</th><th style="width:28%">🇪🇺 欧盟 (GDPR 合规)</th><th style="width:28%" style="background:var(--primary);color:#fff">🇨🇳 四川骨科 · AI 本系统</th></tr>
+          <tr><td><strong>触达策略</strong></td><td>Patient Portal + 电话</td><td>邮件 + SMS (GDPR 受限)</td><td><strong style="color:var(--primary)">微信+短信+AI语音 三通道</strong></td></tr>
+          <tr><td><strong>AI 应用</strong></td><td>规则引擎 + 部分 ML</td><td>可解释 AI (XAI)</td><td><strong style="color:var(--primary)">大模型 NLP + 多模态分析</strong></td></tr>
+          <tr><td><strong>数据标准</strong></td><td>FHIR / HL7</td><td>GDPR + 去标识化</td><td><strong style="color:var(--primary)">CDISC+FHIR+GCP 三标准</strong></td></tr>
+          <tr><td><strong>预警体系</strong></td><td>基于规则告警</td><td>AI 辅助决策</td><td><strong style="color:var(--primary)">三级预警(红/橙/黄)+自适应</strong></td></tr>
+          <tr><td><strong>随访率</strong></td><td>65-75%</td><td>60-70%</td><td><strong style="color:var(--primary)">目标 92%</strong></td></tr>
+          <tr><td><strong>人力节省</strong></td><td>50%</td><td>40%</td><td><strong style="color:var(--primary)">75%</strong></td></tr>
+        </table>
+      </div>
+    </div>
+
+    <!-- Simulation -->
+    <div class="card">
+      <div class="card-header">
+        <h3><i class="fas fa-play-circle" style="color:var(--green)"></i> 全自动闭环模拟 <small style="font-weight:400;color:var(--text2)">— 从患者出院到数据归档完整流程</small></h3>
+        <span class="tag green">DEMO</span>
+      </div>
+      <div class="row row-2">
+        <div class="simulate-area">
+          <button class="simulate-btn" id="simBtn" onclick="toggleSim()"><i class="fas fa-play" id="simIcon"></i></button>
+          <div style="margin-top:12px;font-size:13px;color:var(--text2)" id="simStatus">点击运行全自动闭环</div>
+          <div style="margin-top:8px;display:flex;gap:12px;justify-content:center;font-size:12px;color:var(--text3)">
+            <span><i class="fas fa-user"></i> ${PATIENTS[rand(0,PATIENTS.length-1)].name}</span>
+            <span><i class="fas fa-procedures"></i> ${pick(SURGERIES)}</span>
+          </div>
+        </div>
+        <div>
+          <div class="flex-between mb-8">
+            <span class="text-muted"><i class="fas fa-terminal"></i> 闭环日志</span>
+            <span class="tag green">自动运行中</span>
+          </div>
+          <div class="sim-log" id="simLog" style="max-height:280px"><div class="line" style="opacity:1;color:var(--text3)">// 就绪 — 点击 ▶ 启动全自动随访闭环</div></div>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function toggleSim(){
+  const btn = document.getElementById('simBtn');
+  const icon = document.getElementById('simIcon');
+  const log = document.getElementById('simLog');
+  const status = document.getElementById('simStatus');
+  if(simRunning){
+    clearTimeout(simTimer); simRunning=false;
+    btn.classList.remove('running'); icon.className='fas fa-play';
+    status.textContent = '⏸ 已暂停'; return;
+  }
+  simRunning=true; btn.classList.add('running'); icon.className='fas fa-pause';
+  log.innerHTML = '';
+  status.textContent = '▶ 全自动闭环运行中...';
+  const steps = [
+    {text:'[入院] 患者办理出院 → 系统自动创建随访档案',cls:'info',delay:400},
+    {text:'[规则引擎] 匹配术式 → 全膝关节置换术后 5节点随访方案',cls:'info',delay:1000},
+    {text:'[规则引擎] 依据指南自动计算: 2周→1月→3月→6月→12月时间轴',cls:'info',delay:1600},
+    {text:'[通道引擎] 策略优选: 电话(紧急)+微信(日常)+短信(提醒) 三通道并行',cls:'info',delay:2200},
+    {text:'[短信通道] ✓ 术后康复指导 #001 — 送达成功 94%',cls:'success',delay:2800},
+    {text:'[微信通道] ✓ 服务号推送功能评估量表 — 患者已填写返回',cls:'success',delay:3400},
+    {text:'[AI语音] 外呼患者 — 接通 | 患者自述疼痛评分 3/10, ROM 90°',cls:'phone',delay:4100},
+    {text:'[AI语音] NLP 提取关键信息: 疼痛↑·ROM·用药依从性→已结构化',cls:'phone',delay:4800},
+    {text:'[预警引擎] ⚠️ 分析: 疼痛评分较上月+2 → 触发橙色预警',cls:'warn',delay:5500},
+    {text:'[预警引擎] 三级分级: 橙色(重要) → 推送主管医师 + 建议提前复查',cls:'alert-red',delay:6200},
+    {text:'[健康画像] 更新风险标签: 疼痛控制不佳(高) 康复依从性好(低)',cls:'info',delay:6900},
+    {text:'[数据归档] 本次随访数据 → CDISC 标准 → GCP 科研数据库',cls:'success',delay:7600},
+    {text:'[闭环反馈] 随访模型持续优化 → 下次触达策略自适应调整',cls:'info',delay:8300},
+    {text:'✅ 全自动闭环完成 | 耗时 52s (人工需 8min) | 触达率 100% | 数据采集 12项',cls:'success',delay:9000}
+  ];
+  let i=0;
+  function nextStep(){
+    if(!simRunning||i>=steps.length){if(simRunning){simRunning=false;btn.classList.remove('running');icon.className='fas fa-play';status.textContent='✅ 全自动闭环完成'};return}
+    const s=steps[i++];const d=document.createElement('div');d.className='line '+s.cls;d.textContent=s.text;
+    log.appendChild(d);log.scrollTop=log.scrollHeight;simTimer=setTimeout(nextStep,s.delay);
+  }
+  nextStep();
+}
+
+/* ===================================================================
+   VIRTUAL DOCTOR
+   =================================================================== */
+let chatHistory = [];
+let chatScenariosIdx = 0;
+
+function renderDoctor(){
+  const el = document.getElementById('page-doctor');
+  chatHistory = [];
+  chatScenariosIdx = 0;
+  el.innerHTML = `
+    <div class="doc-card">
+      <div class="avatar"><i class="fas fa-user-md"></i></div>
+      <div class="info">
+        <h3>👨‍⚕️ AI 随访医生 · 骨科康复助手</h3>
+        <p>基于大语言模型 + 骨科专科知识库 | 可解答术后康复、用药、复查等问题 | 支持语音交互</p>
+      </div>
+    </div>
+    <div class="chat-container" id="chatContainer">
+      <div class="chat-header">
+        <div class="doc-avatar"><i class="fas fa-robot"></i></div>
+        <div class="doc-info">
+          <h4>AI 随访医生</h4>
+          <span>🟢 在线 · 四川省骨科医院</span>
+        </div>
+        <div style="margin-left:auto;font-size:12px;opacity:.7">
+          <span>患者: ${PATIENTS[rand(0,PATIENTS.length-1)].name}</span>
+        </div>
+      </div>
+      <div class="chat-messages" id="chatMessages">
+        <div class="chat-msg bot">
+          您好！我是四川省骨科医院的 AI 随访医生 👨‍⚕️<br>可以为您解答术后康复、用药、复查时间等问题。<br><br>💡 <strong>试试问：</strong>膝盖疼正常吗？什么时候能走路？复查时间是多久？
+          <span class="msg-time">${new Date().toLocaleTimeString('zh-CN',{hour:'2-digit',minute:'2-digit'})}</span>
+        </div>
+      </div>
+      <div class="quick-reply" id="quickReplies">
+        <button onclick="sendQuickMsg(0)">😣 膝盖有点疼</button>
+        <button onclick="sendQuickMsg(1)">🚶 何时能下地走路</button>
+        <button onclick="sendQuickMsg(2)">📅 复查时间安排</button>
+        <button onclick="sendQuickMsg(3)">💊 药还要吃多久</button>
+        <button onclick="sendQuickMsg(4)">🏋️ 康复训练要点</button>
+      </div>
+      <div class="chat-input">
+        <input id="chatInput" placeholder="输入您的问题..." onkeydown="if(event.key==='Enter')sendChatMsg()">
+        <button class="chat-send" onclick="sendChatMsg()"><i class="fas fa-paper-plane"></i></button>
+      </div>
+    </div>
+  `;
+}
+
+function sendQuickMsg(idx){
+  if(idx>=0&&idx<CHAT_SCENARIOS.length){
+    addChatMsg(CHAT_SCENARIOS[idx].q,'user');
+    setTimeout(()=>addChatMsg(CHAT_SCENARIOS[idx].a,'bot'),500+rand(200,600));
+  }
+}
+
+function sendChatMsg(){
+  const input = document.getElementById('chatInput');
+  if(!input||!input.value.trim()) return;
+  const text = input.value.trim();
+  input.value = '';
+  addChatMsg(text,'user');
+  // Auto-reply with closest match
+  const matched = CHAT_SCENARIOS.find(s=>text.includes(s.q.slice(0,4))||s.q.includes(text.slice(0,6))) || CHAT_SCENARIOS[rand(0,CHAT_SCENARIOS.length-1)];
+  setTimeout(()=>addChatMsg(matched.a,'bot'),500+rand(200,600));
+}
+
+function addChatMsg(text,role){
+  const container = document.getElementById('chatMessages');
+  if(!container) return;
+  const div = document.createElement('div');
+  div.className = 'chat-msg '+role;
+  div.innerHTML = text + `<span class="msg-time">${new Date().toLocaleTimeString('zh-CN',{hour:'2-digit',minute:'2-digit'})}</span>`;
+  container.appendChild(div);
+  container.scrollTop = container.scrollHeight;
+  chatHistory.push({role,text});
+}
+
+/* ===================================================================
+   PATIENTS (with batch operations)
+   =================================================================== */
+let patientFilter = '';
+let patientSurgery = '';
+let selectedPatients = new Set();
+
+function renderPatients(){
+  const el = document.getElementById('page-patients');
+  let filtered = PATIENTS.filter(p=>{
+    if(patientFilter && !p.name.includes(patientFilter) && !p.id.includes(patientFilter)) return false;
+    if(patientSurgery && p.surgery!==patientSurgery) return false;
+    return true;
+  });
+  const stMap = {'已完成':'green','待执行':'blue','进行中':'yellow','已失联':'red','已逾期':'purple'};
+  const allSelected = filtered.length>0 && filtered.every(p=>selectedPatients.has(p.id));
+
+  el.innerHTML = `
+    <div class="flex-between mb-16">
+      <div class="search-bar" style="margin-bottom:0">
+        <input placeholder="搜索患者姓名 / 病历号..." oninput="patientFilter=this.value;renderPatients()">
+        <select onchange="patientSurgery=this.value;renderPatients()">
+          <option value="">全部术式</option>
+          ${SURGERIES.map(s=>`<option value="${s}">${s}</option>`).join('')}
+        </select>
+      </div>
+      <div class="flex gap-4">
+        <button class="btn btn-outline btn-sm"><i class="fas fa-download"></i> 导出</button>
+        <button class="btn btn-primary btn-sm" onclick="alert('✅ 已创建新随访任务')"><i class="fas fa-plus"></i> 新建随访</button>
+      </div>
+    </div>
+    <div class="batch-bar ${selectedPatients.size>0?'show':''}" id="batchBar">
+      <span>已选择 <span class="count" id="batchCount">${selectedPatients.size}</span> 位患者</span>
+      <button class="btn btn-success btn-sm" onclick="batchFollowup()"><i class="fas fa-play"></i> 一键批量自动随访</button>
+      <button class="btn btn-primary btn-sm" onclick="batchNotify()"><i class="fas fa-bell"></i> 批量发送通知</button>
+      <button class="btn btn-outline btn-sm" onclick="selectedPatients.clear();renderPatients()"><i class="fas fa-times"></i> 取消选择</button>
+    </div>
+    <div class="card" style="padding:0;overflow:hidden">
+      <div class="table-wrap">
+        <table>
+          <thead><tr>
+            <th style="width:36px"><input type="checkbox" class="ck" ${allSelected?'checked':''} onchange="toggleSelectAll(this.checked)"></th>
+            <th>病历号</th><th>姓名</th><th>性别/年龄</th><th>手术名称</th><th>出院日期</th><th>主治医师</th>
+            <th>随访状态</th><th>风险标签</th><th>触达率</th><th>操作</th>
+          </tr></thead>
+          <tbody>
+            ${filtered.map(p=>`
+              <tr>
+                <td><input type="checkbox" class="ck" ${selectedPatients.has(p.id)?'checked':''} onchange="togglePatient('${p.id}')"></td>
+                <td style="font-family:monospace;font-size:12px">${p.id}</td>
+                <td><strong>${p.name}</strong>${p.riskTags.length>0?' <span class="alert-tier red" style="font-size:9px;padding:1px 6px">'+p.riskTags.length+'</span>':''}</td>
+                <td>${p.gender}/${p.age}岁</td>
+                <td style="max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${p.surgery}">${p.surgery}</td>
+                <td>${p.dischargeDate}</td>
+                <td>${p.doctor}</td>
+                <td><span class="status-tag ${stMap[p.status]}">${p.status}</span></td>
+                <td style="max-width:120px">${p.riskTags.slice(0,2).map(t=>`<span style="font-size:10px;padding:1px 6px;border-radius:8px;background:#FEE2E2;color:#991B1B;margin-right:2px;display:inline-block;margin-bottom:2px">${t}</span>`).join('')}${p.riskTags.length>2?' <span class="text-sm">+'+ (p.riskTags.length-2)+'</span>':''}</td>
+                <td><div class="flex" style="gap:4px"><div style="width:40px;height:6px;background:#E8EDF2;border-radius:3px"><div style="width:${p.reachRate}%;height:100%;background:${p.reachRate>80?'var(--green)':p.reachRate>60?'var(--yellow)':'var(--red)'};border-radius:3px"></div></div><span class="text-sm">${p.reachRate}%</span></div></td>
+                <td><button class="btn btn-outline btn-sm" onclick="showPatientDetail('${p.id}')"><i class="fas fa-eye"></i></button></td>
+              </tr>
+            `).join('')}
+            ${filtered.length===0?'<tr><td colspan="11" class="text-center" style="padding:40px;color:var(--text3)">无匹配患者</td></tr>':''}
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="flex-between mt-12">
+      <span class="text-sm">共 ${filtered.length} 条记录 (总 ${PATIENTS.length} 人)</span>
+      <span class="text-sm">标记风险患者: ${PATIENTS.filter(p=>p.riskTags.length>0).length} 人</span>
+    </div>
+  `;
+}
+
+function togglePatient(id){
+  if(selectedPatients.has(id)) selectedPatients.delete(id);
+  else selectedPatients.add(id);
+  renderPatients();
+}
+function toggleSelectAll(checked){
+  const filtered = PATIENTS.filter(p=>{
+    if(patientFilter && !p.name.includes(patientFilter) && !p.id.includes(patientFilter)) return false;
+    if(patientSurgery && p.surgery!==patientSurgery) return false;
+    return true;
+  });
+  if(checked) filtered.forEach(p=>selectedPatients.add(p.id));
+  else filtered.forEach(p=>selectedPatients.delete(p.id));
+  renderPatients();
+}
+function batchFollowup(){
+  if(selectedPatients.size===0){alert('请先选择患者');return}
+  const selected = PATIENTS.filter(p=>selectedPatients.has(p.id));
+  const m = document.getElementById('modalContent');
+  const overlay = document.getElementById('modalOverlay');
+  const now = new Date();
+  const batchId = 'FUP-'+now.getFullYear()+String(now.getMonth()+1).padStart(2,'0')+String(now.getDate()).padStart(2,'0')+'-'+String(followupHistory.length+1).padStart(3,'0');
+
+  m.className = 'modal modal-wide';
+  m.innerHTML = `
+    <div class="wf-header">
+      <span class="wf-badge running" id="wfBadge">⏳ 运行中</span>
+      <span class="wf-title">${batchId} · 批量自动随访</span>
+      <span style="margin-left:auto;font-size:12px;color:var(--text2)" id="wfPatients">${selected.length} 位患者</span>
+      <button class="btn btn-outline btn-sm" onclick="closeModal()"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="wf-progress"><div class="wf-progress-fill" id="wfProgress" style="width:0%"></div></div>
+    <div class="wf-stats" id="wfStats">
+      <div class="wf-stat"><div class="wf-stat-val" style="color:var(--green)" id="wfDone">0</div><div class="wf-stat-lbl">✅ 完成</div></div>
+      <div class="wf-stat"><div class="wf-stat-val" style="color:var(--blue)" id="wfDoing">0</div><div class="wf-stat-lbl">⏳ 处理中</div></div>
+      <div class="wf-stat"><div class="wf-stat-val" style="color:var(--red)" id="wfFail">0</div><div class="wf-stat-lbl">❌ 失败</div></div>
+      <div class="wf-stat"><div class="wf-stat-val" style="color:var(--text2)" id="wfWait">${selected.length}</div><div class="wf-stat-lbl">⏸ 待处理</div></div>
+    </div>
+    <div class="wf-tabs">
+      <button class="wf-tab active" onclick="switchWfTab(this,'log')"><i class="fas fa-terminal"></i> 实时日志</button>
+      <button class="wf-tab" onclick="switchWfTab(this,'list')"><i class="fas fa-list"></i> 患者状态</button>
+      <button class="wf-tab" onclick="switchWfTab(this,'result')"><i class="fas fa-chart-bar"></i> 执行结果</button>
+    </div>
+    <div class="wf-panel active" id="wfLogPanel">
+      <div class="wf-log" id="wfLog"><div class="l info" style="opacity:1">[${now.toLocaleTimeString('zh-CN',{hour:'2-digit',minute:'2-digit'})}] 批量随访任务启动 — 准备处理 ${selected.length} 位患者...</div></div>
+    </div>
+    <div class="wf-panel" id="wfListPanel">
+      <div class="wf-patient-list" id="wfPatientList"></div>
+    </div>
+    <div class="wf-panel" id="wfResultPanel">
+      <div style="text-align:center;padding:30px 0" id="wfResultContent"><span class="text-muted">任务执行中，请查看日志面板...</span></div>
+    </div>
+  `;
+  overlay.classList.add('show');
+
+  // Initialize patient list
+  const listEl = document.getElementById('wfPatientList');
+  const patientStates = selected.map(p=>({
+    id:p.id, name:p.name, surgery:p.surgery,
+    channels:['短信','微信','电话'].filter(()=>Math.random()>.3),
+    status:'pending', progress:0
+  }));
+  patientStates.forEach(ps => {
+    const row = document.createElement('div');
+    row.className = 'wf-patient-row';
+    row.id = 'wfpr-'+ps.id;
+    row.innerHTML = `<span class="wf-pname">${ps.name}</span><span class="wf-pstatus" id="wfps-${ps.id}">⏸ 等待中</span><div class="wf-pbar"><div class="wf-pbar-track"><div class="wf-pbar-fill" id="wpf-${ps.id}" style="width:0%;background:var(--text3)"></div></div></div>`;
+    listEl.appendChild(row);
+  });
+
+  // Simulate workflow
+  let done = 0, doing = 0, fail = 0, wait = selected.length;
+  let logIdx = 0;
+  const logLines = [
+    (p)=>`[通道引擎] ${p.name} → SMS 通道预检: 号码有效, 签名已配置 ✓`,
+    (p)=>`[短信通道] → ${p.name} 术后康复指导 #001 已发送 (送达率 94%)`,
+    (p)=>`[微信通道] → ${p.name} 服务号推送功能评估量表 (已读 ${rand(60,90)}%)`,
+    (p)=>`[AI语音] 外呼 ${p.name} 138****${rand(1000,9999)} — ${Math.random()>.2?'已接通':'未接通, 转短信留言'}`,
+    (p)=>`[NLP] ${p.name} 对话完成 → 采集到 疼痛评分/ROM/用药依从性 3项`,
+    (p)=>`[预警引擎] ${p.name} 数据评估: 无异常 ✓`
+  ];
+
+  function addWfLog(text, cls='info'){
+    const log = document.getElementById('wfLog');
+    if(!log) return;
+    const d = document.createElement('div'); d.className = 'l '+cls;
+    d.textContent = '['+new Date().toLocaleTimeString('zh-CN',{hour:'2-digit',minute:'2-digit',second:'2-digit'})+'] '+text;
+    log.appendChild(d); log.scrollTop = log.scrollHeight;
+  }
+
+  function processNext(){
+    const pending = patientStates.filter(ps=>ps.status==='pending');
+    if(pending.length===0 && doing===0){
+      // All done
+      const totalDone = patientStates.filter(ps=>ps.status==='done').length;
+      const totalFail = patientStates.filter(ps=>ps.status==='fail').length;
+      addWfLog(`✅ 批量随访完成！成功 ${totalDone} 人, 失败 ${totalFail} 人`, 'ok');
+      document.getElementById('wfBadge').className = 'wf-badge done';
+      document.getElementById('wfBadge').textContent = '✅ 已完成';
+      // Show results
+      document.getElementById('wfResultContent').innerHTML = `
+        <div style="font-size:28px;font-weight:700;color:var(--green);margin-bottom:8px">✅ ${totalDone}/${patientStates.length}</div>
+        <div class="text-muted">随访任务已完成</div>
+        <div style="margin:16px auto;max-width:300px">
+          <div class="compare-bar"><span>成功率</span><div class="bar-track"><div class="bar-fill" style="width:${Math.round(totalDone/patientStates.length*100)}%;background:var(--green)"></div></div><span>${Math.round(totalDone/patientStates.length*100)}%</span></div>
+          <div class="compare-bar"><span>预警触发</span><div class="bar-track"><div class="bar-fill" style="width:${rand(5,15)}%;background:var(--orange)"></div></div><span>${rand(1,4)}件</span></div>
+          <div class="compare-bar"><span>数据采集</span><div class="bar-track"><div class="bar-fill" style="width:100%;background:var(--purple)"></div></div><span>${totalDone*3}项</span></div>
+        </div>
+        <button class="btn btn-outline btn-sm mt-16" onclick="showFollowupHistory()"><i class="fas fa-history"></i> 查看历史记录</button>
+      `;
+      // Save to history
+      followupHistory.push({
+        id:batchId, time:now.toLocaleString('zh-CN'), total:patientStates.length,
+        done:totalDone, fail:totalFail, mode:'AI批量', patients:patientStates
+      });
+      // Clear selection
+      selectedPatients.clear(); renderPatients();
+      return;
+    }
+    // Process next batch (up to 3 concurrent)
+    const toProcess = pending.slice(0, Math.min(3, pending.length));
+    toProcess.forEach(ps => {
+      ps.status = 'doing'; doing++; wait--;
+      updateStats();
+      const p = selected.find(x=>x.id===ps.id);
+      addWfLog(`[开始] ${ps.name} — 启动多渠道触达`, 'info');
+      // Simulate each channel
+      let channelIdx = 0;
+      function nextChannel(){
+        if(channelIdx < logLines.length){
+          addWfLog(logLines[channelIdx](ps), channelIdx===3&&Math.random()>.2?'ok':channelIdx===3?'warn':'ok');
+          const pct = Math.round(((channelIdx+1)/logLines.length)*100);
+          ps.progress = pct;
+          const bar = document.getElementById('wpf-'+ps.id);
+          if(bar){bar.style.width=pct+'%';bar.style.background=pct<50?'var(--yellow)':pct<100?'var(--blue)':'var(--green)';}
+          const statusEl = document.getElementById('wfps-'+ps.id);
+          if(statusEl) statusEl.textContent = pct<100?`📡 ${['短信准备','短信发送','微信推送','语音呼叫','NLP分析'][channelIdx]||'处理中'}`:'✅ 完成';
+          channelIdx++;
+          setTimeout(nextChannel, rand(300,800));
+        } else {
+          ps.status = Math.random()>.1?'done':'fail';
+          doing--;
+          if(ps.status==='done') done++; else fail++;
+          updateStats();
+          const bar = document.getElementById('wpf-'+ps.id);
+          if(bar){bar.style.width='100%';bar.style.background=ps.status==='done'?'var(--green)':'var(--red)';}
+          const statusEl = document.getElementById('wfps-'+ps.id);
+          if(statusEl) statusEl.textContent = ps.status==='done'?'✅ 完成':'❌ 失败';
+          addWfLog(ps.status==='done'?`✅ ${ps.name} 随访完成 → 数据已归档`:`❌ ${ps.name} 随访失败 → 已标记重试`, ps.status==='done'?'ok':'err');
+          // Update progress
+          const total = patientStates.length;
+          const processed = done+fail;
+          const pct = Math.round((processed/total)*100);
+          const prog = document.getElementById('wfProgress');
+          if(prog) prog.style.width = pct+'%';
+          setTimeout(processNext, 200);
+        }
+      }
+      setTimeout(nextChannel, rand(200,500));
+    });
+  }
+
+  function updateStats(){
+    document.getElementById('wfDone').textContent = done;
+    document.getElementById('wfDoing').textContent = doing;
+    document.getElementById('wfFail').textContent = fail;
+    document.getElementById('wfWait').textContent = wait;
+  }
+
+  processNext();
+}
+
+function switchWfTab(btn, panel){
+  document.querySelectorAll('.wf-tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.wf-panel').forEach(p=>p.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('wf'+panel.charAt(0).toUpperCase()+panel.slice(1)+'Panel').classList.add('active');
+}
+
+function showFollowupHistory(){
+  const m = document.getElementById('modalContent');
+  const overlay = document.getElementById('modalOverlay');
+  m.className = 'modal modal-wide';
+  m.innerHTML = `
+    <div class="wf-header">
+      <span class="wf-title"><i class="fas fa-history" style="color:var(--primary)"></i> 随访工作记录</span>
+      <span style="margin-left:auto;font-size:12px;color:var(--text2)">共 ${followupHistory.length} 条记录</span>
+      <button class="btn btn-outline btn-sm" onclick="closeModal()"><i class="fas fa-times"></i></button>
+    </div>
+    ${followupHistory.length===0?`
+    <div class="text-center" style="padding:40px 0">
+      <i class="fas fa-inbox" style="font-size:48px;color:var(--text3);margin-bottom:12px"></i>
+      <p class="text-muted">暂无随访记录</p>
+      <p class="text-sm mt-12">请在患者管理中选择患者并执行"一键批量自动随访"</p>
+    </div>`:`
+    <table class="wf-history-table">
+      <tr><th>任务编号</th><th>执行时间</th><th>患者数</th><th>成功</th><th>失败</th><th>模式</th><th>操作</th></tr>
+      ${followupHistory.slice().reverse().map(h=>`
+      <tr>
+        <td style="font-family:monospace">${h.id}</td>
+        <td>${h.time}</td>
+        <td>${h.total}</td>
+        <td style="color:var(--green);font-weight:600">${h.done}</td>
+        <td style="color:var(--red)">${h.fail}</td>
+        <td><span class="status-tag blue">${h.mode}</span></td>
+        <td><button class="btn btn-outline btn-sm" onclick="closeModal();showFollowupDetail('${h.id}')"><i class="fas fa-eye"></i></button></td>
+      </tr>`).join('')}
+    </table>`}
+    <div style="text-align:center;margin-top:16px">
+      <button class="btn btn-outline btn-sm" onclick="closeModal()"><i class="fas fa-times"></i> 关闭</button>
+    </div>
+  `;
+  overlay.classList.add('show');
+}
+
+function showFollowupDetail(id){
+  const h = followupHistory.find(x=>x.id===id);
+  if(!h) return;
+  const m = document.getElementById('modalContent');
+  const overlay = document.getElementById('modalOverlay');
+  m.className = 'modal modal-wide';
+  m.innerHTML = `
+    <div class="wf-header">
+      <span class="wf-title"><i class="fas fa-search" style="color:var(--primary)"></i> ${h.id} 详细报告</span>
+      <button class="btn btn-outline btn-sm" onclick="closeModal()"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="row row-3 mb-16">
+      <div class="stat-card"><div class="stat-icon" style="background:#D1FAE5;color:var(--green)"><i class="fas fa-check-circle"></i></div><div class="stat-label">成功</div><div class="stat-value" style="color:var(--green)">${h.done}</div></div>
+      <div class="stat-card"><div class="stat-icon" style="background:#FEE2E2;color:var(--red)"><i class="fas fa-times-circle"></i></div><div class="stat-label">失败</div><div class="stat-value" style="color:var(--red)">${h.fail}</div></div>
+      <div class="stat-card"><div class="stat-icon" style="background:#DBEAFE;color:var(--blue)"><i class="fas fa-phone-volume"></i></div><div class="stat-label">总触达率</div><div class="stat-value">${h.total>0?Math.round(h.done/h.total*100):0}%</div></div>
+    </div>
+    ${h.patients?`
+    <table class="wf-history-table">
+      <tr><th>患者</th><th>状态</th><th>进度</th></tr>
+      ${h.patients.map(ps=>`<tr><td>${ps.name}</td><td>${ps.status==='done'?'<span class="status-tag green">✅ 成功</span>':ps.status==='fail'?'<span class="status-tag red">❌ 失败</span>':'<span class="status-tag yellow">⏸ 待处理</span>'}</td><td><div style="width:80px;height:6px;background:#E8EDF2;border-radius:3px"><div style="width:${ps.progress}%;height:100%;background:${ps.progress<50?'var(--yellow)':'var(--green)'};border-radius:3px"></div></div></td></tr>`).join('')}
+    </table>`:''}
+    <div class="text-center mt-16"><button class="btn btn-outline btn-sm" onclick="closeModal();showFollowupHistory()"><i class="fas fa-arrow-left"></i> 返回列表</button></div>
+  `;
+  overlay.classList.add('show');
+}
+
+function showPatientDetail(id){
+  const p = PATIENTS.find(x=>x.id===id);
+  if(!p) return;
+  const m = document.getElementById('modalContent');
+  const overlay = document.getElementById('modalOverlay');
+  const steps = SURGERY_RULES[p.surgery] || SURGERY_RULES['默认'];
+  const tierMap = {'已完成':'green','待执行':'blue','进行中':'yellow','已失联':'red','已逾期':'purple'};
+  m.innerHTML = `
+    <div class="flex-between"><h3>${p.name} · 随访详情</h3><button class="btn btn-outline btn-sm" onclick="closeModal()"><i class="fas fa-times"></i></button></div>
+    <div class="row row-2" style="margin:16px 0">
+      <div><span class="text-muted">病历号</span><br><strong>${p.id}</strong></div>
+      <div><span class="text-muted">手术名称</span><br><strong>${p.surgery}</strong></div>
+      <div><span class="text-muted">出院日期</span><br><strong>${p.dischargeDate}</strong></div>
+      <div><span class="text-muted">随访状态</span><br><span class="status-tag ${tierMap[p.status]}">${p.status}</span></div>
+    </div>
+    ${p.riskTags.length>0?`
+    <h4 style="margin:12px 0 8px;font-size:14px"><i class="fas fa-tags" style="color:var(--orange)"></i> 风险标签</h4>
+    <div class="tag-group mb-16">${p.riskTags.map(t=>{
+      const found = RISK_TAGS.find(r=>r.name===t);
+      return `<span class="tag ${found?found.level==='high'?'red':found.level==='medium'?'orange':'yellow':'yellow'}">${t}</span>`;
+    }).join('')}</div>`:''}
+    <h4 style="margin:12px 0 8px;font-size:14px"><i class="fas fa-timeline" style="color:var(--primary)"></i> 随访计划时间线</h4>
+    <div class="timeline">
+      ${steps.map(s=>`
+        <div class="timeline-item green" style="padding-bottom:14px">
+          <div class="tl-time">术后第 ${s.day} 天 · ${s.channel}</div>
+          <div class="tl-title" style="font-size:13px">${s.name}</div>
+          <div class="tl-desc">${s.tasks}</div>
+        </div>
+      `).join('')}
+    </div>
+    <div class="flex mt-16" style="gap:8px">
+      <button class="btn btn-primary" onclick="closeModal()"><i class="fas fa-phone"></i> 发起随访</button>
+      <button class="btn btn-warning" onclick="alert('⚠️ 已标记风险审核')"><i class="fas fa-exclamation-triangle"></i> 标记风险</button>
+      <button class="btn btn-outline" onclick="closeModal()"><i class="fas fa-times"></i> 关闭</button>
+    </div>
+  `;
+  overlay.classList.add('show');
+}
+function closeModal(){document.getElementById('modalOverlay').classList.remove('show')}
+document.getElementById('modalOverlay').addEventListener('click',e=>{if(e.target===e.currentTarget)closeModal()});
+
+/* ===================================================================
+   RULES (Voice + Upload)
+   =================================================================== */
+function renderRules(){
+  const el = document.getElementById('page-rules');
+  el.innerHTML = `
+    <div class="row row-2">
+      <div class="card">
+        <div class="card-header"><h3><i class="fas fa-microphone" style="color:var(--primary)"></i> 口述生成规则</h3><span class="tag">AI 语音转规则</span></div>
+        <div class="flex gap-4 mb-8">
+          <button class="voice-btn" id="voiceBtn" onclick="toggleVoice()"><i class="fas fa-microphone" id="voiceIcon"></i></button>
+          <span class="text-sm" id="voiceStatus">点击开始口述</span>
+        </div>
+        <div class="form-group"><label>口述内容</label><textarea id="voiceText" placeholder="例如：腰椎间盘突出术后需要1周打电话问疼痛评分，1个月电话+微信问功能恢复..." oninput="updateVoicePreview(this.value)"></textarea></div>
+        <div class="flex-between">
+          <span class="text-sm" id="voicePreview">AI 将自动解析为结构化规则...</span>
+          <button class="btn btn-primary btn-sm" onclick="generateRules()"><i class="fas fa-magic"></i> 生成规则</button>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header"><h3><i class="fas fa-file-upload" style="color:var(--secondary)"></i> 上传指南生成规则</h3><span class="tag">PDF/Word</span></div>
+        <div class="upload-zone" onclick="document.getElementById('fileInput').click()">
+          <i class="fas fa-cloud-upload-alt"></i>
+          <p>点击上传临床指南 / 专家共识文档</p>
+          <span class="text-sm">支持 PDF、Word、TXT 格式</span>
+        </div>
+        <input type="file" id="fileInput" style="display:none" accept=".pdf,.doc,.docx,.txt" onchange="handleUpload(this)">
+        <div id="uploadResult"></div>
+        <div class="flex-between mt-12">
+          <span class="text-sm">已上传指南: <strong id="guideCount">3</strong> 份</span>
+          <button class="btn btn-primary btn-sm" onclick="handleGuideGenerate()"><i class="fas fa-magic"></i> 从指南生成</button>
+        </div>
+      </div>
+    </div>
+    ${SURGERIES.slice(0,6).map(surgery=>{
+      const rules = SURGERY_RULES[surgery] || SURGERY_RULES['默认'];
+      return `
+      <div class="card">
+        <div class="card-header"><h3><i class="fas fa-syringe" style="color:var(--secondary)"></i> ${surgery}</h3>
+          <div class="flex gap-4">
+            <label style="display:flex;align-items:center;gap:6px;font-size:13px"><input type="checkbox" ${Math.random()>.3?'checked':''} style="width:16px;height:16px;accent-color:var(--primary)"> 启用</label>
+            <button class="btn btn-outline btn-sm"><i class="fas fa-edit"></i></button>
+          </div>
+        </div>
+        <div class="timeline" style="padding-left:24px">
+          ${rules.map(s=>`
+            <div class="timeline-item green" style="padding-bottom:14px">
+              <div class="tl-time">术后 ${s.day} 天 · ${s.channel}</div>
+              <div class="tl-title" style="font-size:13px">${s.name}</div>
+              <div class="tl-desc">${s.tasks}</div>
+            </div>
+          `).join('')}
+        </div>
+      </div>`;
+    }).join('')}
+  `;
+}
+function toggleVoice(){
+  const btn = document.getElementById('voiceBtn');
+  const icon = document.getElementById('voiceIcon');
+  const status = document.getElementById('voiceStatus');
+  const textarea = document.getElementById('voiceText');
+  if(btn.classList.toggle('recording')){
+    icon.className='fas fa-stop'; status.textContent='🎙️ 录音中... 请口述随访规则';
+    setTimeout(()=>{
+      btn.classList.remove('recording'); icon.className='fas fa-microphone';
+      status.textContent='✅ 录音完成';
+      textarea.value='腰椎间盘突出术后第1周需要电话随访，评估疼痛评分、切口情况、神经功能；第1个月电话+微信随访，评估功能恢复、用药依从性、康复指导；第3个月微信随访，提醒影像复查...';
+      updateVoicePreview(textarea.value);
+    },2000);
+  } else {
+    icon.className='fas fa-microphone'; status.textContent='点击开始口述';
+  }
+}
+function updateVoicePreview(v){
+  document.getElementById('voicePreview').textContent = v ? '✅ 已识别 '+v.length+' 字，AI 准备解析' : 'AI 将自动解析为结构化规则...';
+}
+function generateRules(){
+  showRuleEditor('腰椎间盘突出术后', SURGERY_RULES['腰椎间盘突出术后'], '口述生成');
+}
+function handleUpload(input){
+  const r = document.getElementById('uploadResult');
+  if(input.files.length>0){
+    const fileName = input.files[0].name;
+    const fileSize = (input.files[0].size/1024).toFixed(1);
+    r.innerHTML = `<div class="alert success"><i class="fas fa-check-circle"></i> 已上传: ${fileName} (${fileSize} KB) — AI 正在解析...</div>`;
+    document.getElementById('guideCount').textContent = parseInt(document.getElementById('guideCount').textContent)+1;
+    setTimeout(()=>{
+      showRuleEditor('全膝关节置换术后（基于指南）', SURGERY_RULES['全膝关节置换术后'], '指南生成', fileName);
+    }, 1500);
+  }
+}
+function showRuleEditor(surgery, nodes, source, fileName){
+  const m = document.getElementById('modalContent');
+  const overlay = document.getElementById('modalOverlay');
+  const now = new Date();
+  const y = now.getFullYear(), mth = String(now.getMonth()+1).padStart(2,'0'), d = String(now.getDate()).padStart(2,'0');
+  const endY = y+1;
+
+  m.className = 'modal modal-wide';
+  m.innerHTML = `
+    <div class="flex-between"><h3><i class="fas fa-${source==='口述生成'?'microphone':source==='指南生成'?'file-alt':'magic'}" style="color:var(--primary)"></i> 随访规则编辑器 · ${source}</h3><button class="btn btn-outline btn-sm" onclick="closeModal()"><i class="fas fa-times"></i></button></div>
+    ${source==='指南生成'?`<div class="alert info"><i class="fas fa-file-alt"></i> 基于文档「${fileName||'临床指南.pdf'}」AI 自动结构化生成，请核对后确认</div>`:''}
+    <div class="re-row">
+      <div class="form-group"><label>规则名称</label><input id="reName" value="${surgery}随访规则"></div>
+      <div class="form-group"><label>状态</label><select id="reStatus" style="width:100%"><option value="1" selected>✅ 启用</option><option value="0">⏸ 停用</option></select></div>
+    </div>
+    <div class="re-row">
+      <div class="form-group"><label>开始适用日期</label><input id="reStart" type="date" value="${y}-${mth}-${d}"></div>
+      <div class="form-group"><label>结束适用日期</label><input id="reEnd" type="date" value="${endY}-${mth}-${d}"></div>
+    </div>
+    <div class="form-group"><label>适用术式</label><input id="reSurgery" value="${surgery}"></div>
+
+    <h4 style="font-size:14px;margin:12px 0 8px"><i class="fas fa-timeline" style="color:var(--secondary)"></i> 随访节点 <span class="text-sm">(可编辑)</span></h4>
+    <div class="re-nodes" id="reNodes">
+      ${nodes.map((n,i)=>`
+        <div class="re-node">
+          <input value="${n.name}" placeholder="节点名称" data-idx="${i}" class="re-node-name">
+          <input value="${n.day}" placeholder="天数" type="number" data-idx="${i}" class="re-node-day">
+          <select data-idx="${i}" class="re-node-ch">
+            <option ${n.channel==='电话'?'selected':''}>电话</option>
+            <option ${n.channel==='微信'?'selected':''}>微信</option>
+            <option ${n.channel==='短信'?'selected':''}>短信</option>
+            <option ${n.channel==='电话+微信'?'selected':''}>电话+微信</option>
+            <option ${n.channel==='微信+短信'?'selected':''}>微信+短信</option>
+          </select>
+          <input value="${n.tasks}" placeholder="任务内容" data-idx="${i}" class="re-node-tasks">
+        </div>
+      `).join('')}
+    </div>
+    <button class="btn btn-outline btn-sm" onclick="addRuleNode()"><i class="fas fa-plus"></i> 添加节点</button>
+
+    <h4 style="font-size:14px;margin:16px 0 8px"><i class="fas fa-comment-dots" style="color:var(--blue)"></i> 短信/语音内容配置</h4>
+    <div class="re-row">
+      <div class="form-group"><label>📱 短信模板</label><textarea id="reSms" rows="3">【四川省骨科医院】$\{name}您好，术后随访提醒：您已术后 $\{days} 天，请关注恢复情况。如有不适请及时就医。回复Y可获取康复指导 [AI随访]</textarea></div>
+      <div class="form-group"><label>🎙️ 语音话术</label><textarea id="reVoice" rows="3">您好，我是四川省骨科医院的AI随访助手。您于 $\{surgery} 术后已 $\{days} 天，现在进行例行随访。请问您目前的疼痛评分是几分？康复训练是否在坚持？...</textarea></div>
+    </div>
+    <div class="flex-between mt-16">
+      <span class="text-sm"><i class="fas fa-info-circle"></i> 修改后需点击"确定生效"才会应用到随访流程</span>
+      <div class="flex gap-4">
+        <button class="btn btn-outline" onclick="closeModal()"><i class="fas fa-times"></i> 取消</button>
+        <button class="btn btn-outline" onclick="saveRuleDraft()"><i class="fas fa-save"></i> 保存为草稿</button>
+        <button class="btn btn-primary" onclick="confirmRule()"><i class="fas fa-check"></i> 确定生效</button>
+      </div>
+    </div>
+  `;
+  overlay.classList.add('show');
+}
+function addRuleNode(){
+  const container = document.getElementById('reNodes');
+  const idx = container.children.length;
+  const div = document.createElement('div'); div.className = 're-node';
+  div.innerHTML = `<input placeholder="节点名称" class="re-node-name"><input placeholder="天数" type="number" class="re-node-day"><select class="re-node-ch"><option>电话</option><option>微信</option><option>短信</option><option selected>电话+微信</option><option>微信+短信</option></select><input placeholder="任务内容" class="re-node-tasks">`;
+  container.appendChild(div);
+}
+function saveRuleDraft(){
+  const name = document.getElementById('reName')?.value || '未命名规则';
+  alert(`📝 规则「${name}」已保存为草稿\n\n可在规则库中继续编辑`);
+  closeModal();
+}
+function confirmRule(){
+  const name = document.getElementById('reName')?.value || '未命名规则';
+  const status = document.getElementById('reStatus')?.value === '1' ? '已启用' : '已停用';
+  const start = document.getElementById('reStart')?.value || '-';
+  const end = document.getElementById('reEnd')?.value || '-';
+  const surgery = document.getElementById('reSurgery')?.value || '未指定';
+  const nodes = document.querySelectorAll('.re-node');
+  let nodeSummary = '';
+  nodes.forEach((n,i)=>{
+    const inputs = n.querySelectorAll('input,select');
+    if(inputs.length>=4 && inputs[0].value){
+      nodeSummary += `\n  ${i+1}. ${inputs[0].value} (术后${inputs[1].value||'?'}天 · ${inputs[2].value})`;
+    }
+  });
+  alert(`✅ 规则已确定生效\n\n规则名称：${name}\n适用术式：${surgery}\n状态：${status}\n适用期：${start} 至 ${end}\n\n随访节点：${nodeSummary}\n\n短信模板 ✓  语音话术 ✓`);
+  closeModal();
+}
+function handleGuideGenerate(){
+  const guideCount = parseInt(document.getElementById('guideCount').textContent);
+  if(guideCount === 0){
+    alert('⚠️ 请先上传指南文档');
+    return;
+  }
+  showRuleEditor('全膝关节置换术后（基于指南）', SURGERY_RULES['全膝关节置换术后'], '指南生成', '已上传指南文档');
+}
+function batchNotify(){
+  if(selectedPatients.size===0){alert('请先选择患者');return}
+  const names = PATIENTS.filter(p=>selectedPatients.has(p.id)).map(p=>p.name);
+  alert(`✅ 已向 ${selectedPatients.size} 位患者发送批量通知\n\n${names.slice(0,5).join('、')}${names.length>5?'等'+names.length+'人':''}\n\n通知方式：\n• 短信提醒 ✓\n• 微信推送 ✓\n• AI语音留言 ${names.length>5?'✓':'(部分)'}`);
+}
+
+/* ===================================================================
+   PROFILE (Population Health)
+   =================================================================== */
+let profileCharts = {};
+
+function renderProfile(){
+  const el = document.getElementById('page-profile');
+  const highRisk = PATIENTS.filter(p=>p.riskTags.some(t=>RISK_TAGS.find(rt=>rt.name===t&&rt.level==='high'))).length;
+  const mediumRisk = PATIENTS.filter(p=>p.riskTags.some(t=>RISK_TAGS.find(rt=>rt.name===t&&rt.level==='medium'))).length;
+  const totalTagged = PATIENTS.filter(p=>p.riskTags.length>0).length;
+  const avgAge = Math.round(PATIENTS.reduce((s,p)=>s+p.age,0)/PATIENTS.length);
+  const male = PATIENTS.filter(p=>p.gender==='男').length;
+
+  el.innerHTML = `
+    <div class="row row-4 mb-16">
+      <div class="stat-card">
+        <div class="stat-icon" style="background:#FEE2E2;color:var(--red)"><i class="fas fa-exclamation-triangle"></i></div>
+        <div class="stat-label">高风险患者</div>
+        <div class="stat-value" style="color:var(--red)">${highRisk}</div>
+        <div class="stat-sub">占总数 ${Math.round(highRisk/PATIENTS.length*100)}%</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon" style="background:#FFEDD5;color:var(--orange)"><i class="fas fa-chart-line"></i></div>
+        <div class="stat-label">中等风险</div>
+        <div class="stat-value" style="color:var(--orange)">${mediumRisk}</div>
+        <div class="stat-sub">持续监测中</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon" style="background:#EDE9FE;color:var(--purple)"><i class="fas fa-tags"></i></div>
+        <div class="stat-label">风险标签覆盖</div>
+        <div class="stat-value">${totalTagged}</div>
+        <div class="stat-sub">${Math.round(totalTagged/PATIENTS.length*100)}% 患者已标记</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon" style="background:#DBEAFE;color:var(--blue)"><i class="fas fa-people-arrows"></i></div>
+        <div class="stat-label">人群特征</div>
+        <div class="stat-value">${avgAge}岁</div>
+        <div class="stat-sub">男 ${male} / 女 ${PATIENTS.length-male}</div>
+      </div>
+    </div>
+
+    <div class="row row-2">
+      <div class="card">
+        <div class="card-header"><h3><i class="fas fa-tag" style="color:var(--orange)"></i> 风险标签云</h3></div>
+        <div class="risk-cloud">
+          ${RISK_TAGS.filter(t=>t.count>0).sort((a,b)=>b.count-a.count).map(t=>`
+            <span class="risk-tag ${t.level}">${t.name} <span class="count">${t.count}</span></span>
+          `).join('')}
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header"><h3><i class="fas fa-chart-donut" style="color:var(--primary)"></i> 手术分布</h3></div>
+        <div style="height:240px"><canvas id="surgeryDistChart"></canvas></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header"><h3><i class="fas fa-activity" style="color:var(--secondary)"></i> 群体健康指标</h3></div>
+      <div class="profile-grid">
+        <div class="profile-item"><div class="pi-value">${rand(70,90)}%</div><div class="pi-label">康复达标率</div><div class="pi-bar"><div class="pi-fill" style="width:${rand(70,90)}%;background:var(--green)"></div></div></div>
+        <div class="profile-item"><div class="pi-value">${rand(6,8)}/10</div><div class="pi-label">平均满意度</div><div class="pi-bar"><div class="pi-fill" style="width:${rand(60,80)*10}%;background:var(--blue)"></div></div></div>
+        <div class="profile-item"><div class="pi-value">${rand(80,95)}%</div><div class="pi-label">用药依从性</div><div class="pi-bar"><div class="pi-fill" style="width:${rand(80,95)}%;background:var(--purple)"></div></div></div>
+        <div class="profile-item"><div class="pi-value">${rand(3,5)}</div><div class="pi-label">人均风险标签</div><div class="pi-bar"><div class="pi-fill" style="width:${rand(30,50)}%;background:var(--orange)"></div></div></div>
+        <div class="profile-item"><div class="pi-value">${rand(60,80)}%</div><div class="pi-label">功能恢复优良率</div><div class="pi-bar"><div class="pi-fill" style="width:${rand(60,80)}%;background:var(--green)"></div></div></div>
+        <div class="profile-item"><div class="pi-value">${rand(85,98)}%</div><div class="pi-label">随访满意度</div><div class="pi-bar"><div class="pi-fill" style="width:${rand(85,98)}%;background:var(--secondary)"></div></div></div>
+      </div>
+    </div>
+  `;
+
+  setTimeout(()=>{
+    Object.values(profileCharts).forEach(c=>c.destroy()); profileCharts = {};
+    const c = document.getElementById('surgeryDistChart');
+    if(c){
+      const counts = SURGERIES.map(s=>PATIENTS.filter(p=>p.surgery===s).length);
+      profileCharts.dist = new Chart(c,{
+        type:'doughnut',
+        data:{labels:SURGERIES,datasets:[{data:counts,backgroundColor:['#0D47A1','#1565C0','#1976D2','#1E88E5','#2196F3','#42A5F5','#64B5F6','#90CAF9'],borderWidth:0}]},
+        options:{plugins:{legend:{position:'right',labels:{padding:10,font:{size:10}}}},cutout:'60%'}
+      });
+    }
+  },50);
+}
+
+/* ===================================================================
+   INSIGHTS
+   =================================================================== */
+let insightCharts = {};
+function renderInsights(){
+  const el = document.getElementById('page-insights');
+  const months = ['1月','2月','3月','4月','5月'];
+  const fupData = [34,45,62,78,85];
+  const gcpTotal = PATIENTS.filter(p=>p.status==='已完成').length;
+  const fields = ['VAS疼痛评分','ROM关节活动度','KSS功能评分','Harris评分','SF-36生活质量','ODI功能障碍指数','EQ-5D健康量表','影像学资料'];
+  el.innerHTML = `
+    <div class="alert info"><i class="fas fa-flask"></i> <strong>GCP 支撑数据：</strong>已自动积累 <strong>${gcpTotal}</strong> 例结构化随访数据，满足前瞻性观察性研究数据标准</div>
+    <div class="row row-3 mb-16">
+      <div class="stat-card"><div class="stat-icon" style="background:#DBEAFE;color:var(--blue)"><i class="fas fa-database"></i></div><div class="stat-label">结构化随访记录</div><div class="stat-value">${gcpTotal * rand(3,5)}</div><div class="stat-sub">覆盖 ${gcpTotal} 名患者</div></div>
+      <div class="stat-card"><div class="stat-icon" style="background:#D1FAE5;color:var(--green)"><i class="fas fa-file-medical-alt"></i></div><div class="stat-label">GCP 数据字段</div><div class="stat-value">${fields.length * 3}+</div><div class="stat-sub">结构化维度</div></div>
+      <div class="stat-card"><div class="stat-icon" style="background:#EDE9FE;color:var(--purple)"><i class="fas fa-trophy"></i></div><div class="stat-label">可支持 GCP 项目</div><div class="stat-value">${rand(2,4)}</div><div class="stat-sub">前瞻性观察研究</div></div>
+    </div>
+    <div class="row row-2">
+      <div class="card"><div class="card-header"><h3><i class="fas fa-chart-line" style="color:var(--primary)"></i> 随访完成率趋势</h3></div><div style="height:230px"><canvas id="insightTrend"></canvas></div></div>
+      <div class="card"><div class="card-header"><h3><i class="fas fa-list" style="color:var(--secondary)"></i> 已采集科研数据字段</h3></div>
+        <div style="margin:8px 0">
+          ${fields.map(f=>`<div class="flex-between" style="padding:7px 0;border-bottom:1px solid var(--border)"><span style="font-size:13px">${f}</span><span class="status-tag green">${rand(30,80)}条</span><span style="color:var(--text3);font-size:12px">采集率 ${rand(70,98)}%</span></div>`).join('')}
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-header"><h3><i class="fas fa-file-export" style="color:var(--purple)"></i> 数据导出</h3></div>
+      <div class="row row-3">
+        <button class="btn btn-outline" style="justify-content:center;padding:16px"><i class="fas fa-file-csv"></i> 导出 CSV</button>
+        <button class="btn btn-outline" style="justify-content:center;padding:16px"><i class="fas fa-file-excel"></i> 导出 Excel (GCP 模板)</button>
+        <button class="btn btn-primary" style="justify-content:center;padding:16px"><i class="fas fa-file-export"></i> 生成 GCP 数据包</button>
+      </div>
+      <div class="text-sm mt-12">数据格式符合 CDISC / SDTM 标准，可直接用于 GCP 项目申报</div>
+    </div>
+  `;
+  setTimeout(()=>{
+    Object.values(insightCharts).forEach(c=>c.destroy()); insightCharts = {};
+    const c = document.getElementById('insightTrend');
+    if(c) insightCharts.trend = new Chart(c,{
+      type:'line',
+      data:{labels:months,datasets:[{label:'AI 组完成率 (%)',data:fupData,borderColor:'#0D47A1',backgroundColor:'rgba(13,71,161,.1)',fill:true,tension:.3},{label:'传统组完成率 (%)',data:[28,26,24,22,20],borderColor:'#8899AA',backgroundColor:'rgba(136,153,170,.1)',fill:true,tension:.3,borderDash:[4,4]}]},
+      options:{plugins:{legend:{position:'top',labels:{usePointStyle:true}}},scales:{y:{beginAtZero:true,max:100}}}
+    });
+  },50);
+}
+
+/* ===================================================================
+   REVENUE
+   =================================================================== */
+let revenueCharts = {};
+function renderRevenue(){
+  const el = document.getElementById('page-revenue');
+  el.innerHTML = `
+    <div class="alert success"><i class="fas fa-coins"></i> <strong>预估月度创收潜力：5-10 万元</strong> — 通过 AI 主动召回失联患者，提高复诊率，减少科室收入流失</div>
+    <div class="row row-3 mb-16">
+      <div class="stat-card"><div class="stat-icon" style="background:#D1FAE5;color:var(--green)"><i class="fas fa-undo-alt"></i></div><div class="stat-label">AI 召回患者/月</div><div class="stat-value">${rand(15,25)}</div><div class="stat-change" style="color:var(--green)"><i class="fas fa-arrow-up"></i> 较上月 +${rand(3,8)}</div></div>
+      <div class="stat-card"><div class="stat-icon" style="background:#FEF3C7;color:var(--yellow)"><i class="fas fa-yen-sign"></i></div><div class="stat-label">人均复诊收入</div><div class="stat-value">¥${rand(2500,4000)}</div><div class="stat-sub">含检查+诊疗+康复</div></div>
+      <div class="stat-card"><div class="stat-icon" style="background:#EDE9FE;color:var(--purple)"><i class="fas fa-chart-pie"></i></div><div class="stat-label">预估月增量收入</div><div class="stat-value">¥${rand(5,10)}万</div><div class="stat-change" style="color:var(--green)"><i class="fas fa-arrow-up"></i> 年化预估 ${rand(60,120)}万</div></div>
+    </div>
+    <div class="row row-2">
+      <div class="card"><div class="card-header"><h3><i class="fas fa-chart-area" style="color:var(--secondary)"></i> AI 随访创收趋势</h3></div><div style="height:250px"><canvas id="revenueChart"></canvas></div></div>
+      <div class="card"><div class="card-header"><h3><i class="fas fa-calculator" style="color:var(--primary)"></i> ROI 测算</h3></div>
+        <div style="padding:8px 0">
+          <div class="comp-item"><span class="label">系统建设成本</span><span class="value">¥${rand(8,15)}万/年</span></div>
+          <div class="comp-item"><span class="label">人力成本节省</span><span class="value" style="color:var(--green)">-¥${rand(12,20)}万/年</span></div>
+          <div class="comp-item"><span class="label">增创收入</span><span class="value" style="color:var(--green)">+¥${rand(60,120)}万/年</span></div>
+          <div class="comp-item" style="border-top:2px solid var(--border);margin-top:8px;padding-top:12px"><span class="label" style="font-weight:600">净收益</span><span class="value" style="color:var(--green);font-size:20px">¥${rand(60,110)}万/年</span></div>
+          <div class="comp-item"><span class="label">投资回报周期</span><span class="value" style="color:var(--green)">< ${rand(1,3)} 个月</span></div>
+          <div class="comp-item"><span class="label">预警避免损失</span><span class="value" style="color:var(--green)">≈ ¥${rand(3,8)}万/年</span></div>
+        </div>
+      </div>
+    </div>
+  `;
+  setTimeout(()=>{
+    Object.values(revenueCharts).forEach(c=>c.destroy()); revenueCharts = {};
+    const c = document.getElementById('revenueChart');
+    if(c) revenueCharts.main = new Chart(c,{
+      type:'bar',
+      data:{labels:['1月','2月','3月','4月','5月','6月(预估)'],
+        datasets:[{label:'AI 增创收入 (万元)',data:[2.1,3.5,5.2,6.8,7.5,9.2],backgroundColor:'rgba(16,185,129,.7)',borderRadius:4},{label:'传统随访收入 (万元)',data:[12,11.5,10.8,10.2,9.5,9],backgroundColor:'rgba(136,153,170,.4)',borderRadius:4}]},
+      options:{plugins:{legend:{position:'top',labels:{usePointStyle:true}}},scales:{y:{beginAtZero:true,title:{display:true,text:'收入 (万元)'}}}}
+    });
+  },50);
+}
+
+/* ===================================================================
+   SETTINGS (Enriched)
+   =================================================================== */
+function renderSettings(){
+  const el = document.getElementById('page-settings');
+  el.innerHTML = `
+    <div class="row row-2">
+      <div class="card">
+        <div class="card-header"><h3><i class="fas fa-comment-dots" style="color:var(--blue)"></i> 短信通道</h3><span class="status-tag green">已激活</span></div>
+        <div class="form-group"><label>服务商</label><select><option>阿里云短信</option><option>腾讯云短信</option><option>七牛云</option></select></div>
+        <div class="form-group"><label>API 密钥</label><input value="sk-****${rand(1000,9999)}" type="password"></div>
+        <div class="form-group"><label>签名</label><input value="【四川省骨科医院】"></div>
+        <div class="form-group"><label>日发送限额</label><input value="${rand(500,2000)} 条/天"></div>
+        <div class="form-group"><label>发送时段</label><input value="08:00 - 21:00"></div>
+      </div>
+      <div class="card">
+        <div class="card-header"><h3><i class="fab fa-weixin" style="color:var(--green)"></i> 微信服务号</h3><span class="status-tag green">已绑定</span></div>
+        <div class="form-group"><label>服务号名称</label><input value="四川省骨科医院康复服务"></div>
+        <div class="form-group"><label>AppID</label><input value="wx****${rand(1000,9999)}"></div>
+        <div class="form-group"><label>AppSecret</label><input value="******" type="password"></div>
+        <div class="form-group"><label>模板消息 ID</label><input value="OPENTM${rand(1000000000,9999999999)}"></div>
+        <div class="form-group"><label>菜单配置</label><input value="随访服务 → 我的康复 → 在线咨询"></div>
+      </div>
+      <div class="card">
+        <div class="card-header"><h3><i class="fas fa-phone" style="color:var(--purple)"></i> AI 语音电话</h3><span class="status-tag green">已配置</span></div>
+        <div class="form-group"><label>语音引擎</label><select><option>阿里云语音 (TTS)</option><option>腾讯云语音</option><option>百度语音</option></select></div>
+        <div class="form-group"><label>AI 对话模型</label><select><option>Claude 3.5 Sonnet</option><option>GPT-4o</option><option>Qwen-Max</option></select></div>
+        <div class="form-group"><label>外呼号码</label><input value="028-${rand(10000000,99999999)}"></div>
+        <div class="form-group"><label>外呼时段</label><input value="09:00 - 20:00"></div>
+        <div class="form-group"><label>失败重试次数</label><select><option>2 次</option><option selected>3 次</option><option>5 次</option></select></div>
+      </div>
+      <div class="card">
+        <div class="card-header"><h3><i class="fas fa-exclamation-triangle" style="color:var(--orange)"></i> 预警阈值配置</h3></div>
+        <div class="form-group"><label>红色预警 (紧急)</label><select><option>VAS 疼痛评分 ≥ 7</option><option selected>VAS ≥ 6</option><option>VAS ≥ 8</option></select></div>
+        <div class="form-group"><label>橙色预警 (重要)</label><select><option selected>失联 ≥ 3 天</option><option>失联 ≥ 5 天</option><option>失联 ≥ 7 天</option></select></div>
+        <div class="form-group"><label>黄色预警 (关注)</label><select><option selected>复查逾期 ≥ 2 天</option><option>复查逾期 ≥ 3 天</option><option>复查逾期 ≥ 5 天</option></select></div>
+        <div class="form-group"><label>通知方式</label>
+          <div style="display:flex;gap:12px;margin-top:4px">
+            <label style="display:flex;align-items:center;gap:4px;font-weight:400"><input type="checkbox" checked> 系统弹窗</label>
+            <label style="display:flex;align-items:center;gap:4px;font-weight:400"><input type="checkbox" checked> 短信通知</label>
+            <label style="display:flex;align-items:center;gap:4px;font-weight:400"><input type="checkbox" checked> 微信推送</label>
+            <label style="display:flex;align-items:center;gap:4px;font-weight:400"><input type="checkbox"> 电话呼叫</label>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header"><h3><i class="fas fa-users-cog" style="color:var(--primary)"></i> 团队管理</h3></div>
+        <div class="form-group"><label>科室管理员</label><input value="王主任 (主任医师)"></div>
+        <div class="form-group"><label>随访护士数</label><input value="${rand(3,6)} 人"></div>
+        <div class="form-group"><label>AI 审核医师</label><input value="李副主任、张主治"></div>
+        <div class="form-group"><label>预警接收人</label><input value="王主任、李副主任、值班护士长"></div>
+        <div class="form-group"><label>排班配置</label><input value="白班 08:00-18:00 · 夜班 18:00-08:00"></div>
+        <div class="form-group"><label>权限控制</label>
+          <div style="display:flex;flex-direction:column;gap:5px;margin-top:4px">
+            ${['查看患者信息','发起随访任务','修改随访规则','导出科研数据','管理预警配置','系统设置'].map(p=>`<label style="display:flex;align-items:center;gap:6px;font-weight:400"><input type="checkbox" ${p==='修改随访规则'||p==='系统设置'?'':p==='管理预警配置'?'':'checked'} style="accent-color:var(--primary)"> ${p}</label>`).join('')}
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header"><h3><i class="fas fa-envelope" style="color:var(--secondary)"></i> 通知模板</h3></div>
+        <div class="form-group"><label>短信模板 - 复查提醒</label><textarea>【四川省骨科医院】${'${name}'}您好，您的术后复查时间已到，请于 ${'${date}'} 来院复查。联系电话：028-${rand(10000000,99999999)} [AI随访]</textarea></div>
+        <div class="form-group"><label>微信模板 - 康复指导</label><textarea>尊敬的${'${name}'}，您术后${'${days}'}天的康复指导已更新，请点击查看详情。如有不适请及时就医。</textarea></div>
+        <div class="form-group"><label>语音开场白</label><textarea>您好，我是四川省骨科医院的AI随访助手，您的手术已过去${'${days}'}天，现在进行术后随访，大约占用您3分钟时间...</textarea></div>
+      </div>
+    </div>
+    <div class="card" style="text-align:center;padding:16px">
+      <button class="btn btn-primary btn-lg" onclick="alert('✅ 配置已保存\n\n短信通道 ✓ 微信通道 ✓ AI语音 ✓\n预警阈值 ✓ 团队配置 ✓ 通知模板 ✓')"><i class="fas fa-save"></i> 保存全部配置</button>
+      <button class="btn btn-outline btn-lg" style="margin-left:8px" onclick="alert('已重置为默认配置')"><i class="fas fa-undo"></i> 恢复默认</button>
+    </div>
+  `;
+}
+
+/* ===================================================================
+   INIT
+   =================================================================== */
+function updateClock(){
+  const now = new Date();
+  document.getElementById('headerTime').innerHTML = '<i class="far fa-clock"></i> '+
+    now.toLocaleDateString('zh-CN',{year:'numeric',month:'2-digit',day:'2-digit'})+' '+
+    now.toLocaleTimeString('zh-CN',{hour:'2-digit',minute:'2-digit'});
+}
+updateClock();
+setInterval(updateClock,30000);
+document.getElementById('alertBadge').textContent = alertCount;
+renderDashboard();
+</script>
+</body>
+</html>

@@ -1,0 +1,491 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>运动功能量化评估 — 门诊查体</title>
+<style>
+  :root {
+    --brand: #1f6feb; --brand-soft: #68d4ff;
+    --surface: #0d1520; --surface-2: #111927; --border: #2d3951;
+    --text: #edf2ff; --sub: #b7c8e6; --ok: #3bb273; --warn: #f0b44e; --risk: #e75d5d;
+    --radius: 10px;
+  }
+  * { box-sizing:border-box; margin:0; padding:0 }
+  body {
+    font-family: system-ui, -apple-system, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+    background: radial-gradient(circle at top, #1a2230, #0b0f15 55%);
+    color: var(--text); min-height:100vh;
+  }
+  .header {
+    display:flex; align-items:center; justify-content:space-between;
+    padding:10px 20px; border-bottom:1px solid var(--border);
+    background:rgba(14,20,30,.85);
+  }
+  .header h1 { font-size:1.1rem; font-weight:700; color:#eaf3ff; letter-spacing:.02em }
+  .dot { display:inline-block; width:7px; height:7px; border-radius:50%; margin-right:5px }
+  .dot.on { background:#4caf50; animation:pulse 1.5s infinite }
+  .dot.off{ background:#666 }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.35} }
+
+  .main { display:flex; gap:12px; padding:12px; max-width:1340px; margin:0 auto; height:calc(100vh - 110px) }
+  .panel-video { flex:1 1 62%; display:flex; flex-direction:column; gap:8px; min-width:0 }
+  .panel-data  { flex:0 0 360px; display:flex; flex-direction:column; gap:10px; overflow-y:auto }
+
+  .stage {
+    position:relative; border-radius:12px; overflow:hidden;
+    border:1px solid var(--border); background:#05070b; aspect-ratio:16/9;
+  }
+  .stage video, .stage canvas { position:absolute; inset:0; width:100%; height:100%; object-fit:cover }
+  .stage video { transform:scaleX(-1); opacity:0; pointer-events:none }
+
+  .card {
+    border:1px solid var(--border); border-radius:10px;
+    padding:12px; background:rgba(14,20,30,.82); backdrop-filter:blur(4px);
+  }
+  .sec-title {
+    font-size:.72rem; color:var(--sub); letter-spacing:.04em;
+    text-transform:uppercase; margin-bottom:6px;
+  }
+  .sec-title::before { content:"■"; font-size:.5rem; margin-right:6px; color:#5da8ff; vertical-align:middle }
+
+  /* movement chips */
+  .mv-grid { display:grid; grid-template-columns:1fr 1fr 1fr; gap:5px }
+  .mv-chip {
+    padding:7px 6px; border:1px solid var(--border); border-radius:8px;
+    font-size:.72rem; font-weight:600; cursor:pointer; text-align:center;
+    transition:all .15s; background:var(--surface); color:var(--sub);
+  }
+  .mv-chip:hover { border-color:var(--brand-soft); color:#fff }
+  .mv-chip.active { border-color:var(--brand-soft); background:#1a3050; color:#fff }
+
+  /* metrics */
+  .rom-row { display:grid; grid-template-columns:1fr 1fr; gap:8px }
+  .rom-box {
+    background:var(--surface); border-radius:8px; padding:10px; text-align:center;
+    border:2px solid var(--border); transition:border-color .3s;
+  }
+  .rom-box.normal  { border-color:var(--ok) }
+  .rom-box.borderline { border-color:var(--warn) }
+  .rom-box.abnormal { border-color:var(--risk) }
+  .rom-val { font-size:1.9rem; font-weight:700; line-height:1.1 }
+  .rom-lbl { font-size:.7rem; color:var(--sub); margin-top:2px }
+
+  .score-row { display:flex; align-items:center; gap:14px }
+  .score-ring {
+    width:72px; height:72px; border-radius:50%; display:flex;
+    align-items:center; justify-content:center; font-size:1.5rem; font-weight:800;
+    border:4px solid var(--border); flex-shrink:0;
+  }
+  .score-ring.excellent { border-color:var(--ok); color:var(--ok) }
+  .score-ring.good      { border-color:#2196f3; color:#2196f3 }
+  .score-ring.fair      { border-color:var(--warn); color:var(--warn) }
+  .score-ring.poor      { border-color:var(--risk); color:var(--risk) }
+  .score-detail { font-size:.78rem; line-height:1.5 }
+
+  .chart-canvas { width:100%; height:80px; display:block; background:#0b111b; border-radius:6px; margin-top:6px }
+
+  .stat-row { display:flex; justify-content:space-between; padding:3px 0; font-size:.75rem; border-bottom:1px solid rgba(45,57,81,.4) }
+  .stat-row .v { font-weight:600 }
+
+  /* bottom bar */
+  .bottombar {
+    display:flex; gap:8px; padding:8px 20px; align-items:center;
+    background:rgba(14,20,30,.85); border-top:1px solid var(--border);
+    flex-wrap:wrap;
+  }
+  .bottombar select {
+    border:1px solid var(--border); border-radius:8px; padding:7px 10px;
+    background:var(--surface); color:var(--text); font-size:.8rem;
+  }
+
+  button {
+    border:0; border-radius:8px; padding:8px 14px; cursor:pointer;
+    font-weight:700; font-size:.8rem; transition:transform .12s,filter .2s;
+  }
+  button:hover { filter:brightness(1.06); transform:translateY(-1px) }
+  button:active { transform:scale(.97) }
+  button:disabled { opacity:.4; cursor:not-allowed; pointer-events:none }
+  .btn-brand { background:var(--brand-soft); color:#05131a }
+  .btn-secondary { background:#9db6ff; color:#0b1430 }
+  .btn-ghost { background:#1a2538; color:#cfe1ff; border:1px solid #43587f }
+  .btn-danger { background:var(--risk); color:#fff }
+  .hidden { display:none !important }
+
+  .cam-hint { position:absolute; top:10px; left:10px; z-index:9; background:rgba(0,0,0,.6); padding:5px 10px; border-radius:6px; font-size:.7rem; color:#eef7ff; pointer-events:none }
+
+  @media (max-width:860px) {
+    .main { flex-direction:column; height:auto }
+    .panel-data { flex:unset; width:100% }
+    .mv-grid { grid-template-columns:1fr 1fr }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>运动功能量化评估系统</h1>
+  <span style="font-size:.78rem;color:var(--sub)" id="statusLine">
+    <span class="dot off" id="statusDot"></span><span id="statusLabel">等待连接</span>
+  </span>
+</div>
+
+<div class="main">
+  <!-- VIDEO -->
+  <div class="panel-video">
+    <div class="stage">
+      <video id="video" autoplay playsinline></video>
+      <canvas id="canvas"></canvas>
+      <div class="cam-hint" id="camHint">请开启摄像头</div>
+    </div>
+  </div>
+
+  <!-- DATA -->
+  <div class="panel-data">
+    <!-- movement -->
+    <div class="card">
+      <div class="sec-title">检查动作</div>
+      <div class="mv-grid" id="mvGrid"></div>
+      <div style="font-size:.68rem;color:var(--sub);margin-top:6px" id="mvHint"></div>
+    </div>
+
+    <!-- ROM -->
+    <div class="card">
+      <div class="sec-title">关节活动度 ROM</div>
+      <div class="rom-row">
+        <div class="rom-box"><div class="rom-val" id="romL">--°</div><div class="rom-lbl">左侧</div></div>
+        <div class="rom-box"><div class="rom-val" id="romR">--°</div><div class="rom-lbl">右侧</div></div>
+      </div>
+      <div style="font-size:.72rem;margin-top:6px;text-align:center" id="symInfo">等待数据...</div>
+    </div>
+
+    <!-- score -->
+    <div class="card">
+      <div class="sec-title">动作质量评分</div>
+      <div class="score-row">
+        <div class="score-ring" id="scoreRing">--</div>
+        <div class="score-detail" id="scoreDetail">等待动作数据...</div>
+      </div>
+    </div>
+
+    <!-- score trend -->
+    <div class="card">
+      <div class="sec-title">评分趋势</div>
+      <canvas id="scoreChart" class="chart-canvas" width="600" height="80"></canvas>
+    </div>
+
+    <!-- session -->
+    <div class="card">
+      <div class="sec-title">当前记录</div>
+      <div id="sessionStats" style="font-size:.78rem;color:var(--sub)">尚未开始记录</div>
+    </div>
+  </div>
+</div>
+
+<div class="bottombar">
+  <select id="camSelect"><option>检测摄像头...</option></select>
+  <button class="btn-brand" id="btnCam" onclick="toggleCamera()">📷 开启摄像头</button>
+  <button class="btn-ghost" id="btnMirror" onclick="toggleMirror()" disabled>镜像</button>
+  <span style="width:1px;background:var(--border);align-self:stretch;margin:0 4px"></span>
+  <button class="btn-danger" id="btnRecord" onclick="toggleRecording()" disabled>⏺ 开始记录</button>
+  <span style="font-size:.75rem;color:var(--sub);margin:0 4px" id="frameLabel">帧: 0</span>
+  <span id="recDot" style="color:var(--risk);font-weight:700;font-size:.75rem" class="hidden">● 记录中</span>
+  <span style="flex:1"></span>
+  <button class="btn-ghost" onclick="resetSession()">↺ 重置</button>
+  <button class="btn-secondary" id="btnReport" onclick="openReport()" disabled>📄 评估报告</button>
+  <button class="btn-ghost" onclick="exportJSON()">📥 导出 JSON</button>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/pose@0.5.1675469404/pose.js" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils@0.3.1675466862/camera_utils.js" crossorigin="anonymous"></script>
+
+<script>
+const POSE_CONNS = [[11,12],[11,13],[13,15],[12,14],[14,16],[11,23],[12,24],[23,24],[23,25],[25,27],[24,26],[26,28]];
+
+const MOVEMENTS = [
+  { id:'shoulder-flex', name:'肩关节前屈', lm_L:[23,11,13], lm_R:[24,12,14], std:180, fn:a=>180-a, hint:'摄像头侧面 · 手臂前上举至头顶', label:'前屈' },
+  { id:'shoulder-abd',  name:'肩关节外展', lm_L:[23,11,13], lm_R:[24,12,14], std:180, fn:a=>180-a, hint:'摄像头正面 · 手臂侧平举至头顶', label:'外展' },
+  { id:'elbow-flex',   name:'肘关节屈曲', lm_L:[11,13,15], lm_R:[12,14,16], std:145, fn:a=>180-a, hint:'正面/侧面均可 · 屈肘手掌近肩', label:'屈曲' },
+  { id:'knee-flex',    name:'膝关节屈曲', lm_L:[23,25,27], lm_R:[24,26,28], std:135, fn:a=>180-a, hint:'摄像头侧面 · 屈膝足跟近臀', label:'屈曲' },
+  { id:'knee-ext',     name:'膝关节伸直', lm_L:[23,25,27], lm_R:[24,26,28], std:180, fn:a=>a,     hint:'正面/侧面均可 · 坐位伸膝至直', label:'伸展' },
+  { id:'hip-flex',     name:'髋关节前屈', lm_L:[11,23,25], lm_R:[12,24,26], std:120, fn:a=>180-a, hint:'摄像头侧面 · 直腿前抬', label:'前屈' },
+];
+
+// DOM
+const $ = s => document.querySelector(s);
+const domVideo=$('#video'), domCanvas=$('#canvas'), ctx=domCanvas.getContext('2d');
+const domCamSel=$('#camSelect'), domBtnCam=$('#btnCam'), domBtnMirror=$('#btnMirror');
+const domBtnRecord=$('#btnRecord'), domBtnReport=$('#btnReport');
+const domStatusDot=$('#statusDot'), domStatusLabel=$('#statusLabel');
+const domMvGrid=$('#mvGrid'), domMvHint=$('#mvHint');
+const domRomL=$('#romL'), domRomR=$('#romR'), domSym=$('#symInfo');
+const domScoreRing=$('#scoreRing'), domScoreDetail=$('#scoreDetail');
+const domScoreChart=$('#scoreChart'), scoreCtx=domScoreChart.getContext('2d');
+const domSessionStats=$('#sessionStats');
+const domFrameLabel=$('#frameLabel'), domRecDot=$('#recDot'), domCamHint=$('#camHint');
+
+// State
+const S = {
+  camOn:false, mirror:true, currentMv:MOVEMENTS[0],
+  recording:false, frameIdx:0,
+  romHistory:{L:[],R:[]}, romStats:{L:{min:1/0,max:-1/0,sum:0,n:0},R:{min:1/0,max:-1/0,sum:0,n:0}},
+  latestROM:{L:null,R:null}, latestScore:null, latestKpt:0,
+  pose:null, cam:null, lms:null,
+};
+let Camera;
+
+// helpers
+const clamp = (v,l,h) => Math.min(h,Math.max(l,v));
+function jointAngle(a,b,c) {
+  const v1={x:a.x-b.x,y:a.y-b.y}, v2={x:c.x-b.x,y:c.y-b.y};
+  const d=v1.x*v2.x+v1.y*v2.y, m1=Math.hypot(v1.x,v1.y), m2=Math.hypot(v2.x,v2.y);
+  if(!m1||!m2) return null;
+  return Math.acos(clamp(d/(m1*m2),-1,1))*180/Math.PI;
+}
+function calcROM(indices) {
+  const [a,b,c]=indices;
+  if(!S.lms[a]||!S.lms[b]||!S.lms[c]) return null;
+  if(S.lms[a].visibility<.5||S.lms[b].visibility<.5||S.lms[c].visibility<.5) return null;
+  const ja=jointAngle(S.lms[a],S.lms[b],S.lms[c]);
+  return ja!=null?S.currentMv.fn(ja):null;
+}
+function calcScore(avgROM, romL, romR) {
+  const err=Math.abs(avgROM-S.currentMv.std);
+  const rs=Math.max(0,100-err*1.2);
+  let ss=100;
+  if(romL!=null&&romR!=null){const mx=Math.max(romL,romR);if(mx>0)ss=Math.max(0,(1-Math.abs(romL-romR)/mx)*100)}
+  return Math.round(rs*.7+ss*.3);
+}
+function grade(s) {
+  if(s>=90) return {cls:'excellent',txt:'优秀',desc:'关节活动度正常，动作完成标准'};
+  if(s>=75) return {cls:'good',txt:'良好',desc:'关节活动度轻度受限，动作完成尚可'};
+  if(s>=60) return {cls:'fair',txt:'一般',desc:'关节活动度部分受限，需进一步评估'};
+  return {cls:'poor',txt:'受限',desc:'关节活动度明显受限，动作完成不达标'};
+}
+
+// camera
+async function enumCams() {
+  try {
+    await navigator.mediaDevices.getUserMedia({video:true}).then(s=>s.getTracks().forEach(t=>t.stop()));
+    const devs=(await navigator.mediaDevices.enumerateDevices()).filter(d=>d.kind==='videoinput');
+    domCamSel.innerHTML=devs.length?devs.map((c,i)=>`<option value="${c.deviceId}">${c.label||'摄像头'+(i+1)}</option>`).join(''):'<option>未检测到</option>';
+  } catch(e) { domCamSel.innerHTML='<option>权限未授予</option>' }
+}
+async function startCam() {
+  try {
+    const stream=await navigator.mediaDevices.getUserMedia({video:{deviceId:domCamSel.value?{exact:domCamSel.value}:undefined,width:{ideal:1280},height:{ideal:720}}});
+    domVideo.srcObject=stream; await domVideo.play();
+    S.cam=new Camera(domVideo,{onFrame:async()=>{await S.pose.send({image:domVideo})},width:1280,height:720});
+    await S.cam.start(); S.camOn=true; updateUI();
+  } catch(e) { alert('摄像头启动失败: '+e.message) }
+}
+function stopCam() {
+  if(S.cam){S.cam.stop();S.cam=null}
+  if(domVideo.srcObject){domVideo.srcObject.getTracks().forEach(t=>t.stop());domVideo.srcObject=null}
+  S.camOn=false; S.lms=null; ctx.clearRect(0,0,domCanvas.width,domCanvas.height); updateUI();
+}
+async function toggleCamera() { S.camOn?stopCam():await startCam() }
+function toggleMirror() { S.mirror=!S.mirror; domBtnMirror.textContent=S.mirror?'镜像':'原始' }
+
+// pose
+function initPose() {
+  S.pose=new Pose({locateFile:f=>`https://cdn.jsdelivr.net/npm/@mediapipe/pose@0.5.1675469404/${f}`});
+  S.pose.setOptions({modelComplexity:1,smoothLandmarks:true,enableSegmentation:false,minDetectionConfidence:.6,minTrackingConfidence:.6});
+  S.pose.onResults(onResults);
+}
+function onResults(res) {
+  if(!domVideo.videoWidth) return;
+  domCanvas.width=domVideo.videoWidth; domCanvas.height=domVideo.videoHeight;
+  S.lms=res.poseLandmarks||[];
+  drawFrame(res.image);
+  if(S.lms.length>=29) processLms();
+  S.frameIdx++; domFrameLabel.textContent='帧: '+S.frameIdx;
+}
+
+function drawFrame(frame) {
+  const w=domCanvas.width, h=domCanvas.height;
+  ctx.save(); ctx.clearRect(0,0,w,h);
+  ctx.save(); ctx.translate(w,0); ctx.scale(-1,1);
+  if(frame) ctx.drawImage(frame,0,0,w,h);
+  if(S.lms&&S.lms.length>=29) {
+    ctx.strokeStyle='#00e5ff'; ctx.lineWidth=2;
+    for(const[i,j] of POSE_CONNS) {
+      const a=S.lms[i],b=S.lms[j];
+      if(a&&b&&a.visibility>.5&&b.visibility>.5){ctx.beginPath();ctx.moveTo(a.x*w,a.y*h);ctx.lineTo(b.x*w,b.y*h);ctx.stroke()}
+    }
+    for(let i=0;i<S.lms.length;i++) {
+      const lm=S.lms[i]; if(!lm||lm.visibility<.5) continue;
+      ctx.fillStyle='#ff8f9b'; ctx.beginPath(); ctx.arc(lm.x*w,lm.y*h,3.5,0,2*Math.PI); ctx.fill();
+    }
+    // draw ROM labels near joints
+    const mv=S.currentMv;
+    const drawLabel=(indices,val,color)=>{
+      const b=S.lms[indices[1]]; if(!b||b.visibility<.5) return;
+      ctx.fillStyle=color; ctx.font='bold 14px system-ui'; ctx.fillText(val+'°',b.x*w-22,b.y*h-14);
+    };
+    if(S.latestROM.L!=null) drawLabel(mv.lm_L,Math.round(S.latestROM.L),S.latestROM.L>=mv.std*.8?'#4caf50':S.latestROM.L>=mv.std*.5?'#ffab00':'#ff5252');
+    if(S.latestROM.R!=null) drawLabel(mv.lm_R,Math.round(S.latestROM.R),S.latestROM.R>=mv.std*.8?'#4caf50':S.latestROM.R>=mv.std*.5?'#ffab00':'#ff5252');
+  }
+  ctx.restore();
+  // HUD
+  ctx.fillStyle='rgba(0,0,0,.55)'; ctx.fillRect(8,8,260,48);
+  ctx.fillStyle='#fff'; ctx.font='13px system-ui';
+  ctx.fillText(`ROM L:${S.latestROM.L!=null?S.latestROM.L.toFixed(1):'--'}°  R:${S.latestROM.R!=null?S.latestROM.R.toFixed(1):'--'}°  |  ${S.latestKpt}/33`,16,28);
+  ctx.fillText(`评分: ${S.latestScore??'--'}  |  ${S.currentMv.name}`,16,46);
+  ctx.restore();
+}
+
+function processLms() {
+  const mv=S.currentMv;
+  const rL=calcROM(mv.lm_L), rR=calcROM(mv.lm_R);
+  S.latestROM={L:rL,R:rR};
+  S.latestKpt=S.lms.filter(p=>(p.visibility??0)>=.6).length;
+
+  const avg=(rL!=null&&rR!=null)?(rL+rR)/2:(rL??rR);
+  if(avg!=null) S.latestScore=calcScore(avg,rL,rR);
+
+  if(S.recording) {
+    if(rL!=null){S.romHistory.L.push(rL); const s=S.romStats.L; s.min=Math.min(s.min,rL); s.max=Math.max(s.max,rL); s.sum+=rL; s.n++}
+    if(rR!=null){S.romHistory.R.push(rR); const s=S.romStats.R; s.min=Math.min(s.min,rR); s.max=Math.max(s.max,rR); s.sum+=rR; s.n++}
+  }
+  updateDataPanel();
+}
+
+// data panel
+function updateUI() {
+  domBtnCam.textContent=S.camOn?'📷 关闭摄像头':'📷 开启摄像头';
+  domBtnCam.classList.toggle('btn-danger',S.camOn); domBtnCam.classList.toggle('btn-brand',!S.camOn);
+  domBtnMirror.disabled=!S.camOn; domBtnRecord.disabled=!S.camOn;
+  domStatusDot.className='dot '+(S.camOn?'on':'off');
+  domStatusLabel.textContent=S.camOn?'实时检测中':'等待连接';
+  domCamHint.textContent=S.camOn?'检测中...':'请开启摄像头';
+  const hasRec=S.romStats.L.n>0||S.romStats.R.n>0;
+  domBtnReport.disabled=!hasRec&&S.latestScore==null;
+}
+
+function updateDataPanel() {
+  const rL=S.latestROM.L, rR=S.latestROM.R;
+  const updateBox=(el,val,std)=>{
+    el.querySelector('.rom-val').textContent=val!=null?val.toFixed(1)+'°':'--°';
+    const ratio=val!=null?val/std:0;
+    el.className='rom-box'+(val!=null?(ratio>=.85?' normal':ratio>=.6?' borderline':' abnormal'):'');
+  };
+  updateBox(domRomL,rL,S.currentMv.std); updateBox(domRomR,rR,S.currentMv.std);
+
+  if(rL!=null&&rR!=null) {
+    const diff=Math.abs(rL-rR), mx=Math.max(rL,rR);
+    const sym=mx>0?((1-diff/mx)*100).toFixed(1):100;
+    domSym.textContent=`对称性: ${sym}%  |  差值: ${diff.toFixed(1)}°`;
+    domSym.style.color=diff<=5?'var(--ok)':diff<=15?'var(--warn)':'var(--risk)';
+  } else { domSym.textContent='等待双侧数据...'; domSym.style.color='var(--sub)' }
+
+  if(S.latestScore!=null) {
+    const g=grade(S.latestScore);
+    domScoreRing.textContent=S.latestScore; domScoreRing.className='score-ring '+g.cls;
+    domScoreDetail.innerHTML=`<strong>${g.txt}</strong> (${S.latestScore}分)<br><span style="font-size:.7rem;color:var(--sub)">${g.desc}</span>`;
+  }
+
+  updateSessionStats();
+  drawScoreChart();
+}
+
+function updateSessionStats() {
+  const sl=S.romStats.L, sr=S.romStats.R;
+  if(sl.n===0&&sr.n===0){domSessionStats.innerHTML='尚未开始记录';return}
+  const avgL=sl.n>0?(sl.sum/sl.n).toFixed(1):'--', avgR=sr.n>0?(sr.sum/sr.n).toFixed(1):'--';
+  domSessionStats.innerHTML=`
+    <div class="stat-row"><span>记录帧数</span><span class="v">${sl.n+sr.n}</span></div>
+    <div class="stat-row"><span>左侧 ROM 均值/min/max</span><span class="v">${avgL}° / ${sl.n>0?sl.min.toFixed(1):'--'}° / ${sl.n>0?sl.max.toFixed(1):'--'}°</span></div>
+    <div class="stat-row"><span>右侧 ROM 均值/min/max</span><span class="v">${avgR}° / ${sr.n>0?sr.min.toFixed(1):'--'}° / ${sr.n>0?sr.max.toFixed(1):'--'}°</span></div>
+  `;
+}
+
+function drawScoreChart() {
+  const w=domScoreChart.width, h=domScoreChart.height;
+  scoreCtx.clearRect(0,0,w,h); scoreCtx.fillStyle='#0b111b'; scoreCtx.fillRect(0,0,w,h);
+  scoreCtx.strokeStyle='#2a3956'; scoreCtx.lineWidth=1;
+  for(let i=0;i<=4;i++){const y=h/4*i;scoreCtx.beginPath();scoreCtx.moveTo(0,y);scoreCtx.lineTo(w,y);scoreCtx.stroke()}
+  const data=[...S.romHistory.L,...S.romHistory.R]; // simple: show all ROM values
+  if(!data.length){scoreCtx.fillStyle='#8fa5cc';scoreCtx.font='11px system-ui';scoreCtx.fillText('评分趋势 — 记录后显示',10,16);return}
+  scoreCtx.strokeStyle='#65d7ff'; scoreCtx.lineWidth=2; scoreCtx.beginPath();
+  const mx=Math.max(data.length-1,1), lo=Math.min(...data), hi=Math.max(...data), rng=Math.max(hi-lo,20);
+  for(let i=0;i<data.length;i++){const x=i/mx*(w-20)+10,y=h-10-((data[i]-lo)/rng)*(h-20);i===0?scoreCtx.moveTo(x,y):scoreCtx.lineTo(x,y)}
+  scoreCtx.stroke();
+}
+
+// recording
+function toggleRecording() {
+  if(!S.recording) {
+    S.recording=true; S.romHistory={L:[],R:[]};
+    S.romStats={L:{min:1/0,max:-1/0,sum:0,n:0},R:{min:1/0,max:-1/0,sum:0,n:0}};
+    domBtnRecord.textContent='⏹ 停止记录'; domBtnRecord.classList.remove('btn-danger'); domBtnRecord.classList.add('btn-secondary');
+    domRecDot.classList.remove('hidden'); domBtnReport.disabled=true;
+  } else {
+    S.recording=false;
+    domBtnRecord.textContent='⏺ 开始记录'; domBtnRecord.classList.add('btn-danger'); domBtnRecord.classList.remove('btn-secondary');
+    domRecDot.classList.add('hidden');
+    domBtnReport.disabled=(S.romStats.L.n===0&&S.romStats.R.n===0);
+  }
+}
+function resetSession() {
+  S.recording=false; S.romHistory={L:[],R:[]};
+  S.romStats={L:{min:1/0,max:-1/0,sum:0,n:0},R:{min:1/0,max:-1/0,sum:0,n:0}};
+  S.latestROM={L:null,R:null}; S.latestScore=null;
+  domBtnRecord.textContent='⏺ 开始记录'; domBtnRecord.classList.add('btn-danger'); domBtnRecord.classList.remove('btn-secondary');
+  domRecDot.classList.add('hidden'); domBtnReport.disabled=true;
+  updateDataPanel();
+}
+
+// movement
+function buildMvGrid() {
+  domMvGrid.innerHTML=MOVEMENTS.map((m,i)=>`<div class="mv-chip${i===0?' active':''}" onclick="selectMv(${i})">${m.name}</div>`).join('');
+  domMvHint.textContent=MOVEMENTS[0].hint;
+}
+function selectMv(idx) {
+  S.currentMv=MOVEMENTS[idx];
+  document.querySelectorAll('.mv-chip').forEach((c,i)=>c.classList.toggle('active',i===idx));
+  domMvHint.textContent=MOVEMENTS[idx].hint;
+  resetSession();
+}
+
+// report
+function openReport() {
+  const sl=S.romStats.L, sr=S.romStats.R;
+  if(sl.n===0&&sr.n===0) { alert('无记录数据'); return }
+  const data = {
+    timestamp: new Date().toISOString(),
+    movement: S.currentMv,
+    romStats: {
+      left: { avg: sl.n>0?sl.sum/sl.n:null, min: sl.n>0?sl.min:null, max: sl.n>0?sl.max:null, n: sl.n, history: S.romHistory.L.slice(-200) },
+      right:{ avg: sr.n>0?sr.sum/sr.n:null, min: sr.n>0?sr.min:null, max: sr.n>0?sr.max:null, n: sr.n, history: S.romHistory.R.slice(-200) },
+    },
+    latestScore: S.latestScore,
+    latestROM: S.latestROM,
+  };
+  localStorage.setItem('clinic_report_data', JSON.stringify(data));
+  window.open('clinic-report.html', '_blank');
+}
+
+// export
+function exportJSON() {
+  const sl=S.romStats.L, sr=S.romStats.R;
+  const data = {
+    timestamp: new Date().toISOString(),
+    movement: S.currentMv.name, standardROM: S.currentMv.std,
+    left: { avg: sl.n>0?sl.sum/sl.n:null, min: sl.n>0?sl.min:null, max: sl.n>0?sl.max:null, n:sl.n, history:S.romHistory.L },
+    right:{ avg: sr.n>0?sr.sum/sr.n:null, min: sr.n>0?sr.min:null, max: sr.n>0?sr.max:null, n:sr.n, history:S.romHistory.R },
+    score: S.latestScore,
+  };
+  const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+  const u=URL.createObjectURL(blob), a=document.createElement('a');
+  a.href=u; a.download=`rom_${S.currentMv.id}_${Date.now()}.json`; a.click(); URL.revokeObjectURL(u);
+}
+
+// init
+function init() {
+  buildMvGrid(); enumCams(); initPose(); updateUI(); drawScoreChart();
+}
+window.addEventListener('load',()=>{ if(typeof window.Camera!=='undefined') Camera=window.Camera; init(); });
+</script>
+</body>
+</html>

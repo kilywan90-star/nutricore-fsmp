@@ -1,0 +1,85 @@
+<!-- 标书生成页 — 核心页面 -->
+<view class="container">
+  <!-- 步骤条 -->
+  <view class="steps">
+    <view class="step {{step >= 1 ? 'active' : ''}}">1. 上传招标文件</view>
+    <view class="step-arrow">→</view>
+    <view class="step {{step >= 2 ? 'active' : ''}}">2. 填写信息</view>
+    <view class="step-arrow">→</view>
+    <view class="step {{step >= 3 ? 'active' : ''}}">3. AI生成</view>
+  </view>
+
+  <!-- 步骤1：上传招标文件 -->
+  <view class="step-content" wx:if="{{step === 1}}">
+    <view class="upload-area" bindtap="uploadFile">
+      <view class="upload-icon">📄</view>
+      <view class="upload-text">点击上传招标文件</view>
+      <view class="upload-hint">支持 PDF、Word、Excel 格式</view>
+    </view>
+
+    <view class="uploaded-file" wx:if="{{fileName}}">
+      <view class="file-info">{{fileName}} ({{fileSize}})</view>
+      <view class="file-status {{parseStatus}}">{{parseStatusText}}</view>
+    </view>
+
+    <view class="parsed-info" wx:if="{{parsedData}}">
+      <view class="info-card" wx:if="{{parsedData.project_name}}">
+        <text class="label">项目名称：</text>{{parsedData.project_name}}
+      </view>
+      <view class="info-card" wx:if="{{parsedData.budget}}">
+        <text class="label">预算金额：</text>{{parsedData.budget}}
+      </view>
+      <view class="info-card" wx:if="{{parsedData.deadline}}">
+        <text class="label">截止时间：</text>{{parsedData.deadline}}
+      </view>
+    </view>
+
+    <button class="btn-primary" bindtap="nextStep" disabled="{{!parsedData}}">下一步</button>
+  </view>
+
+  <!-- 步骤2：填写投标信息 -->
+  <view class="step-content" wx:if="{{step === 2}}">
+    <view class="form-group">
+      <view class="form-label">公司名称 *</view>
+      <input class="form-input" placeholder="请输入您的公司全称" value="{{companyName}}" bindinput="onFieldInput" data-field="companyName"/>
+    </view>
+    <view class="form-group">
+      <view class="form-label">公司资质与业绩</view>
+      <textarea class="form-textarea" placeholder="请描述公司资质、类似项目业绩、核心团队等信息，越详细生成的标书越有说服力" value="{{companyInfo}}" bindinput="onFieldInput" data-field="companyInfo"/>
+    </view>
+    <view class="form-group">
+      <view class="form-label">重点突出方向</view>
+      <input class="form-input" placeholder="如：价格优势、技术领先、服务保障" value="{{keyPoints}}" bindinput="onFieldInput" data-field="keyPoints"/>
+    </view>
+    <view class="form-group">
+      <view class="form-label">补充要求</view>
+      <textarea class="form-textarea" placeholder="其他需要强调的信息或特殊要求" value="{{additionalRequirements}}" bindinput="onFieldInput" data-field="additionalRequirements"/>
+    </view>
+
+    <view class="form-actions">
+      <button class="btn-secondary" bindtap="prevStep">上一步</button>
+      <button class="btn-primary" bindtap="startGenerate" disabled="{{!companyName}}">开始AI生成</button>
+    </view>
+  </view>
+
+  <!-- 步骤3：AI流式生成 -->
+  <view class="step-content" wx:if="{{step === 3}}">
+    <view class="generating-status" wx:if="{{isGenerating}}">
+      <view class="generating-spinner"></view>
+      <view class="generating-text">AI 正在为您生成标书...</view>
+      <view class="generating-progress">{{generatedChars}} 字已生成</view>
+      <view class="generating-hint">内容将逐字实时显示，预计需要 1-3 分钟</view>
+    </view>
+
+    <view class="generated-preview" wx:if="{{generatedContent}}">
+      <scroll-view scroll-y class="preview-scroll">
+        <rich-text nodes="{{formattedContent}}"></rich-text>
+      </scroll-view>
+    </view>
+
+    <view class="generate-actions" wx:if="{{!isGenerating && generatedContent}}">
+      <button class="btn-secondary" bindtap="regenerate">重新生成</button>
+      <button class="btn-primary" bindtap="goEdit">进入编辑</button>
+    </view>
+  </view>
+</view>

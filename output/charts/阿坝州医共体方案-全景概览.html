@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>阿坝州医共体信息化建设方案</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+html{width:1587px;height:1122px;overflow:hidden}
+body{
+  width:1587px;height:1122px;font-family:'Microsoft YaHei','宋体',sans-serif;
+  background:#fff;color:#1a1a1a;font-size:10px;line-height:1.3;
+  display:grid;grid-template-rows:40px 1fr 18px;
+}
+/* ====== 顶栏 ====== */
+.top{
+  background:linear-gradient(90deg,#0d2137,#1a3c6e,#0d2137);color:#fff;
+  display:flex;align-items:center;justify-content:space-between;padding:0 18px;
+}
+.top h1{font-size:16px;font-weight:700;letter-spacing:2px}
+.top .tags{display:flex;gap:10px;font-size:8.5px;opacity:0.9}
+
+/* ====== 主体6列 ====== */
+.main{
+  display:grid;
+  grid-template-columns:1fr 1fr 1fr 1fr 1fr 1fr;
+  grid-template-rows:88px 1fr;
+  gap:4px;padding:4px 6px;background:#eef1f5;
+}
+/* 卡片 */
+.c{
+  background:#fff;border-radius:3px;padding:5px 7px;overflow:hidden;
+  display:flex;flex-direction:column;
+}
+.ct{font-size:10.5px;font-weight:700;color:#1a3c6e;border-left:3px solid #1a3c6e;padding-left:5px;margin-bottom:3px;white-space:nowrap}
+.s2{grid-column:span 2}.s3{grid-column:span 3}.s4{grid-column:span 4}.s6{grid-column:span 6}
+
+/* ====== 行1: 诊断+策略 88px ====== */
+
+/* 问题条 */
+.plist{display:grid;grid-template-columns:repeat(5,1fr);gap:3px;flex:1}
+.pi{
+  border:1px solid #e8e8e8;border-radius:3px;padding:3px 4px;
+  display:flex;align-items:center;gap:4px;
+}
+.pi .n{font-size:20px;font-weight:800;min-width:40px;text-align:center}
+.pi .t{font-size:9px;font-weight:700;line-height:1.15}
+.pi .d{font-size:7px;color:#999}
+.c1 .n{color:#d32f2f}.c2 .n{color:#e65100}.c3 .n{color:#1565c0}.c4 .n{color:#2e7d32}.c5 .n{color:#6a1b9a}
+
+/* 策略条 */
+.strats{display:flex;gap:3px;flex:1}
+.si{
+  flex:1;border-radius:3px;padding:4px 5px;text-align:center;
+  display:flex;flex-direction:column;justify-content:center;
+}
+.si.l1{background:#ffebee;border:1.5px solid #ef9a9a}
+.si.l2{background:#fff3e0;border:1.5px solid #ffcc80}
+.si.l3{background:#e3f2fd;border:1.5px solid #90caf9}
+.si.h{font-size:10.5px;font-weight:700}
+.si.m{font-size:7px;color:#666;line-height:1.2;margin:2px 0}
+.si.p{font-size:14px;font-weight:800}
+
+/* 投资条 */
+.ibars{display:flex;flex-direction:column;gap:2px;flex:1}
+.ib{display:flex;align-items:center;gap:4px;font-size:8px}
+.ib .l{width:50px;text-align:right;font-weight:600;font-size:7.5px}
+.ib .b{flex:1;height:9px;background:#eee;border-radius:2px;overflow:hidden}
+.ib .f{height:100%;border-radius:2px}
+.ib .v{width:36px;font-size:7.5px;color:#888}
+
+/* ====== 行2: AI+路线图+回报+案例 自动填充 ====== */
+
+/* AI场景 */
+.ascenes{display:flex;flex-direction:column;gap:2.5px;flex:1}
+.as{
+  display:flex;align-items:center;gap:4px;
+  padding:2.5px 5px;border-radius:2px;border:1px solid #eee;
+}
+.as.p0{border-left:2.5px solid #d32f2f;background:#fff5f5}
+.as.p1{border-left:2.5px solid #ff9800;background:#fffaf5}
+.as.p2{border-left:2.5px solid #42a5f5;background:#f5f9ff}
+.as.p3{border-left:2.5px solid #9e9e9e;background:#fafafa}
+.badge{
+  width:22px;height:16px;border-radius:2px;
+  font-size:8px;font-weight:800;color:#fff;
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;
+}
+.bp0{background:#d32f2f}.bp1{background:#ff9800}.bp2{background:#42a5f5}.bp3{background:#9e9e9e}
+.as .an{flex:1;font-size:9.5px;font-weight:700;min-width:0}
+.as .ad{font-size:7px;color:#888;line-height:1.2}
+.as .ac{font-size:10px;font-weight:800;color:#1a3c6e;text-align:right;flex-shrink:0}
+.as .at{font-size:6.5px;color:#aaa;text-align:right}
+
+/* 路线图 */
+.rmap{display:flex;gap:3px;flex:1}
+.rm{
+  flex:1;border-radius:3px;padding:4px 5px;display:flex;flex-direction:column;
+}
+.rm1{background:#ffebee;border:1px solid #ef9a9a}
+.rm2{background:#fff3e0;border:1px solid #ffcc80}
+.rm3{background:#e8f5e9;border:1px solid #a5d6a7}
+.rm .rh{display:flex;justify-content:space-between;align-items:center;margin-bottom:2px}
+.rm .rn{font-size:11px;font-weight:700}
+.rm .rc{font-size:13px;font-weight:800}
+.rm ul{list-style:none;font-size:7.2px;color:#444;line-height:1.45}
+.rm ul li::before{content:'- '}
+.rm ul li.h{color:#d32f2f;font-weight:700}
+.rm ul li.h::before{content:'★ '}
+
+/* 回报指标 */
+.kpis{display:grid;grid-template-columns:1fr 1fr;gap:3px;flex:1}
+.kp{
+  background:#f8f9fb;border-radius:3px;padding:4px;text-align:center;
+  display:flex;flex-direction:column;justify-content:center;
+}
+.kp .kv{font-size:16px;font-weight:800;color:#1a3c6e;line-height:1.1}
+.kp .ku{font-size:8px;font-weight:400;color:#999}
+.kp .kl{font-size:7px;color:#aaa;margin-top:1px}
+
+/* 案例+政策——标签云 */
+.tag-row{display:flex;flex-wrap:wrap;gap:3px;align-items:center}
+.ctag{font-size:7px;padding:2px 5px;border-radius:2px;font-weight:600}
+.ctag.case{background:#e8f5e9;color:#2e7d32;border:1px solid #a5d6a7}
+.ctag.policy{background:#e3f2fd;color:#1565c0;border:1px solid #90caf9}
+.ctag.princ{background:#fff3e0;color:#e65100;border:1px solid #ffcc80}
+
+/* 存量评估迷你表 */
+.mtbl{width:100%;border-collapse:collapse;font-size:7.5px}
+.mtbl th{background:#1a3c6e;color:#fff;padding:1.5px 3px;font-size:7px}
+.mtbl td{border:1px solid #ddd;padding:1.5px 3px;text-align:center}
+.mtbl .gr{color:#2e7d32;font-weight:700}.mtbl .or{color:#e65100;font-weight:700}.mtbl .rd{color:#d32f2f}.mtbl .bl{color:#1565c0}
+
+/* 底栏 */
+.btm{
+  background:#1a3c6e;color:rgba(255,255,255,0.7);
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 12px;font-size:7.5px;
+}
+</style>
+</head>
+<body>
+
+<!-- ====== 顶栏 ====== -->
+<div class="top">
+<h1>阿坝州紧密型县域医共体信息化建设方案</h1>
+<div class="tags">
+  <span>9,600万总投资(3,000万已到位)</span><span>|</span>
+  <span>13县·171乡镇·1,168村卫生室</span><span>|</span>
+  <span>36个月三期</span><span>|</span>
+  <span>2026年5月·V2.0</span>
+</div>
+</div>
+
+<!-- ====== 主体 ====== -->
+<div class="main">
+
+<!-- ===== 行1: 诊断(3列) + 策略(3列) 88px ===== -->
+
+<!-- 五大问题 + 存量评估 -->
+<div class="c s3">
+<div class="ct">一、现状诊断：五大核心痛点 → 根因 → 存量家底</div>
+<div class="plist">
+<div class="pi c1"><div class="n">20%+</div><div><div class="t">数据孤岛</div><div class="d">6-8套HIS·互认率0%</div></div></div>
+<div class="pi c2"><div class="n">30-50%</div><div><div class="t">人才匮乏</div><div class="d">设备闲置·外流恶性循环</div></div></div>
+<div class="pi c3"><div class="n">3,260万</div><div><div class="t">医保穿底</div><div class="d">年外流·审核覆盖率&lt;5%</div></div></div>
+<div class="pi c4"><div class="n">×3.6</div><div><div class="t">慢病失控</div><div class="d">孕产妇死亡率全国3.6倍</div></div></div>
+<div class="pi c5"><div class="n">48亿</div><div><div class="t">运营断裂</div><div class="d">十年投48亿·缺造血机制</div></div></div>
+</div>
+<div style="display:flex;gap:4px;margin-top:3px;font-size:7px;color:#666;align-items:center">
+<span style="font-weight:700;color:#1a3c6e">存量评估(46系统)</span>
+<span class="ctag princ">✅保留22</span><span class="ctag princ">🔧改造18</span><span class="ctag princ">❌替换1</span><span class="ctag princ">🆕空白5</span>
+<span style="color:#2e7d32">软件保留+改造率87%</span>
+<span>|</span><span>利旧目标：硬件≥60%·网络≥80%·数据100%</span>
+<span>|</span><span>改造费占比15.2%(非大拆大建)</span>
+</div>
+</div>
+
+<!-- 建设策略 + 投资 -->
+<div class="c s3">
+<div class="ct">二、建设策略：三层递进 · 查漏补缺 · 适配改造优先 · 性价比突出</div>
+<div style="display:flex;gap:5px;flex:1">
+<div class="strats" style="flex:1.2">
+<div class="si l1"><div class="h">第一层"止血"</div><div class="m">全民健康信息平台·13县平台<br>五大共享中心·网络·安全·信创</div><div class="p" style="color:#c62828">3,600万</div></div>
+<div class="si l2"><div class="h">第二层"造血"</div><div class="m">PACS云胶片·体检导检<br>导诊分流·院感疾控·医保DRG</div><div class="p" style="color:#e65100">4,200万</div></div>
+<div class="si l3"><div class="h">第三层"进化"</div><div class="m">CDSS·影像AI·处方AI·语音病历<br>慢病AI·数字分身·随访·预警</div><div class="p" style="color:#1565c0">1,270万</div></div>
+</div>
+<div style="flex:0.8;display:flex;flex-direction:column;justify-content:center">
+<div class="ibars">
+<div class="ib"><span class="l">基础平台</span><div class="b"><div class="f" style="width:100%;background:#1565c0"></div></div><span class="v">3,600万</span></div>
+<div class="ib"><span class="l">业务应用</span><div class="b"><div class="f" style="width:81%;background:#2e7d32"></div></div><span class="v">2,900万</span></div>
+<div class="ib"><span class="l">三医联动</span><div class="b"><div class="f" style="width:36%;background:#e65100"></div></div><span class="v">1,300万</span></div>
+<div class="ib"><span class="l">AI赋能</span><div class="b"><div class="f" style="width:35%;background:#6a1b9a"></div></div><span class="v">1,270万</span></div>
+<div class="ib"><span class="l">配套</span><div class="b"><div class="f" style="width:15%;background:#888"></div></div><span class="v">530万</span></div>
+</div>
+<div style="font-size:7px;color:#999;margin-top:3px;text-align:center">五项铁律：查漏补缺·避免重复·不大拆大建·适配改造优先·性价比突出</div>
+</div>
+</div>
+</div>
+
+<!-- ===== 行2: AI场景(2列) + 路线图(2列) + 回报+案例+政策(2列) ===== -->
+
+<!-- AI八场景 -->
+<div class="c s2">
+<div class="ct">三、AI赋能：P0→P3八场景·总1,270万·一期P0上线570万</div>
+<div class="ascenes">
+<div class="as p0">
+  <span class="badge bp0">P0</span>
+  <div style="flex:1;min-width:0"><div class="an">CDSS+影像AI初筛</div><div class="ad">5病种秒级检测·10,000+症状知识图谱推理·基层留患者根本保障</div></div>
+  <div style="text-align:right;flex-shrink:0"><div class="ac">450万</div><div class="at">一期</div></div>
+</div>
+<div class="as p0">
+  <span class="badge bp0">P0</span>
+  <div style="flex:1;min-width:0"><div class="an">AI处方前置审核</div><div class="ad">六维审方·实时拦截·处方合格率85→95%+·年控费250-500万</div></div>
+  <div style="text-align:right;flex-shrink:0"><div class="ac">120万</div><div class="at">一期</div></div>
+</div>
+<div class="as p1">
+  <span class="badge bp1">P1</span>
+  <div style="flex:1;min-width:0"><div class="an">AI语音电子病历<sup style="color:#ff9800">NEW</sup></div><div class="ad">口述→实时转文字→自动填入·日均省1.5-2h文书·医生接受度最高</div></div>
+  <div style="text-align:right;flex-shrink:0"><div class="ac">150万</div><div class="at">二期</div></div>
+</div>
+<div class="as p1">
+  <span class="badge bp1">P1</span>
+  <div style="flex:1;min-width:0"><div class="an">AI慢病主动管理</div><div class="ad">三色分层·并发症预测·家医工作台·直接挂钩4项考核指标</div></div>
+  <div style="text-align:right;flex-shrink:0"><div class="ac">250万</div><div class="at">二期</div></div>
+</div>
+<div class="as p2">
+  <span class="badge bp2">P2</span>
+  <div style="flex:1;min-width:0"><div class="an">数字医生分身<sup style="color:#42a5f5">NEW</sup></div><div class="ad">AI预问诊·7×24健康咨询·报告解读·复诊判断·需居民习惯培育</div></div>
+  <div style="text-align:right;flex-shrink:0"><div class="ac">120万</div><div class="at">二期末</div></div>
+</div>
+<div class="as p2">
+  <span class="badge bp2">P2</span>
+  <div style="flex:1;min-width:0"><div class="an">AI语音随访</div><div class="ad">批量外呼5,000通/天·智能问答·1个AI替代5-10人工作量</div></div>
+  <div style="text-align:right;flex-shrink:0"><div class="ac">80万</div><div class="at">二期</div></div>
+</div>
+<div class="as p3">
+  <span class="badge bp3">P3</span>
+  <div style="flex:1;min-width:0"><div class="an">AI分诊转诊/大数据预警</div><div class="ad">智能分诊·转诊合理性判断·疾病趋势预测·基金风险预警</div></div>
+  <div style="text-align:right;flex-shrink:0"><div class="ac">100万</div><div class="at">三期</div></div>
+</div>
+<div class="as p3">
+  <span class="badge bp3">P3</span>
+  <div style="flex:1;min-width:0"><div class="an">藏医药AI+高原病模型</div><div class="ad">藏药知识库·配伍AI·高原心脏病/包虫病影像·全国唯一藏区标杆</div></div>
+  <div style="text-align:right;flex-shrink:0"><div class="ac">200万</div><div class="at">三期</div></div>
+</div>
+</div>
+</div>
+
+<!-- 三期路线图 -->
+<div class="c s2">
+<div class="ct">四、36个月三期实施路线图</div>
+<div class="rmap">
+<div class="rm rm1">
+<div class="rh"><span class="rn" style="color:#c62828">第一期·试点·3,000万</span></div>
+<ul>
+<li>4试点县上线(阿坝/松潘/茂县/汶川)</li>
+<li>州平台V1+影像云+远程诊断</li>
+<li class="h">P0:CDSS+影像AI(肺/骨/结核)</li>
+<li class="h">P0:AI审方·处方合格率&gt;95%</li>
+<li>院感疾控基础·等保三级</li>
+<li>试点县全员培训(~2,000人)</li>
+<li><b>首年AI回报≥200万</b></li>
+</ul>
+</div>
+<div class="rm rm2">
+<div class="rh"><span class="rn" style="color:#e65100">第二期·推广·3,300万</span></div>
+<ul>
+<li>9县推广+全州13县联调</li>
+<li>五大资源共享中心全面建成</li>
+<li class="h">P1:AI语音病历全州上线</li>
+<li class="h">P1:AI慢病管理试点</li>
+<li>P2:数字分身+语音随访上线</li>
+<li>7病种影像AI全覆盖</li>
+<li>全州全员培训(~4,000人)</li>
+</ul>
+</div>
+<div class="rm rm3">
+<div class="rh"><span class="rn" style="color:#2e7d32">第三期·深化·3,300万</span></div>
+<ul>
+<li>三医联动数据全面打通</li>
+<li>DRG全量AI审核100%覆盖</li>
+<li>县域中心药房+AI审方运行</li>
+<li>14项指标自动采集考核</li>
+<li>P3:分诊转诊AI+大数据预警</li>
+<li>村卫生室全覆盖(1,168个)</li>
+<li>终验+标杆申报+成果发布</li>
+</ul>
+</div>
+</div>
+</div>
+
+<!-- 回报+案例+政策 -->
+<div class="c s2">
+<div class="ct">五、核心回报 · 行业对标 · 政策依据</div>
+
+<!-- 回报指标 2×4 -->
+<div class="kpis" style="margin-bottom:4px">
+<div class="kp"><div class="kv">4,000<span class="ku">万/年</span></div><div class="kl">成熟期年净回报</div></div>
+<div class="kp"><div class="kv">≈4.2<span class="ku">年</span></div><div class="kl">静态回收期</div></div>
+<div class="kp"><div class="kv">7,300<span class="ku">万</span></div><div class="kl">三年累计净回报</div></div>
+<div class="kp"><div class="kv">79.7→85<span class="ku">%+</span></div><div class="kl">州域内就诊率</div></div>
+<div class="kp"><div class="kv">0→70<span class="ku">%+</span></div><div class="kl">检查互认率</div></div>
+<div class="kp"><div class="kv">85→95<span class="ku">%+</span></div><div class="kl">处方合格率</div></div>
+<div class="kp"><div class="kv">&lt;5→100<span class="ku">%</span></div><div class="kl">医保审核覆盖率</div></div>
+<div class="kp"><div class="kv">56→30<span class="ku">↓/10万</span></div><div class="kl">孕产妇死亡率</div></div>
+</div>
+
+<!-- 快赢ROI -->
+<div style="font-size:8px;font-weight:700;color:#1a3c6e;margin-bottom:2px">快赢场景(回报&lt;12月)·一期投入≥800万</div>
+<table class="mtbl">
+<tr><th>场景</th><th>投入</th><th>年回报</th><th>周期</th><th>ROI</th><th>参考案例</th></tr>
+<tr><td>云胶片替代塑料胶片</td><td>150万</td><td>200-300万</td><td>6-9月</td><td class="gr">133-200%</td><td>安徽/东台</td></tr>
+<tr><td>AI处方前置审核</td><td>120万</td><td>250-500万</td><td>3-6月</td><td class="gr">208-417%</td><td>滨海/江西</td></tr>
+<tr><td>AI肺结核DR筛查</td><td>100万</td><td>检出率×3-5</td><td>3-6月</td><td>—</td><td>重庆/安徽</td></tr>
+<tr><td>DRG智能审核</td><td>650万</td><td>500-800万</td><td>6-9月</td><td class="gr">77-123%</td><td>梧州/尤溪/湘潭</td></tr>
+</table>
+
+<!-- 行业案例标签云 -->
+<div style="margin-top:4px;font-size:7.5px;font-weight:700;color:#1a3c6e">行业对标案例(20+)</div>
+<div class="tag-row">
+<span class="ctag case">安徽:省级影像云+AI传染病</span>
+<span class="ctag case">江西:省域基层AI全覆盖</span>
+<span class="ctag case">梧州:DRG反欺诈(国家试点)</span>
+<span class="ctag case">西青:AI健管+家医协同</span>
+<span class="ctag case">三明:三医联动·医保打包</span>
+<span class="ctag case">东台:一云一网一平台</span>
+<span class="ctag case">滨海:数字驾驶中心</span>
+<span class="ctag case">南皮:数智医共体AI影像</span>
+<span class="ctag case">尤溪:医保AI全闭环</span>
+<span class="ctag case">湘潭:DRG智能审核</span>
+<span class="ctag case">郑州:数字家医</span>
+<span class="ctag case">萧山:19种慢病AI</span>
+<span class="ctag case">重庆:影像云+AI结核</span>
+<span class="ctag case">武汉:AI结核哨兵</span>
+</div>
+
+<!-- 政策依据标签云 -->
+<div style="margin-top:3px;font-size:7.5px;font-weight:700;color:#1a3c6e">政策依据</div>
+<div class="tag-row">
+<span class="ctag policy">国卫办规划函〔2025〕63号：医共体36项功能+4建设模式</span>
+<span class="ctag policy">川卫发〔2024〕9号：四川省医共体实施方案</span>
+<span class="ctag policy">五部门AI+医疗实施意见(2025.11)：8方向24应用</span>
+<span class="ctag policy">国发〔2025〕11号：AI+行动</span>
+<span class="ctag policy">国卫基层发〔2023〕41号：医共体建设指导意见</span>
+<span class="ctag policy">国卫办基层发〔2024〕22号：14项监测指标</span>
+<span class="ctag policy">发改投资规〔2023〕304号：可研编写大纲</span>
+<span class="ctag policy">发改办投资〔2024〕1049号：资金申请格式</span>
+<span class="ctag policy">四川省DRG/DIP统一分组(2025.1)</span>
+<span class="ctag policy">超长期特别国债·中西部倾斜(2025.7)</span>
+</div>
+
+<!-- 能力模块 -->
+<div style="margin-top:3px;font-size:7.5px;font-weight:700;color:#1a3c6e">5大能力模块(不体现厂商)</div>
+<div class="tag-row">
+<span class="ctag princ">区域医学影像AI辅助诊断平台</span>
+<span class="ctag princ">院感-传染病-疾控一体化智能管理平台</span>
+<span class="ctag princ">区域PACS/云影像/远程诊断平台</span>
+<span class="ctag princ">智慧体检预约与智能导检系统</span>
+<span class="ctag princ">智能导诊分流与预问诊系统</span>
+</div>
+
+<!-- 质量校验 -->
+<div style="margin-top:2px;font-size:7px;color:#888">数据校验：55项逐项校验·0不通过·4项待实地核实(利旧率/网络覆盖率/孕产妇死亡率/三县HIS品牌)</div>
+</div>
+
+</div>
+
+<!-- ====== 底栏 ====== -->
+<div class="btm">
+<span>编制：2026年5月 · V2.0最终版 · 密级：内部</span>
+<span>数据来源：四川省公共资源交易平台·中国政府采购网·阿坝州2023统计公报·国家/省卫健委官网·行业案例公开报道</span>
+</div>
+
+</body>
+</html>

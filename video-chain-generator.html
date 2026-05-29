@@ -1,0 +1,1806 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Seedance2.0 长视频生成工具｜故事一键转分镜版</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@ffmpeg/ffmpeg@0.12.7/dist/umd/ffmpeg.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@ffmpeg/util@0.12.1/dist/umd/index.min.js"></script>
+    <style>
+        :root{
+            --bg-main:#0f1118;
+            --bg-card:#161a25;
+            --bg-input:#1e2230;
+            --text-primary:#e5e7eb;
+            --text-secondary:#9ca3af;
+            --border:#2a2f3f;
+            --primary:#3b82f6;
+            --success:#10b981;
+            --danger:#ef4444;
+            --warning:#f59e0b;
+            --purple:#6366f1;
+        }
+        body{
+            background-color:var(--bg-main);
+            color:var(--text-primary);
+            font-family:system-ui, sans-serif;
+        }
+        .card{
+            background:var(--bg-card);
+            border:1px solid var(--border);
+            border-radius:12px;
+        }
+        .input-dark{
+            background:var(--bg-input);
+            border:1px solid var(--border);
+            color:var(--text-primary);
+            border-radius:8px;
+        }
+        .input-dark:focus{
+            outline:none;
+            border-color:var(--primary);
+        }
+        .segment-item{
+            background:var(--bg-input);
+            border:1px solid var(--border);
+            border-radius:10px;
+            margin:8px 0;
+            transition:border-color 0.3s;
+            overflow:hidden;
+        }
+        .seg-header{
+            display:flex; align-items:center; gap:10px;
+            padding:10px 14px;
+            cursor:pointer;
+            user-select:none;
+            transition:background 0.2s;
+        }
+        .seg-header:hover{background:rgba(255,255,255,0.03);}
+        .seg-toggle{
+            font-size:10px; color:var(--text-secondary);
+            transition:transform 0.25s;
+            flex-shrink:0; width:14px; text-align:center;
+        }
+        .seg-toggle.open{transform:rotate(90deg);}
+        .seg-body{
+            padding:0 14px 14px 14px;
+            display:none;
+        }
+        .seg-body.open{display:block;}
+        .seg-collapsed .seg-body{display:none;}
+        .done-seg{border-color:var(--success);}
+        .fail-seg{border-color:var(--danger);}
+        .generating-seg{border-color:var(--primary);animation:pulse 1.5s infinite;}
+        @keyframes pulse{0%,100%{opacity:1}50%{opacity:0.6}}
+        .log-box{
+            background:#0b0d14;
+            border:1px solid var(--border);
+            border-radius:10px;
+        }
+        .btn-primary{background:var(--primary);color:#fff;padding:10px 20px;border-radius:8px;border:none;cursor:pointer;}
+        .btn-success{background:var(--success);color:#fff;padding:10px 20px;border-radius:8px;border:none;cursor:pointer;}
+        .btn-danger{background:var(--danger);color:#fff;padding:10px 20px;border-radius:8px;border:none;cursor:pointer;}
+        .btn-warning{background:var(--warning);color:#fff;padding:6px 12px;border-radius:6px;border:none;cursor:pointer;}
+        .btn-log{background:#475569;color:#fff;padding:6px 12px;border-radius:6px;border:none;cursor:pointer;}
+        .btn-primary:hover,.btn-success:hover,.btn-danger:hover,.btn-warning:hover,.btn-log:hover{opacity:0.85;}
+        .btn-primary:disabled,.btn-success:disabled,.btn-danger:disabled{opacity:0.5;cursor:not-allowed;}
+        .preview-img{max-height:100px;border-radius:6px;margin:4px;}
+        .video-preview{max-height:180px;border-radius:8px;margin-top:10px;}
+        .progress-bar{height:4px;background:var(--border);border-radius:2px;overflow:hidden;}
+        .progress-fill{height:100%;background:var(--primary);transition:width 0.5s;}
+        .seg-status-inline{display:inline-block;padding:2px 8px;border-radius:4px;font-size:11px;white-space:nowrap;}
+        .si-wait{background:#374151;color:#9ca3af}
+        .si-ready{background:#78350f;color:#f59e0b}
+        .si-gen{background:#1e3a5f;color:#3b82f6}
+        .si-done{background:#064e3b;color:#10b981}
+        .si-fail{background:#7f1d1d;color:#ef4444}
+        .seg-badge{display:inline-block;padding:1px 6px;border-radius:3px;font-size:10px;white-space:nowrap;}
+        .btn-camera{background:#1e293b;color:#94a3b8;border:1px solid #334155;border-radius:4px;padding:2px 8px;font-size:11px;cursor:pointer;transition:all 0.15s}
+        .btn-camera:hover{background:#334155;color:#e2e8f0;border-color:#475569}
+        .btn-enhance{background:#7c3aed;color:#fff;border:none;border-radius:4px;padding:2px 10px;font-size:11px;cursor:pointer;transition:opacity 0.15s}
+        .btn-enhance:hover{opacity:0.85}
+        .btn-style{background:#1e1b4b;color:#a78bfa;border:1px solid #4c1d95;border-radius:4px;padding:2px 8px;font-size:11px;cursor:pointer;transition:all 0.15s}
+        .btn-style:hover{background:#312e81;color:#c4b5fd;border-color:#7c3aed}
+        .task-dashboard{margin-bottom:12px}
+        .task-card{display:flex;align-items:center;gap:10px;padding:8px 12px;background:var(--bg-input);border:1px solid var(--border);border-radius:8px;margin:4px 0;transition:border-color 0.3s}
+        .task-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+        .task-dot.wait{background:#6b7280}.task-dot.ready{background:#f59e0b}.task-dot.gen{background:#3b82f6;animation:pulse 1.5s infinite}.task-dot.done{background:#10b981}.task-dot.fail{background:#ef4444}
+        .task-elapsed{font-size:11px;color:var(--text-secondary);width:48px;flex-shrink:0;text-align:right}
+        .task-msg{font-size:12px;color:var(--text-secondary);flex:1}
+        .task-actions{display:flex;gap:6px;flex-shrink:0}
+        .task-btn{font-size:11px;padding:2px 8px;border-radius:4px;border:none;cursor:pointer;background:#374151;color:#e5e7eb}
+        .task-btn:hover{background:#4b5563}
+        .log-collapsed{display:none}
+    </style>
+</head>
+<body class="p-4 md:p-6">
+    <div class="max-w-6xl mx-auto card p-6">
+        <h1 class="text-2xl font-bold text-center text-blue-400 mb-6">Seedance2.0 长视频生成工具｜故事一键转分镜版</h1>
+
+        <!-- ==================== 主面板 ==================== -->
+        <div id="tab-main">
+            <!-- API配置 -->
+            <div class="card p-5 mb-6">
+                <h2 class="text-lg font-semibold mb-4 text-gray-200">API配置（请替换为你自己的）</h2>
+                <div class="grid md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm text-gray-400 mb-1">火山方舟 API Key</label>
+                        <input id="seedanceKey" type="text" placeholder="在你的火山方舟控制台获取" class="input-dark w-full px-3 py-2">
+                    </div>
+                    <div>
+                        <label class="block text-sm text-gray-400 mb-1">Seedance 模型</label>
+                        <select id="seedanceModel" class="input-dark w-full px-3 py-2">
+                            <option value="doubao-seedance-2-0-260128" selected>Seedance 2.0 (高品质 1080p)</option>
+                            <option value="doubao-seedance-2-0-fast-260128">Seedance 2.0 Fast (快速 720p)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm text-gray-400 mb-1">DeepSeek API Key (用于分镜脚本生成)</label>
+                        <input id="deepseekKey" type="text" placeholder="sk-xxx" class="input-dark w-full px-3 py-2">
+                    </div>
+                </div>
+            </div>
+
+            <!-- 基础参数 -->
+            <div class="card p-5 mb-6">
+                <h2 class="text-lg font-semibold mb-4 text-gray-200">生成参数</h2>
+                <div class="flex gap-2 items-center mb-3 flex-wrap">
+                    <span class="text-xs text-gray-400">预设方案:</span>
+                    <select id="presetSelect" class="input-dark text-xs px-2 py-1" style="max-width:200px">
+                        <option value="">默认</option>
+                        <option value="douyin">抖音竖屏 1080p 9:16 15s</option>
+                        <option value="bilibili">B站横屏 1080p 16:9 30s</option>
+                        <option value="xiaohongshu">小红书 720p 3:4 15s</option>
+                        <option value="youtube">YouTube 1080p 16:9 60s</option>
+                        <option value="custom1">自定义方案1</option>
+                        <option value="custom2">自定义方案2</option>
+                    </select>
+                    <button id="savePresetBtn" class="task-btn text-xs">保存当前参数</button>
+                </div>
+                <div class="grid md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm text-gray-400 mb-1">视频总时长</label>
+                        <select id="totalTime" class="input-dark w-full px-3 py-2">
+                            <option value="10">10秒 (1个片段)</option>
+                            <option value="20">20秒 (2个片段)</option>
+                            <option value="30">30秒 (3个片段)</option>
+                            <option value="40">40秒 (4个片段)</option>
+                            <option value="50">50秒 (5个片段)</option>
+                            <option value="60" selected>60秒 (6个片段)</option>
+                        </select>
+                        <p class="text-xs text-gray-500 mt-1">Seedance2.0单次生成上限15秒，本工具自动拆分为多个10秒片段串联</p>
+                    </div>
+                    <div>
+                        <label class="block text-sm text-gray-400 mb-1">每段时长</label>
+                        <select id="segDuration" class="input-dark w-full px-3 py-2">
+                            <option value="8">8秒</option>
+                            <option value="10" selected>10秒 (推荐)</option>
+                            <option value="12">12秒</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm text-gray-400 mb-1">分辨率</label>
+                        <select id="resolution" class="input-dark w-full px-3 py-2">
+                            <option value="1080p" selected>1080p (仅标准版支持)</option>
+                            <option value="720p">720p</option>
+                            <option value="480p">480p</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm text-gray-400 mb-1">画幅比例</label>
+                        <select id="ratio" class="input-dark w-full px-3 py-2">
+                            <option value="9:16" selected>竖屏 9:16 (1080x1920)</option>
+                            <option value="16:9">横屏 16:9 (1920x1080)</option>
+                            <option value="1:1">方形 1:1</option>
+                            <option value="3:4">竖屏 3:4</option>
+                            <option value="4:3">横屏 4:3</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm text-gray-400 mb-1">最长等待时间（每段）</label>
+                        <select id="maxWaitTime" class="input-dark w-full px-3 py-2">
+                            <option value="300">5 分钟</option>
+                            <option value="600" selected>10 分钟</option>
+                            <option value="900">15 分钟</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm text-gray-400 mb-1">失败重试次数</label>
+                        <select id="retryMax" class="input-dark w-full px-3 py-2">
+                            <option value="1">1 次</option>
+                            <option value="2" selected>2 次</option>
+                            <option value="3">3 次</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 全局首尾帧设置 -->
+            <div class="grid md:grid-cols-2 gap-4 mb-6">
+                <div class="card p-5">
+                    <h2 class="text-lg font-semibold mb-3 text-gray-200">起始首帧（必须上传）</h2>
+                    <input type="file" id="globalFirstFrame" accept="image/jpeg,image/jpg,image/png,image/webp" class="input-dark w-full px-2 py-2">
+                    <p class="text-xs text-gray-500 mt-1">支持JPG/PNG/WebP，推荐1080x1920竖屏</p>
+                    <img id="globalFirstFramePreview" class="preview-img hidden">
+                </div>
+                <div class="card p-5">
+                    <h2 class="text-lg font-semibold mb-3 text-gray-200">结束尾帧（可选）</h2>
+                    <input type="file" id="lastFrame" accept="image/jpeg,image/jpg,image/png,image/webp" class="input-dark w-full px-2 py-2">
+                    <p class="text-xs text-gray-500 mt-1">仅最后一段使用，不填则AI自由发挥</p>
+                    <img id="lastFramePreview" class="preview-img hidden">
+                </div>
+            </div>
+
+            <!-- 故事素材底稿一键生成分镜 -->
+            <div class="card p-5 mb-6">
+                <h2 class="text-lg font-semibold mb-4 text-gray-200">故事素材底稿 - 一键生成分镜脚本</h2>
+                <textarea id="storyDraft" rows="5" placeholder="粘贴你的完整故事素材、剧情梗概、角色设定、场景描述。AI先生成简要大纲填入各段，再点每段的✨增强展开为完整分镜" class="input-dark w-full px-3 py-2 mb-3"></textarea>
+                <button id="genStoryScriptBtn" class="btn-primary">生成分镜大纲 → 逐段增强</button>
+            </div>
+
+            <!-- 分段列表 -->
+            <div class="mb-6">
+                <div class="flex justify-between items-center mb-3">
+                    <h2 class="text-lg font-semibold text-gray-200">分段列表（自动首尾帧接力）</h2>
+                    <span id="overallProgress" class="text-sm text-gray-400"></span>
+                </div>
+                <div class="progress-bar mb-4">
+                    <div id="progressFill" class="progress-fill" style="width:0%"></div>
+                </div>
+                <div id="segContainer"></div>
+            </div>
+
+            <!-- 操作按钮 -->
+            <div class="flex gap-4 justify-center mb-6 flex-wrap">
+                <button id="startAllBtn" class="btn-success">开始全自动生成+合并下载</button>
+                <button id="stopBtn" class="btn-danger">停止任务</button>
+                <button id="mergeOnlyBtn" class="btn-warning">仅合并已生成片段</button>
+                <button id="clearLogBtn" class="btn-log">清空日志</button>
+            </div>
+
+            <!-- 任务仪表板 -->
+            <div class="task-dashboard mb-4">
+                <div class="flex justify-between items-center mb-2">
+                    <h2 class="text-sm font-semibold text-gray-300">任务仪表板</h2>
+                    <button id="toggleLogBtn" class="task-btn text-xs">显示详细日志</button>
+                </div>
+                <div id="taskDashboard"></div>
+            </div>
+
+            <!-- 详细日志（默认折叠） -->
+            <div id="logWrapper" class="log-collapsed">
+                <div class="log-box p-4 h-40 overflow-auto mb-4">
+                    <pre id="log" class="text-green-400 text-sm"></pre>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+    (function() {
+        // ==================== 全局状态 ====================
+        var segCount = 6;
+        var segDuration = 10;
+        var segList = [];
+        var segVideoBlobList = [];
+        var segVideoUrlList = [];
+        var segFrameList = [];
+        var segLastFrameList = [];
+        var currentSeg = 0;
+        var retryMax = 2;
+        var maxWaitPerSeg = 600;
+        var isRunning = false;
+        var abortController = null;
+        var firstFrameBase64 = null;
+        var lastFrameBase64 = null;
+        var logContent = '';
+
+        var segRefImageList = [];    // 参考图片 (每段最多3张)
+        var segModeList = [];        // 0:text 1:first_frame 2:first+last 3:ref_img 4:ref_img+video 5:ref_img+audio
+        var segVideoUrlInputList = []; // 参考视频URL
+        var segAudioUrlInputList = []; // 参考音频URL
+        var dashboardCards = [];      // 任务仪表板卡片DOM
+        var segTimers = [];           // 每段开始计时的时间戳
+
+        var $ = function(id) { return document.getElementById(id); };
+
+        // ==================== 日志系统 ====================
+        function log(txt) {
+            var timeStr = new Date().toLocaleTimeString();
+            var line = timeStr + ' ' + txt + '\n';
+            logContent += line;
+            var dom = $('log');
+            if (dom) {
+                dom.textContent += line;
+                dom.scrollTop = dom.scrollHeight;
+            }
+        }
+
+        if ($('clearLogBtn')) {
+            $('clearLogBtn').addEventListener('click', function() {
+                var dom = $('log');
+                if (dom) dom.textContent = '';
+                logContent = '';
+            });
+        }
+
+        // ==================== 辅助函数 ====================
+        function sleep(ms) {
+            return new Promise(function(resolve) { setTimeout(resolve, ms); });
+        }
+
+        function fileToBase64(file) {
+            return new Promise(function(resolve, reject) {
+                var reader = new FileReader();
+                reader.onload = function() { resolve(reader.result); };
+                reader.onerror = reject;
+                reader.readAsDataURL(file);
+            });
+        }
+
+        function blobToBase64(blob) {
+            return new Promise(function(resolve, reject) {
+                var reader = new FileReader();
+                reader.onload = function() { resolve(reader.result); };
+                reader.onerror = reject;
+                reader.readAsDataURL(blob);
+            });
+        }
+
+        // ==================== 初始化分段 ====================
+        function initSegments() {
+            var container = $('segContainer');
+            var dashContainer = $('taskDashboard');
+            if (!container) return;
+            container.innerHTML = '';
+            if (dashContainer) dashContainer.innerHTML = '';
+            segList = [];
+            segVideoBlobList = [];
+            segVideoUrlList = [];
+            segFrameList = [];
+            segLastFrameList = [];
+            segRefImageList = [];
+            segModeList = [];
+            segVideoUrlInputList = [];
+            segAudioUrlInputList = [];
+            dashboardCards = [];
+            segTimers = [];
+
+            var totalTime = parseInt($('totalTime').value) || 60;
+            segDuration = parseInt($('segDuration').value) || 10;
+            segCount = Math.ceil(totalTime / segDuration);
+
+            for (var i = 0; i < segCount; i++) {
+                var actualDuration = (i === segCount - 1 && totalTime % segDuration !== 0)
+                    ? totalTime - (segCount - 1) * segDuration
+                    : segDuration;
+                var isFirst = (i === 0);
+
+                var modeNames = ['纯文本','首帧','首尾帧','参考图','参考图+视频','参考图+音频'];
+                var item = document.createElement('div');
+                item.className = 'segment-item';
+                item.setAttribute('data-seg-idx', i);
+                item.innerHTML =
+                    // === 折叠Header ===
+                    '<div class="seg-header" data-seg-idx="' + i + '" data-toggle="' + i + '">' +
+                        '<span class="seg-toggle" data-toggle="' + i + '">&#9654;</span>' +
+                        '<span class="text-sm font-medium" data-toggle="' + i + '">第' + (i+1) + '段 ' + actualDuration + 's</span>' +
+                        '<select data-seg-idx="' + i + '" class="seg-mode-select input-dark text-xs px-1 py-0.5" style="max-width:110px">' +
+                            modeNames.map(function(n, mi) {
+                                return '<option value="' + mi + '"' + (mi === 1 ? ' selected' : '') + '>' + n + '</option>';
+                            }).join('') +
+                        '</select>' +
+                        '<span class="seg-status-inline" style="background:#374151;color:#9ca3af">等待输入</span>' +
+                        '<div class="flex-1"></div>' +
+                        '<button data-seg-idx="' + i + '" class="btn-jump-lastframe btn-log text-xs px-2 py-1 hidden">尾帧定位</button>' +
+                        '<a data-seg-idx="' + i + '" class="dl-link text-xs text-blue-400 underline hidden" target="_blank" rel="noopener">下载</a>' +
+                        '<button data-seg-idx="' + i + '" class="btn-generate-seg btn-success text-xs px-2 py-1">生成</button>' +
+                    '</div>' +
+                    // === 展开Body ===
+                    '<div class="seg-body" data-seg-idx="' + i + '">' +
+                        '<textarea data-idx="' + i + '" rows="3" placeholder="分镜脚本描述" class="seg-prompt input-dark w-full px-2 py-1 mb-1 text-sm"></textarea>' +
+                        // 增强 + 镜头按钮
+                        '<div class="flex gap-1 items-center mb-2 flex-wrap">' +
+                            '<button data-seg-idx="' + i + '" class="btn-enhance text-xs">✨增强</button>' +
+                            '<span class="text-xs text-gray-600 mx-1">|</span>' +
+                            '<button data-seg-idx="' + i + '" data-term="镜头缓缓推近" class="btn-camera">推近</button>' +
+                            '<button data-seg-idx="' + i + '" data-term="镜头缓缓拉远" class="btn-camera">拉远</button>' +
+                            '<button data-seg-idx="' + i + '" data-term="镜头向左平移摇摄" class="btn-camera">左摇</button>' +
+                            '<button data-seg-idx="' + i + '" data-term="镜头向右平移摇摄" class="btn-camera">右摇</button>' +
+                            '<button data-seg-idx="' + i + '" data-term="镜头缓慢上升" class="btn-camera">上升</button>' +
+                            '<button data-seg-idx="' + i + '" data-term="镜头缓慢下降" class="btn-camera">下降</button>' +
+                            '<button data-seg-idx="' + i + '" data-term="手持跟拍运动" class="btn-camera">跟拍</button>' +
+                            '<button data-seg-idx="' + i + '" data-term="环绕主体旋转拍摄" class="btn-camera">环绕</button>' +
+                            '<button data-seg-idx="' + i + '" data-term="镜头静止固定" class="btn-camera">静止</button>' +
+                            '<button data-seg-idx="' + i + '" data-term="特写镜头，聚焦细节" class="btn-camera">特写</button>' +
+                            '<button data-seg-idx="' + i + '" data-term="大远景全景镜头" class="btn-camera">全景</button>' +
+                            '<button data-seg-idx="' + i + '" data-term="慢动作升格镜头" class="btn-camera">慢镜头</button>' +
+                        '</div>' +
+                        // 风格标签
+                        '<div class="flex gap-1 items-center mb-2 flex-wrap">' +
+                            '<span class="text-xs text-gray-600 mr-1">风格:</span>' +
+                            '<button data-seg-idx="' + i + '" data-term="电影感画面，cinematic lighting，浅景深" class="btn-style">电影感</button>' +
+                            '<button data-seg-idx="' + i + '" data-term="动漫风格，anime style" class="btn-style">动漫</button>' +
+                            '<button data-seg-idx="' + i + '" data-term="3D渲染风格，3D render，高精度" class="btn-style">3D渲染</button>' +
+                            '<button data-seg-idx="' + i + '" data-term="写实风格，photorealistic，真实光影" class="btn-style">写实</button>' +
+                            '<button data-seg-idx="' + i + '" data-term="赛博朋克风格，cyberpunk，霓虹灯光" class="btn-style">赛博朋克</button>' +
+                            '<button data-seg-idx="' + i + '" data-term="水墨画风格，中国传统水墨" class="btn-style">水墨</button>' +
+                            '<button data-seg-idx="' + i + '" data-term="油画风格，oil painting texture" class="btn-style">油画</button>' +
+                            '<button data-seg-idx="' + i + '" data-term="复古胶片风格，vintage film grain" class="btn-style">复古</button>' +
+                            '<button data-seg-idx="' + i + '" data-term="科幻风格，scifi futuristic" class="btn-style">科幻</button>' +
+                            '<button data-seg-idx="' + i + '" data-term="梦幻柔光风格，ethereal dreamlike" class="btn-style">梦幻</button>' +
+                            '<button data-seg-idx="' + i + '" data-term="暗黑风格，dark moody atmosphere" class="btn-style">暗黑</button>' +
+                            '<button data-seg-idx="' + i + '" data-term="清新明亮风格，bright and airy" class="btn-style">清新</button>' +
+                        '</div>' +
+                        // 负面提示词 + 种子
+                        '<div class="flex gap-2 items-center mb-2 flex-wrap">' +
+                            '<input type="text" data-seg-idx="' + i + '" class="seg-negative-prompt input-dark text-xs px-2 py-1" placeholder="负面提示词（不希望出现的内容）" style="flex:1;min-width:160px">' +
+                            '<span class="text-xs text-gray-500">种子:</span>' +
+                            '<input type="number" data-seg-idx="' + i + '" class="seg-seed-input input-dark text-xs px-2 py-1" value="-1" min="-1" max="4294967295" style="width:80px">' +
+                        '</div>' +
+                        '<div class="seg-section-firstframe mb-2 p-2 rounded-lg flex items-center gap-2 flex-wrap" style="background:#252a38">' +
+                            '<span class="text-xs text-blue-400 flex-shrink-0">首帧:</span>' +
+                            (isFirst
+                                ? '<span class="text-xs text-blue-400">使用全局首帧</span>'
+                                : '<input type="file" data-seg-idx="' + i + '" class="seg-firstframe-input input-dark text-xs px-2 py-1" accept="image/jpeg,image/jpg,image/png,image/webp" style="max-width:160px">') +
+                            '<img data-seg-idx="' + i + '" class="seg-frame-preview preview-img hidden" style="max-height:30px">' +
+                            '<span class="seg-frame-tip text-xs text-gray-400">' + (isFirst ? '' : '上传尾帧截图') + '</span>' +
+                        '</div>' +
+                        '<div class="seg-section-lastframe mb-2 p-2 rounded-lg hidden flex items-center gap-2" style="background:#252a38">' +
+                            '<span class="text-xs text-cyan-400 flex-shrink-0">尾帧:</span>' +
+                            '<input type="file" data-seg-idx="' + i + '" class="seg-lastframe-input input-dark text-xs px-2 py-1" accept="image/jpeg,image/jpg,image/png,image/webp" style="max-width:160px">' +
+                            '<img data-seg-idx="' + i + '" class="seg-lastframe-preview preview-img hidden" style="max-height:30px">' +
+                        '</div>' +
+                        '<div class="seg-section-refimg mb-2 p-2 rounded-lg hidden flex items-center gap-2 flex-wrap" style="background:#252a38">' +
+                            '<span class="text-xs text-purple-400 flex-shrink-0">参考图:</span>' +
+                            '<input type="file" data-seg-idx="' + i + '" class="seg-ref-input input-dark text-xs px-2 py-1" accept="image/jpeg,image/jpg,image/png,image/webp" style="max-width:160px" multiple>' +
+                            '<div data-seg-idx="' + i + '" class="seg-ref-previews inline-flex gap-1 align-middle"></div>' +
+                            '<span class="text-xs text-gray-500">提示词用[图1]引用</span>' +
+                        '</div>' +
+                        '<div class="seg-section-refvideo mb-2 p-2 rounded-lg hidden flex items-center gap-2" style="background:#252a38">' +
+                            '<span class="text-xs text-green-400 flex-shrink-0">参考视频URL:</span>' +
+                            '<input type="text" data-seg-idx="' + i + '" class="seg-video-url-input input-dark text-xs px-2 py-1" placeholder="https://...mp4" style="width:240px">' +
+                            '<span class="text-xs text-gray-500">[视频1]引用</span>' +
+                        '</div>' +
+                        '<div class="seg-section-refaudio mb-2 p-2 rounded-lg hidden flex items-center gap-2" style="background:#252a38">' +
+                            '<span class="text-xs text-yellow-400 flex-shrink-0">参考音频URL:</span>' +
+                            '<input type="text" data-seg-idx="' + i + '" class="seg-audio-url-input input-dark text-xs px-2 py-1" placeholder="https://...mp3" style="width:240px">' +
+                            '<span class="text-xs text-gray-500">[音频1]引用</span>' +
+                        '</div>' +
+                        '<video data-seg-idx="' + i + '" class="video-preview hidden mt-2" controls crossorigin="anonymous"></video>' +
+                    '</div>';
+                container.appendChild(item);
+                segList.push(item);
+                segVideoBlobList.push(null);
+                segVideoUrlList.push(null);
+                segFrameList.push(null);
+                segLastFrameList.push(null);
+                segRefImageList.push([]);
+                segModeList.push(1);
+                segVideoUrlInputList.push('');
+                segAudioUrlInputList.push('');
+                segTimers.push(0);
+                // 创建仪表板卡片
+                var card = document.createElement('div');
+                card.className = 'task-card';
+                card.setAttribute('data-dash-idx', i);
+                card.innerHTML =
+                    '<span class="task-dot wait"></span>' +
+                    '<span class="text-xs font-medium" style="width:32px">段' + (i+1) + '</span>' +
+                    '<span class="task-elapsed">—</span>' +
+                    '<span class="task-msg">等待输入</span>' +
+                    '<span class="task-actions">' +
+                        '<button data-dash-idx="' + i + '" class="task-btn dash-preview-btn hidden">预览</button>' +
+                        '<button data-dash-idx="' + i + '" class="task-btn dash-dl-btn hidden">下载</button>' +
+                        '<button data-dash-idx="' + i + '" class="task-btn dash-retry-btn hidden">重试</button>' +
+                    '</span>';
+                $('taskDashboard').appendChild(card);
+                dashboardCards.push(card);
+                // 初始化模式UI (默认首帧)
+                setTimeout(function() { updateModeUI(i, 1); }, 0);
+            }
+
+            if (firstFrameBase64) {
+                segFrameList[0] = firstFrameBase64;
+                if (segList.length > 0) {
+                    segList[0].querySelector('.seg-status-inline').textContent = '等待生成';
+                    segList[0].querySelector('.seg-status-inline').className = 'seg-status-inline si-ready';
+                }
+            }
+            log('已创建 ' + segCount + ' 个分段（每段' + segDuration + '秒，手动接力模式）');
+            updateProgress();
+        }
+
+        function updateProgress() {
+            var done = segVideoBlobList.filter(function(v) { return v !== null; }).length;
+            var total = segCount;
+            var fill = $('progressFill');
+            var label = $('overallProgress');
+            if (fill) fill.style.width = total > 0 ? (done / total * 100) + '%' : '0%';
+            if (label) label.textContent = done + '/' + total + ' 已完成';
+        }
+
+        // ==================== 图片上传 ====================
+        // ==================== 全局首帧上传 ====================
+        if ($('globalFirstFrame')) {
+            $('globalFirstFrame').addEventListener('change', function(e) {
+                var file = e.target.files[0];
+                if (!file) return;
+                if (file.size > 30 * 1024 * 1024) {
+                    log('错误：图片大小不能超过30MB（Seedance2.0限制）');
+                    return;
+                }
+                fileToBase64(file).then(function(b64) {
+                    firstFrameBase64 = b64;
+                    segFrameList[0] = firstFrameBase64;
+                    var img = $('globalFirstFramePreview');
+                    img.src = URL.createObjectURL(file);
+                    img.classList.remove('hidden');
+                    if (segList.length > 0) {
+                        segList[0].querySelector('.seg-status-inline').textContent = '等待生成';
+                        segList[0].querySelector('.seg-status-inline').className = 'seg-status-inline si-ready';
+                        segList[0].querySelector('.seg-frame-tip').textContent = '首帧已就绪';
+                    }
+                    log('全局首帧上传成功 (' + (file.size / 1024).toFixed(0) + 'KB)');
+                }).catch(function(err) {
+                    log('图片读取失败: ' + err.message);
+                });
+            });
+        }
+
+        if ($('lastFrame')) {
+            $('lastFrame').addEventListener('change', function(e) {
+                var file = e.target.files[0];
+                if (!file) return;
+                if (file.size > 30 * 1024 * 1024) {
+                    log('错误：图片大小不能超过30MB');
+                    return;
+                }
+                fileToBase64(file).then(function(b64) {
+                    lastFrameBase64 = b64;
+                    var img = $('lastFramePreview');
+                    img.src = URL.createObjectURL(file);
+                    img.classList.remove('hidden');
+                    log('全局尾帧上传成功');
+                }).catch(function(err) {
+                    log('图片读取失败: ' + err.message);
+                });
+            });
+        }
+
+        // ==================== 事件委托: 分段首帧上传 + 生成 + 尾帧定位 + 下载链接 ====================
+        document.addEventListener('change', function(e) {
+            // 分段首帧上传 (段2+)
+            if (e.target.classList.contains('seg-firstframe-input')) {
+                var idx = parseInt(e.target.getAttribute('data-seg-idx'));
+                var file = e.target.files[0];
+                if (!file) return;
+                if (file.size > 30 * 1024 * 1024) {
+                    log('错误：图片大小不能超过30MB');
+                    return;
+                }
+                fileToBase64(file).then(function(b64) {
+                    segFrameList[idx] = b64;
+                    // 显示预览
+                    var preview = segList[idx].querySelector('.seg-frame-preview');
+                    if (preview) {
+                        preview.src = URL.createObjectURL(file);
+                        preview.classList.remove('hidden');
+                    }
+                    segList[idx].querySelector('.seg-frame-tip').textContent = '首帧已就绪';
+                    segList[idx].querySelector('.seg-status-inline').textContent = '等待生成';
+                    segList[idx].querySelector('.seg-status-inline').className = 'seg-status-inline si-ready';
+                    log('第' + (idx+1) + '段首帧上传成功 (' + (file.size / 1024).toFixed(0) + 'KB)');
+                }).catch(function(err) {
+                    log('图片读取失败: ' + err.message);
+                });
+            }
+
+            // 模式切换 (6种模式下拉)
+            if (e.target.classList.contains('seg-mode-select')) {
+                var idx = parseInt(e.target.getAttribute('data-seg-idx'));
+                var mode = parseInt(e.target.value);
+                segModeList[idx] = mode;
+                updateModeUI(idx, mode);
+                var modeNames = ['纯文本', '首帧驱动', '首尾帧驱动', '参考图驱动', '参考图+视频', '参考图+音频'];
+                log('第' + (idx+1) + '段切换为: ' + modeNames[mode]);
+            }
+
+            // 分段参考图片上传 (支持多选)
+            if (e.target.classList.contains('seg-ref-input')) {
+                var idx = parseInt(e.target.getAttribute('data-seg-idx'));
+                var files = e.target.files;
+                if (!files || files.length === 0) return;
+                if (files.length > 3) {
+                    log('参考图最多3张');
+                    return;
+                }
+                segRefImageList[idx] = [];
+                var previewContainer = segList[idx].querySelector('.seg-ref-previews');
+                if (previewContainer) previewContainer.innerHTML = '';
+
+                var promises = [];
+                for (var f = 0; f < files.length; f++) {
+                    (function(file) {
+                        if (file.size > 30 * 1024 * 1024) {
+                            log('错误：参考图大小不能超过30MB');
+                            return;
+                        }
+                        promises.push(fileToBase64(file).then(function(b64) {
+                            segRefImageList[idx].push(b64);
+                            // 缩略图预览
+                            if (previewContainer) {
+                                var thumb = document.createElement('img');
+                                thumb.className = 'preview-img';
+                                thumb.style.maxHeight = '36px';
+                                thumb.src = URL.createObjectURL(file);
+                                previewContainer.appendChild(thumb);
+                            }
+                        }));
+                    })(files[f]);
+                }
+                Promise.all(promises).then(function() {
+                    log('第' + (idx+1) + '段参考图上传成功 (' + segRefImageList[idx].length + '张), 提示词中用[图1]引用');
+                }).catch(function(err) {
+                    log('参考图读取失败: ' + err.message);
+                });
+            }
+        });
+
+        document.addEventListener('click', function(e) {
+            // 手风琴折叠/展开
+            if (e.target.hasAttribute('data-toggle')) {
+                var idx = parseInt(e.target.getAttribute('data-toggle'));
+                var seg = segList[idx];
+                if (!seg) return;
+                var body = seg.querySelector('.seg-body');
+                var toggle = seg.querySelector('.seg-toggle');
+                if (!body || !toggle) return;
+                if (body.classList.contains('open')) {
+                    body.classList.remove('open');
+                    toggle.classList.remove('open');
+                    toggle.innerHTML = '&#9654;';
+                } else {
+                    body.classList.add('open');
+                    toggle.classList.add('open');
+                    toggle.innerHTML = '&#9660;';
+                }
+                return; // Stop event processing
+            }
+
+            // 镜头运动 + 风格标签: 追加术语到textarea
+            if (e.target.classList.contains('btn-camera') || e.target.classList.contains('btn-style')) {
+                var idx = parseInt(e.target.getAttribute('data-seg-idx'));
+                var term = e.target.getAttribute('data-term');
+                var ta = segList[idx].querySelector('.seg-prompt');
+                if (ta && term) {
+                    var current = ta.value.trim();
+                    ta.value = current ? current + '，' + term : term;
+                    ta.focus();
+                }
+                return;
+            }
+
+            // 提示词增强: DeepSeek单句扩展
+            if (e.target.classList.contains('btn-enhance')) {
+                var idx = parseInt(e.target.getAttribute('data-seg-idx'));
+                var ta = segList[idx].querySelector('.seg-prompt');
+                if (!ta || !ta.value.trim()) {
+                    log('请先在分镜文案中填入基础描述');
+                    return;
+                }
+                var deepseekKey = $('deepseekKey').value.trim();
+                if (!deepseekKey) { log('请先填写DeepSeek API密钥'); return; }
+                var origText = ta.value.trim();
+                log('正在增强第' + (idx+1) + '段分镜文案...');
+                ta.value = origText + ' (增强中...)';
+                ta.disabled = true;
+                fetch('https://api.deepseek.com/v1/chat/completions', {
+                    method: 'POST',
+                    headers: { 'Authorization': 'Bearer ' + deepseekKey, 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        model: 'deepseek-chat',
+                        messages: [
+                            { role: 'system', content: '你是专业AI视频分镜导演。将用户提供的简单镜头描述扩展为一段' + segDuration + '秒的专业分镜文案。要求：补充运镜方式、光影氛围、景别、角色动作细节、情绪基调。输出仅一段完整文案，不要编号或分段标记，不要解释。语言简洁具体，适合AI视频生成。' },
+                            { role: 'user', content: origText }
+                        ],
+                        temperature: 0.8, max_tokens: 512
+                    })
+                }).then(function(r) { return r.json(); })
+                .then(function(json) {
+                    var content = json.choices?.[0]?.message?.content || origText;
+                    ta.value = content.trim() || origText;
+                    log('第' + (idx+1) + '段文案增强完成');
+                }).catch(function(err) {
+                    ta.value = origText;
+                    log('增强失败: ' + err.message);
+                }).finally(function() {
+                    ta.disabled = false;
+                });
+                return;
+            }
+
+            // 分段"生成此段"按钮
+            if (e.target.classList.contains('btn-generate-seg')) {
+                var idx = parseInt(e.target.getAttribute('data-seg-idx'));
+                if (isRunning) {
+                    log('任务正在运行中，请等待当前段完成');
+                    return;
+                }
+                var prompt = segList[idx].querySelector('.seg-prompt').value.trim();
+                if (!prompt) {
+                    log('第' + (idx+1) + '段请先填写分镜文案');
+                    return;
+                }
+                var mode = segModeList[idx] || 1;
+                if ((mode === 1 || mode === 2) && !segFrameList[idx]) {
+                    log('第' + (idx+1) + '段缺少首帧，请先上传');
+                    return;
+                }
+                if (mode === 2 && !segLastFrameList[idx]) {
+                    log('第' + (idx+1) + '段缺少尾帧，请先上传');
+                    return;
+                }
+                if ((mode === 3 || mode === 4 || mode === 5) && (!segRefImageList[idx] || segRefImageList[idx].length === 0)) {
+                    log('第' + (idx+1) + '段缺少参考图，请先上传');
+                    return;
+                }
+                generateSingleSegment(idx);
+            }
+
+            // "尾帧截图定位"按钮
+            if (e.target.classList.contains('btn-jump-lastframe')) {
+                var idx = parseInt(e.target.getAttribute('data-seg-idx'));
+                var videoEl = segList[idx].querySelector('.video-preview');
+                if (!videoEl || !videoEl.src) {
+                    log('视频尚未加载，请等待视频出现后再点击');
+                    return;
+                }
+                if (videoEl.readyState >= 1) {
+                    // 已加载，直接跳转
+                    videoEl.currentTime = Math.max(0, videoEl.duration - 0.5);
+                    videoEl.pause();
+                    log('已定位到第' + (idx+1) + '段尾帧，请用截图工具(Win+Shift+S)截取画面');
+                    log('截图保存后上传为第' + (idx+2) + '段的首帧，点击"生成此段"继续');
+                } else {
+                    // 未加载完成，标记等待metadata
+                    videoEl.dataset.pendingJump = 'true';
+                    log('视频加载中，加载完成后将自动定位到尾帧...');
+                }
+            }
+        });
+
+        // ==================== 根据模式显示/隐藏输入区 ====================
+        function updateModeUI(idx, mode) {
+            var seg = segList[idx];
+            if (!seg) return;
+            var secFF = seg.querySelector('.seg-section-firstframe');
+            var secLF = seg.querySelector('.seg-section-lastframe');
+            var secRI = seg.querySelector('.seg-section-refimg');
+            var secRV = seg.querySelector('.seg-section-refvideo');
+            var secRA = seg.querySelector('.seg-section-refaudio');
+
+            // 全部隐藏
+            if (secFF) secFF.classList.add('hidden');
+            if (secLF) secLF.classList.add('hidden');
+            if (secRI) secRI.classList.add('hidden');
+            if (secRV) secRV.classList.add('hidden');
+            if (secRA) secRA.classList.add('hidden');
+
+            // 按模式显示
+            if (mode === 1 || mode === 2) {
+                if (secFF) secFF.classList.remove('hidden');   // 首帧
+            }
+            if (mode === 2) {
+                if (secLF) secLF.classList.remove('hidden');   // 尾帧
+            }
+            if (mode === 3 || mode === 4 || mode === 5) {
+                if (secRI) secRI.classList.remove('hidden');   // 参考图
+            }
+            if (mode === 4) {
+                if (secRV) secRV.classList.remove('hidden');   // 参考视频URL
+            }
+            if (mode === 5) {
+                if (secRA) secRA.classList.remove('hidden');   // 参考音频URL
+            }
+
+            // 更新状态提示
+            var statusEl = seg.querySelector('.seg-status-inline');
+            var modeNames = ['需填文案', '需上传首帧', '需上传首帧+尾帧', '需上传参考图', '需参考图+视频URL', '需参考图+音频URL'];
+            if (statusEl) { statusEl.textContent = modeNames[mode]; statusEl.className = 'seg-status-inline si-wait'; }
+
+            // 第1段首帧模式特殊处理
+            if (idx === 0 && (mode === 1 || mode === 2)) {
+                if (firstFrameBase64) {
+                    if (statusEl) { statusEl.textContent = '等待生成'; statusEl.className = 'seg-status-inline si-ready'; }
+                }
+            }
+        }
+
+        // 事件: 尾帧上传
+        document.addEventListener('change', function(e) {
+            if (e.target.classList.contains('seg-lastframe-input')) {
+                var idx = parseInt(e.target.getAttribute('data-seg-idx'));
+                var file = e.target.files[0];
+                if (!file) return;
+                if (file.size > 30 * 1024 * 1024) { log('尾帧图片不能超过30MB'); return; }
+                fileToBase64(file).then(function(b64) {
+                    segLastFrameList[idx] = b64;
+                    var preview = segList[idx].querySelector('.seg-lastframe-preview');
+                    if (preview) { preview.src = URL.createObjectURL(file); preview.classList.remove('hidden'); }
+                    log('第' + (idx+1) + '段尾帧上传成功');
+                });
+            }
+            // 参考视频URL
+            if (e.target.classList.contains('seg-video-url-input')) {
+                var idx = parseInt(e.target.getAttribute('data-seg-idx'));
+                segVideoUrlInputList[idx] = e.target.value.trim();
+                log('第' + (idx+1) + '段参考视频URL已设置');
+            }
+            // 参考音频URL
+            if (e.target.classList.contains('seg-audio-url-input')) {
+                var idx = parseInt(e.target.getAttribute('data-seg-idx'));
+                segAudioUrlInputList[idx] = e.target.value.trim();
+                log('第' + (idx+1) + '段参考音频URL已设置');
+            }
+        });
+
+        // ==================== 仪表板卡片更新 ====================
+        function updateDashboardCard(idx, opts) {
+            var card = dashboardCards[idx];
+            if (!card) return;
+            var dot = card.querySelector('.task-dot');
+            var elapsed = card.querySelector('.task-elapsed');
+            var msg = card.querySelector('.task-msg');
+            var previewBtn = card.querySelector('.dash-preview-btn');
+            var dlBtn = card.querySelector('.dash-dl-btn');
+            var retryBtn = card.querySelector('.dash-retry-btn');
+
+            // 状态指示灯
+            if (dot) { dot.className = 'task-dot ' + (opts.dotClass || 'wait'); }
+            // 耗时
+            if (elapsed) { elapsed.textContent = opts.elapsed || '—'; }
+            // 消息
+            if (msg) { msg.textContent = opts.msg || ''; }
+            // 按钮
+            if (previewBtn) previewBtn.classList.add('hidden');
+            if (dlBtn) dlBtn.classList.add('hidden');
+            if (retryBtn) retryBtn.classList.add('hidden');
+            if (opts.buttons === 'done') {
+                if (previewBtn) previewBtn.classList.remove('hidden');
+                if (dlBtn) dlBtn.classList.remove('hidden');
+            }
+            if (opts.buttons === 'fail') {
+                if (retryBtn) retryBtn.classList.remove('hidden');
+            }
+        }
+
+        // 事件委托: 仪表板按钮
+        document.addEventListener('click', function(e) {
+            if (e.target.classList.contains('dash-retry-btn')) {
+                var idx = parseInt(e.target.getAttribute('data-dash-idx'));
+                if (isRunning) { log('任务运行中，请等待'); return; }
+                log('重试第' + (idx+1) + '段...');
+                generateSingleSegment(idx);
+            }
+            if (e.target.classList.contains('dash-preview-btn')) {
+                var idx = parseInt(e.target.getAttribute('data-dash-idx'));
+                var seg = segList[idx];
+                if (seg) { seg.querySelector('.seg-body').classList.add('open'); seg.querySelector('.seg-toggle').classList.add('open'); seg.querySelector('.seg-toggle').innerHTML = '&#9660;'; seg.scrollIntoView({behavior:'smooth'}); }
+            }
+            if (e.target.classList.contains('dash-dl-btn')) {
+                var idx = parseInt(e.target.getAttribute('data-dash-idx'));
+                var url = segVideoUrlList[idx];
+                if (url) { window.open(url, '_blank'); } else { log('视频URL不可用'); }
+            }
+        });
+
+        // 日志折叠切换
+        if ($('toggleLogBtn')) {
+            $('toggleLogBtn').addEventListener('click', function() {
+                var wrapper = $('logWrapper');
+                var btn = $('toggleLogBtn');
+                if (wrapper.classList.contains('log-collapsed')) {
+                    wrapper.classList.remove('log-collapsed');
+                    btn.textContent = '隐藏详细日志';
+                } else {
+                    wrapper.classList.add('log-collapsed');
+                    btn.textContent = '显示详细日志';
+                }
+            });
+        }
+
+        // ==================== 参数预设 ====================
+        var presetConfigs = {
+            'douyin':    { resolution:'1080p', ratio:'9:16', totalTime:'15', segDuration:'15' },
+            'bilibili':  { resolution:'1080p', ratio:'16:9', totalTime:'30', segDuration:'10' },
+            'xiaohongshu':{ resolution:'720p', ratio:'3:4', totalTime:'15', segDuration:'15' },
+            'youtube':   { resolution:'1080p', ratio:'16:9', totalTime:'60', segDuration:'10' }
+        };
+
+        function applyPreset(key) {
+            var cfg = presetConfigs[key];
+            if (!cfg) {
+                // 自定义方案从localStorage加载
+                try { cfg = JSON.parse(localStorage.getItem('vp_custom_' + key) || 'null'); } catch(e) {}
+                if (!cfg) return;
+            }
+            if (cfg.resolution && $('resolution')) $('resolution').value = cfg.resolution;
+            if (cfg.ratio && $('ratio')) $('ratio').value = cfg.ratio;
+            if (cfg.totalTime && $('totalTime')) $('totalTime').value = cfg.totalTime;
+            if (cfg.segDuration && $('segDuration')) $('segDuration').value = cfg.segDuration;
+            initSegments();
+        }
+
+        if ($('presetSelect')) {
+            $('presetSelect').addEventListener('change', function() {
+                var val = this.value;
+                if (!val) return;
+                if (val === 'custom1' || val === 'custom2') {
+                    var cfg = JSON.parse(localStorage.getItem('vp_custom_' + val) || 'null');
+                    if (!cfg) { log('自定义方案' + (val==='custom1'?'1':'2') + '未保存，请先保存当前参数'); return; }
+                }
+                applyPreset(val);
+                log('已应用预设: ' + this.options[this.selectedIndex].text);
+                this.value = ''; // reset
+            });
+        }
+
+        if ($('savePresetBtn')) {
+            $('savePresetBtn').addEventListener('click', function() {
+                var key = prompt('保存为哪个自定义方案？输入 1 或 2');
+                if (key !== '1' && key !== '2') return;
+                var cfg = {
+                    resolution: $('resolution').value,
+                    ratio: $('ratio').value,
+                    totalTime: $('totalTime').value,
+                    segDuration: $('segDuration').value
+                };
+                localStorage.setItem('vp_custom_custom' + key, JSON.stringify(cfg));
+                log('已保存为自定义方案' + key + ': ' + cfg.resolution + ' ' + cfg.ratio + ' ' + cfg.totalTime + 's');
+            });
+        }
+
+        // ==================== 参数变化 ====================
+        if ($('totalTime')) $('totalTime').addEventListener('change', initSegments);
+        if ($('segDuration')) $('segDuration').addEventListener('change', initSegments);
+
+        // ==================== DeepSeek 一键生成分镜脚本 ====================
+        if ($('genStoryScriptBtn')) {
+            $('genStoryScriptBtn').addEventListener('click', function() {
+                var story = $('storyDraft').value.trim();
+                if (!story) {
+                    log('请先输入你的故事素材底稿');
+                    return;
+                }
+                var deepseekKey = $('deepseekKey').value.trim();
+                if (!deepseekKey) {
+                    log('请先填写DeepSeek API密钥');
+                    return;
+                }
+
+                log('步骤1/2: 正在生成' + segCount + '段简要大纲...');
+
+                var promptText = '你是专业的短视频分镜策划。请将用户提供的故事素材，拆分成' + segCount + '个连续的' + segDuration + '秒镜头大纲。\n' +
+                    '要求：\n' +
+                    '1. 每段大纲不超过60字，仅描述核心画面和动作，不要详细运镜和氛围\n' +
+                    '2. 段与段之间连贯自然，覆盖整个故事弧线\n' +
+                    '3. 角色形象、服装、场景保持全程一致\n' +
+                    '4. 严格输出' + segCount + '行，每行格式：第N段：xxx\n' +
+                    '5. 不要输出任何额外的解释、说明或标题\n' +
+                    '6. 确保恰好输出' + segCount + '条，即使最后几段需要根据上下文合理推断';
+
+                fetch('https://api.deepseek.com/v1/chat/completions', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': 'Bearer ' + deepseekKey,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        model: 'deepseek-chat',
+                        messages: [
+                            { role: 'system', content: promptText },
+                            { role: 'user', content: story }
+                        ],
+                        temperature: 0.7,
+                        max_tokens: 1024
+                    })
+                }).then(function(res) { return res.json(); })
+                .then(function(json) {
+                    var content = json.choices?.[0]?.message?.content || '';
+                    if (!content) {
+                        log('大纲生成失败，未返回内容');
+                        return;
+                    }
+                    // 宽松解析：匹配 第N段、N.、N、等格式
+                    var lines = content.split('\n').filter(function(x) { return x.trim(); });
+                    var txts = [];
+                    lines.forEach(function(line) {
+                        var cleaned = line.replace(/^[\s]*第?\d+[段\.\、\s：:]+/, '').replace(/^[\s]*\d+[\.\、\s]+/, '').trim();
+                        if (cleaned && cleaned.length > 3) {
+                            txts.push(cleaned);
+                        }
+                    });
+                    // 如果解析不够，直接用非空行
+                    if (txts.length < segCount) {
+                        txts = lines.filter(function(l) { return l.trim().length > 3; }).map(function(l) { return l.replace(/^[\d\.\、\s\-\*]+/,'').trim(); });
+                    }
+                    var areas = document.querySelectorAll('.seg-prompt');
+                    var filled = 0;
+                    for (var i = 0; i < areas.length && i < txts.length; i++) {
+                        areas[i].value = txts[i];
+                        filled++;
+                    }
+                    log('大纲生成完成，已填入' + filled + '/' + segCount + '段');
+                    if (filled < segCount) {
+                        log('注意: 仅解析到' + filled + '段，剩余段落请手动填写或调整素材后重试');
+                    }
+                    log('步骤2/2: 对不满意的段，展开该段并点 ✨增强 展开为完整分镜文案');
+                }).catch(function(err) {
+                    log('分镜生成失败: ' + err.message);
+                });
+            });
+        }
+
+        // ==================== Seedance2.0 API: 创建异步任务 ====================
+        // mode: 0=text 1=first_frame 2=first+last 3=ref_img 4=ref_img+video 5=ref_img+audio
+        function createSeedanceTask(imageBase64, prompt, negativePrompt, seedVal, isLastSegment, lastFrameB64, refImages, mode, videoUrl, audioUrl) {
+            var apiKey = $('seedanceKey').value.trim();
+            if (!apiKey) return Promise.reject(new Error('请先填写火山方舟API Key'));
+
+            var model = $('seedanceModel').value;
+            var resolution = $('resolution').value;
+            var ratio = $('ratio').value;
+            var duration = (isLastSegment && parseInt($('totalTime').value) % segDuration !== 0)
+                ? parseInt($('totalTime').value) - (segCount - 1) * segDuration
+                : segDuration;
+
+            var content = [];
+
+            // mode 1,2: 首帧/首尾帧
+            if ((mode === 1 || mode === 2) && imageBase64) {
+                content.push({ type: 'image_url', image_url: { url: imageBase64 }, role: 'first_frame' });
+                if (mode === 2 && lastFrameB64) {
+                    content.push({ type: 'image_url', image_url: { url: lastFrameB64 }, role: 'last_frame' });
+                }
+            }
+
+            // mode 3,4,5: 参考图
+            if ((mode === 3 || mode === 4 || mode === 5) && refImages && refImages.length > 0) {
+                for (var r = 0; r < refImages.length; r++) {
+                    content.push({ type: 'image_url', image_url: { url: refImages[r] }, role: 'reference_image' });
+                }
+            }
+
+            // mode 4: 参考视频
+            if (mode === 4 && videoUrl) {
+                content.push({ type: 'video_url', video_url: { url: videoUrl }, role: 'reference_video' });
+            }
+
+            // mode 5: 参考音频
+            if (mode === 5 && audioUrl) {
+                content.push({ type: 'audio_url', audio_url: { url: audioUrl }, role: 'reference_audio' });
+            }
+
+            var finalPrompt = prompt;
+            if (negativePrompt && negativePrompt.trim()) {
+                finalPrompt = prompt + '。避免以下元素：' + negativePrompt.trim();
+            }
+            content.push({ type: 'text', text: finalPrompt });
+
+            var body = {
+                model: model,
+                content: content,
+                duration: duration,
+                resolution: resolution,
+                ratio: ratio,
+                return_last_frame: true,
+                watermark: false,
+                seed: (seedVal !== undefined && seedVal !== null && seedVal !== -1) ? seedVal : -1
+            };
+
+            log('创建任务: model=' + model + ' duration=' + duration + 's resolution=' + resolution + ' ratio=' + ratio);
+
+            return fetch('https://ark.cn-beijing.volces.com/api/v3/contents/generations/tasks', {
+                method: 'POST',
+                headers: {
+                    'Authorization': 'Bearer ' + apiKey,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(body),
+                signal: abortController ? abortController.signal : undefined
+            }).then(function(res) {
+                if (!res.ok) {
+                    return res.text().then(function(errText) {
+                        throw new Error('HTTP ' + res.status + ': ' + errText.substring(0, 300));
+                    });
+                }
+                return res.json();
+            }).then(function(data) {
+                if (data.error) {
+                    throw new Error('API错误: ' + (data.error.message || JSON.stringify(data.error)));
+                }
+                var taskId = data.id || data.task_id;
+                if (!taskId) {
+                    throw new Error('未获取到任务ID，响应: ' + JSON.stringify(data).substring(0, 300));
+                }
+                return taskId;
+            });
+        }
+
+        // ==================== Seedance2.0 API: 轮询任务直到完成 ====================
+        function pollSeedanceTask(taskId) {
+            var apiKey = $('seedanceKey').value.trim();
+            var maxWait = (parseInt($('maxWaitTime').value) || 600) * 1000;
+            var startTime = Date.now();
+            var pollDelay = 5000;
+
+            var pollCount = 0;
+
+            function poll() {
+                pollCount++;
+                if (!isRunning) return Promise.reject(new Error('用户手动停止'));
+                if (Date.now() - startTime >= maxWait) {
+                    return Promise.reject(new Error('任务超时（超过' + (maxWait/1000) + '秒）'));
+                }
+
+                return sleep(pollDelay).then(function() {
+                    // Re-check timeout after sleep
+                    if (Date.now() - startTime >= maxWait) {
+                        throw new Error('任务超时（超过' + (maxWait/1000) + '秒）');
+                    }
+                    return fetch(
+                        'https://ark.cn-beijing.volces.com/api/v3/contents/generations/tasks/' + taskId,
+                        {
+                            headers: { 'Authorization': 'Bearer ' + apiKey },
+                            signal: abortController ? abortController.signal : undefined
+                        }
+                    );
+                }).then(function(res) {
+                    if (!res.ok) {
+                        return res.text().then(function(errText) {
+                            log('轮询HTTP错误 ' + res.status + ': ' + errText.substring(0, 200));
+                            pollDelay = Math.min(pollDelay * 1.5, 30000);
+                            // Check timeout before retrying
+                            if (Date.now() - startTime >= maxWait) {
+                                throw new Error('任务超时（超过' + (maxWait/1000) + '秒）');
+                            }
+                            return poll();
+                        });
+                    }
+                    return res.json();
+                }).then(function(data) {
+                    var status = data.status;
+
+                    if (status === 'succeeded') {
+                        // Correct field: content.video_url and content.last_frame_url
+                        var videoUrl = (data.content && data.content.video_url) || data.output || data.video_url || '';
+                        var lastFrameUrl = (data.content && data.content.last_frame_url) || data.last_frame || data.last_frame_url || null;
+                        if (!videoUrl) {
+                            log('WARNING: 任务成功但未找到video_url，原始响应: ' + JSON.stringify(data).substring(0, 400));
+                        }
+                        return {
+                            videoUrl: videoUrl,
+                            lastFrameUrl: lastFrameUrl
+                        };
+                    }
+
+                    if (status === 'failed') {
+                        var errMsg = data.error
+                            ? (typeof data.error === 'string' ? data.error : (data.error.message || JSON.stringify(data.error)))
+                            : '未知错误';
+                        throw new Error('任务失败: ' + errMsg);
+                    }
+
+                    if (status === 'expired') {
+                        throw new Error('任务已过期');
+                    }
+
+                    if (status === 'cancelled') {
+                        throw new Error('任务已被取消');
+                    }
+
+                    // First poll: log raw keys for debugging
+                    if (pollCount === 1) {
+                        var keys = Object.keys(data);
+                        log('首次轮询响应字段: ' + keys.join(', '));
+                    }
+
+                    var elapsed = ((Date.now() - startTime) / 1000).toFixed(0);
+                    log('任务状态: ' + status + ' (已等待' + elapsed + 's, 下次轮询' + (pollDelay/1000).toFixed(0) + 's)');
+                    pollDelay = Math.min(pollDelay * 1.2, 30000);
+                    return poll();
+                });
+            }
+
+            return poll();
+        }
+
+        // ==================== 下载视频到Blob (含CORS回退) ====================
+        function downloadVideoAsBlob(videoUrl) {
+            if (!videoUrl) {
+                return Promise.reject(new Error('视频URL为空，无法下载。请检查API响应中content.video_url字段'));
+            }
+            log('下载视频: ' + videoUrl.substring(0, 80) + '...');
+
+            // 方案1: 直接fetch (需要CDN支持CORS)
+            return fetch(videoUrl).then(function(res) {
+                if (!res.ok) throw new Error('视频下载失败 HTTP ' + res.status);
+                return res.blob();
+            }).catch(function(err) {
+                if (err.name === 'TypeError' || err.message.indexOf('Failed to fetch') !== -1) {
+                    log('直接下载被CORS阻止，尝试CORS代理...');
+                    // 方案2: CORS代理
+                    var proxyUrl = 'https://api.allorigins.win/raw?url=' + encodeURIComponent(videoUrl);
+                    return fetch(proxyUrl).then(function(res) {
+                        if (!res.ok) throw new Error('代理下载失败 HTTP ' + res.status);
+                        return res.blob();
+                    }).catch(function(proxyErr) {
+                        // 方案3: 备用代理
+                        log('代理1失败，尝试备用代理...');
+                        var proxy2Url = 'https://api.codetabs.com/v1/proxy?quest=' + encodeURIComponent(videoUrl);
+                        return fetch(proxy2Url).then(function(res) {
+                            if (!res.ok) throw new Error('备用代理下载失败 HTTP ' + res.status);
+                            return res.blob();
+                        }).catch(function() {
+                            // 全部失败：提供手动下载链接
+                            log('所有下载方式均失败(CORS限制)');
+                            log('请手动下载视频: ' + videoUrl);
+                            throw new Error('CORS阻止下载。视频URL已显示在日志中，请手动下载。');
+                        });
+                    });
+                }
+                throw err;
+            });
+        }
+
+        // ==================== 下载尾帧图片 ====================
+        function downloadLastFrameAsBase64(lastFrameUrl) {
+            if (!lastFrameUrl) return Promise.resolve(null);
+            log('下载API返回的尾帧图片...');
+            return fetch(lastFrameUrl).then(function(res) {
+                if (!res.ok) throw new Error('HTTP ' + res.status);
+                return res.blob();
+            }).then(function(blob) {
+                return blobToBase64(blob);
+            }).catch(function(err) {
+                log('尾帧下载失败: ' + err.message + '，将使用浏览器截帧');
+                return null;
+            });
+        }
+
+        // ==================== 浏览器端截取视频尾帧（备用方案） ====================
+        function extractLastFrameFromVideo(videoBlob) {
+            return new Promise(function(resolve) {
+                var video = document.createElement('video');
+                var url = URL.createObjectURL(videoBlob);
+                video.src = url;
+                video.crossOrigin = 'anonymous';
+                video.currentTime = segDuration - 0.1;
+
+                video.onloadeddata = function() {
+                    var ratioStr = $('ratio').value;
+                    var width, height;
+                    if (ratioStr === '9:16') { width = 1080; height = 1920; }
+                    else if (ratioStr === '16:9') { width = 1920; height = 1080; }
+                    else if (ratioStr === '1:1') { width = 1080; height = 1080; }
+                    else if (ratioStr === '3:4') { width = 810; height = 1080; }
+                    else if (ratioStr === '4:3') { width = 1440; height = 1080; }
+                    else { width = 1080; height = 1920; }
+
+                    var canvas = document.createElement('canvas');
+                    canvas.width = width;
+                    canvas.height = height;
+                    var ctx = canvas.getContext('2d');
+                    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+                    var frameUrl = canvas.toDataURL('image/jpeg', 0.9);
+                    URL.revokeObjectURL(url);
+                    resolve(frameUrl);
+                };
+
+                video.onerror = function() {
+                    URL.revokeObjectURL(url);
+                    log('浏览器截帧失败');
+                    resolve(null);
+                };
+            });
+        }
+
+        // ==================== 生成单个分段的视频（完整流程） ====================
+        function generateSegmentVideo(idx, imageBase64, prompt, isLastSegment) {
+            retryMax = parseInt($('retryMax').value) || 2;
+            var lastError = null;
+            var currentImage = imageBase64;
+            var privacyFallbackUsed = false;
+
+            function attempt(currentAttempt) {
+                if (currentAttempt > 0) {
+                    log('第' + (idx+1) + '段重试 ' + currentAttempt + '/' + (retryMax-1));
+                }
+
+                // 尾帧: mode=2时用本段上传的尾帧; 最后一段且全局尾帧存在时用全局尾帧
+                var useLastFrame = null;
+                var curMode = segModeList[idx] || 1;
+                if (curMode === 2 && segLastFrameList[idx]) {
+                    useLastFrame = segLastFrameList[idx];
+                } else if (isLastSegment && lastFrameBase64 && (curMode === 1 || curMode === 2)) {
+                    useLastFrame = lastFrameBase64;
+                    log('最后一段使用全局尾帧');
+                }
+
+                var mode = curMode;
+                var refImg = segRefImageList[idx] || [];
+                var vidUrl = segVideoUrlInputList[idx] || '';
+                var audUrl = segAudioUrlInputList[idx] || '';
+                var negPrompt = (segList[idx].querySelector('.seg-negative-prompt') || {}).value || '';
+                var seedVal = parseInt((segList[idx].querySelector('.seg-seed-input') || {}).value);
+                if (isNaN(seedVal)) seedVal = -1;
+                return createSeedanceTask(currentImage, prompt, negPrompt, seedVal, isLastSegment, useLastFrame, refImg, mode, vidUrl, audUrl)
+                    .then(function(taskId) {
+                        log('任务ID: ' + taskId + '，等待生成完成...');
+                        return pollSeedanceTask(taskId);
+                    })
+                    .then(function(result) {
+                        // 保存远程URL(即使下载失败也能用)
+                        var remoteVideoUrl = result.videoUrl;
+                        var remoteLastFrameUrl = result.lastFrameUrl;
+
+                        // 尝试下载视频Blob
+                        return downloadVideoAsBlob(remoteVideoUrl).then(function(videoBlob) {
+                            // Blob下载成功
+                            return downloadLastFrameAsBase64(remoteLastFrameUrl).then(function(lastFrameB64) {
+                                if (!lastFrameB64 && videoBlob) {
+                                    log('API尾帧未返回，使用浏览器截帧...');
+                                    return extractLastFrameFromVideo(videoBlob).then(function(extractedFrame) {
+                                        return {
+                                            videoBlob: videoBlob,
+                                            videoUrl: remoteVideoUrl,
+                                            lastFrameBase64: extractedFrame,
+                                            blobFailed: false
+                                        };
+                                    });
+                                }
+                                return {
+                                    videoBlob: videoBlob,
+                                    videoUrl: remoteVideoUrl,
+                                    lastFrameBase64: lastFrameB64,
+                                    blobFailed: false
+                                };
+                            });
+                        }).catch(function(blobErr) {
+                            // Blob下载失败，但远程URL仍可用
+                            log('视频Blob下载失败(CORS): ' + blobErr.message);
+                            log('视频远程URL已保存，可手动下载: ' + remoteVideoUrl.substring(0, 80) + '...');
+                            // 尝试用远程URL获取尾帧
+                            return downloadLastFrameAsBase64(remoteLastFrameUrl).then(function(lastFrameB64) {
+                                return {
+                                    videoBlob: null,
+                                    videoUrl: remoteVideoUrl,
+                                    lastFrameBase64: lastFrameB64,
+                                    blobFailed: true
+                                };
+                            });
+                        });
+                    })
+                    .catch(function(err) {
+                        lastError = err;
+                        log('第' + (idx+1) + '段失败(尝试' + (currentAttempt+1) + '/' + retryMax + '): ' + err.message);
+
+                        // 真人风控拦截：仅首帧模式(1,2)下自动回退到原始首帧
+                        var curMode = segModeList[idx] || 1;
+                        if ((curMode === 1 || curMode === 2) && (err.message.indexOf('PrivacyInformation') !== -1 || err.message.indexOf('real person') !== -1 || err.message.indexOf('sensitive') !== -1)) {
+                            var originalFrame = firstFrameBase64 || segFrameList[0];
+                            if (originalFrame && currentImage !== originalFrame && !privacyFallbackUsed) {
+                                privacyFallbackUsed = true;
+                                currentImage = originalFrame;
+                                log('截图被风控误判为真人，自动切换为原始首帧重试...');
+                                return attempt(0);
+                            }
+                        }
+
+                        if (err.name === 'AbortError') throw err;
+                        if (currentAttempt + 1 < retryMax) {
+                            return sleep(5000).then(function() {
+                                return attempt(currentAttempt + 1);
+                            });
+                        }
+                        throw lastError || new Error('重试次数耗尽');
+                    });
+            }
+
+            return attempt(0);
+        }
+
+        // ==================== FFmpeg 合并视频 (v0.12.x API) ====================
+        function mergeVideos(videoBlobs) {
+            log('初始化视频合并引擎 (FFmpeg.wasm v0.12.x)...');
+
+            var FFmpegClass, fetchFileFn, toBlobURLFn;
+
+            if (typeof FFmpegWASM !== 'undefined' && FFmpegWASM.FFmpeg) {
+                FFmpegClass = FFmpegWASM.FFmpeg;
+            } else if (typeof FFmpeg !== 'undefined') {
+                FFmpegClass = FFmpeg;
+            } else {
+                return Promise.reject(new Error('FFmpeg库加载失败，请刷新页面后重试'));
+            }
+
+            if (typeof FFmpegUtil !== 'undefined') {
+                fetchFileFn = FFmpegUtil.fetchFile;
+                toBlobURLFn = FFmpegUtil.toBlobURL;
+            } else {
+                return Promise.reject(new Error('FFmpeg工具库加载失败，请刷新页面后重试'));
+            }
+
+            var ffmpeg = new FFmpegClass();
+
+            var baseURL = 'https://unpkg.com/@ffmpeg/core@0.12.6/dist/umd';
+            return toBlobURLFn(baseURL + '/ffmpeg-core.js', 'text/javascript').then(function(coreURL) {
+                return toBlobURLFn(baseURL + '/ffmpeg-core.wasm', 'application/wasm').then(function(wasmURL) {
+                    return ffmpeg.load({ coreURL: coreURL, wasmURL: wasmURL });
+                });
+            }).then(function() {
+                log('FFmpeg加载完成，共' + videoBlobs.length + '个片段待合并');
+
+                var writePromises = [];
+                for (var i = 0; i < videoBlobs.length; i++) {
+                    var fileName = 'seg_' + String(i).padStart(3, '0') + '.mp4';
+                    writePromises.push(
+                        fetchFileFn(videoBlobs[i]).then(function(data) {
+                            return ffmpeg.writeFile(fileName, data);
+                        })
+                    );
+                }
+                return Promise.all(writePromises).then(function() {
+                    log('写入片段完成');
+                    var concatContent = '';
+                    for (var j = 0; j < videoBlobs.length; j++) {
+                        concatContent += "file 'seg_" + String(j).padStart(3, '0') + ".mp4'\n";
+                    }
+                    return ffmpeg.writeFile('concat_list.txt', concatContent);
+                });
+            }).then(function() {
+                log('开始合并视频...');
+                return ffmpeg.exec(['-f', 'concat', '-safe', '0', '-i', 'concat_list.txt', '-c', 'copy', 'output.mp4']);
+            }).then(function() {
+                return ffmpeg.readFile('output.mp4');
+            }).then(function(data) {
+                return new Uint8Array(data);
+            });
+        }
+
+        // ==================== 下载文件 ====================
+        function downloadFile(data, fileName) {
+            var blob = data instanceof Uint8Array
+                ? new Blob([data], { type: 'video/mp4' })
+                : data;
+            var url = URL.createObjectURL(blob);
+            var a = document.createElement('a');
+            a.href = url;
+            a.download = fileName;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            setTimeout(function() { URL.revokeObjectURL(url); }, 1000);
+        }
+
+        // ==================== 生成单个分段 (手动接力模式) ====================
+        function generateSingleSegment(idx) {
+            if (isRunning) {
+                log('任务正在运行中，请等待完成');
+                return;
+            }
+            var mode = segModeList[idx] || 1;
+            // 模式校验
+            if (mode === 1 || mode === 2) {
+                if (!segFrameList[idx]) { log('第' + (idx+1) + '段缺少首帧，请先上传'); return; }
+                if (mode === 2 && !segLastFrameList[idx]) { log('第' + (idx+1) + '段缺少尾帧，请先上传'); return; }
+            }
+            if (mode === 3 || mode === 4 || mode === 5) {
+                if (!segRefImageList[idx] || segRefImageList[idx].length === 0) { log('第' + (idx+1) + '段缺少参考图，请先上传'); return; }
+                if (mode === 4 && !segVideoUrlInputList[idx]) { log('第' + (idx+1) + '段缺少参考视频URL'); return; }
+                if (mode === 5 && !segAudioUrlInputList[idx]) { log('第' + (idx+1) + '段缺少参考音频URL'); return; }
+            }
+            var prompt = segList[idx].querySelector('.seg-prompt').value.trim();
+            if (!prompt) {
+                log('第' + (idx+1) + '段请先填写分镜文案');
+                return;
+            }
+
+            retryMax = parseInt($('retryMax').value) || 2;
+            isRunning = true;
+            currentSeg = idx;
+            var isLastSegment = (idx === segCount - 1);
+
+            segTimers[idx] = Date.now();
+            segList[idx].className = 'segment-item generating-seg';
+            // Auto-expand
+            var body = segList[idx].querySelector('.seg-body');
+            var toggle = segList[idx].querySelector('.seg-toggle');
+            if (body && !body.classList.contains('open')) { body.classList.add('open'); }
+            if (toggle && !toggle.classList.contains('open')) { toggle.classList.add('open'); toggle.innerHTML = '&#9660;'; }
+            segList[idx].querySelector('.seg-status-inline').textContent = '生成中...';
+            segList[idx].querySelector('.seg-status-inline').className = 'seg-status-inline si-gen';
+            updateDashboardCard(idx, { dotClass:'gen', elapsed:'0s', msg:'生成中...' });
+
+            log('========================================');
+            log('开始生成第' + (idx+1) + '段视频 (' + segDuration + '秒)');
+            log('========================================');
+
+            return generateSegmentVideo(idx, segFrameList[idx], prompt, isLastSegment)
+                .then(function(result) {
+                    segVideoBlobList[idx] = result.videoBlob;
+                    segVideoUrlList[idx] = result.videoUrl;
+
+                    // 状态更新
+                    segList[idx].className = 'segment-item done-seg';
+                    segList[idx].querySelector('.seg-status-inline').textContent = '已完成';
+                    segList[idx].querySelector('.seg-status-inline').className = 'seg-status-inline si-done';
+                    var elapsed = ((Date.now() - segTimers[idx]) / 1000).toFixed(0) + 's';
+                    updateDashboardCard(idx, { dotClass:'done', elapsed:elapsed, msg:'已完成', buttons:'done' });
+
+                    // 显示视频：优先用Blob，CORS阻止时直接用远程URL作为video src
+                    var videoEl = segList[idx].querySelector('.video-preview');
+                    if (result.videoBlob) {
+                        videoEl.src = URL.createObjectURL(result.videoBlob);
+                    } else {
+                        // CORS阻止下载但video标签可直接播放远程URL
+                        videoEl.src = result.videoUrl;
+                        videoEl.crossOrigin = 'anonymous';
+                    }
+                    videoEl.classList.remove('hidden');
+
+                    // 显示"尾帧截图定位"按钮
+                    var jumpBtn = segList[idx].querySelector('.btn-jump-lastframe');
+                    if (jumpBtn) jumpBtn.classList.remove('hidden');
+
+                    // 显示下载链接
+                    var dlLink = segList[idx].querySelector('.dl-link');
+                    if (dlLink) {
+                        dlLink.href = result.videoUrl;
+                        dlLink.textContent = '下载视频文件';
+                        dlLink.classList.remove('hidden');
+                    }
+
+                    log('第' + (idx+1) + '段生成成功!');
+                    log('---');
+                    if (idx + 1 < segCount) {
+                        log('下一步操作:');
+                        log('  1. 点击"尾帧截图定位"按钮，视频会跳到最后1帧并暂停');
+                        log('  2. 用截图工具(Win+Shift+S)截取屏幕上的尾帧画面');
+                        log('  3. 保存截图到桌面');
+                        log('  4. 在第' + (idx+2) + '段的首帧上传区选择该截图');
+                        log('  5. 点击第' + (idx+2) + '段的"生成此段"按钮');
+                    } else {
+                        log('全部段落生成完毕! 请逐个下载视频文件进行合并');
+                    }
+
+                    updateProgress();
+                    isRunning = false;
+                })
+                .catch(function(err) {
+                    segList[idx].className = 'segment-item fail-seg';
+                    segList[idx].querySelector('.seg-status-inline').textContent = '失败';
+                    segList[idx].querySelector('.seg-status-inline').className = 'seg-status-inline si-fail';
+                    var elapsed = ((Date.now() - segTimers[idx]) / 1000).toFixed(0) + 's';
+                    var errMsg = err.message.length > 40 ? err.message.substring(0, 40) : err.message;
+                    updateDashboardCard(idx, { dotClass:'fail', elapsed:elapsed, msg:errMsg, buttons:'fail' });
+                    log('第' + (idx+1) + '段生成失败: ' + err.message);
+                    updateProgress();
+                    isRunning = false;
+                });
+        }
+
+        // ==================== 一键生成全部 (自动接力：逐个生成具备首帧的段) ====================
+        function runSequentialAll() {
+            if (!firstFrameBase64 && !segFrameList[0]) {
+                log('请先上传全局起始首帧');
+                return Promise.resolve();
+            }
+
+            function processNext(i) {
+                if (!isRunning) {
+                    log('任务已被停止');
+                    return Promise.resolve();
+                }
+                if (i >= segCount) {
+                    log('所有分段处理完毕!');
+                    var validUrls = segVideoUrlList.filter(function(v) { return v !== null; });
+                    if (validUrls.length > 0) {
+                        log('已生成的视频URL:');
+                        validUrls.forEach(function(url, idx) { log('  片段' + (idx+1) + ': ' + url); });
+                    }
+                    isRunning = false;
+                    updateProgress();
+                    return Promise.resolve();
+                }
+
+                if (!segFrameList[i]) {
+                    log('第' + (i+1) + '段缺少首帧，暂停自动流程');
+                    log('请手动上传第' + (i+1) + '段首帧后点击该段的"生成此段"继续');
+                    isRunning = false;
+                    updateProgress();
+                    return Promise.resolve();
+                }
+
+                var prompt = segList[i].querySelector('.seg-prompt').value.trim();
+                if (!prompt) {
+                    log('第' + (i+1) + '段无分镜文案，跳过');
+                    return processNext(i + 1);
+                }
+
+                currentSeg = i;
+                var isLastSegment = (i === segCount - 1);
+
+                segTimers[i] = Date.now();
+                segList[i].className = 'segment-item generating-seg';
+                var body = segList[i].querySelector('.seg-body');
+                var toggle = segList[i].querySelector('.seg-toggle');
+                if (body && !body.classList.contains('open')) { body.classList.add('open'); }
+                if (toggle && !toggle.classList.contains('open')) { toggle.classList.add('open'); toggle.innerHTML = '&#9660;'; }
+                segList[i].querySelector('.seg-status-inline').textContent = '生成中...';
+                segList[i].querySelector('.seg-status-inline').className = 'seg-status-inline si-gen';
+                updateDashboardCard(i, { dotClass:'gen', elapsed:'0s', msg:'生成中...' });
+                log('--- 自动生成第' + (i+1) + '/' + segCount + '段 ---');
+
+                return generateSegmentVideo(i, segFrameList[i], prompt, isLastSegment)
+                    .then(function(result) {
+                        segVideoBlobList[i] = result.videoBlob;
+                        segVideoUrlList[i] = result.videoUrl;
+                        segList[i].className = 'segment-item done-seg';
+                        segList[i].querySelector('.seg-status-inline').textContent = '已完成';
+                        segList[i].querySelector('.seg-status-inline').className = 'seg-status-inline si-done';
+                        var elapsed = ((Date.now() - segTimers[i]) / 1000).toFixed(0) + 's';
+                        updateDashboardCard(i, { dotClass:'done', elapsed:elapsed, msg:'已完成', buttons:'done' });
+
+                        var videoEl = segList[i].querySelector('.video-preview');
+                        videoEl.src = result.videoBlob ? URL.createObjectURL(result.videoBlob) : result.videoUrl;
+                        if (!result.videoBlob) videoEl.crossOrigin = 'anonymous';
+                        videoEl.classList.remove('hidden');
+
+                        var jumpBtn = segList[i].querySelector('.btn-jump-lastframe');
+                        if (jumpBtn) jumpBtn.classList.remove('hidden');
+
+                        var dlLink = segList[i].querySelector('.dl-link');
+                        if (dlLink) { dlLink.href = result.videoUrl; dlLink.textContent = '下载视频'; dlLink.classList.remove('hidden'); }
+
+                        log('第' + (i+1) + '段生成成功');
+                        updateProgress();
+                        return processNext(i + 1);
+                    })
+                    .catch(function(err) {
+                        segList[i].className = 'segment-item fail-seg';
+                        segList[i].querySelector('.seg-status-inline').textContent = '失败';
+                        segList[i].querySelector('.seg-status-inline').className = 'seg-status-inline si-fail';
+                        var elapsed = ((Date.now() - segTimers[i]) / 1000).toFixed(0) + 's';
+                        var errMsg = err.message.length > 40 ? err.message.substring(0, 40) : err.message;
+                        updateDashboardCard(i, { dotClass:'fail', elapsed:elapsed, msg:errMsg, buttons:'fail' });
+                        log('第' + (i+1) + '段生成失败: ' + err.message);
+                        updateProgress();
+                        return processNext(i + 1);
+                    });
+            }
+
+            log('开始逐段生成（将在缺少首帧时暂停等待手动上传）...');
+            return processNext(0);
+        }
+
+        // ==================== 开始按钮 ====================
+        if ($('startAllBtn')) {
+            $('startAllBtn').addEventListener('click', function() {
+                if (isRunning) {
+                    log('任务正在运行中，请先停止或等待完成');
+                    return;
+                }
+
+                if (!$('seedanceKey').value.trim()) {
+                    log('请先填写火山方舟API Key');
+                    return;
+                }
+
+                if (!firstFrameBase64) {
+                    log('请先上传全局起始首帧');
+                    return;
+                }
+
+                var hasPrompt = false;
+                for (var i = 0; i < segCount; i++) {
+                    var ta = segList[i].querySelector('.seg-prompt');
+                    if (ta && ta.value.trim()) {
+                        hasPrompt = true;
+                        break;
+                    }
+                }
+                if (!hasPrompt) {
+                    log('请至少填写一段分镜文案，或使用"一键生成分镜脚本"功能');
+                    return;
+                }
+
+                isRunning = true;
+                abortController = new AbortController();
+                $('startAllBtn').disabled = true;
+
+                // 逐段生成，缺首帧时自动暂停等待手动上传
+                if (!segFrameList[0] && firstFrameBase64) {
+                    segFrameList[0] = firstFrameBase64;
+                }
+                log('开始逐段生成流程（遇到缺首帧会自动暂停）...');
+                runSequentialAll().then(function() {
+                    $('startAllBtn').disabled = false;
+                }).catch(function(err) {
+                    log('全局错误: ' + err.message);
+                    isRunning = false;
+                    $('startAllBtn').disabled = false;
+                });
+            });
+        }
+
+        // ==================== 停止按钮 ====================
+        if ($('stopBtn')) {
+            $('stopBtn').addEventListener('click', function() {
+                if (!isRunning) {
+                    log('当前没有运行中的任务');
+                    return;
+                }
+                isRunning = false;
+                if (abortController) {
+                    abortController.abort();
+                    abortController = null;
+                }
+                if (currentSeg < segCount && segList[currentSeg]) {
+                    segList[currentSeg].className = 'segment-item fail-seg';
+                    segList[currentSeg].querySelector('.seg-status-inline').textContent = '已停止';
+                }
+                if ($('startAllBtn')) $('startAllBtn').disabled = false;
+                log('已手动终止任务');
+            });
+        }
+
+        // ==================== 仅合并按钮 ====================
+        if ($('mergeOnlyBtn')) {
+            $('mergeOnlyBtn').addEventListener('click', function() {
+                var validBlobs = segVideoBlobList.filter(function(v) { return v !== null; });
+                if (validBlobs.length === 0) {
+                    log('暂无已生成的视频片段可合并');
+                    return;
+                }
+                log('开始合并 ' + validBlobs.length + ' 个已生成片段...');
+                mergeVideos(validBlobs).then(function(mergedData) {
+                    var fileName = 'Seedance2.0_合并成品_' + new Date().toISOString().slice(0,10) + '.mp4';
+                    downloadFile(mergedData, fileName);
+                    log('合并完成: ' + fileName);
+                }).catch(function(err) {
+                    log('合并失败: ' + err.message);
+                });
+            });
+        }
+
+        // ==================== 视频: metadata加载后自动定位尾帧 ====================
+        document.addEventListener('loadedmetadata', function(e) {
+            // 当用户点击"尾帧截图定位"后，metadata加载完成时会自动跳转
+            var videoEl = e.target;
+            if (videoEl.tagName === 'VIDEO' && videoEl.dataset.pendingJump === 'true') {
+                videoEl.dataset.pendingJump = 'false';
+                videoEl.currentTime = Math.max(0, videoEl.duration - 0.5);
+                videoEl.pause();
+                log('视频尾帧已定位，请用截图工具截取画面');
+            }
+        }, true);
+
+        // ==================== 页面初始化 ====================
+        window.addEventListener('DOMContentLoaded', function() {
+            initSegments();
+            log('Seedance2.0 长视频生成工具 v2.0 初始化完成');
+            log('---');
+            log('使用: 点击分段标题展开 -> 选模式 -> 填文案/上图 -> 点生成');
+            log('尾帧接力: 生成完点"尾帧定位" -> Win+Shift+S截图 -> 下一段上传');
+            log('批量: 点"开始全自动"逐段生成，缺首帧时暂停等手动上传');
+            log('合并: 所有段完成后点"仅合并已生成片段"');
+        });
+
+    })();
+    </script>
+</body>
+</html>

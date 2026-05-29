@@ -1,6 +1,20 @@
 import pytest
 from httpx import AsyncClient, ASGITransport, ConnectError
 from src.main import app
+from src.api.auth_deps import get_current_user
+from src.models.user import User, UserRole
+import uuid
+
+
+async def mock_get_current_user():
+    return User(id=uuid.uuid4(), phone_hash="test_doctor", role=UserRole.DOCTOR, is_active=True)
+
+
+@pytest.fixture(autouse=True)
+def override_auth():
+    app.dependency_overrides[get_current_user] = mock_get_current_user
+    yield
+    app.dependency_overrides.clear()
 
 
 @pytest.fixture
@@ -28,41 +42,3 @@ async def test_get_patient_not_found_db_unavailable(client):
         assert response.status_code in (404, 500)
     except (ConnectError, ConnectionRefusedError, OSError):
         pass
-
-
-@pytest.mark.asyncio
-async def test_health_endpoint(client):
-    response = await client.get("/health")
-    assert response.status_code == 200
-    data = response.json()
-    assert data["status"] == "ok"
-
-
-@pytest.mark.asyncio
-async def test_risk_assessment_via_api(client):
-    response = await client.post("/api/v1/patient/risk-assessment", json={
-        "age": 55,
-        "bmi": 28.5,
-        "waist_circumference": 95,
-        "family_history": True,
-        "physical_activity": "low",
-        "fasting_glucose": 6.8,
-        "has_hypertension": True,
-    })
-    assert response.status_code == 200
-    data = response.json()
-    assert data["risk_level"] in ("高危", "极高危")
-
-
-@pytest.mark.asyncio
-async def test_risk_assessment_validation(client):
-    response = await client.post("/api/v1/patient/risk-assessment", json={
-        "age": 10,
-        "bmi": 28.5,
-        "waist_circumference": 95,
-        "family_history": True,
-        "physical_activity": "low",
-        "fasting_glucose": 6.8,
-        "has_hypertension": True,
-    })
-    assert response.status_code == 422

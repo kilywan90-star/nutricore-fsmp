@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>企业AI控制层 - 丰田一页纸</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700;900&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Noto Sans SC', 'Microsoft YaHei', sans-serif;
+    background: #f0f2f5;
+    display: flex;
+    justify-content: center;
+    padding: 20px;
+    color: #1a1a2e;
+  }
+
+  .a3-page {
+    width: 1400px;
+    min-height: 990px;
+    background: #fff;
+    padding: 36px 40px;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.10);
+    border: 1px solid #d0d5dd;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+  }
+
+  /* ── 标题行 ── */
+  .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    border-bottom: 3px solid #1a1a2e;
+    padding-bottom: 12px;
+  }
+  .header h1 {
+    font-size: 26px;
+    font-weight: 900;
+    letter-spacing: 2px;
+    color: #1a1a2e;
+  }
+  .header .meta {
+    font-size: 12px;
+    color: #666;
+    text-align: right;
+    line-height: 1.6;
+  }
+  .header .meta strong {
+    color: #c41e3a;
+    font-size: 14px;
+  }
+
+  /* ── 核心理念条 ── */
+  .core-idea {
+    background: #1a1a2e;
+    color: #fff;
+    padding: 10px 20px;
+    font-size: 13px;
+    font-weight: 500;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-radius: 4px;
+  }
+  .core-idea span:last-child {
+    font-size: 11px;
+    opacity: 0.75;
+    font-weight: 300;
+  }
+
+  /* ── 通用栅格 ── */
+  .row { display: flex; gap: 16px; }
+  .row > * { flex: 1; }
+
+  /* ── 卡片样式 ── */
+  .card {
+    border: 1.5px solid #d0d5dd;
+    border-radius: 6px;
+    overflow: hidden;
+  }
+  .card-header {
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    padding: 7px 12px;
+    color: #fff;
+  }
+  .card-body { padding: 10px 12px; font-size: 11px; }
+
+  /* 各维度用色 */
+  .c-control  .card-header { background: #2563eb; } /* 控制-蓝 */
+  .c-constrain .card-header { background: #dc2626; } /* 约束-红 */
+  .c-auth     .card-header { background: #7c3aed; } /* 授权-紫 */
+  .c-observe  .card-header { background: #0891b2; } /* 观测-青 */
+  .c-rule     .card-header { background: #ea580c; } /* 规则-橙 */
+  .c-audit    .card-header { background: #4f46e5; } /* 审计-靛 */
+  .c-breaker  .card-header { background: #be123c; } /* 熔断-深红 */
+  .c-align    .card-header { background: #059669; } /* 对齐-绿 */
+  .c-exec     .card-header { background: #52525b; } /* 执行-灰 */
+
+  /* ── 汽车隐喻映射表 ── */
+  .metaphor-table { width: 100%; border-collapse: collapse; font-size: 11px; }
+  .metaphor-table th {
+    background: #f1f5f9; font-weight: 700; text-align: left;
+    padding: 6px 10px; border: 1px solid #d0d5dd;
+  }
+  .metaphor-table td {
+    padding: 5px 10px; border: 1px solid #d0d5dd;
+    vertical-align: top; line-height: 1.5;
+  }
+  .metaphor-table .highlight { background: #fef9c3; font-weight: 700; }
+
+  /* ── 时间轴（事前-事中-事后） ── */
+  .timeline-bar {
+    display: flex; gap: 0;
+    border-radius: 6px; overflow: hidden;
+    border: 1.5px solid #d0d5dd;
+  }
+  .timeline-phase {
+    flex: 1; text-align: center; padding: 8px 0; font-size: 12px; font-weight: 700;
+  }
+  .tl-pre  { background: #dbeafe; color: #1e40af; }
+  .tl-mid  { background: #fef3c7; color: #92400e; }
+  .tl-post { background: #ede9fe; color: #5b21b6; }
+
+  /* ── 信息流图（紧凑） ── */
+  .flow-row {
+    display: flex; align-items: center; gap: 6px; font-size: 10.5px;
+    justify-content: center; flex-wrap: wrap;
+  }
+  .flow-box {
+    padding: 5px 10px; border-radius: 4px; font-weight: 700;
+    white-space: nowrap;
+  }
+  .flow-arrow { font-size: 16px; color: #94a3b8; }
+
+  /* ── 小标签 ── */
+  .tag {
+    display: inline-block; padding: 2px 7px; border-radius: 3px;
+    font-size: 10px; font-weight: 700; margin-right: 3px; margin-bottom: 3px;
+    white-space: nowrap;
+  }
+  .tag-b { background: #dbeafe; color: #1e40af; }
+  .tag-r { background: #fee2e2; color: #991b1b; }
+  .tag-g { background: #d1fae5; color: #065f46; }
+  .tag-p { background: #ede9fe; color: #5b21b6; }
+  .tag-o { background: #fff7ed; color: #9a3412; }
+  .tag-c { background: #ecfeff; color: #155e75; }
+
+  /* ── 底部框架对照表 ── */
+  .framework-table { width: 100%; border-collapse: collapse; font-size: 10.5px; }
+  .framework-table th {
+    background: #1a1a2e; color: #fff; padding: 5px 8px; text-align: left;
+    font-weight: 500; letter-spacing: 0.5px;
+  }
+  .framework-table td {
+    padding: 4px 8px; border: 1px solid #d0d5dd;
+    line-height: 1.5;
+  }
+  .framework-table tr:nth-child(even) { background: #f8fafc; }
+
+  /* ── 全景架构区域 ── */
+  .arch-grid {
+    display: grid; grid-template-columns: 1fr 2fr 1fr;
+    gap: 6px; font-size: 10.5px; text-align: center;
+  }
+  .arch-layer {
+    border-radius: 4px; padding: 8px 4px; font-weight: 700;
+    display: flex; flex-direction: column; gap: 4px;
+  }
+
+  /* 图例 */
+  .legend { display: flex; gap: 14px; font-size: 10px; color: #64748b; flex-wrap: wrap; }
+  .legend-dot {
+    display: inline-block; width: 8px; height: 8px; border-radius: 50%;
+    margin-right: 3px; vertical-align: middle;
+  }
+
+  /* 打印优化 */
+  @media print {
+    body { background: #fff; padding: 0; }
+    .a3-page { box-shadow: none; border: none; width: 100%; }
+  }
+</style>
+</head>
+<body>
+
+<div class="a3-page">
+
+  <!-- ━━━ 标题 ━━━ -->
+  <div class="header">
+    <div>
+      <h1>企业AI控制层 · 一页纸架构</h1>
+      <div style="font-size:12px;color:#64748b;margin-top:2px;">Enterprise AI Control Plane — A3 Architecture Overview</div>
+    </div>
+    <div class="meta">
+      版本: v1.0<br>
+      日期: 2026-05-22<br>
+      <strong>核心问题：AI 越强大，越需要可控</strong>
+    </div>
+  </div>
+
+  <!-- ━━━ 核心理念 ━━━ -->
+  <div class="core-idea">
+    <span>核心命题：控制不是限制AI能力，而是让AI能力在安全边界内最大化释放</span>
+    <span>Ashby必要多样性法则：控制系统的复杂度 ≥ 被控系统的复杂度</span>
+  </div>
+
+  <!-- ━━━ 第一区块：汽车隐喻完整映射 ━━━ -->
+  <div class="card">
+    <div class="card-header" style="background:#1a1a2e;">汽车隐喻 → 控制维度完整映射</div>
+    <div class="card-body" style="padding:6px 10px;">
+      <table class="metaphor-table">
+        <thead>
+        <tr>
+          <th style="width:10%;">汽车部件</th>
+          <th style="width:13%;">控制维度</th>
+          <th style="width:6%;">时间</th>
+          <th style="width:7%;">控制模式</th>
+          <th>具体职责</th>
+          <th style="width:18%;">企业AI实现方式</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+          <td><strong>导航系统</strong></td>
+          <td class="highlight"><strong>战略对齐层</strong>（上游）</td>
+          <td>事前</td>
+          <td>前馈</td>
+          <td>目标设定、价值对齐、风险偏好</td>
+          <td>OKR映射AI → 价值观注入Prompt → 风险偏好阈值配置</td>
+        </tr>
+        <tr>
+          <td><strong>交通规则 + 国标</strong></td>
+          <td class="highlight">规则 Rules</td>
+          <td>事前</td>
+          <td>开环</td>
+          <td>合规策略、企业AI使用政策、内容安全策略、业务规则</td>
+          <td>GDPR/安全法映射 → Guardrails-as-Code → 算法备案</td>
+        </tr>
+        <tr>
+          <td><strong>驾照核验</strong></td>
+          <td class="highlight">授权 Authorization</td>
+          <td>事前</td>
+          <td>开环</td>
+          <td>身份认证、权限管理、风险分级审批、最小权限</td>
+          <td>IAM → RBAC/ABAC → Just-in-Time授权 → 高危操作人工审批</td>
+        </tr>
+        <tr>
+          <td><strong>方向盘 + 油门</strong></td>
+          <td class="highlight">控制 Control</td>
+          <td>事中</td>
+          <td>闭环</td>
+          <td>参数动态调节、工具启停、多模型路由、行为边界</td>
+          <td>temperature/top_p动态调节 → Agent权限开关 → 模型路由策略</td>
+        </tr>
+        <tr>
+          <td><strong>刹车 + 安全带 + 车架</strong></td>
+          <td class="highlight">约束 Constraints</td>
+          <td>事中</td>
+          <td>闭环+预测</td>
+          <td>输入护栏、输出护栏、模型本体对齐、环境隔离</td>
+          <td>Prompt防火墙 → 内容审核API → Constitutional AI → 沙箱隔离</td>
+        </tr>
+        <tr>
+          <td><strong>安全气囊</strong></td>
+          <td class="highlight">熔断降级 Circuit Breaker</td>
+          <td>事中</td>
+          <td>预测</td>
+          <td>异常检测、自动熔断、优雅降级、恢复验证</td>
+          <td>异常指标触发(幻觉率>阈值) → 切换备选模型/规则引擎/人工</td>
+        </tr>
+        <tr>
+          <td><strong>仪表盘</strong></td>
+          <td class="highlight">观测 Observability</td>
+          <td>事中</td>
+          <td>闭环</td>
+          <td>实时指标、全链路追踪、异常检测、质量评估</td>
+          <td>延迟/费用/幻觉率 Dashboard → Tracing → LLM-as-Judge</td>
+        </tr>
+        <tr>
+          <td><strong>行车记录仪 + 黑匣子</strong></td>
+          <td class="highlight">审计 Audit</td>
+          <td>事后</td>
+          <td>——</td>
+          <td>不可篡改日志、会话回放、合规报告、根因溯源</td>
+          <td>决策日志链 → 会话回放 → 合规报告自动生成 → SIEM集成</td>
+        </tr>
+        <tr>
+          <td><strong>司机（人类）</strong></td>
+          <td class="highlight">Human-in/on-the-Loop</td>
+          <td>全流程</td>
+          <td>——</td>
+          <td>人类决策节点、L0~L5分级介入、人工接管机制</td>
+          <td>L0人工审批 → L1辅助增强 → L2限定域自主 → L3异常接管 → L4全自动</td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ━━━ 第二区块：三维架构总览（分层×时间×控制模式） ━━━ -->
+  <div class="row">
+    <!-- 左：三层架构 + 信息流 -->
+    <div class="card" style="flex:1.2;">
+      <div class="card-header" style="background:#1a1a2e;">分层架构 + 五股信息流</div>
+      <div class="card-body" style="font-size:10.5px;">
+        <div style="display:flex;flex-direction:column;gap:8px;">
+
+          <!-- 对齐层 -->
+          <div style="display:flex;align-items:center;gap:8px;">
+            <div style="background:#059669;color:#fff;padding:5px 10px;border-radius:4px;font-weight:700;font-size:11px;min-width:80px;text-align:center;">战略对齐层</div>
+            <div style="flex:1;font-size:10px;color:#64748b;">目标设定 · 价值对齐 · 风险偏好 · 能力边界决策</div>
+          </div>
+          <div style="text-align:center;font-size:9px;color:#94a3b8;">↓ 意图流（目标/策略/价值观：上→下）</div>
+
+          <!-- 控制层核心 -->
+          <div style="border:2px solid #1a1a2e;border-radius:6px;padding:8px 10px;background:#fafafa;">
+            <div style="font-weight:700;font-size:11px;margin-bottom:6px;">企业AI控制层（核心）</div>
+            <div style="display:flex;flex-wrap:wrap;gap:4px;">
+              <span class="tag tag-b">控制</span><span class="tag tag-r">约束</span><span class="tag tag-p">授权</span>
+              <span class="tag tag-c">观测</span><span class="tag tag-o">规则</span><span class="tag" style="background:#e0e7ff;color:#3730a3;">审计</span>
+              <span class="tag" style="background:#fce7f3;color:#9d174d;">熔断</span>
+            </div>
+            <div style="display:flex;gap:8px;margin-top:6px;font-size:9px;color:#64748b;flex-wrap:wrap;">
+              <span>← 感知流（指标/状态/异常：下→上）</span>
+              <span>↔ 干预流（控制指令/熔断：横向）</span>
+              <span style="color:#c41e3a;">↕ 记录流（日志/轨迹：纵向下沉）</span>
+            </div>
+          </div>
+
+          <div style="text-align:center;font-size:9px;color:#94a3b8;">↑ 反馈流（效果/异常/漂移：下→上）</div>
+
+          <!-- 执行层 -->
+          <div style="display:flex;align-items:center;gap:8px;">
+            <div style="background:#52525b;color:#fff;padding:5px 10px;border-radius:4px;font-weight:700;font-size:11px;min-width:80px;text-align:center;">执行层</div>
+            <div style="flex:1;font-size:10px;color:#64748b;">LLM推理 · Agent编排 · 工具调用 · 数据访问</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 右：时间轴（事前→事中→事后） -->
+    <div class="card" style="flex:1;">
+      <div class="card-header" style="background:#1a1a2e;">时间维：纵深防御链</div>
+      <div class="card-body">
+        <div class="timeline-bar" style="margin-bottom:8px;">
+          <div class="timeline-phase tl-pre">事前防御<br>Pre-Guard</div>
+          <div class="timeline-phase tl-mid">事中控制<br>In-Guard</div>
+          <div class="timeline-phase tl-post">事后治理<br>Post-Guard</div>
+        </div>
+        <table style="width:100%;font-size:10px;border-collapse:collapse;">
+          <tr><td style="padding:3px 6px;border:1px solid #d0d5dd;"><strong>事前</strong></td><td style="padding:3px 6px;border:1px solid #d0d5dd;">规则引擎 · 授权校验 · 输入护栏 · 风险评估 · 沙箱准备</td></tr>
+          <tr><td style="padding:3px 6px;border:1px solid #d0d5dd;"><strong>事中</strong></td><td style="padding:3px 6px;border:1px solid #d0d5dd;">动态控制 · 实时观测 · 熔断降级 · 输出护栏 · 人工接管</td></tr>
+          <tr><td style="padding:3px 6px;border:1px solid #d0d5dd;"><strong>事后</strong></td><td style="padding:3px 6px;border:1px solid #d0d5dd;">审计追溯 · 效果评估 · 规则演进 · 合规报告 · 模型更新</td></tr>
+        </table>
+        <div style="margin-top:6px;font-size:9px;color:#94a3b8;">
+          Swiss Cheese Model：每层有孔，但多层重叠使风险无法穿透
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ━━━ 第三区块：控制颗粒度 L0~L5 ━━━ -->
+  <div class="card">
+    <div class="card-header" style="background:#1a1a2e;">控制颗粒度：L0~L5 自主分级</div>
+    <div class="card-body">
+      <table style="width:100%;font-size:10.5px;border-collapse:collapse;">
+        <thead>
+          <tr style="background:#f1f5f9;">
+            <th style="padding:5px 8px;border:1px solid #d0d5dd;">级别</th>
+            <th style="padding:5px 8px;border:1px solid #d0d5dd;">名称</th>
+            <th style="padding:5px 8px;border:1px solid #d0d5dd;">控制方式</th>
+            <th style="padding:5px 8px;border:1px solid #d0d5dd;">人类角色</th>
+            <th style="padding:5px 8px;border:1px solid #d0d5dd;">汽车类比</th>
+            <th style="padding:5px 8px;border:1px solid #d0d5dd;">典型场景</th>
+            <th style="padding:5px 8px;border:1px solid #d0d5dd;">风险等级</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td style="padding:4px 8px;border:1px solid #d0d5dd;text-align:center;"><strong>L0</strong></td><td style="padding:4px 8px;border:1px solid #d0d5dd;">完全人工</td><td style="padding:4px 8px;border:1px solid #d0d5dd;">每条输出需审批</td><td style="padding:4px 8px;border:1px solid #d0d5dd;">In-the-Loop</td><td style="padding:4px 8px;border:1px solid #d0d5dd;">驾校教练车（双方向盘）</td><td style="padding:4px 8px;border:1px solid #d0d5dd;">医疗诊断、法律意见</td><td style="padding:4px 8px;border:1px solid #d0d5dd;text-align:center;"><span class="tag tag-r">极高</span></td></tr>
+          <tr><td style="padding:4px 8px;border:1px solid #d0d5dd;text-align:center;"><strong>L1</strong></td><td style="padding:4px 8px;border:1px solid #d0d5dd;">辅助增强</td><td style="padding:4px 8px;border:1px solid #d0d5dd;">AI建议，人工决策</td><td style="padding:4px 8px;border:1px solid #d0d5dd;">In-the-Loop</td><td style="padding:4px 8px;border:1px solid #d0d5dd;">定速巡航</td><td style="padding:4px 8px;border:1px solid #d0d5dd;">金融分析、代码审查</td><td style="padding:4px 8px;border:1px solid #d0d5dd;text-align:center;"><span class="tag tag-o">高</span></td></tr>
+          <tr><td style="padding:4px 8px;border:1px solid #d0d5dd;text-align:center;"><strong>L2</strong></td><td style="padding:4px 8px;border:1px solid #d0d5dd;">条件自主</td><td style="padding:4px 8px;border:1px solid #d0d5dd;">限定域自主，人工监控</td><td style="padding:4px 8px;border:1px solid #d0d5dd;">On-the-Loop</td><td style="padding:4px 8px;border:1px solid #d0d5dd;">高速公路辅助驾驶</td><td style="padding:4px 8px;border:1px solid #d0d5dd;">客服机器人、文档生成</td><td style="padding:4px 8px;border:1px solid #d0d5dd;text-align:center;"><span class="tag" style="background:#fff7ed;color:#9a3412;">中</span></td></tr>
+          <tr><td style="padding:4px 8px;border:1px solid #d0d5dd;text-align:center;"><strong>L3</strong></td><td style="padding:4px 8px;border:1px solid #d0d5dd;">高度自主</td><td style="padding:4px 8px;border:1px solid #d0d5dd;">自主执行，异常接管</td><td style="padding:4px 8px;border:1px solid #d0d5dd;">On-the-Loop</td><td style="padding:4px 8px;border:1px solid #d0d5dd;">拥堵路段自动驾驶</td><td style="padding:4px 8px;border:1px solid #d0d5dd;">推荐系统、数据分析</td><td style="padding:4px 8px;border:1px solid #d0d5dd;text-align:center;"><span class="tag tag-g">低</span></td></tr>
+          <tr><td style="padding:4px 8px;border:1px solid #d0d5dd;text-align:center;"><strong>L4</strong></td><td style="padding:4px 8px;border:1px solid #d0d5dd;">完全自主</td><td style="padding:4px 8px;border:1px solid #d0d5dd;">全自动，仅事后审计</td><td style="padding:4px 8px;border:1px solid #d0d5dd;">Out-of-the-Loop</td><td style="padding:4px 8px;border:1px solid #d0d5dd;">无人配送车（限定区域）</td><td style="padding:4px 8px;border:1px solid #d0d5dd;">搜索排序、广告投放</td><td style="padding:4px 8px;border:1px solid #d0d5dd;text-align:center;"><span class="tag tag-g">极低</span></td></tr>
+          <tr><td style="padding:4px 8px;border:1px solid #d0d5dd;text-align:center;color:#94a3b8;"><strong>L5</strong></td><td style="padding:4px 8px;border:1px solid #d0d5dd;color:#94a3b8;">无界自主</td><td style="padding:4px 8px;border:1px solid #d0d5dd;color:#94a3b8;">通用自主（不推荐）</td><td style="padding:4px 8px;border:1px solid #d0d5dd;color:#94a3b8;">——</td><td style="padding:4px 8px;border:1px solid #d0d5dd;color:#94a3b8;">全自动驾驶（未实现）</td><td style="padding:4px 8px;border:1px solid #d0d5dd;color:#94a3b8;">——</td><td style="padding:4px 8px;border:1px solid #d0d5dd;text-align:center;color:#94a3b8;">N/A</td></tr>
+        </tbody>
+      </table>
+      <div style="margin-top:4px;font-size:9px;color:#94a3b8;">比例原则：低风险过度控制扼杀效率，高风险控制不足酿成事故。控制的精细度与风险量级匹配。</div>
+    </div>
+  </div>
+
+  <!-- ━━━ 第四区块：可观测性成熟度 + 控制面部署模式 ━━━ -->
+  <div class="row">
+    <!-- 可观测性成熟度 -->
+    <div class="card">
+      <div class="card-header" style="background:#0891b2;">观测成熟度五级</div>
+      <div class="card-body" style="font-size:10px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
+          <span style="font-weight:700;">L1 监控</span><span>预定义指标·固定阈值告警</span><span style="color:#94a3b8;">仪表盘警告灯</span>
+        </div>
+        <div style="height:2px;background:#0891b2;margin:2px 0;"></div>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
+          <span style="font-weight:700;">L2 可观测</span><span>任意维度下钻·动态查询</span><span style="color:#94a3b8;">+ 翻看传感器读数</span>
+        </div>
+        <div style="height:2px;background:#0891b2;margin:2px 0;"></div>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
+          <span style="font-weight:700;">L3 可诊断</span><span>全链路追踪·根因分析</span><span style="color:#94a3b8;">+ 故障诊断电脑</span>
+        </div>
+        <div style="height:2px;background:#0891b2;margin:2px 0;"></div>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
+          <span style="font-weight:700;">L4 可预测</span><span>趋势预测·异常预警</span><span style="color:#94a3b8;">+ 预测性维护系统</span>
+        </div>
+        <div style="height:2px;background:#0891b2;margin:2px 0;"></div>
+        <div style="display:flex;align-items:center;justify-content:space-between;">
+          <span style="font-weight:700;">L5 可自治</span><span>自愈·自优化·闭环调节</span><span style="color:#94a3b8;">+ 自动驾驶系统</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 控制面部署模式 -->
+    <div class="card">
+      <div class="card-header" style="background:#7c3aed;">控制面三种部署模式</div>
+      <div class="card-body" style="font-size:10px;">
+        <table style="width:100%;border-collapse:collapse;font-size:10px;">
+          <tr>
+            <td style="padding:3px 6px;border:1px solid #d0d5dd;"><strong>集中式</strong></td>
+            <td style="padding:3px 6px;border:1px solid #d0d5dd;">所有AI请求→统一网关→统一策略→统一审计</td>
+            <td style="padding:3px 6px;border:1px solid #d0d5dd;">强监管行业</td>
+          </tr>
+          <tr>
+            <td style="padding:3px 6px;border:1px solid #d0d5dd;"><strong>联邦式</strong></td>
+            <td style="padding:3px 6px;border:1px solid #d0d5dd;">中心定基线+各域自治执行+汇总上报</td>
+            <td style="padding:3px 6px;border:1px solid #d0d5dd;">大型企业多业务线</td>
+          </tr>
+          <tr>
+            <td style="padding:3px 6px;border:1px solid #d0d5dd;"><strong>嵌入式</strong></td>
+            <td style="padding:3px 6px;border:1px solid #d0d5dd;">每个Agent/SDK内置控制组件</td>
+            <td style="padding:3px 6px;border:1px solid #d0d5dd;">边缘计算/IoT</td>
+          </tr>
+        </table>
+        <div style="margin-top:4px;font-size:9px;color:#94a3b8;">
+          推荐：联邦式 + 轻量中心（中心定地板，各域建天花板）
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ━━━ 第五区块：业界理论框架对照 ━━━ -->
+  <div class="card">
+    <div class="card-header" style="background:#1a1a2e;">业界参考框架对照</div>
+    <div class="card-body">
+      <table class="framework-table">
+        <thead>
+          <tr><th>框架/理论</th><th>来源</th><th>核心贡献</th><th style="width:40%;">对本控制层的启示</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><strong>AI TRiSM</strong></td><td>Gartner 2023</td><td>可信、风险、安全三位一体</td><td>整体架构对标：Trustworthiness→约束/规则，Risk→控制/熔断，Security→授权/约束</td></tr>
+          <tr><td><strong>NIST AI RMF</strong></td><td>美国NIST</td><td>Map → Measure → Manage → Govern 四步循环</td><td>规则→观测→控制→审计的闭环设计范本</td></tr>
+          <tr><td><strong>Kubernetes控制面</strong></td><td>CNCF</td><td>声明式状态调和（Desired vs Actual → Reconcile）</td><td>Agent编排的控制实现：期望状态=规则，实际状态=观测，调和=控制生效</td></tr>
+          <tr><td><strong>控制论</strong></td><td>Norbert Wiener</td><td>反馈回路、必要多样性法则、双环学习</td><td>观测→控制闭环逻辑；控制层复杂度≥被控系统；策略持续演进</td></tr>
+          <tr><td><strong>OODA循环</strong></td><td>John Boyd (军事)</td><td>Observe → Orient → Decide → Act</td><td>观测→理解→决策→控制的流程设计范式</td></tr>
+          <tr><td><strong>STAMP/STPA</strong></td><td>MIT (Leveson)</td><td>安全是控制问题而非故障问题</td><td>将AI安全重新框定为控制约束不足，而非模型"出错"</td></tr>
+          <tr><td><strong>纵深防御</strong></td><td>网络安全</td><td>多层独立防护，一层失效不穿透</td><td>输入护栏→模型层→输出护栏→行为控制→审计，五层独立</td></tr>
+          <tr><td><strong>Swiss Cheese Model</strong></td><td>James Reason</td><td>多层防护各有孔，但对齐后风险无法穿透</td><td>事前→事中→事后各层重叠覆盖的必要性</td></tr>
+          <tr><td><strong>EU AI Act</strong></td><td>欧盟</td><td>风险分级监管（不可接受/高/有限/极低）</td><td>规则层的外部合规输入，L0~L5分级逻辑的法规基础</td></tr>
+          <tr><td><strong>OWASP Top 10 for LLM</strong></td><td>OWASP</td><td>十大LLM安全威胁清单</td><td>约束层和熔断层需覆盖的攻击场景</td></tr>
+          <tr><td><strong>Irony of Automation</strong></td><td>Bainbridge</td><td>自动化越高，人工介入越难</td><td>L4→L3降级必须可平滑执行，不能是悬崖式切换</td></tr>
+          <tr><td><strong>ISO 42001</strong></td><td>ISO</td><td>AI管理体系国际标准</td><td>审计和合规的制度化框架</td></tr>
+          <tr><td><strong>Collingridge困境</strong></td><td>技术治理</td><td>早期难预见风险，晚期难改变方向</td><td>控制层架构必须可演进：规则热更新、策略版本化</td></tr>
+          <tr><td><strong>零信任(Least Privilege)</strong></td><td>安全行业</td><td>最小权限 + 即时授权</td><td>Agent权限管理的核心范式：默认拒绝、按需授予、用完收回</td></tr>
+          <tr><td><strong>中国生成式AI管理办法</strong></td><td>网信办等七部门</td><td>内容安全、数据合规、算法备案</td><td>中国语境下的规则层核心约束：算法备案→安全评估→内容审核三道防线</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ━━━ 第六区块：核心KPI + 中国监管映射 ━━━ -->
+  <div class="row">
+    <!-- KPI -->
+    <div class="card">
+      <div class="card-header" style="background:#1a1a2e;">核心度量指标 KPI</div>
+      <div class="card-body" style="font-size:10px;">
+        <table style="width:100%;border-collapse:collapse;font-size:10px;">
+          <tr><td style="padding:3px 6px;border:1px solid #d0d5dd;font-weight:700;">控制</td><td style="padding:3px 6px;border:1px solid #d0d5dd;">覆盖率：受控调用/总调用</td><td style="padding:3px 6px;border:1px solid #d0d5dd;text-align:right;">目标 &gt;99%</td></tr>
+          <tr><td style="padding:3px 6px;border:1px solid #d0d5dd;font-weight:700;">约束</td><td style="padding:3px 6px;border:1px solid #d0d5dd;">拦截率 + 误拦率</td><td style="padding:3px 6px;border:1px solid #d0d5dd;text-align:right;">误拦 &lt;1%</td></tr>
+          <tr><td style="padding:3px 6px;border:1px solid #d0d5dd;font-weight:700;">授权</td><td style="padding:3px 6px;border:1px solid #d0d5dd;">自动放行率（低风险）</td><td style="padding:3px 6px;border:1px solid #d0d5dd;text-align:right;">目标 &gt;80%</td></tr>
+          <tr><td style="padding:3px 6px;border:1px solid #d0d5dd;font-weight:700;">观测</td><td style="padding:3px 6px;border:1px solid #d0d5dd;">告警准确率</td><td style="padding:3px 6px;border:1px solid #d0d5dd;text-align:right;">目标 &gt;90%</td></tr>
+          <tr><td style="padding:3px 6px;border:1px solid #d0d5dd;font-weight:700;">规则</td><td style="padding:3px 6px;border:1px solid #d0d5dd;">规则有效率（触发>0/总数）</td><td style="padding:3px 6px;border:1px solid #d0d5dd;text-align:right;">目标 &gt;60%</td></tr>
+          <tr><td style="padding:3px 6px;border:1px solid #d0d5dd;font-weight:700;">审计</td><td style="padding:3px 6px;border:1px solid #d0d5dd;">日志完整率</td><td style="padding:3px 6px;border:1px solid #d0d5dd;text-align:right;">目标 100%</td></tr>
+          <tr><td style="padding:3px 6px;border:1px solid #d0d5dd;font-weight:700;">熔断</td><td style="padding:3px 6px;border:1px solid #d0d5dd;">MTTR 故障恢复时间</td><td style="padding:3px 6px;border:1px solid #d0d5dd;text-align:right;">目标 &lt;5min</td></tr>
+        </table>
+      </div>
+    </div>
+
+    <!-- 中国监管 -->
+    <div class="card">
+      <div class="card-header" style="background:#c41e3a;">中国监管框架映射</div>
+      <div class="card-body" style="font-size:10px;">
+        <table style="width:100%;border-collapse:collapse;font-size:10px;">
+          <tr><td style="padding:3px 6px;border:1px solid #d0d5dd;"><strong>生成式AI服务管理办法</strong></td><td style="padding:3px 6px;border:1px solid #d0d5dd;">内容安全·数据合规·算法备案</td><td style="padding:3px 6px;border:1px solid #d0d5dd;text-align:right;"><span class="tag tag-o">规则+约束</span></td></tr>
+          <tr><td style="padding:3px 6px;border:1px solid #d0d5dd;"><strong>个人信息保护法</strong></td><td style="padding:3px 6px;border:1px solid #d0d5dd;">用户同意·最小必要·跨境限制</td><td style="padding:3px 6px;border:1px solid #d0d5dd;text-align:right;"><span class="tag tag-p">约束+授权</span></td></tr>
+          <tr><td style="padding:3px 6px;border:1px solid #d0d5dd;"><strong>数据安全法</strong></td><td style="padding:3px 6px;border:1px solid #d0d5dd;">分类分级·风险评估·安全审查</td><td style="padding:3px 6px;border:1px solid #d0d5dd;text-align:right;"><span class="tag" style="background:#e0e7ff;color:#3730a3;">规则+审计</span></td></tr>
+          <tr><td style="padding:3px 6px;border:1px solid #d0d5dd;"><strong>AI安全治理框架1.0</strong></td><td style="padding:3px 6px;border:1px solid #d0d5dd;">风险分类·安全分级·治理体系</td><td style="padding:3px 6px;border:1px solid #d0d5dd;text-align:right;"><span class="tag tag-b">全部维度</span></td></tr>
+          <tr><td style="padding:3px 6px;border:1px solid #d0d5dd;"><strong>等保2.0</strong></td><td style="padding:3px 6px;border:1px solid #d0d5dd;">系统定级·安全防护·测评认证</td><td style="padding:3px 6px;border:1px solid #d0d5dd;text-align:right;"><span class="tag tag-r">控制+约束</span></td></tr>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ━━━ 底部：关键原则 + 图例 ━━━ -->
+  <div style="display:flex;justify-content:space-between;align-items:center;font-size:10px;color:#64748b;border-top:1.5px solid #d0d5dd;padding-top:8px;margin-top:2px;">
+    <div>
+      <strong style="color:#1a1a2e;">关键原则：</strong>
+      ① 控制不是限制，是在安全边界内最大化能力 &nbsp;
+      ② 纵深防御：事前→事中→事后多层重叠 &nbsp;
+      ③ 比例原则：控制力度与风险匹配 &nbsp;
+      ④ 可演进：控制层必须随AI能力同步成长 &nbsp;
+      ⑤ 最少权限 + 即时授权
+    </div>
+    <div style="text-align:right;white-space:nowrap;">
+      <strong style="color:#1a1a2e;">版本</strong> v1.0 &nbsp;|&nbsp;
+      <strong style="color:#1a1a2e;">制图</strong> 丰田A3一页纸风格
+    </div>
+  </div>
+
+</div>
+
+</body>
+</html>

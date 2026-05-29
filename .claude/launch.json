@@ -1,0 +1,81 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "orthopedic-emr",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": ["serve", "-l", "8080", "--no-clipboard"],
+      "port": 8080
+    },
+    {
+      "name": "video-chain-gen",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": ["serve", "-l", "3000", "--no-clipboard"],
+      "port": 3000
+    },
+    {
+      "name": "video-editor",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": ["serve", "-l", "3001", "--no-clipboard"],
+      "port": 3001
+    },
+    {
+      "name": "ai-film-studio",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "dev"],
+      "port": 5173,
+      "cwd": "web"
+    },
+    {
+      "name": "charts-server",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": ["serve", "-l", "5000", "--no-clipboard"],
+      "port": 5000,
+      "cwd": "output/charts"
+    },
+    {
+      "name": "product-plan",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": ["serve", "-l", "4200", "--no-clipboard"],
+      "port": 4200
+    },
+    {
+      "name": "a3-control-plane",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": ["serve", "-l", "4300", "--no-clipboard"],
+      "port": 4300
+    },
+    {
+      "name": "business-case",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": ["serve", "-l", "4400", "--no-clipboard"],
+      "port": 4400,
+      "cwd": "docs"
+    },
+    {
+      "name": "ppt-preview",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": ["serve", "-l", "4500", "--no-clipboard"],
+      "port": 4500,
+      "cwd": "output"
+    },
+    {
+      "name": "resume-preview",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": ["serve", "-l", "4600", "--no-clipboard"],
+      "port": 4600
+    },
+    {
+      "name": "smart-triage",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": ["serve", "-l", "5555", "--no-clipboard"],
+      "port": 5555
+    },
+    {
+      "name": "worldcup-predictions",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": ["serve", "-l", "5600", "--no-clipboard"],
+      "port": 5600
+    }
+  ]
+}

@@ -1,0 +1,787 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mystery Meow - Pop Mart Style Cat Plush</title>
+<style>
+  :root {
+    --pop-pink: #FF5FA2;
+    --pop-purple: #8B5CF6;
+    --pop-teal: #06D6A0;
+    --pop-yellow: #FFD166;
+    --pop-orange: #FF8C42;
+    --pop-blue: #4CC9F0;
+    --bg-dark: #1A0A2E;
+    --card-bg: rgba(255,255,255,0.08);
+    --glass: rgba(255,255,255,0.12);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  @font-face {
+    font-family: 'PopMart';
+    src: local('Arial Black'), local('PingFang SC');
+  }
+
+  body {
+    font-family: 'PingFang SC', 'Hiragino Sans', 'Noto Sans JP', 'Arial', sans-serif;
+    background: var(--bg-dark);
+    color: #fff;
+    overflow-x: hidden;
+    cursor: default;
+  }
+
+  /* ===== Sparkle Particles ===== */
+  .particles {
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    pointer-events: none; z-index: 0;
+  }
+  .particle {
+    position: absolute;
+    width: 4px; height: 4px;
+    background: #fff;
+    border-radius: 50%;
+    animation: sparkle var(--dur) ease-in-out infinite;
+    animation-delay: var(--delay);
+    opacity: 0;
+  }
+  @keyframes sparkle {
+    0%, 100% { opacity: 0; transform: scale(0) translateY(0); }
+    50% { opacity: 1; transform: scale(1) translateY(-20px); }
+  }
+
+  /* ===== Language Switch ===== */
+  .lang-switch {
+    position: fixed; top: 20px; right: 20px; z-index: 1000;
+    display: flex; gap: 6px;
+  }
+  .lang-btn {
+    padding: 8px 16px; border-radius: 20px; border: 2px solid rgba(255,255,255,0.3);
+    background: rgba(255,255,255,0.1); color: #fff;
+    font-size: 13px; font-weight: 700; cursor: pointer;
+    backdrop-filter: blur(10px);
+    transition: all 0.3s cubic-bezier(0.34,1.56,0.64,1);
+  }
+  .lang-btn:hover {
+    background: rgba(255,255,255,0.25);
+    transform: scale(1.05);
+  }
+  .lang-btn.active {
+    background: var(--pop-pink); border-color: var(--pop-pink);
+    box-shadow: 0 0 20px rgba(255,95,162,0.5);
+  }
+
+  /* ===== Hero Section ===== */
+  .hero {
+    position: relative; z-index: 1;
+    min-height: 100vh; display: flex; align-items: center; justify-content: center;
+    flex-direction: column; text-align: center; padding: 40px 20px;
+  }
+  .hero-bg-glow {
+    position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+    width: 600px; height: 600px;
+    background: radial-gradient(circle, rgba(255,95,162,0.3) 0%, transparent 70%);
+    border-radius: 50%; animation: pulse-glow 3s ease-in-out infinite;
+    pointer-events: none;
+  }
+  @keyframes pulse-glow {
+    0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.6; }
+    50% { transform: translate(-50%, -50%) scale(1.2); opacity: 1; }
+  }
+
+  /* Cat Plush Showcase */
+  .cat-showcase {
+    position: relative; width: 280px; height: 280px; margin-bottom: 30px;
+  }
+  .cat-plush {
+    width: 200px; height: 200px; margin: 40px auto 0;
+    position: relative; z-index: 2;
+    animation: float-cat 3s ease-in-out infinite;
+  }
+  /* Cat face made with pure CSS */
+  .cat-body {
+    position: relative; width: 180px; height: 160px; margin: 0 auto;
+    background: radial-gradient(ellipse at 50% 40%, #FFE4EC, #FFB8D0);
+    border-radius: 50% 50% 45% 45%;
+    box-shadow:
+      0 20px 60px rgba(255,95,162,0.4),
+      inset 0 -10px 30px rgba(255,95,162,0.15),
+      0 0 0 8px rgba(255,255,255,0.15);
+  }
+  .cat-ear {
+    position: absolute; width: 50px; height: 55px;
+    background: radial-gradient(ellipse at 50% 60%, #FFD0E0, #FF9EBD);
+    border-radius: 80% 20% 50% 50%;
+    top: -30px;
+  }
+  .cat-ear.left {
+    left: 10px; transform: rotate(-15deg);
+    box-shadow: inset 0 -5px 15px rgba(255,95,162,0.2);
+  }
+  .cat-ear.right {
+    right: 10px; transform: rotate(15deg);
+    box-shadow: inset 0 -5px 15px rgba(255,95,162,0.2);
+  }
+  .cat-ear::after {
+    content: ''; position: absolute; width: 30px; height: 35px;
+    background: radial-gradient(ellipse at 50% 60%, #FFB0CA, #FF85AD);
+    border-radius: 80% 20% 50% 50%;
+    top: 5px; left: 10px;
+  }
+  .cat-eye {
+    position: absolute; width: 32px; height: 36px;
+    background: #1a1a2e; border-radius: 50%;
+    top: 55px; z-index: 3;
+  }
+  .cat-eye.left { left: 35px; }
+  .cat-eye.right { right: 35px; }
+  .cat-eye::after {
+    content: ''; position: absolute; width: 14px; height: 14px;
+    background: #fff; border-radius: 50%;
+    top: 6px; left: 6px;
+    animation: eye-shine 4s ease-in-out infinite;
+  }
+  .cat-eye::before {
+    content: ''; position: absolute; width: 6px; height: 6px;
+    background: #fff; border-radius: 50%;
+    top: 14px; left: 20px; opacity: 0.6;
+  }
+  @keyframes eye-shine {
+    0%, 100% { top: 6px; left: 6px; }
+    45% { top: 8px; left: 8px; }
+    50% { top: 10px; left: 6px; }
+    55% { top: 8px; left: 8px; }
+  }
+  .cat-nose {
+    position: absolute; width: 16px; height: 12px;
+    background: #FF8C94; border-radius: 50%;
+    top: 85px; left: 50%; transform: translateX(-50%); z-index: 3;
+  }
+  .cat-mouth {
+    position: absolute; width: 40px; height: 20px;
+    border-bottom: 2.5px solid #E8788A;
+    border-radius: 0 0 50% 50%;
+    top: 92px; left: 50%; transform: translateX(-50%); z-index: 3;
+  }
+  .cat-whisker {
+    position: absolute; height: 2px; background: #E8A0B0; border-radius: 1px;
+    top: 90px; z-index: 3;
+  }
+  .cat-whisker.w1 { width: 35px; left: -10px; transform: rotate(-5deg); }
+  .cat-whisker.w2 { width: 35px; left: -8px; transform: rotate(5deg); top: 98px; }
+  .cat-whisker.w3 { width: 35px; right: -10px; transform: rotate(5deg); }
+  .cat-whisker.w4 { width: 35px; right: -8px; transform: rotate(-5deg); top: 98px; }
+  .cat-blush {
+    position: absolute; width: 24px; height: 16px;
+    background: rgba(255,150,170,0.5); border-radius: 50%;
+    top: 82px; z-index: 2;
+  }
+  .cat-blush.left { left: 18px; }
+  .cat-blush.right { right: 18px; }
+
+  @keyframes float-cat {
+    0%, 100% { transform: translateY(0) rotate(0deg); }
+    25% { transform: translateY(-12px) rotate(1deg); }
+    75% { transform: translateY(-8px) rotate(-1deg); }
+  }
+
+  /* Blind Box */
+  .blind-box-wrap {
+    position: absolute; bottom: 0; left: 50%; transform: translateX(-50%);
+    animation: float-box 3s ease-in-out infinite;
+    animation-delay: 0.5s;
+  }
+  .blind-box {
+    width: 120px; height: 100px;
+    background: linear-gradient(135deg, #FF5FA2, #FF8C42);
+    border-radius: 12px;
+    box-shadow: 0 10px 40px rgba(255,95,162,0.5);
+    position: relative;
+    display: flex; align-items: center; justify-content: center;
+    border: 3px solid rgba(255,255,255,0.3);
+  }
+  .blind-box::before {
+    content: '?'; font-size: 48px; color: rgba(255,255,255,0.8);
+    font-weight: 900;
+  }
+  .blind-box::after {
+    content: ''; position: absolute; top: -15px; left: 50%; transform: translateX(-50%);
+    width: 40px; height: 8px;
+    background: rgba(255,255,255,0.6); border-radius: 4px;
+  }
+  @keyframes float-box {
+    0%, 100% { transform: translateX(-50%) translateY(0); }
+    50% { transform: translateX(-50%) translateY(-8px); }
+  }
+
+  /* Series badge */
+  .series-badge {
+    display: inline-block; padding: 6px 20px;
+    background: linear-gradient(135deg, var(--pop-purple), var(--pop-pink));
+    border-radius: 20px; font-size: 12px; font-weight: 700;
+    letter-spacing: 2px; text-transform: uppercase;
+    margin-bottom: 16px;
+    animation: fadeInUp 0.8s ease-out;
+  }
+  .hero-title {
+    font-size: clamp(36px, 6vw, 64px); font-weight: 900;
+    background: linear-gradient(135deg, #FFD166, #FF5FA2, #8B5CF6);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin: 10px 0; line-height: 1.2;
+    animation: fadeInUp 0.8s ease-out 0.1s both;
+  }
+  .hero-sub {
+    font-size: 18px; opacity: 0.8; margin-bottom: 30px;
+    animation: fadeInUp 0.8s ease-out 0.2s both;
+  }
+  .cta-btn {
+    display: inline-block; padding: 16px 48px;
+    background: linear-gradient(135deg, var(--pop-pink), var(--pop-orange));
+    color: #fff; border: none; border-radius: 50px;
+    font-size: 18px; font-weight: 700; cursor: pointer;
+    text-decoration: none; letter-spacing: 1px;
+    box-shadow: 0 8px 30px rgba(255,95,162,0.4);
+    transition: all 0.3s cubic-bezier(0.34,1.56,0.64,1);
+    animation: fadeInUp 0.8s ease-out 0.3s both;
+  }
+  .cta-btn:hover {
+    transform: scale(1.08);
+    box-shadow: 0 12px 40px rgba(255,95,162,0.6);
+  }
+  @keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ===== Section: Series Gallery ===== */
+  .section {
+    position: relative; z-index: 1; padding: 80px 20px;
+  }
+  .section-title {
+    text-align: center; font-size: 32px; font-weight: 900; margin-bottom: 10px;
+  }
+  .section-sub {
+    text-align: center; font-size: 16px; opacity: 0.6; margin-bottom: 50px;
+  }
+
+  /* Gallery Grid */
+  .gallery {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 24px; max-width: 1100px; margin: 0 auto;
+  }
+  .gallery-card {
+    background: var(--card-bg); border-radius: 20px; padding: 30px 20px 24px;
+    text-align: center; cursor: pointer;
+    border: 1px solid rgba(255,255,255,0.08);
+    backdrop-filter: blur(10px);
+    transition: all 0.4s cubic-bezier(0.34,1.56,0.64,1);
+    position: relative; overflow: hidden;
+  }
+  .gallery-card:hover {
+    transform: translateY(-10px);
+    border-color: rgba(255,255,255,0.25);
+    box-shadow: 0 20px 60px rgba(255,95,162,0.25);
+  }
+  .gallery-card::before {
+    content: ''; position: absolute; top: -50%; left: -50%;
+    width: 200%; height: 200%;
+    background: radial-gradient(circle, rgba(255,255,255,0.06) 0%, transparent 60%);
+    opacity: 0; transition: opacity 0.4s;
+  }
+  .gallery-card:hover::before { opacity: 1; }
+  .card-icon {
+    width: 100px; height: 100px; border-radius: 50%;
+    margin: 0 auto 16px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 48px;
+    position: relative; z-index: 1;
+  }
+  .card-icon.c1 { background: linear-gradient(135deg, #FFE4EC, #FFB8D0); }
+  .card-icon.c2 { background: linear-gradient(135deg, #E0F0FF, #A8D8FF); }
+  .card-icon.c3 { background: linear-gradient(135deg, #E8FFE8, #A8E6A8); }
+  .card-icon.c4 { background: linear-gradient(135deg, #FFF3E0, #FFD4A8); }
+  .card-icon.c5 { background: linear-gradient(135deg, #F3E8FF, #D4B8FF); }
+  .card-icon.c6 { background: linear-gradient(135deg, #FFE8E0, #FFBBA8); }
+  .card-name { font-size: 18px; font-weight: 700; position: relative; z-index: 1; }
+  .card-rarity {
+    font-size: 12px; opacity: 0.5; margin-top: 6px;
+    position: relative; z-index: 1;
+  }
+  .card-flag {
+    position: absolute; top: 12px; right: 12px;
+    padding: 4px 12px; border-radius: 12px;
+    font-size: 10px; font-weight: 700; z-index: 2;
+    background: linear-gradient(135deg, #FF5FA2, #FF8C42);
+    color: #fff;
+  }
+
+  /* ===== Feature Highlights ===== */
+  .features {
+    max-width: 1000px; margin: 0 auto;
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 24px;
+  }
+  .feature-card {
+    background: var(--card-bg); border-radius: 20px; padding: 30px;
+    border: 1px solid rgba(255,255,255,0.08);
+    backdrop-filter: blur(10px);
+    transition: all 0.3s ease;
+  }
+  .feature-card:hover {
+    border-color: rgba(255,255,255,0.2);
+    transform: translateY(-4px);
+  }
+  .feature-icon { font-size: 36px; margin-bottom: 14px; }
+  .feature-title { font-size: 20px; font-weight: 700; margin-bottom: 8px; }
+  .feature-desc { font-size: 14px; opacity: 0.7; line-height: 1.6; }
+
+  /* ===== Stats / Counter Section ===== */
+  .stats-strip {
+    display: flex; justify-content: center; gap: 60px; flex-wrap: wrap;
+    padding: 40px 20px;
+  }
+  .stat-item { text-align: center; }
+  .stat-num { font-size: 48px; font-weight: 900; }
+  .stat-num.c1 { color: var(--pop-pink); }
+  .stat-num.c2 { color: var(--pop-teal); }
+  .stat-num.c3 { color: var(--pop-yellow); }
+  .stat-label { font-size: 14px; opacity: 0.6; margin-top: 4px; }
+
+  /* ===== Reveal Section ===== */
+  .reveal-section {
+    text-align: center; padding: 60px 20px;
+  }
+  .reveal-box {
+    display: inline-block; width: 160px; height: 140px;
+    background: linear-gradient(135deg, #1a1a2e, #2d2d50);
+    border-radius: 20px; position: relative; cursor: pointer;
+    border: 2px solid rgba(255,255,255,0.2);
+    transition: all 0.5s cubic-bezier(0.34,1.56,0.64,1);
+    overflow: hidden;
+  }
+  .reveal-box:hover {
+    border-color: var(--pop-pink);
+    box-shadow: 0 0 60px rgba(255,95,162,0.4);
+    transform: scale(1.05);
+  }
+  .reveal-box:hover .reveal-hidden { opacity: 0; }
+  .reveal-box:hover .reveal-cat { opacity: 1; transform: scale(1); }
+  .reveal-hidden {
+    position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+    font-size: 60px; font-weight: 900; color: rgba(255,255,255,0.5);
+    transition: all 0.5s;
+  }
+  .reveal-cat {
+    position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0.5);
+    font-size: 64px; opacity: 0;
+    transition: all 0.5s cubic-bezier(0.34,1.56,0.64,1);
+  }
+  .reveal-hint {
+    margin-top: 16px; font-size: 14px; opacity: 0.5;
+  }
+
+  /* ===== Footer / CTA bar ===== */
+  .cta-bar {
+    position: relative; z-index: 1;
+    text-align: center; padding: 80px 20px 100px;
+  }
+  .cta-bar h2 { font-size: 28px; margin-bottom: 20px; }
+  .stores {
+    display: flex; justify-content: center; gap: 20px; flex-wrap: wrap;
+    margin-top: 30px;
+  }
+  .store-btn {
+    padding: 12px 28px; border-radius: 50px;
+    border: 2px solid rgba(255,255,255,0.3);
+    background: rgba(255,255,255,0.08);
+    color: #fff; font-weight: 700; font-size: 14px;
+    cursor: pointer; backdrop-filter: blur(10px);
+    transition: all 0.3s cubic-bezier(0.34,1.56,0.64,1);
+  }
+  .store-btn:hover {
+    background: rgba(255,255,255,0.2);
+    transform: scale(1.05);
+  }
+
+  /* ===== Floating Decorations ===== */
+  .float-deco {
+    position: fixed; pointer-events: none; z-index: 0;
+    font-size: 32px; opacity: 0.3;
+    animation: drift var(--drift-dur) ease-in-out infinite;
+    animation-delay: var(--drift-delay);
+  }
+  @keyframes drift {
+    0%, 100% { transform: translateY(0) rotate(0deg); }
+    33% { transform: translateY(-30px) rotate(10deg); }
+    66% { transform: translateY(-10px) rotate(-10deg); }
+  }
+
+  /* ===== Scrollbar ===== */
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb {
+    background: rgba(255,255,255,0.15); border-radius: 3px;
+  }
+
+  /* ===== Responsive ===== */
+  @media (max-width: 768px) {
+    .hero-title { font-size: 36px; }
+    .gallery { grid-template-columns: repeat(2, 1fr); }
+    .stats-strip { gap: 30px; }
+    .lang-switch { top: 10px; right: 10px; }
+    .lang-btn { padding: 6px 12px; font-size: 11px; }
+  }
+
+  /* ===== Reveal "unboxing" animation trigger ===== */
+  .reveal-animating .reveal-hidden { animation: pop-out 0.6s forwards; }
+  .reveal-animating .reveal-cat { animation: pop-in 0.6s 0.3s forwards; }
+  @keyframes pop-out {
+    0% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+    100% { transform: translate(-50%, -50%) scale(1.5); opacity: 0; }
+  }
+  @keyframes pop-in {
+    0% { transform: translate(-50%, -50%) scale(0); opacity: 0; }
+    60% { transform: translate(-50%, -50%) scale(1.2); opacity: 1; }
+    100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Particles -->
+<div class="particles" id="particles"></div>
+
+<!-- Floating decorations -->
+<div class="float-deco" style="top:15%;left:5%;--drift-dur:5s;--drift-delay:0s;">&#x2728;</div>
+<div class="float-deco" style="top:25%;right:8%;--drift-dur:6s;--drift-delay:1s;">&#x2B50;</div>
+<div class="float-deco" style="top:60%;left:3%;--drift-dur:7s;--drift-delay:2s;">&#x1F338;</div>
+<div class="float-deco" style="top:70%;right:5%;--drift-dur:5.5s;--drift-delay:0.5s;">&#x2728;</div>
+<div class="float-deco" style="top:40%;left:90%;--drift-dur:6.5s;--drift-delay:1.5s;">&#x1F31F;</div>
+<div class="float-deco" style="top:80%;left:10%;--drift-dur:8s;--drift-delay:3s;">&#x2B50;</div>
+
+<!-- Language Switch -->
+<div class="lang-switch">
+  <button class="lang-btn" data-lang="zh" onclick="switchLang('zh')">中文</button>
+  <button class="lang-btn active" data-lang="en" onclick="switchLang('en')">EN</button>
+  <button class="lang-btn" data-lang="ja" onclick="switchLang('ja')">日本語</button>
+</div>
+
+<!-- Hero -->
+<section class="hero">
+  <div class="hero-bg-glow"></div>
+  <div class="series-badge" data-i18n="series-badge"></div>
+  <div class="cat-showcase">
+    <div class="cat-plush">
+      <div class="cat-body">
+        <div class="cat-ear left"></div>
+        <div class="cat-ear right"></div>
+        <div class="cat-eye left"></div>
+        <div class="cat-eye right"></div>
+        <div class="cat-nose"></div>
+        <div class="cat-mouth"></div>
+        <div class="cat-whisker w1"></div>
+        <div class="cat-whisker w2"></div>
+        <div class="cat-whisker w3"></div>
+        <div class="cat-whisker w4"></div>
+        <div class="cat-blush left"></div>
+        <div class="cat-blush right"></div>
+      </div>
+    </div>
+    <div class="blind-box-wrap">
+      <div class="blind-box"></div>
+    </div>
+  </div>
+  <h1 class="hero-title" data-i18n="hero-title"></h1>
+  <p class="hero-sub" data-i18n="hero-sub"></p>
+  <a href="#" class="cta-btn" data-i18n="cta-btn"></a>
+</section>
+
+<!-- Stats -->
+<div class="stats-strip">
+  <div class="stat-item">
+    <div class="stat-num c1">12+1</div>
+    <div class="stat-label" data-i18n="stat1"></div>
+  </div>
+  <div class="stat-item">
+    <div class="stat-num c2">1/72</div>
+    <div class="stat-label" data-i18n="stat2"></div>
+  </div>
+  <div class="stat-item">
+    <div class="stat-num c3">6</div>
+    <div class="stat-label" data-i18n="stat3"></div>
+  </div>
+</div>
+
+<!-- Features -->
+<section class="section">
+  <h2 class="section-title" data-i18n="features-title"></h2>
+  <p class="section-sub" data-i18n="features-sub"></p>
+  <div class="features">
+    <div class="feature-card">
+      <div class="feature-icon">&#x1F9F8;</div>
+      <div class="feature-title" data-i18n="feat1-title"></div>
+      <div class="feature-desc" data-i18n="feat1-desc"></div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">&#x1F3A8;</div>
+      <div class="feature-title" data-i18n="feat2-title"></div>
+      <div class="feature-desc" data-i18n="feat2-desc"></div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">&#x1F48E;</div>
+      <div class="feature-title" data-i18n="feat3-title"></div>
+      <div class="feature-desc" data-i18n="feat3-desc"></div>
+    </div>
+  </div>
+</section>
+
+<!-- Series Gallery -->
+<section class="section">
+  <h2 class="section-title" data-i18n="gallery-title"></h2>
+  <p class="section-sub" data-i18n="gallery-sub"></p>
+  <div class="gallery">
+    <div class="gallery-card">
+      <div class="card-flag" data-i18n="card-rarity">REGULAR</div>
+      <div class="card-icon c1">&#x1F63A;</div>
+      <div class="card-name" data-i18n="card1-name"></div>
+      <div class="card-rarity" data-i18n="card1-desc"></div>
+    </div>
+    <div class="gallery-card">
+      <div class="card-flag" data-i18n="card-rarity">REGULAR</div>
+      <div class="card-icon c2">&#x1F639;</div>
+      <div class="card-name" data-i18n="card2-name"></div>
+      <div class="card-rarity" data-i18n="card2-desc"></div>
+    </div>
+    <div class="gallery-card">
+      <div class="card-flag" data-i18n="card-rarity">REGULAR</div>
+      <div class="card-icon c3">&#x1F63B;</div>
+      <div class="card-name" data-i18n="card3-name"></div>
+      <div class="card-rarity" data-i18n="card3-desc"></div>
+    </div>
+    <div class="gallery-card">
+      <div class="card-flag" data-i18n="card-rarity">REGULAR</div>
+      <div class="card-icon c4">&#x1F63C;</div>
+      <div class="card-name" data-i18n="card4-name"></div>
+      <div class="card-rarity" data-i18n="card4-desc"></div>
+    </div>
+    <div class="gallery-card">
+      <div class="card-flag" style="background:linear-gradient(135deg,#FFD700,#FF8C42);" data-i18n="card-rarity2">RARE</div>
+      <div class="card-icon c5">&#x1F63D;</div>
+      <div class="card-name" data-i18n="card5-name"></div>
+      <div class="card-rarity" data-i18n="card5-desc"></div>
+    </div>
+    <div class="gallery-card">
+      <div class="card-flag" style="background:linear-gradient(135deg,#FFD700,#FF3366);" data-i18n="card-secret">SECRET</div>
+      <div class="card-icon c6">&#x1F31F;</div>
+      <div class="card-name" data-i18n="card6-name"></div>
+      <div class="card-rarity" data-i18n="card6-desc"></div>
+    </div>
+  </div>
+</section>
+
+<!-- Blind Box Reveal Interactive -->
+<section class="reveal-section">
+  <h2 class="section-title" data-i18n="reveal-title"></h2>
+  <p class="section-sub" data-i18n="reveal-sub"></p>
+  <div class="reveal-box" id="revealBox" onclick="triggerReveal()">
+    <div class="reveal-hidden">?</div>
+    <div class="reveal-cat">&#x1F63A;</div>
+  </div>
+  <p class="reveal-hint" data-i18n="reveal-hint"></p>
+</section>
+
+<!-- CTA -->
+<section class="cta-bar">
+  <h2 data-i18n="cta-title"></h2>
+  <a href="#" class="cta-btn" data-i18n="cta-buy"></a>
+  <div class="stores">
+    <button class="store-btn">&#x1F6CD; POP MART</button>
+    <button class="store-btn">&#x1F4E6; Tmall</button>
+    <button class="store-btn">&#x1F310; Amazon</button>
+  </div>
+</section>
+
+<script>
+// ===== Particle System =====
+(function() {
+  var c = document.getElementById('particles');
+  var n = 50;
+  var html = '';
+  for (var i = 0; i < n; i++) {
+    var x = Math.random() * 100;
+    var y = Math.random() * 100;
+    var d = (Math.random() * 3 + 2).toFixed(1);
+    var delay = (Math.random() * 4).toFixed(1);
+    var size = Math.random() * 3 + 2;
+    html += '<div class="particle" style="left:' + x + '%;top:' + y + '%;'
+      + '--dur:' + d + 's;--delay:' + delay + 's;'
+      + 'width:' + size + 'px;height:' + size + 'px;'
+      + 'background:rgba(255,255,255,' + (Math.random() * 0.6 + 0.3) + ');'
+      + '"></div>';
+  }
+  c.innerHTML = html;
+})();
+
+// ===== i18n Data =====
+var i18n = {
+  en: {
+    'series-badge': 'COSMIC KITTENS Series',
+    'hero-title': 'Mystery Meow',
+    'hero-sub': 'Open the box. Meet your cosmic companion.',
+    'cta-btn': 'Get Yours Now',
+    'stat1': 'Designs in the series',
+    'stat2': 'Chance of secret rare',
+    'stat3': 'Basic designs',
+    'features-title': 'Why You\'ll Love It',
+    'features-sub': 'Premium crafted plush that brings joy in every box',
+    'feat1-title': 'Ultra-Soft Plush',
+    'feat1-desc': 'Made with premium peach-skin fleece and PP cotton filling. Squeeze it and feel the stress melt away.',
+    'feat2-title': 'Designer Art Toy',
+    'feat2-desc': 'Designed by renowned toy artists. Each cat features unique outfits and expressions — collect them all.',
+    'feat3-title': 'Blind Box Thrill',
+    'feat3-desc': 'Every unboxing is a surprise. Will you get the regular cutie or the ultra-rare golden galaxy cat?',
+    'gallery-title': 'The Full Collection',
+    'gallery-sub': '6 regular designs + 1 secret rare. Can you find them all?',
+    'card1-name': 'Starlight',
+    'card1-desc': 'Pink & gentle dreamer',
+    'card2-name': 'Ocean Wave',
+    'card2-desc': 'Blue sailor adventurer',
+    'card3-name': 'Forest Elf',
+    'card3-desc': 'Green nature lover',
+    'card4-name': 'Sunny Toast',
+    'card4-desc': 'Warm breakfast buddy',
+    'card5-name': 'Lavender Mist',
+    'card5-desc': 'Purple moon mystic',
+    'card6-name': 'Galaxy King',
+    'card6-desc': 'Golden secret rare',
+    'card-rarity': 'REGULAR',
+    'card-rarity2': 'RARE',
+    'card-secret': 'SECRET',
+    'reveal-title': 'Try Your Luck',
+    'reveal-sub': 'Hover to reveal. Every box holds a different destiny.',
+    'reveal-hint': 'Hover over the box to reveal!',
+    'cta-title': 'Start Your Collection Today',
+    'cta-buy': 'Shop the Series'
+  },
+  zh: {
+    'series-badge': '星际小猫 系列',
+    'hero-title': '谜喵',
+    'hero-sub': '打开盲盒。遇见你的星际伙伴。',
+    'cta-btn': '立即购买',
+    'stat1': '全系列设计款',
+    'stat2': '隐藏款概率',
+    'stat3': '基础款设计',
+    'features-title': '为什么你会爱上它',
+    'features-sub': '精致工艺玩偶，每盒都是惊喜',
+    'feat1-title': '超柔短毛绒',
+    'feat1-desc': '采用顶级桃皮绒面料和PP棉填充。捏一捏，压力全消。',
+    'feat2-title': '设计师艺术玩具',
+    'feat2-desc': '由知名玩具设计师操刀。每只猫都有独特的服装和表情——集齐它们。',
+    'feat3-title': '盲盒快感',
+    'feat3-desc': '每一次拆盒都是未知的惊喜。你会拆到普通款小可爱，还是万里挑一的金色银河猫？',
+    'gallery-title': '全系列一览',
+    'gallery-sub': '6款基础设计 + 1款隐藏稀有款。你能集齐吗？',
+    'card1-name': '星光',
+    'card1-desc': '粉色温柔梦想家',
+    'card2-name': '海浪',
+    'card2-desc': '蓝色水手冒险家',
+    'card3-name': '森林精灵',
+    'card3-desc': '绿色自然爱好者',
+    'card4-name': '阳光吐司',
+    'card4-desc': '温暖早餐小伙伴',
+    'card5-name': '薰衣草薄雾',
+    'card5-desc': '紫色月亮神秘者',
+    'card6-name': '银河之王',
+    'card6-desc': '金色隐藏稀有款',
+    'card-rarity': '普通款',
+    'card-rarity2': '稀有款',
+    'card-secret': '隐藏款',
+    'reveal-title': '试试你的运气',
+    'reveal-sub': '悬停揭晓。每个盒子藏着不同的命运。',
+    'reveal-hint': '鼠标悬停在盒子上揭开答案！',
+    'cta-title': '今天开始你的收藏之旅',
+    'cta-buy': '购买全系列'
+  },
+  ja: {
+    'series-badge': 'コズミック・キトゥンズ シリーズ',
+    'hero-title': 'ミステリー・ミャオ',
+    'hero-sub': '箱を開けて。宇宙の仲間に出会おう。',
+    'cta-btn': '今すぐ購入',
+    'stat1': 'シリーズ全デザイン',
+    'stat2': 'シークレット出現率',
+    'stat3': '基本デザイン',
+    'features-title': 'なぜ好きになるのか',
+    'features-sub': 'こだわりのぬいぐるみ、毎回の開封が特別な体験',
+    'feat1-title': '極上やわらかぬいぐるみ',
+    'feat1-desc': '最高級の桃肌フリースとPPコットンを使用。ぎゅっと抱きしめれば、ストレスもふきとぶ。',
+    'feat2-title': 'デザイナーズ・アートトイ',
+    'feat2-desc': '有名トイデザイナーによる作品。それぞれ個性的な衣装と表情——全部集めよう。',
+    'feat3-title': 'ブラインドボックスのドキドキ',
+    'feat3-desc': '開けるまで何が出るかわからない。レギュラーの可愛い子か、それとも激レアのゴールデンギャラクシーキャットか？',
+    'gallery-title': 'コレクション全種',
+    'gallery-sub': '基本6種 + シークレット1種。コンプリートできる？',
+    'card1-name': 'スターライト',
+    'card1-desc': 'ピンクの優しい夢見る子',
+    'card2-name': 'オーシャンウェーブ',
+    'card2-desc': '青い船乗りの冒険者',
+    'card3-name': 'フォレストエルフ',
+    'card3-desc': '緑の自然大好き',
+    'card4-name': 'サニートースト',
+    'card4-desc': 'あたたかい朝ごはんのお供',
+    'card5-name': 'ラベンダーミスト',
+    'card5-desc': '紫の月の神秘家',
+    'card6-name': 'ギャラクシーキング',
+    'card6-desc': '金色のシークレットレア',
+    'card-rarity': 'レギュラー',
+    'card-rarity2': 'レア',
+    'card-secret': 'シークレット',
+    'reveal-title': '運試しをしよう',
+    'reveal-sub': 'ホバーでめくる。箱の中には違う運命が。',
+    'reveal-hint': '箱にカーソルを合わせてめくろう！',
+    'cta-title': '今日からコレクションを始めよう',
+    'cta-buy': 'シリーズを購入'
+  }
+};
+
+// ===== Language Switch Logic =====
+var currentLang = 'en';
+
+function switchLang(lang) {
+  currentLang = lang;
+  var btns = document.querySelectorAll('.lang-btn');
+  btns.forEach(function(b) {
+    b.classList.toggle('active', b.dataset.lang === lang);
+  });
+  document.querySelectorAll('[data-i18n]').forEach(function(el) {
+    var key = el.dataset.i18n;
+    if (i18n[lang] && i18n[lang][key]) {
+      el.textContent = i18n[lang][key];
+    }
+  });
+  document.documentElement.lang = lang === 'zh' ? 'zh-CN' : lang === 'ja' ? 'ja' : 'en';
+}
+
+// Init with EN
+switchLang('en');
+
+// ===== Blind Box Reveal Animation =====
+function triggerReveal() {
+  var box = document.getElementById('revealBox');
+  box.classList.add('reveal-animating');
+  var cats = ['&#x1F63A;', '&#x1F639;', '&#x1F63B;', '&#x1F63C;', '&#x1F63D;', '&#x1F31F;'];
+  var randomCat = cats[Math.floor(Math.random() * cats.length)];
+  var catEl = box.querySelector('.reveal-cat');
+  setTimeout(function() {
+    catEl.innerHTML = randomCat;
+  }, 300);
+  setTimeout(function() {
+    box.classList.remove('reveal-animating');
+  }, 1000);
+}
+</script>
+
+</body>
+</html>

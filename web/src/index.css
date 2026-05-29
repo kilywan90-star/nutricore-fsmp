@@ -1,0 +1,60 @@
+@import "tailwindcss";
+
+@theme {
+  --color-canvas-bg: #1a1a2e;
+  --color-canvas-surface: #16213e;
+  --color-canvas-border: #2a2a4a;
+  --color-accent-primary: #7c3aed;
+  --color-accent-secondary: #a78bfa;
+  --color-success: #22c55e;
+  --color-warning: #f59e0b;
+  --color-error: #ef4444;
+  --color-text-primary: #f1f5f9;
+  --color-text-secondary: #94a3b8;
+  --color-panel-bg: #0f0f23;
+  --color-panel-border: #1e1e3a;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body, #root {
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
+}
+
+body {
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  background: var(--color-canvas-bg);
+  color: var(--color-text-primary);
+}
+
+/* React Flow overrides */
+.react-flow__node {
+  font-size: 12px;
+}
+
+.react-flow__edge-path {
+  stroke: var(--color-accent-secondary);
+  stroke-width: 2;
+}
+
+.react-flow__background {
+  background: var(--color-canvas-bg) !important;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: var(--color-panel-bg);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--color-canvas-border);
+  border-radius: 3px;
+}

@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>标书助手 - 管理后台</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; background: #f0f2f5; }
+  .header { background: #1677ff; color: #fff; padding: 16px 24px; display: flex; justify-content: space-between; align-items: center; }
+  .header h1 { font-size: 20px; }
+  .layout { display: flex; min-height: calc(100vh - 56px); }
+  .sidebar { width: 200px; background: #fff; padding: 12px 0; border-right: 1px solid #e8e8e8; }
+  .sidebar a { display: block; padding: 12px 24px; color: #333; text-decoration: none; font-size: 14px; }
+  .sidebar a:hover, .sidebar a.active { background: #f0f5ff; color: #1677ff; }
+  .main { flex: 1; padding: 24px; }
+  .card { background: #fff; border-radius: 8px; padding: 20px; margin-bottom: 16px; box-shadow: 0 1px 4px rgba(0,0,0,.06); }
+  .card-title { font-size: 16px; font-weight: 600; margin-bottom: 16px; }
+  .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px; }
+  .stat-card { background: #fff; border-radius: 8px; padding: 20px; text-align: center; box-shadow: 0 1px 4px rgba(0,0,0,.06); }
+  .stat-value { font-size: 28px; font-weight: 700; color: #1677ff; }
+  .stat-label { font-size: 13px; color: #999; margin-top: 4px; }
+  table { width: 100%; border-collapse: collapse; }
+  th, td { padding: 10px 12px; text-align: left; border-bottom: 1px solid #f0f0f0; font-size: 13px; }
+  th { background: #fafafa; font-weight: 600; }
+  .badge { padding: 2px 8px; border-radius: 10px; font-size: 12px; }
+  .badge-success { background: #f6ffed; color: #52c41a; }
+  .badge-warning { background: #fff7e6; color: #fa8c16; }
+  .badge-danger { background: #fff2f0; color: #ff4d4f; }
+  .badge-info { background: #f0f5ff; color: #1677ff; }
+  .tabs { display: flex; gap: 0; margin-bottom: 16px; }
+  .tab { padding: 8px 20px; cursor: pointer; border: 1px solid #d9d9d9; background: #fff; font-size: 13px; }
+  .tab:first-child { border-radius: 6px 0 0 6px; }
+  .tab:last-child { border-radius: 0 6px 6px 0; }
+  .tab.active { background: #1677ff; color: #fff; border-color: #1677ff; }
+  .tab-content { display: none; }
+  .tab-content.active { display: block; }
+  .api-key-section { margin-top: 16px; }
+  .api-key-item { display: flex; justify-content: space-between; padding: 10px 12px; background: #fafafa; border-radius: 6px; margin-bottom: 8px; font-size: 13px; font-family: monospace; }
+  input, select { padding: 8px 12px; border: 1px solid #d9d9d9; border-radius: 6px; font-size: 13px; width: 100%; margin-bottom: 8px; }
+  .btn { padding: 8px 16px; border-radius: 6px; font-size: 13px; cursor: pointer; border: none; }
+  .btn-primary { background: #1677ff; color: #fff; }
+  .btn-danger { background: #ff4d4f; color: #fff; }
+  .btn-default { background: #fff; border: 1px solid #d9d9d9; }
+  .loading { text-align: center; padding: 40px; color: #999; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>标书助手 — 管理后台</h1>
+  <span style="font-size:13px;opacity:0.9">v2.0.0</span>
+</div>
+
+<div class="layout">
+  <nav class="sidebar">
+    <a href="#" class="active" onclick="showSection('dashboard')">数据概览</a>
+    <a href="#" onclick="showSection('users')">用户管理</a>
+    <a href="#" onclick="showSection('orders')">订单管理</a>
+    <a href="#" onclick="showSection('templates')">模板管理</a>
+    <a href="#" onclick="showSection('settings')">系统设置</a>
+  </nav>
+
+  <main class="main" id="content">
+    <div class="loading">加载中...</div>
+  </main>
+</div>
+
+<script>
+const API_BASE = '/api';
+let token = '';
+
+async function api(path, options = {}) {
+  const headers = { 'Content-Type': 'application/json', ...options.headers };
+  if (token) headers['Authorization'] = `Bearer ${token}`;
+  const res = await fetch(API_BASE + path, { ...options, headers });
+  if (res.status === 401) { alert('请先登录'); return null; }
+  return res.json();
+}
+
+function showSection(name) {
+  document.querySelectorAll('.sidebar a').forEach(a => a.classList.remove('active'));
+  event.target.classList.add('active');
+  loadSection(name);
+}
+
+function loadSection(name) {
+  const content = document.getElementById('content');
+  switch(name) {
+    case 'dashboard': renderDashboard(content); break;
+    case 'users': renderUsers(content); break;
+    case 'orders': renderOrders(content); break;
+    case 'templates': renderTemplates(content); break;
+    case 'settings': renderSettings(content); break;
+  }
+}
+
+async function renderDashboard(el) {
+  el.innerHTML = `
+    <div class="stats">
+      <div class="stat-card"><div class="stat-value">-</div><div class="stat-label">总用户数</div></div>
+      <div class="stat-card"><div class="stat-value">-</div><div class="stat-label">今日生成次数</div></div>
+      <div class="stat-card"><div class="stat-value">-</div><div class="stat-label">今日收入(元)</div></div>
+      <div class="stat-card"><div class="stat-value">-</div><div class="stat-label">活跃会员数</div></div>
+    </div>
+    <div class="card">
+      <div class="card-title">最近订单</div>
+      <p style="color:#999;font-size:13px">数据加载功能开发中...请直接查询订单管理标签页</p>
+    </div>`;
+}
+
+async function renderUsers(el) {
+  el.innerHTML = `
+    <div class="card">
+      <div class="card-title">用户管理</div>
+      <div style="margin-bottom:12px">
+        <input type="text" placeholder="搜索用户（手机号/昵称）" style="width:300px;display:inline-block;margin-right:8px">
+        <button class="btn btn-primary" onclick="searchUsers()">搜索</button>
+      </div>
+      <p style="color:#999;font-size:13px">用户列表 API: GET /api/admin/users （需添加管理端接口后可用）</p>
+    </div>`;
+}
+
+async function renderOrders(el) {
+  el.innerHTML = `
+    <div class="card">
+      <div class="card-title">订单管理</div>
+      <div class="tabs">
+        <div class="tab active" onclick="filterOrders('all')">全部</div>
+        <div class="tab" onclick="filterOrders('pending')">待支付</div>
+        <div class="tab" onclick="filterOrders('paid')">已支付</div>
+        <div class="tab" onclick="filterOrders('refunded')">已退款</div>
+      </div>
+      <p style="color:#999;font-size:13px">订单列表 API: GET /api/admin/orders （需添加管理端接口后可用）</p>
+    </div>`;
+}
+
+async function renderTemplates(el) {
+  el.innerHTML = `
+    <div class="card">
+      <div class="card-title">提示词模板管理</div>
+      <p style="margin-bottom:16px;color:#666;font-size:13px">管理的提示词模板文件位于：backend/core/prompts/</p>
+      <div id="template-list"></div>
+    </div>`;
+
+  try {
+    const res = await api('/generator/industries');
+    if (res && res.status === 'success') {
+      let html = '';
+      for (const [industry, types] of Object.entries(res.data)) {
+        html += `<div style="margin-bottom:12px"><strong>${industry}</strong>: ${types.join(', ')}</div>`;
+      }
+      document.getElementById('template-list').innerHTML = html || '<p style="color:#999">暂无模板</p>';
+    }
+  } catch(e) {}
+}
+
+async function renderSettings(el) {
+  el.innerHTML = `
+    <div class="card">
+      <div class="card-title">系统配置</div>
+      <div class="form-group">
+        <label>DeepSeek API Key</label>
+        <input type="password" id="apiKey" placeholder="sk-...">
+      </div>
+      <div class="form-group">
+        <label>API Base URL</label>
+        <input type="text" id="apiBase" value="https://api.deepseek.com" placeholder="https://api.deepseek.com">
+      </div>
+      <div class="form-group">
+        <label>默认模型</label>
+        <select id="model">
+          <option value="deepseek-chat">deepseek-chat (V4)</option>
+          <option value="deepseek-reasoner">deepseek-reasoner (R1)</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>生成温度 (0-1)</label>
+        <input type="number" id="temperature" value="0.3" min="0" max="1" step="0.1">
+      </div>
+      <button class="btn btn-primary" onclick="saveSettings()">保存配置</button>
+      <p style="color:#999;font-size:12px;margin-top:12px">配置保存 API: POST /api/admin/configs （需添加管理端接口后可用）</p>
+    </div>
+    <div class="card">
+      <div class="card-title">微信配置</div>
+      <div class="form-group">
+        <label>小程序 AppID</label>
+        <input type="text" id="wxAppId" placeholder="wx...">
+      </div>
+      <div class="form-group">
+        <label>商户号 MCHID</label>
+        <input type="text" id="wxMchId" placeholder="微信支付商户号">
+      </div>
+      <button class="btn btn-primary" onclick="saveSettings()">保存微信配置</button>
+    </div>
+    <div class="card">
+      <div class="card-title">订阅套餐配置</div>
+      <p style="color:#666;font-size:13px">套餐配置通过数据库 subscription_plans 表管理，可通过 API 增删改查</p>
+      <p style="color:#999;font-size:12px;margin-top:4px">参见 db/models.py 中的 SubscriptionPlan 和 CountPack 模型</p>
+    </div>`;
+}
+
+// 初始化
+showSection('dashboard');
+</script>
+
+</body>
+</html>

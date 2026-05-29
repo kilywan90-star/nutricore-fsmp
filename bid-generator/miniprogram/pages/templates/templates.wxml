@@ -1,0 +1,17 @@
+<!-- 模板中心 -->
+<view class="container">
+  <scroll-view scroll-x class="industry-filter">
+    <view class="filter-item {{currentIndustry === item ? 'active' : ''}}"
+          wx:for="{{industries}}" wx:key="*this"
+          bindtap="selectIndustry" data-industry="{{item}}">{{item}}</view>
+  </scroll-view>
+
+  <view class="template-list">
+    <view class="template-card" wx:for="{{templates}}" wx:key="name" bindtap="useTemplate" data-template="{{item}}">
+      <view class="template-name">{{item.name}}</view>
+      <view class="template-type">{{item.type}}</view>
+      <view class="template-desc">{{item.desc}}</view>
+      <button class="btn-use" size="mini">立即使用</button>
+    </view>
+  </view>
+</view>

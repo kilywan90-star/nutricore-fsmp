@@ -1,0 +1,35 @@
+<!-- 套餐购买页 -->
+<view class="container">
+  <view class="tabs">
+    <view class="tab {{currentTab === 'subscription' ? 'active' : ''}}" bindtap="switchTab" data-tab="subscription">订阅套餐</view>
+    <view class="tab {{currentTab === 'count_pack' ? 'active' : ''}}" bindtap="switchTab" data-tab="count_pack">次数包</view>
+  </view>
+
+  <!-- 订阅套餐 -->
+  <view class="plan-list" wx:if="{{currentTab === 'subscription'}}">
+    <view class="plan-card" wx:for="{{plans}}" wx:key="id">
+      <view class="plan-name">{{item.name}}</view>
+      <view class="plan-price">
+        <text class="price-symbol">¥</text>{{item.price}}
+        <text class="price-period">/{{item.duration_days}}天</text>
+      </view>
+      <view class="plan-original" wx:if="{{item.original_price}}">原价 ¥{{item.original_price}}</view>
+      <view class="plan-features">
+        <view class="feature" wx:for="{{item.privileges}}" wx:key="*this" wx:for-item="p">✓ {{p}}</view>
+      </view>
+      <view class="plan-limit" wx:if="{{item.daily_gen_limit > 0}}">每日 {{item.daily_gen_limit}} 次生成</view>
+      <view class="plan-limit" wx:if="{{item.daily_gen_limit === -1}}">无限次生成</view>
+      <button class="btn-buy" bindtap="buyPlan" data-item="{{item}}">立即购买</button>
+    </view>
+  </view>
+
+  <!-- 次数包 -->
+  <view class="plan-list" wx:if="{{currentTab === 'count_pack'}}">
+    <view class="pack-card" wx:for="{{countPacks}}" wx:key="id">
+      <view class="pack-name">{{item.name}}</view>
+      <view class="pack-meta">{{item.count}} 次 · 单价 ¥{{item.unit_price}}/次</view>
+      <view class="pack-price">¥{{item.price}}</view>
+      <button class="btn-buy" bindtap="buyPack" data-item="{{item}}">立即购买</button>
+    </view>
+  </view>
+</view>

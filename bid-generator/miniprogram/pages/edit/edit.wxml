@@ -1,0 +1,39 @@
+<!-- 标书编辑页 -->
+<view class="container">
+  <view class="toolbar">
+    <button class="tool-btn" bindtap="validateBid" loading="{{isValidating}}">🔍 智能校验</button>
+    <button class="tool-btn" bindtap="regenerateSection">🔄 重生成章节</button>
+    <button class="tool-btn" bindtap="exportDocx" loading="{{isExporting}}">📥 导出Word</button>
+  </view>
+
+  <!-- 校验结果 -->
+  <view class="validation-panel" wx:if="{{validationResult}}">
+    <view class="val-score">综合评分：{{validationResult.overall_score}} 分</view>
+    <view class="val-section" wx:if="{{validationResult.errors.length > 0}}">
+      <view class="val-title">❌ 错误 ({{validationResult.errors.length}})</view>
+      <view class="val-item" wx:for="{{validationResult.errors}}" wx:key="index">
+        {{item.message}} — <text class="val-suggestion">{{item.suggestion}}</text>
+      </view>
+    </view>
+    <view class="val-section" wx:if="{{validationResult.warnings.length > 0}}">
+      <view class="val-title">⚠️ 警告 ({{validationResult.warnings.length}})</view>
+      <view class="val-item" wx:for="{{validationResult.warnings}}" wx:key="index">
+        {{item.message}}
+      </view>
+    </view>
+    <view class="val-summary" wx:if="{{validationResult.improvement_summary}}">
+      {{validationResult.improvement_summary}}
+    </view>
+  </view>
+
+  <!-- 标书内容 -->
+  <scroll-view scroll-y class="content-scroll">
+    <view class="bid-content" wx:if="{{bidContent}}">
+      <rich-text nodes="{{bidContent}}"></rich-text>
+    </view>
+    <view class="empty" wx:else>
+      <view class="empty-icon">📝</view>
+      <view class="empty-text">标书内容加载中...</view>
+    </view>
+  </scroll-view>
+</view>

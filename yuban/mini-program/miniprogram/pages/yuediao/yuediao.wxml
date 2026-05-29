@@ -1,0 +1,120 @@
+<!-- 约钓页面 - 找钓友 + 陪钓服务 -->
+<view class="page">
+  <!-- Tab切换 -->
+  <view class="yuediao-tabs">
+    <view class="tab-item {{activeTab === 'buddies' ? 'active' : ''}}" bindtap="switchTab" data-tab="buddies">
+      <text>找钓友</text>
+    </view>
+    <view class="tab-item {{activeTab === 'companions' ? 'active' : ''}}" bindtap="switchTab" data-tab="companions">
+      <text>陪钓服务</text>
+    </view>
+  </view>
+
+  <!-- ===== 找钓友 ===== -->
+  <view wx:if="{{activeTab === 'buddies'}}" class="tab-content">
+    <!-- 约钓列表 -->
+    <scroll-view class="list-scroll" scroll-y bindscrolltolower="loadMoreSessions">
+      <block wx:for="{{sessions}}" wx:key="id">
+        <view class="card session-card">
+          <view class="flex">
+            <image class="avatar" src="{{item.creator.avatar || '/static/default-avatar.png'}}" mode="aspectFill" />
+            <view class="flex-1" style="margin-left:16rpx">
+              <view class="flex-between">
+                <text class="text-bold">{{item.creator.nickname}}</text>
+                <text class="tag tag-green">{{item.status}}</text>
+              </view>
+              <view class="mt-8 text-sm text-muted">
+                <text>🎯 {{item.spot ? item.spot.name : '未指定钓点'}}</text>
+              </view>
+              <view class="mt-4 text-sm text-muted">
+                <text>📅 {{item.target_date}}</text>
+                <text style="margin-left:16rpx">👥 {{item.current_count}}/{{item.max_participants}}人</text>
+              </view>
+              <view class="mt-4 text-sm text-muted" wx:if="{{item.requirements}}">
+                <text>💬 {{item.requirements}}</text>
+              </view>
+              <button class="btn-outline mt-8" style="font-size:24rpx;padding:8rpx 24rpx" bindtap="joinSession" data-id="{{item.id}}">
+                加入
+              </button>
+            </view>
+          </view>
+        </view>
+      </block>
+
+      <view wx:if="{{sessions.length === 0}}" class="text-center p-24 text-muted">
+        <text>暂无约钓活动，发布第一个吧</text>
+      </view>
+    </scroll-view>
+
+    <!-- 发布约钓按钮 -->
+    <view class="fab" bindtap="showCreateSession">
+      <text class="fab-text">+</text>
+    </view>
+
+    <!-- 创建约钓弹窗 -->
+    <view class="publish-modal" wx:if="{{showCreateModal}}">
+      <view class="modal-mask" bindtap="hideCreateSession"></view>
+      <view class="modal-content">
+        <view class="flex-between p-24">
+          <text class="text-lg text-bold">发起约钓</text>
+          <text bindtap="hideCreateSession" style="font-size:40rpx;color:#999">✕</text>
+        </view>
+        <view class="p-24">
+          <input class="form-input" placeholder="目标钓点名称" value="{{createForm.spotName}}" bindinput="onSpotInput" />
+          <input class="form-input mt-16" placeholder="日期 (如: 2026-06-01)" value="{{createForm.date}}" bindinput="onDateInput" />
+          <input class="form-input mt-16" placeholder="最多人数" type="number" value="{{createForm.maxParticipants}}" bindinput="onMaxInput" />
+          <input class="form-input mt-16" placeholder="要求/备注" value="{{createForm.requirements}}" bindinput="onReqInput" />
+          <button class="btn-primary mt-24" style="width:100%" bindtap="submitSession">发布约钓</button>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- ===== 陪钓服务 ===== -->
+  <view wx:if="{{activeTab === 'companions'}}" class="tab-content">
+    <scroll-view class="list-scroll" scroll-y>
+      <block wx:for="{{companions}}" wx:key="id">
+        <view class="card companion-card">
+          <view class="flex">
+            <image class="avatar-lg" src="{{item.user.avatar || '/static/default-avatar.png'}}" mode="aspectFill" />
+            <view class="flex-1" style="margin-left:16rpx">
+              <view class="flex-between">
+                <view>
+                  <text class="text-bold">{{item.user.nickname}}</text>
+                  <text wx:if="{{item.verified}}" class="tag tag-green" style="margin-left:8rpx">已认证</text>
+                </view>
+                <text class="text-bold" style="color:#FA5151">¥{{item.price_per_hour}}/小时</text>
+              </view>
+              <view class="mt-4">
+                <text class="tag tag-blue">{{item.type}}</text>
+                <text class="text-sm text-muted">⭐{{item.rating}} · {{item.order_count}}单</text>
+              </view>
+              <view class="mt-8 text-sm text-muted" wx:if="{{item.bio}}">
+                <text>{{item.bio}}</text>
+              </view>
+              <view class="flex-between mt-12">
+                <view class="flex" wx:if="{{item.services && item.services.length > 0}}">
+                  <text wx:for="{{item.services}}" wx:key="*this" class="text-sm text-muted" style="margin-right:16rpx">
+                    ✔ {{item}}
+                  </text>
+                </view>
+                <button class="btn-primary" style="font-size:24rpx;padding:8rpx 24rpx" bindtap="bookCompanion" data-id="{{item.id}}">
+                  立即预约
+                </button>
+              </view>
+            </view>
+          </view>
+        </view>
+      </block>
+
+      <view wx:if="{{companions.length === 0}}" class="text-center p-24 text-muted">
+        <text>暂无陪钓服务者</text>
+      </view>
+    </scroll-view>
+
+    <!-- 注册成为陪钓 -->
+    <view class="register-btn" bindtap="showRegisterCompanion">
+      <text class="text-sm" style="color:#07C160">成为陪钓服务者 ></text>
+    </view>
+  </view>
+</view>

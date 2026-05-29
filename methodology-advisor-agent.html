@@ -1,0 +1,1828 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>方法论智能体 · Methodology Advisor</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700;900&display=swap');
+
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Noto Sans SC', 'Microsoft YaHei', sans-serif;
+    background: #f5f5f0;
+    min-height: 100vh;
+    color: #1a1a2e;
+  }
+
+  /* ═══════════════ HEADER ═══════════════ */
+  .app-header {
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+    color: #fff;
+    padding: 16px 32px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 3px solid #e2b04a;
+  }
+  .app-header h1 {
+    font-size: 22px; font-weight: 900; letter-spacing: 1px;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .app-header h1 .icon { font-size: 28px; }
+  .app-header .stats {
+    font-size: 12px; opacity: 0.8; text-align: right; line-height: 1.5;
+  }
+  .app-header .stats strong { color: #e2b04a; font-size: 16px; }
+
+  /* API 状态与设置按钮 */
+  .header-right { display: flex; align-items: center; gap: 12px; }
+  .api-status-dot {
+    width: 10px; height: 10px; border-radius: 50%; display: inline-block;
+    background: #94a3b8; transition: background 0.3s;
+  }
+  .api-status-dot.active { background: #22c55e; box-shadow: 0 0 6px #22c55e; }
+  .api-status-dot.loading { background: #e2b04a; animation: pulse 1s infinite; }
+  .api-status-label { font-size: 11px; color: #94a3b8; vertical-align: middle; }
+  .api-settings-btn {
+    background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2);
+    color: #fff; padding: 6px 14px; border-radius: 6px; cursor: pointer;
+    font-size: 12px; font-weight: 500; transition: all 0.2s;
+    display: flex; align-items: center; gap: 5px;
+  }
+  .api-settings-btn:hover { background: rgba(255,255,255,0.2); border-color: #e2b04a; }
+  .api-settings-btn .gear { font-size: 15px; }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; } 50% { opacity: 0.4; }
+  }
+
+  /* 加载覆盖层 */
+  .loading-overlay {
+    position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(250,250,248,0.92); z-index: 10;
+    display: flex; flex-direction: column; align-items: center;
+    justify-content: center; gap: 16px;
+  }
+  .loading-overlay.hidden { display: none; }
+  .loading-spinner {
+    width: 40px; height: 40px; border-radius: 50%;
+    border: 4px solid #e5e7eb; border-top-color: #e2b04a;
+    animation: spin 0.8s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .loading-text { font-size: 13px; font-weight: 500; color: #64748b; }
+  .loading-model { font-size: 11px; color: #94a3b8; }
+  .loading-cancel {
+    margin-top: 8px; padding: 6px 18px; border: 1px solid #d0d5dd;
+    background: #fff; border-radius: 6px; cursor: pointer; font-size: 11px;
+    color: #64748b; transition: all 0.2s;
+  }
+  .loading-cancel:hover { border-color: #dc2626; color: #dc2626; }
+
+  /* 设置弹窗 */
+  .settings-modal-overlay {
+    position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.5); z-index: 200;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .settings-modal-overlay.hidden { display: none; }
+  .settings-modal {
+    background: #fff; border-radius: 10px; width: 520px; max-height: 80vh;
+    overflow-y: auto; box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+  }
+  .settings-modal-header {
+    padding: 16px 20px; border-bottom: 1px solid #e5e7eb;
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .settings-modal-header h3 { font-size: 16px; }
+  .settings-modal-body { padding: 20px; font-size: 12px; }
+  .settings-modal-body .form-group { margin-bottom: 14px; }
+  .settings-modal-body label {
+    display: block; font-weight: 700; margin-bottom: 4px;
+    font-size: 11px; color: #334155; text-transform: uppercase; letter-spacing: 0.5px;
+  }
+  .settings-modal-body select,
+  .settings-modal-body input[type="text"],
+  .settings-modal-body input[type="password"],
+  .settings-modal-body input[type="url"] {
+    width: 100%; padding: 8px 10px; border: 1.5px solid #d0d5dd;
+    border-radius: 6px; font-size: 12px; font-family: inherit;
+    transition: border-color 0.2s;
+  }
+  .settings-modal-body select:focus,
+  .settings-modal-body input:focus { outline: none; border-color: #e2b04a; }
+  .settings-modal-body .hint {
+    font-size: 10px; color: #94a3b8; margin-top: 3px;
+  }
+  .settings-modal-body .form-actions {
+    display: flex; gap: 8px; margin-top: 20px;
+  }
+  .btn-primary {
+    padding: 8px 18px; background: #e2b04a; color: #1a1a2e;
+    border: none; border-radius: 6px; font-weight: 700; cursor: pointer;
+    font-size: 12px; transition: all 0.2s;
+  }
+  .btn-primary:hover { background: #d4a030; }
+  .btn-secondary {
+    padding: 8px 18px; background: #f1f5f9; color: #334155;
+    border: 1px solid #d0d5dd; border-radius: 6px; cursor: pointer;
+    font-size: 12px; transition: all 0.2s;
+  }
+  .btn-secondary:hover { background: #e5e7eb; }
+  .btn-danger {
+    padding: 8px 18px; background: #fff; color: #dc2626;
+    border: 1px solid #fca5a5; border-radius: 6px; cursor: pointer;
+    font-size: 12px; transition: all 0.2s;
+  }
+  .btn-danger:hover { background: #fef2f2; }
+  .test-result {
+    margin-top: 8px; padding: 8px 12px; border-radius: 6px;
+    font-size: 11px; font-weight: 500;
+  }
+  .test-result.success { background: #d1fae5; color: #065f46; }
+  .test-result.error { background: #fee2e2; color: #991b1b; }
+  .test-result.testing { background: #fef3c7; color: #92400e; }
+
+  /* ═══════════════ MAIN LAYOUT ═══════════════ */
+  .main-container {
+    display: grid;
+    grid-template-columns: 340px 1fr;
+    height: calc(100vh - 80px);
+    gap: 0;
+  }
+  .main-container > * { min-height: 0; }
+
+  /* ═══════════════ LEFT PANEL ═══════════════ */
+  .left-panel {
+    background: #fff;
+    border-right: 1px solid #d0d5dd;
+    display: flex; flex-direction: column;
+    overflow: hidden;
+  }
+
+  /* 问题输入区 */
+  .problem-input-area {
+    padding: 16px; border-bottom: 1px solid #e5e7eb;
+  }
+  .problem-input-area h3 {
+    font-size: 13px; font-weight: 700; margin-bottom: 8px;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .problem-input-area h3 .dot { width: 8px; height: 8px; border-radius: 50%; background: #e2b04a; }
+  .problem-input-area textarea {
+    width: 100%; height: 80px; border: 1.5px solid #d0d5dd; border-radius: 6px;
+    padding: 10px; font-size: 12px; font-family: inherit; resize: vertical;
+    transition: border-color 0.2s;
+  }
+  .problem-input-area textarea:focus { outline: none; border-color: #e2b04a; }
+
+  .domain-tags {
+    display: flex; flex-wrap: wrap; gap: 5px; margin-top: 8px;
+  }
+  .domain-tag {
+    font-size: 10.5px; padding: 4px 10px; border-radius: 20px;
+    border: 1.5px solid #d0d5dd; cursor: pointer; background: #fff;
+    transition: all 0.15s; font-weight: 500; user-select: none;
+  }
+  .domain-tag:hover { border-color: #e2b04a; }
+  .domain-tag.active { background: #1a1a2e; color: #fff; border-color: #1a1a2e; }
+
+  .analyze-btn {
+    width: 100%; margin-top: 10px; padding: 10px;
+    background: #e2b04a; color: #1a1a2e; border: none; border-radius: 6px;
+    font-size: 13px; font-weight: 700; cursor: pointer; letter-spacing: 0.5px;
+    transition: all 0.2s;
+  }
+  .analyze-btn:hover { background: #d4a030; transform: translateY(-1px); }
+  .analyze-btn:disabled { background: #d0d5dd; cursor: not-allowed; transform: none; }
+
+  /* 分类筛选 */
+  .category-filter {
+    padding: 10px 16px; border-bottom: 1px solid #e5e7eb;
+    display: flex; flex-wrap: wrap; gap: 4px;
+  }
+  .cat-chip {
+    font-size: 10px; padding: 3px 8px; border-radius: 12px;
+    border: 1px solid #d0d5dd; cursor: pointer; background: #fff;
+    white-space: nowrap; transition: all 0.15s; user-select: none;
+  }
+  .cat-chip:hover { border-color: #e2b04a; }
+  .cat-chip.active { background: #e2b04a; color: #1a1a2e; border-color: #e2b04a; font-weight: 700; }
+
+  /* 方法论列表 */
+  .method-list { flex: 1; overflow-y: auto; padding: 6px 0; }
+  .method-item {
+    padding: 10px 16px; cursor: pointer; border-left: 3px solid transparent;
+    transition: all 0.15s; border-bottom: 1px solid #f3f4f6;
+  }
+  .method-item:hover { background: #fef9e7; border-left-color: #e2b04a; }
+  .method-item.selected { background: #fef3c7; border-left-color: #e2b04a; }
+  .method-item .name { font-size: 13px; font-weight: 700; }
+  .method-item .name .acronym { color: #e2b04a; margin-right: 4px; }
+  .method-item .subtitle { font-size: 10px; color: #64748b; margin-top: 2px; }
+  .method-item .tags-row { display: flex; gap: 4px; margin-top: 4px; flex-wrap: wrap; }
+  .method-item .mini-tag {
+    font-size: 9px; padding: 1px 6px; border-radius: 10px;
+    background: #f1f5f9; color: #64748b;
+  }
+  .method-item .star-rating { color: #e2b04a; font-size: 11px; margin-top: 3px; }
+
+  /* ═══════════════ RIGHT PANEL ═══════════════ */
+  .right-panel {
+    background: #fafaf8;
+    display: grid;
+    grid-template-rows: auto 1fr;
+    overflow: hidden;
+  }
+  .right-panel > * { min-height: 0; }
+
+  /* 诊断结果条 */
+  .diagnosis-bar {
+    background: #fff; padding: 14px 24px; border-bottom: 1px solid #e5e7eb;
+    display: flex; align-items: center; gap: 16px; flex-wrap: wrap;
+    position: relative; z-index: 2;
+  }
+  .diagnosis-bar .diag-label { font-size: 11px; color: #64748b; font-weight: 500; white-space: nowrap; }
+  .diagnosis-bar .diag-value {
+    font-size: 12px; font-weight: 700; padding: 4px 12px; border-radius: 4px;
+  }
+  .diag-type-strategy { background: #dbeafe; color: #1e40af; }
+  .diag-type-process { background: #d1fae5; color: #065f46; }
+  .diag-type-problem { background: #fee2e2; color: #991b1b; }
+  .diag-type-decision { background: #ede9fe; color: #5b21b6; }
+  .diag-type-innovation { background: #fff7ed; color: #9a3412; }
+  .diag-complexity { background: #f1f5f9; color: #334155; }
+
+  /* 结果内容区 */
+  .result-content {
+    overflow-y: scroll; overflow-x: hidden;
+    padding: 16px 20px 50px 20px;
+    min-height: 0;
+    scrollbar-width: auto;
+    scrollbar-color: #e2b04a #e5e7eb;
+    scrollbar-gutter: stable;
+  }
+  .result-content > * { margin-bottom: 10px; }
+  .result-content > *:last-child { margin-bottom: 0; }
+  .result-content::-webkit-scrollbar {
+    width: 14px;
+  }
+  .result-content::-webkit-scrollbar-track {
+    background: #e5e7eb; border-radius: 7px; margin: 4px 0;
+    box-shadow: inset 0 0 3px rgba(0,0,0,0.1);
+  }
+  .result-content::-webkit-scrollbar-thumb {
+    background: #e2b04a; border-radius: 7px; border: 3px solid #e5e7eb;
+    min-height: 40px;
+  }
+  .result-content::-webkit-scrollbar-thumb:hover {
+    background: #c9952a;
+  }
+  .result-content::-webkit-scrollbar-thumb:active {
+    background: #a67c1e;
+  }
+
+  .result-placeholder {
+    flex: 1; display: flex; flex-direction: column;
+    align-items: center; justify-content: center; color: #94a3b8;
+  }
+  .result-placeholder .big-icon { font-size: 64px; margin-bottom: 12px; opacity: 0.4; }
+  .result-placeholder p { font-size: 13px; }
+
+  /* 推荐卡片 */
+  .rec-card {
+    background: #fff; border-radius: 8px; border: 1.5px solid #d0d5dd;
+    overflow: hidden;
+  }
+  .rec-card-header {
+    padding: 9px 14px; font-weight: 700; font-size: 12px;
+    display: flex; justify-content: space-between; align-items: center;
+    cursor: pointer;
+  }
+  .rec-card-header .rank-badge {
+    width: 28px; height: 28px; border-radius: 50%; display: flex;
+    align-items: center; justify-content: center; font-weight: 900; font-size: 14px;
+    color: #fff;
+  }
+  .rec-card-body { padding: 0 16px 14px; display: none; overflow-wrap: break-word; word-break: break-word; }
+  .rec-card.expanded .rec-card-body { display: block; }
+  .rec-card.expanded .rec-card-header { border-bottom: 1px solid #e5e7eb; }
+
+  .rec-card-body .section { margin-top: 6px; }
+  .rec-card-body .section-title {
+    font-size: 10.5px; font-weight: 700; color: #64748b;
+    text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 2px;
+  }
+  .rec-card-body .section-content { font-size: 11px; line-height: 1.55; }
+
+  .step-list { list-style: none; padding: 0; }
+  .step-list li {
+    padding: 2px 0; padding-left: 16px; position: relative;
+    font-size: 10.5px; line-height: 1.45;
+  }
+  .step-list li::before {
+    content: ''; position: absolute; left: 0; top: 10px;
+    width: 6px; height: 6px; border-radius: 50%; background: #e2b04a;
+  }
+
+  .combo-badge {
+    display: inline-block; padding: 3px 10px; border-radius: 4px;
+    font-size: 10.5px; font-weight: 700; margin: 2px;
+  }
+  .combo-primary { background: #fef3c7; color: #92400e; border: 1px solid #fcd34d; }
+  .combo-secondary { background: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; }
+
+  /* 方法论详情弹窗 */
+  .modal-overlay {
+    position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.5); z-index: 100;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .modal-overlay.hidden { display: none; }
+  .modal-box {
+    background: #fff; border-radius: 10px; width: 680px; max-height: 80vh;
+    overflow-y: auto; box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+  }
+  .modal-header {
+    padding: 16px 20px; border-bottom: 1px solid #e5e7eb;
+    display: flex; justify-content: space-between; align-items: center;
+    position: sticky; top: 0; background: #fff; z-index: 1;
+  }
+  .modal-header h3 { font-size: 18px; }
+  .modal-close {
+    width: 32px; height: 32px; border-radius: 50%; border: none;
+    background: #f1f5f9; cursor: pointer; font-size: 18px; display: flex;
+    align-items: center; justify-content: center;
+  }
+  .modal-body { padding: 20px; font-size: 12px; line-height: 1.8; }
+  .modal-body .meta-row {
+    display: flex; gap: 16px; flex-wrap: wrap; margin-bottom: 16px;
+  }
+  .modal-body .meta-item {
+    padding: 6px 12px; border-radius: 4px; font-size: 11px; font-weight: 500;
+  }
+
+  /* 对比表 */
+  .compare-table {
+    width: 100%; border-collapse: collapse; font-size: 11px; margin: 8px 0;
+    min-width: 600px;
+  }
+  .compare-table-wrapper {
+    overflow-x: auto; -webkit-overflow-scrolling: touch;
+  }
+  .compare-table th {
+    background: #1a1a2e; color: #fff; padding: 6px 10px; text-align: left;
+  }
+  .compare-table td { padding: 5px 10px; border: 1px solid #d0d5dd; }
+
+  /* 响应式 */
+  @media (max-width: 900px) {
+    .main-container { grid-template-columns: 1fr; }
+    .left-panel { max-height: 40vh; }
+  }
+
+  /* 打印 */
+  @media print {
+    .left-panel { display: none; }
+    .right-panel { overflow: visible; }
+    .result-content { overflow: visible !important; }
+  }
+</style>
+</head>
+<body>
+
+<div class="app-header">
+  <h1>
+    <span class="icon">&#x1F9E0;</span>
+    方法论智能体 · Methodology Advisor
+  </h1>
+  <div style="display:flex;align-items:center;gap:16px;">
+    <div class="stats">
+      方法论库：<strong id="methodCount">112</strong> 种 &nbsp;|&nbsp;
+      分类：<strong>10</strong> 大类 &nbsp;|&nbsp;
+      匹配引擎：<strong>v1.2</strong>
+    </div>
+    <span style="display:flex;align-items:center;gap:5px;">
+      <span class="api-status-dot" id="apiStatusDot" title="API 未配置"></span>
+      <span class="api-status-label" id="apiStatusLabel">未接入API</span>
+    </span>
+    <button class="api-settings-btn" onclick="openSettings()" title="API 配置">
+      <span class="gear">&#9881;</span> 配置
+    </button>
+  </div>
+</div>
+
+<div class="main-container">
+
+  <!-- ═══════════════ LEFT PANEL ═══════════════ -->
+  <div class="left-panel">
+    <div class="problem-input-area">
+      <h3><span class="dot"></span>描述你的问题 / 场景</h3>
+      <textarea id="problemInput" placeholder="例如：我们团队效率低下，项目经常延期，质量也不稳定，该用什么方法论？&#10;&#10;例如：公司想制定未来三年的战略，但市场环境变化太快，需要系统性的分析框架。&#10;&#10;例如：产品上线后用户留存很差，需要找到根本原因并快速迭代。"></textarea>
+      <div class="domain-tags" id="domainTags">
+        <span class="domain-tag" data-domain="strategy">战略规划</span>
+        <span class="domain-tag" data-domain="process">流程改进</span>
+        <span class="domain-tag" data-domain="problem">问题解决</span>
+        <span class="domain-tag" data-domain="decision">决策分析</span>
+        <span class="domain-tag" data-domain="innovation">创新设计</span>
+        <span class="domain-tag" data-domain="project">项目管理</span>
+        <span class="domain-tag" data-domain="team">团队管理</span>
+      </div>
+      <button class="analyze-btn" id="analyzeBtn">诊断问题 → 匹配方法论</button>
+    </div>
+
+    <div class="category-filter" id="categoryFilter">
+      <span class="cat-chip active" data-cat="all">全部</span>
+      <span class="cat-chip" data-cat="战略与规划">战略与规划</span>
+      <span class="cat-chip" data-cat="质量与改进">质量与改进</span>
+      <span class="cat-chip" data-cat="问题分析与解决">问题分析与解决</span>
+      <span class="cat-chip" data-cat="决策支持">决策支持</span>
+      <span class="cat-chip" data-cat="创新与设计">创新与设计</span>
+      <span class="cat-chip" data-cat="项目管理">项目管理</span>
+      <span class="cat-chip" data-cat="团队与人才">团队与人才</span>
+      <span class="cat-chip" data-cat="系统思维">系统思维</span>
+      <span class="cat-chip" data-cat="沟通表达">沟通表达</span>
+      <span class="cat-chip" data-cat="风险与安全">风险与安全</span>
+    </div>
+
+    <div class="method-list" id="methodList"></div>
+  </div>
+
+  <!-- ═══════════════ RIGHT PANEL ═══════════════ -->
+  <div class="right-panel">
+    <div class="diagnosis-bar" id="diagnosisBar">
+      <span class="diag-label">等待输入问题…</span>
+    </div>
+    <div class="result-content" id="resultContent">
+      <div class="result-placeholder">
+        <div class="big-icon">&#x1F50D;</div>
+        <p>在左侧输入你的问题，智能体将自动诊断<br>并匹配最合适的一种或多种方法论</p>
+        <p style="font-size:11px;margin-top:4px;color:#cbd5e1;">支持模糊描述，无需精确术语</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════ DETAIL MODAL ═══════════════ -->
+<div class="modal-overlay hidden" id="modalOverlay">
+  <div class="modal-box" id="modalBox"></div>
+</div>
+
+<!-- ═══════════════ API 配置弹窗 ═══════════════ -->
+<div class="settings-modal-overlay hidden" id="settingsModalOverlay">
+  <div class="settings-modal">
+    <div class="settings-modal-header">
+      <h3>&#9881; API 大模型配置</h3>
+      <button class="modal-close" onclick="closeSettings()">✕</button>
+    </div>
+    <div class="settings-modal-body">
+      <div class="form-group">
+        <label>API 提供商</label>
+        <select id="apiProvider" onchange="onProviderChange()">
+          <option value="openai">OpenAI (ChatGPT)</option>
+          <option value="anthropic">Anthropic (Claude)</option>
+          <option value="custom">自定义 (OpenAI 兼容)</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>API Key</label>
+        <input type="password" id="apiKey" placeholder="sk-... 或 api-key-...">
+        <div class="hint">密钥仅保存在浏览器 localStorage 中，不会上传</div>
+      </div>
+      <div class="form-group" id="endpointGroup" style="display:none;">
+        <label>API Endpoint URL</label>
+        <input type="url" id="apiEndpoint" placeholder="https://api.openai.com/v1/chat/completions">
+        <div class="hint">OpenAI 兼容接口地址</div>
+      </div>
+      <div class="form-group">
+        <label>模型名称</label>
+        <input type="text" id="apiModel" placeholder="gpt-4o / claude-sonnet-4-6 / deepseek-chat">
+      </div>
+      <div class="form-group">
+        <label>超时时间（秒）</label>
+        <input type="text" id="apiTimeout" value="30" style="width:80px;">
+      </div>
+      <div id="testResult"></div>
+      <div class="form-actions">
+        <button class="btn-primary" onclick="testConnection()">测试连接</button>
+        <button class="btn-secondary" onclick="saveConfig()">保存配置</button>
+        <button class="btn-danger" onclick="clearConfig()">清除配置</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════ 加载覆盖层 ═══════════════ -->
+<div class="loading-overlay hidden" id="loadingOverlay" style="position:absolute;top:0;left:0;right:0;bottom:0;background:rgba(250,250,248,0.92);z-index:10;display:none;flex-direction:column;align-items:center;justify-content:center;gap:16px;">
+  <div class="loading-spinner"></div>
+  <div class="loading-text" id="loadingText">正在通过 AI 大模型理解问题…</div>
+  <div class="loading-model" id="loadingModel"></div>
+  <button class="loading-cancel" onclick="cancelApiCall()">取消</button>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════
+//  方法论数据库
+// ═══════════════════════════════════════════════
+const METHOD_DB = [
+  // ── 战略与规划 ──
+  {id:"swot",name:"SWOT分析",acronym:"SWOT",category:"战略与规划",tags:["战略","分析","规划"],stars:5,complexity:"低",time:"短",origin:"Albert Humphrey, 1960s",desc:"通过分析优势(Strengths)、劣势(Weaknesses)、机会(Opportunities)、威胁(Threats)四个维度，全面评估组织或项目的战略地位。最通用的战略分析工具。",steps:["1. 列出内部优势","2. 列出内部劣势","3. 识别外部机会","4. 识别外部威胁","5. 交叉分析：SO策略(优势×机会)、WO策略(劣势×机会)、ST策略(优势×威胁)、WT策略(劣势×威胁)","6. 制定行动计划"],bestFor:"战略规划、项目评估、竞品分析、个人职业规划",limitations:"偏静态分析，不提供量化权重，主观性强",combos:["PESTEL → SWOT 形成内外部分析闭环","SWOT → TOWS矩阵 生成具体策略"]},
+  {id:"pestel",name:"PESTEL分析",acronym:"PESTEL",category:"战略与规划",tags:["宏观环境","战略","分析"],stars:4,complexity:"低",time:"中",origin:"Francis Aguilar, 1967",desc:"从政治(Political)、经济(Economic)、社会(Social)、技术(Technological)、环境(Environmental)、法律(Legal)六个维度扫描宏观环境。",steps:["1. 政治因素分析（政策、监管、地缘政治）","2. 经济因素分析（增长率、通胀、汇率）","3. 社会因素分析（人口、文化、消费趋势）","4. 技术因素分析（新技术、数字化、研发）","5. 环境因素分析（可持续、气候变化）","6. 法律因素分析（法规、合规要求）"],bestFor:"宏观环境扫描、市场进入决策、战略规划",limitations:"易变成信息堆砌，缺乏重点，需配合其他框架判断优先级",combos:["PESTEL → SWOT (外部因素作为OT输入)","PESTEL → 波特五力 → 战略选择"]},
+  {id:"porter5",name:"波特五力模型",acronym:"Porter's 5F",category:"战略与规划",tags:["竞争分析","战略","行业"],stars:5,complexity:"中",time:"中",origin:"Michael Porter, 1979",desc:"分析行业竞争结构的经典模型：现有竞争者的竞争程度、新进入者威胁、替代品威胁、供应商议价能力、买方议价能力。",steps:["1. 评估现有竞争对手的竞争强度","2. 分析新进入者的进入壁垒","3. 识别替代产品或服务","4. 评估供应商的议价能力","5. 评估买方的议价能力","6. 综合判断行业吸引力"],bestFor:"行业分析、竞争战略、投资决策、市场进入",limitations:"偏静态，假设行业边界清晰，对平台经济/网络效应考虑不足",combos:["五力 → SWOT → 战略选择","五力 + 蓝海战略（防御+进攻）"]},
+  {id:"bcg",name:"BCG矩阵",acronym:"BCG",category:"战略与规划",tags:["产品组合","战略","投资"],stars:4,complexity:"低",time:"短",origin:"Boston Consulting Group, 1970",desc:"根据市场增长率和相对市场份额，将业务/产品分为四类：明星(Stars)、金牛(Cash Cows)、问题儿童(Question Marks)、瘦狗(Dogs)。",steps:["1. 确定每个业务的市场增长率和相对市场份额","2. 绘制BCG矩阵气泡图","3. 明星：投资增长","4. 金牛：收割现金流","5. 问题儿童：选择性投资或剥离","6. 瘦狗：剥离或关停"],bestFor:"产品组合管理、资源分配、业务单元评估",limitations:"仅两个维度过于简化，市场增长≠盈利，份额界定模糊",combos:["BCG + GE矩阵（多维度补充）","BCG → 安索夫矩阵 → 增长策略"]},
+  {id:"blueocean",name:"蓝海战略",acronym:"BOS",category:"战略与规划",tags:["创新战略","价值创新","增长"],stars:5,complexity:"中",time:"中",origin:"W. Chan Kim & Renée Mauborgne, 2005",desc:"通过价值创新创造无人竞争的市场空间（蓝海），而非在现有市场中与对手血拼（红海）。核心工具：战略布局图、四步动作框架(消除-减少-提升-创造)。",steps:["1. 绘制当前行业的战略布局图","2. 应用四步动作框架：消除(哪些被默认的元素可以去掉)","3. 减少(哪些元素应降到行业标准以下)","4. 提升(哪些元素应提升到行业标准以上)","5. 创造(创造行业从未有过的元素)","6. 形成新的价值曲线"],bestFor:"新业务探索、差异化战略、行业颠覆",limitations:"真正的蓝海窗口期短，需要持续创新，需区分'真正的蓝海'和'失败的尝试'",combos:["蓝海战略 + 设计思维（创新×用户洞察）","蓝海战略 → 精益创业（快速验证新价值曲线）"]},
+  {id:"ansoff",name:"安索夫矩阵",acronym:"Ansoff",category:"战略与规划",tags:["增长战略","市场","产品"],stars:4,complexity:"低",time:"短",origin:"Igor Ansoff, 1957",desc:"基于产品和市场两个维度，形成四种增长策略：市场渗透、市场开发、产品开发、多元化。",steps:["1. 市场渗透：现有产品×现有市场（提升份额）","2. 市场开发：现有产品×新市场（地理/人群扩展）","3. 产品开发：新产品×现有市场（创新满足现有客户）","4. 多元化：新产品×新市场（相关/非相关多元化）"],bestFor:"增长策略选择、业务扩展方向决策",limitations:"仅二维，未考虑能力、资源约束，多元化战略风险提示不足",combos:["安索夫 + BCG（方向×资源匹配）","安索夫 + 风险管理框架（评估各方向风险）"]},
+  {id:"balance",name:"平衡计分卡",acronym:"BSC",category:"战略与规划",tags:["绩效","战略执行","KPI"],stars:5,complexity:"中",time:"长",origin:"Kaplan & Norton, 1992",desc:"从财务、客户、内部流程、学习与成长四个维度将战略转化为具体的绩效指标，解决'战略无法落地'的问题。核心工具：战略地图。",steps:["1. 明确愿景和战略","2. 绘制战略地图（四个维度的因果链）","3. 财务维度：为股东创造什么价值？","4. 客户维度：为目标客户提供什么价值主张？","5. 内部流程维度：哪些流程必须卓越？","6. 学习与成长维度：需要哪些人才、技术、文化？","7. 设定KPI、目标值、行动方案"],bestFor:"战略执行、绩效管理、组织对齐",limitations:"实施复杂度高，需要组织高成熟度，KPI设定初期容易过多过杂",combos:["BSC + OKR（长期×短期目标管理）","BSC → PDCA（持续检视和迭代战略执行）"]},
+  {id:"okr",name:"OKR目标管理",acronym:"OKR",category:"战略与规划",tags:["目标管理","执行","对齐"],stars:5,complexity:"低",time:"中",origin:"Andy Grove (Intel), John Doerr, 1970s",desc:"目标(Objectives)与关键结果(Key Results)：设定有挑战性的定性目标，以可量化的关键结果来衡量进展。Google等科技公司广泛使用。",steps:["1. 设定公司级OKR（季度/年度）","2. 各团队/个人对齐制定OKR","3. O：鼓舞人心的定性目标","4. KR：3-5个可量化的关键结果","5. 每周检视进度(0-100%信心打分)","6. 季度末复盘打分(理想70%完成率)"],bestFor:"目标管理、战略执行、组织对齐、敏捷绩效",limitations:"不适用于日常运营指标，目标需要大胆但有争议，不适合纯KPI导向文化",combos:["OKR + BSC（灵活目标×系统绩效）","OKR + 复盘(AAR)（持续学习闭环）"]},
+
+  // ── 质量与改进 ──
+  {id:"pdca",name:"PDCA循环",acronym:"PDCA",category:"质量与改进",tags:["持续改进","质量管理","循环"],stars:5,complexity:"低",time:"持续",origin:"W. Edwards Deming, 1950s",desc:"Plan-Do-Check-Act：计划→执行→检查→行动的持续改进循环。所有质量管理和改进活动的基础方法论。",steps:["Plan 计划：定义问题、分析原因、制定对策","Do 执行：小规模试点实施","Check 检查：收集数据、验证效果","Act 行动：标准化成功经验、总结教训进入下一轮"],bestFor:"持续改进、质量管理、流程优化、任何需要迭代的工作",limitations:"改进速度较慢，不适用于突破性创新，需要纪律性执行",combos:["PDCA + DMAIC（一般改进×深度改进）","PDCA + 5 Whys（在Check阶段根因分析）"]},
+  {id:"dmaic",name:"六西格玛 DMAIC",acronym:"DMAIC",category:"质量与改进",tags:["质量","数据驱动","减少变异"],stars:5,complexity:"高",time:"长",origin:"Motorola, 1986; GE推广",desc:"Define-Measure-Analyze-Improve-Control：六西格玛核心方法论，以数据驱动减少过程变异和缺陷。目标是3.4 DPMO(每百万机会缺陷数)。",steps:["Define 定义：明确问题、范围、客户需求(VOC)","Measure 测量：收集数据、建立基线、验证测量系统","Analyze 分析：识别根因、验证因果关系（假设检验、回归分析）","Improve 改进：设计并实施解决方案(DOE实验设计)","Control 控制：标准化、监控、建立控制计划(SPC)"],bestFor:"制造质量、流程优化、缺陷减少、成本节约",limitations:"实施成本高、周期长、需专业培训(绿带/黑带)、不适合创新模糊问题",combos:["DMAIC + 精益（精益六西格玛）","DMAIC → PDCA（持续维持改进成果）"]},
+  {id:"lean",name:"精益思想",acronym:"Lean",category:"质量与改进",tags:["消除浪费","价值流","效率"],stars:5,complexity:"中",time:"中",origin:"Toyota Production System, 1950s",desc:"以客户价值为核心，识别并消除一切不创造价值的活动（浪费）。五大原则：定义价值、识别价值流、使价值流动、拉动、追求完美。识别7大浪费(Muda)：运输、库存、动作、等待、过度加工、过度生产、缺陷。",steps:["1. 从客户视角定义价值","2. 绘制价值流图(VSM)","3. 消除浪费，使价值顺畅流动","4. 建立拉动系统（下游需求拉动上游生产）","5. 持续追求完美"],bestFor:"运营效率、生产优化、服务流程改进、成本控制",limitations:"过度消减可能导致韧性不足，对创意工作的适用性有争议",combos:["精益 + 六西格玛（速度×质量）","精益 → PDCA（持续消除浪费）"]},
+  {id:"tqm",name:"全面质量管理",acronym:"TQM",category:"质量与改进",tags:["质量管理","全员参与","客户导向"],stars:4,complexity:"中",time:"长",origin:"Feigenbaum, Deming, Juran, 1950s-80s",desc:"以质量为中心、全员参与、客户满意为目标的系统化管理哲学。核心原则：客户导向、全员参与、过程方法、系统管理、持续改进、基于事实决策、互利的供方关系。",steps:["1. 建立以客户为中心的质量文化","2. 全员参与质量改进","3. 识别并管理关键过程","4. 建立测量和反馈系统","5. 持续培训和发展","6. 与供应商建立合作关系"],bestFor:"质量文化建设、组织变革、客户满意度提升",limitations:"文化转型周期长、难以量化ROI、容易变成口号式运动",combos:["TQM + PDCA（文化×执行）","TQM → ISO 9001（制度化管理体系）"]},
+  {id:"kaizen",name:"改善",acronym:"Kaizen",category:"质量与改进",tags:["持续改进","全员参与","日本"],stars:4,complexity:"低",time:"持续",origin:"Masaaki Imai, 1986 (源自TPS)",desc:"通过全员参与、每天小步改进来实现持续改善的哲学。核心原则：质疑现状、不责备、小步快跑、全员参与、现场主义(Gemba)。常用工具：改善提案、改善事件(Kaizen Event)、5S。",steps:["1. 去现场(Gemba)观察","2. 识别浪费和不合理(Muda/Mura/Muri)","3. 提出改善提案","4. 小范围试点","5. 验证效果","6. 标准化并横向展开"],bestFor:"现场管理、文化建设、渐进式改进",limitations:"难以解决系统性问题，突破性创新不足，需要持续的领导力支持",combos:["Kaizen + 精益（文化×工具）","Kaizen → 5S（基础改善→现场管理）"]},
+  {id:"8d",name:"8D问题解决法",acronym:"8D",category:"质量与改进",tags:["问题解决","8步法","汽车行业"],stars:4,complexity:"中",time:"中",origin:"Ford Motor Company, 1987",desc:"8 Disciplines：8个步骤的系统化问题解决方法，从临时措施到永久的预防性解决方案。汽车行业标准(ISO/TS 16949)。",steps:["D1 组建团队","D2 描述问题(5W2H)","D3 制定临时遏制措施","D4 根因分析(鱼骨图/5 Whys)","D5 制定永久纠正措施","D6 实施和验证","D7 预防再发生（系统层面）","D8 团队庆祝和学习"],bestFor:"质量问题、客户投诉、重复性问题",limitations:"步骤线性，实际需迭代，团队组建可能延迟响应",combos:["8D + 5 Whys（结构×根因）","8D → FMEA（预防再发→风险评估）"]},
+
+  // ── 问题分析与解决 ──
+  {id:"5whys",name:"5 Whys 五问法",acronym:"5Whys",category:"问题分析与解决",tags:["根因分析","简单","提问"],stars:4,complexity:"极低",time:"短",origin:"Sakichi Toyoda, 1930s (TPS)",desc:"通过连续追问'为什么'（通常5次）来穿透表面症状，找到问题的根本原因。最简洁的根因分析工具。",steps:["1. 明确问题陈述","2. 问：为什么发生？→ 记录答案","3. 对答案再问：为什么？→ 重复","4. 直到触及系统级根因（通常5次）","5. 制定和实施对策（针对根因而非症状）"],bestFor:"简单到中等复杂度的根因分析、事故调查",limitations:"结果依赖提问者的知识和视角，不同人可能问出不同根因，对复杂系统问题需配合其他工具",combos:["5 Whys + 鱼骨图（深度×广度）","5 Whys → PDCA（根因→对策循环）"]},
+  {id:"fishbone",name:"鱼骨图",acronym:"Ishikawa",category:"问题分析与解决",tags:["根因分析","可视化","头脑风暴"],stars:5,complexity:"低",time:"短",origin:"Kaoru Ishikawa, 1960s",desc:"又称石川图、因果图。将问题放在鱼头位置，通过5M1E(Man人、Machine机、Material料、Method法、Measurement测、Environment环)六个维度系统性地探寻可能原因。",steps:["1. 定义问题，写在鱼头位置","2. 绘制主骨，标注6个维度","3. 头脑风暴每个维度的可能原因(中骨→小骨)","4. 投票或数据验证关键原因","5. 针对关键原因制定对策"],bestFor:"头脑风暴原因分析、团队问题研讨、质量改进",limitations:"可能遗漏维度外的因素，各原因间缺乏因果权重",combos:["鱼骨图 + 5 Whys（广度×深度）","鱼骨图 → 帕累托分析（聚焦关键少数原因）"]},
+  {id:"triz",name:"TRIZ 创新问题解决理论",acronym:"TRIZ",category:"问题分析与解决",tags:["创新","工程","矛盾解决"],stars:5,complexity:"高",time:"中",origin:"Genrich Altshuller, 1946 (苏联)",desc:"基于对20万+专利的研究，提炼出创新的通用模式和原理。核心概念：技术矛盾（改善一个参数会恶化另一个参数）、40个发明原理、矛盾矩阵、物场分析。不是妥协，是解决矛盾。",steps:["1. 将具体问题抽象为TRIZ通用问题","2. 识别技术矛盾或物理矛盾","3. 利用矛盾矩阵查找推荐发明原理","4. 应用发明原理生成解决方案","5. 将方案具体化到特定领域"],bestFor:"工程创新、技术难题、产品设计突破",limitations:"学习曲线陡峭，对非技术问题适用性有限，需要专业培训",combos:["TRIZ + 设计思维（技术突破×用户共情）","TRIZ + FMEA（创新方案×风险评估）"]},
+  {id:"mece",name:"MECE 原则",acronym:"MECE",category:"问题分析与解决",tags:["结构化思维","咨询","逻辑"],stars:5,complexity:"低",time:"短",origin:"Barbara Minto, McKinsey, 1970s",desc:"Mutually Exclusive, Collectively Exhaustive：相互独立、完全穷尽。将问题分解为不重叠、不遗漏的子问题。金字塔原理的基础。",steps:["1. 定义核心问题","2. 选择分解维度（按流程/按要素/按层级/按时间）","3. 确保子问题互不重叠(Mutually Exclusive)","4. 确保子问题完全覆盖(Collectively Exhaustive)","5. 对每个子问题重复分解","6. 形成问题树/逻辑树"],bestFor:"问题结构化、咨询分析、汇报逻辑组织",limitations:"仅用于分解问题不提供解决方案，过度分解可能失去整体视角",combos:["MECE → 假设驱动分析（结构×验证）","MECE + 金字塔原理（分解×表达）"]},
+  {id:"pareto",name:"帕累托分析",acronym:"Pareto",category:"问题分析与解决",tags:["优先级","80/20","数据"],stars:4,complexity:"极低",time:"短",origin:"Vilfredo Pareto, 1906; Joseph Juran推广",desc:"80/20法则：大多数情况下，80%的效果来自20%的原因。通过排序和累计百分比图识别关键少数(Vital Few)和次要多数(Trivial Many)。",steps:["1. 列出所有问题/原因及其频率/影响","2. 按影响降序排列","3. 计算累计百分比","4. 绘制帕累托图（柱状图+累计折线）","5. 聚焦前20%的关键问题解决"],bestFor:"优先级排序、资源分配、质量改进聚焦",limitations:"仅显示频率/数量，不反映因果关系，80/20不总是精确比例",combos:["帕累托 + 鱼骨图（聚焦×根因）","帕累托 → DMAIC（识别关键改进目标）"]},
+
+  // ── 决策支持 ──
+  {id:"decisionmatrix",name:"决策矩阵",acronym:"Pugh",category:"决策支持",tags:["多标准","评估","量化"],stars:4,complexity:"低",time:"短",origin:"Stuart Pugh, 1980s",desc:"对多个方案用加权标准进行评分，量化比较后选择最优方案。消除主观偏见的有效工具。",steps:["1. 列出所有备选方案","2. 确定评估标准","3. 赋予每个标准权重(1-10)","4. 对每个方案在每个标准下评分(1-10)","5. 计算加权总分","6. 敏感性分析(改变权重验证结论稳定性)"],bestFor:"供应商选择、方案评估、多标准决策",limitations:"标准选择和权重设定本身可能带有偏见，评分区分度不足时结论模糊",combos:["决策矩阵 + SWOT（方案评估×战略审视）","决策矩阵 → AHP（简单加权×层次分析）"]},
+  {id:"ahp",name:"层次分析法",acronym:"AHP",category:"决策支持",tags:["多准则","数学","复杂决策"],stars:4,complexity:"高",time:"中",origin:"Thomas L. Saaty, 1970s",desc:"将复杂决策问题分解为层次结构(目标-准则-子准则-方案)，通过两两比较确定各因素相对重要性，计算一致性比率验证判断可靠性。",steps:["1. 建立层次结构模型","2. 构造两两比较判断矩阵","3. 计算权重向量（特征向量法）","4. 一致性检验(CR<0.1)","5. 层次总排序","6. 选择最优方案"],bestFor:"复杂多准则决策、资源分配、供应商评估",limitations:"两两比较数量多时繁琐，一致性要求在实践中较难满足",combos:["AHP + 决策矩阵（理论严谨×实践简便）","AHP → 成本效益分析（入选方案的经济验证）"]},
+  {id:"cynefin",name:"Cynefin 框架",acronym:"Cynefin",category:"决策支持",tags:["复杂性","情境决策","认知"],stars:5,complexity:"中",time:"短",origin:"Dave Snowden, 1999",desc:"将问题情境分为5个域：清晰(Clear)、繁杂(Complicated)、复杂(Complex)、混沌(Chaotic)、混乱(Disorder)。不同域需要不同的决策方式。这是'在什么情境下用什方法'的方法论。",steps:["1. 判断问题属于哪个域","2. 清晰域：感知→分类→响应(最佳实践)","3. 繁杂域：感知→分析→响应(专家判断)","4. 复杂域：试探→感知→响应(涌现)","5. 混沌域：行动→感知→响应(快速稳定)","6. 混乱域：先回到其他域"],bestFor:"问题分类、情境判断、方法论选择（方法论的方法论）",limitations:"域边界模糊，同一问题从不同视角可能属于不同域",combos:["Cynefin + 任何方法论（先判断情境，再选择方法）","Cynefin + 设计思维（复杂域的问题探索）"]},
+  {id:"cba",name:"成本效益分析",acronym:"CBA",category:"决策支持",tags:["经济学","投资","评估"],stars:4,complexity:"中",time:"中",origin:"Jules Dupuit, 1848; 公共政策经济学",desc:"系统性地比较项目的总成本与总收益（包括直接/间接、有形/无形），计算NPV(净现值)、ROI(投资回报率)、B/C比(效益成本比)、IRR(内部收益率)。",steps:["1. 明确项目范围和基准场景","2. 识别所有成本和效益","3. 量化（货币化）成本和效益","4. 折现到当前价值（考虑时间价值）","5. 计算NPV、ROI、B/C比","6. 敏感性分析（关键变量变化的影响）"],bestFor:"投资决策、项目立项、政策评估",limitations:"非货币化价值难以量化，折现率选择影响大，长期预测不确定性高",combos:["CBA + 决策矩阵（财务×多维度评估）","CBA → 风险管理（识别影响NPV的关键风险）"]},
+  {id:"rapid",name:"RAPID 决策权责模型",acronym:"RAPID",category:"决策支持",tags:["决策流程","权责","组织"],stars:4,complexity:"低",time:"短",origin:"Bain & Company",desc:"明确决策中的5种角色：Recommend(建议者)、Agree(同意者)、Perform(执行者)、Input(提供意见者)、Decide(决定者)。解决'谁说了算'的问题。",steps:["1. 列出关键决策事项","2. R：谁提出建议？","3. A：谁拥有否决权？","4. P：谁负责执行？","5. I：谁提供数据和意见？","6. D：谁最终拍板（只能一个人）"],bestFor:"组织决策效率、权责清晰化、减少扯皮",limitations:"不适用于紧急决策，可能过度简化协作性决策",combos:["RAPID + RACI（决策权责×执行职责）","RAPID + 决策矩阵（权责清晰×方案优选）"]},
+
+  // ── 创新与设计 ──
+  {id:"designthinking",name:"设计思维",acronym:"DT",category:"创新与设计",tags:["用户中心","创新","迭代"],stars:5,complexity:"中",time:"中",origin:"IDEO, Stanford d.school, 1990s-2000s",desc:"以人为中心的创新方法论。五个阶段：共情(Empathize)→定义(Define)→构思(Ideate)→原型(Prototype)→测试(Test)。强调发散与收敛交替（双菱形）。",steps:["共情：深度理解用户（访谈、观察、沉浸）","定义：明确真正要解决的问题（POV陈述）","构思：发散生成大量创意（头脑风暴、SCAMPER）","原型：快速制作低保真原型（MVP思维）","测试：与用户验证、收集反馈、迭代"],bestFor:"产品创新、服务设计、用户体验、模糊问题的探索",limitations:"共情阶段可能耗时，不适用于有明确最优解的技术问题",combos:["设计思维 + 精益创业（创新探索×快速验证）","设计思维 → TRIZ（用户洞察×技术突破）"]},
+  {id:"doublediamond",name:"双菱形模型",acronym:"DD",category:"创新与设计",tags:["设计流程","发散收敛","创新"],stars:4,complexity:"低",time:"中",origin:"UK Design Council, 2005",desc:"将设计过程分为两个菱形：第一个菱形(问题空间)→发现(Discover)→定义(Define)；第二个菱形(方案空间)→发展(Develop)→交付(Deliver)。清晰地体现了发散-收敛的交替节奏。",steps:["发现：发散探索用户需求、市场、技术","定义：收敛明确真正要解决的问题","发展：发散生成多种解决方案","交付：收敛测试、迭代、最终输出"],bestFor:"设计流程、创新项目、服务设计",limitations:"线性感较强，实际项目需要多次迭代",combos:["双菱形 + 设计思维（流程框架×具体方法）","双菱形 → 敏捷（设计→开发交付）"]},
+  {id:"scamper",name:"SCAMPER 创新检查表",acronym:"SCAMPER",category:"创新与设计",tags:["创意","头脑风暴","改进"],stars:4,complexity:"低",time:"短",origin:"Bob Eberle, 1971 (基于Alex Osborn的检查表)",desc:"通过7个视角的强制联想来激发创新：Substitute(替代)、Combine(组合)、Adapt(改造)、Modify(修改)、Put to other uses(他用)、Eliminate(消除)、Reverse(逆向/重组)。",steps:["S 替代：可以用什么替代？","C 组合：可以和什么组合？","A 改造：可以借鉴/适应什么？","M 修改：可以放大/缩小/改变什么？","P 他用：还能用于什么其他场景？","E 消除：可以去掉什么？","R 逆向：颠倒/反转会怎样？"],bestFor:"产品改进、创意激发、头脑风暴",limitations:"生成的想法需要后续筛选，对根本性创新帮助有限",combos:["SCAMPER + 设计思维（创意激发×用户验证）","SCAMPER → 决策矩阵（创意→筛选）"]},
+  {id:"jtbd",name:"Jobs-to-be-Done",acronym:"JTBD",category:"创新与设计",tags:["用户需求","创新","产品"],stars:5,complexity:"中",time:"中",origin:"Clayton Christensen, 2003",desc:"不关注用户画像，而关注用户'雇佣'产品来完成的'任务'。核心洞察：用户不是买产品，而是'雇佣'产品来完成特定场景下的任务。核心问题：用户想要达成的进步(Progress)是什么？当前方案的挣扎(Struggle)是什么？",steps:["1. 识别核心Job（功能性/情感性/社交性）","2. 绘制Job地图（从触发到完成的全流程）","3. 识别每个步骤的痛点和期望","4. 定义'雇佣标准'（用户如何选择方案）","5. 发现'非消费'（谁在回避这个Job？为什么？）","6. 设计满足Job的解决方案"],bestFor:"产品定义、需求洞察、创新机会识别",limitations:"不如用户画像直观，需要深度的定性研究",combos:["JTBD + 设计思维（需求定义×创意解决）","JTBD → 价值主张画布（Job→解决方案匹配）"]},
+
+  // ── 项目管理 ──
+  {id:"agile",name:"敏捷开发",acronym:"Agile",category:"项目管理",tags:["迭代","软件","快速响应"],stars:5,complexity:"中",time:"持续",origin:"Agile Manifesto, 2001",desc:"基于敏捷宣言四大价值观和12条原则的迭代式开发方法。核心价值观：个体和互动 > 流程和工具；可工作软件 > 详尽文档；客户协作 > 合同谈判；拥抱变化 > 遵循计划。",steps:["1. 组建跨职能自组织团队","2. 以Sprint(1-4周)为迭代周期","3. Sprint计划→每日站会→Sprint评审→回顾","4. 持续交付可工作的增量","5. 拥抱需求变化（欢迎late change）","6. 定期反思和调整"],bestFor:"软件开发、不确定性高的项目、需要快速交付",limitations:"对团队纪律要求高，不适合需求固定的大型工程，规模化有挑战",combos:["敏捷 + 精益（迭代×消除浪费）","敏捷 → PDCA（Sprint回顾即PDCA）"]},
+  {id:"scrum",name:"Scrum",acronym:"Scrum",category:"项目管理",tags:["敏捷","框架","团队"],stars:5,complexity:"中",time:"持续",origin:"Ken Schwaber & Jeff Sutherland, 1995",desc:"最流行的敏捷框架。定义了3种角色(Product Owner/Scrum Master/开发团队)、5个事件(Sprint计划/每日站会/Sprint评审/回顾/Product Backlog梳理)、3个工件(Product Backlog/Sprint Backlog/增量)。",steps:["Product Owner 维护Product Backlog(按价值排序)","Sprint Planning：选择Sprint目标和工作量","Daily Scrum：15分钟同步进度和障碍","Sprint Review：向干系人演示可工作增量","Sprint Retrospective：团队反思改进"],bestFor:"复杂产品开发、需要频繁交付和反馈","limitations":"需要角色转变（manager→Scrum Master），不适用于纯运营工作",combos:["Scrum + Kanban (Scrumban)","Scrum + 设计思维（在Sprint中嵌入设计）"]},
+  {id:"kanban",name:"看板方法",acronym:"Kanban",category:"项目管理",tags:["可视化","流动","限制WIP"],stars:4,complexity:"低",time:"持续",origin:"Toyota, 1950s; David Anderson推广到知识工作, 2010",desc:"通过可视化工作流和限制在制品(WIP)来优化流动效率。核心原则：从现有流程开始、渐进式变革、尊重现有角色。核心实践：可视化、限制WIP、管理流动、显式化策略、反馈循环、协同改进。",steps:["1. 映射当前工作流(列=阶段)","2. 可视化所有工作项(卡片)","3. 设置WIP限制（每个阶段的并行任务上限）","4. 拉动式工作（完成一个才开始下一个）","5. 测量交付周期和吞吐量","6. 持续改进瓶颈"],bestFor:"运维、支持、持续型工作、任何需要可视化的流程",limitations:"缺乏时间盒，可能导致交付时间不可预测，不适合全新项目启动",combos:["Kanban + Scrum (Scrumban：结构×灵活)","Kanban + 精益（可视化×消除浪费）"]},
+  {id:"prince2",name:"PRINCE2",acronym:"PRINCE2",category:"项目管理",tags:["项目管理","治理","结构化"],stars:4,complexity:"高",time:"长",origin:"UK Government, 1996",desc:"PRojects IN Controlled Environments：基于7原则、7主题、7流程的结构化项目管理方法，强调商业论证驱动的持续合理性验证。广泛用于政府和大型企业。",steps:["7原则：持续商业论证、吸取经验教训、明确定义角色和职责、按阶段管理、例外管理、关注产品、根据项目环境裁剪","7主题：商业论证、组织、质量、计划、风险、变更、进展","7流程：项目准备、项目指导、项目启动、阶段控制、产品交付管理、阶段边界管理、项目收尾"],bestFor:"大型项目、政府项目、需要强治理的复杂项目",limitations:"文档量较大、对小项目过重、需要组织层面支持",combos:["PRINCE2 + 敏捷(PRINCE2 Agile)","PRINCE2 + PMBOK（治理框架×知识体系）"]},
+  {id:"wbs",name:"工作分解结构",acronym:"WBS",category:"项目管理",tags:["范围管理","分解","计划"],stars:4,complexity:"低",time:"短",origin:"US Department of Defense, 1960s",desc:"将项目交付物和工作自上而下逐级分解为更小、更易管理的组件。100%原则：WBS必须包含100%的项目范围。最底层的组件称为工作包(Work Package)，可被估算、安排、分配。",steps:["1. 识别项目的最终交付物","2. 将交付物逐级分解为子交付物","3. 分解到可管理的工作包层级(通常8-80小时)","4. 验证100%原则","5. 为每个工作包分配责任人","6. 作为进度、成本、风险管理的基础"],bestFor:"项目范围定义、进度规划、成本估算",limitations:"过度分解导致微观管理，对于探索性工作分解困难",combos:["WBS → 甘特图（范围→进度）","WBS → 风险管理（识别每个工作包的风险）"]},
+
+  // ── 团队与人才 ──
+  {id:"grow",name:"GROW 教练模型",acronym:"GROW",category:"团队与人才",tags:["教练","辅导","目标"],stars:5,complexity:"低",time:"短",origin:"Sir John Whitmore, 1980s",desc:"最广泛使用的教练辅导框架。Goal(目标)→Reality(现实)→Options(选项)→Will(意愿)。通过结构化对话激发被教练者的觉察和责任感。",steps:["G 目标：你想达成什么？(SMART)","R 现实：现状是什么？已经尝试了什么？","O 选项：有哪些可能的选择？还有呢？","W 意愿：你选择哪个方案？什么时候开始？需要什么支持？"],bestFor:"一对一辅导、员工发展、绩效面谈",limitations:"效果依赖教练的提问技巧，不适合紧急/危机场景",combos:["GROW + SMART（目标框架×具体目标）","GROW → PDCA（辅导后的持续跟进）"]},
+  {id:"smart",name:"SMART 目标",acronym:"SMART",category:"团队与人才",tags:["目标设定","绩效","清晰"],stars:4,complexity:"极低",time:"短",origin:"George T. Doran, 1981",desc:"目标设定的黄金标准：Specific(具体的)、Measurable(可衡量的)、Achievable(可实现的)、Relevant(相关的)、Time-bound(有时限的)。",steps:["S：目标是具体明确的（什么？为什么？谁？哪里？）","M：结果可量化衡量（如何知道完成了？）","A：在现有资源下可实现","R：与更高级目标相关","T：有明确的截止日期"],bestFor:"目标设定、KPI定义、项目目标明确化",limitations:"过于刚性可能导致'精确的错误'，对探索性工作不友好",combos:["SMART + GROW（目标设定×过程教练）","SMART → OKR（个人目标×组织对齐）"]},
+  {id:"raci",name:"RACI 责任矩阵",acronym:"RACI",category:"团队与人才",tags:["职责","协作","角色"],stars:4,complexity:"低",time:"短",origin:"项目管理实践, 1970s",desc:"明确每个任务/交付物的四种角色：R(Responsible执行者)、A(Accountable负责者，唯一)、C(Consulted被咨询者)、I(Informed被通知者)。消除'我以为你在做'的责任模糊。",steps:["1. 列出所有任务/决策/交付物（行）","2. 列出所有角色/人员（列）","3. 为每个任务指定R（执行者）","4. 为每个任务指定A（负责者，必须一人）","5. 指定C（需要双向沟通的专家/干系人）","6. 指定I（需要单向通知的人）","7. 检查每行至少一个R和一个A，每列不过载"],bestFor:"职责划分、跨部门协作、项目启动",limitations:"静态的角色分配，动态变化需更新，对敏捷团队过于僵化",combos:["RACI + RAPID（日常职责×决策权责）","RACI → WBS（职责分配到工作包）"]},
+  {id:"aar",name:"复盘",acronym:"AAR",category:"团队与人才",tags:["学习","反思","改进"],stars:4,complexity:"低",time:"短",origin:"US Army, 1970s; 联想/华为推广",desc:"After Action Review：在行动/项目结束后立即进行结构化反思。四个核心问题：原定目标是什么？实际发生了什么？为什么会发生？下次怎么做？强调心理安全、对事不对人。",steps:["1. 原定目标和预期是什么？","2. 实际发生了什么？（只描述事实，不评判）","3. 为什么会有差异？（分析原因，不追责）","4. 保持：什么做得好，应该继续？","5. 改进：什么可以做得更好？","6. 行动：具体谁做什么、何时完成"],bestFor:"项目总结、经验教训沉淀、团队学习",limitations:"效果依赖团队心理安全感，形式化后可能变成走过场",combos:["AAR + PDCA（反思×持续改进）","AAR → 知识管理（教训→组织能力）"]},
+
+  // ── 系统思维 ──
+  {id:"cld",name:"因果回路图",acronym:"CLD",category:"系统思维",tags:["系统动力学","反馈","可视化"],stars:4,complexity:"中",time:"中",origin:"Jay Forrester, MIT, 1950s",desc:"系统动力学的核心工具。用因果链(+/-)和反馈回路(R增强回路/B调节回路)来映射系统的动态行为结构。揭示'问题越解决越严重'的系统陷阱。",steps:["1. 定义系统边界和关键变量","2. 识别变量间的因果关系","3. 标注因果极性(+同方向变化/-反方向变化)","4. 识别反馈回路（R增强/B调节）","5. 分析系统行为模式（增长、震荡、延迟、政策阻力）","6. 找到高杠杆干预点"],bestFor:"复杂系统问题、组织变革、政策分析",limitations:"需要系统思维训练，定性的推论需要量化模型验证",combos:["CLD + 5 Whys（系统结构×事件根因）","CLD → 存量流量图（定性→定量模拟）"]},
+  {id:"ssm",name:"软系统方法论",acronym:"SSM",category:"系统思维",tags:["软系统","共识","组织变革"],stars:4,complexity:"高",time:"长",origin:"Peter Checkland, Lancaster University, 1981",desc:"应对'软'问题（问题本身就有争议）的系统方法。核心：不同利益相关者对问题的定义不同。通过'根定义(Root Definition)'和CATWOE分析构建'人类活动系统'模型，通过辩论寻找可行的共识性改进。",steps:["1. 识别问题情境（丰富图Rich Picture）","2. 用CATWOE构建根定义（客户/行动者/转换/世界观/所有者/环境）","3. 建立概念模型（根定义要求的人类活动系统）","4. 拿概念模型与现实比较、辩论","5. 确定'系统上可行的、文化上可接受的'变革","6. 采取行动改善问题情境"],bestFor:"利益相关者复杂的组织变革、定义不清的社会/管理问题","limitations":"过程复杂耗时，需要熟练的引导者，不适用于'硬'工程问题",combos:["SSM + 设计思维（共识构建×用户共情）","SSM → 变革管理(ADKAR)（共识→落地执行）"]},
+  {id:"adkar",name:"ADKAR 变革管理",acronym:"ADKAR",category:"系统思维",tags:["变革管理","组织","人员"],stars:4,complexity:"中",time:"中",origin:"Jeff Hiatt, Prosci, 2003",desc:"个人和组织变革的5要素模型：Awareness(认知)、Desire(意愿)、Knowledge(知识)、Ability(能力)、Reinforcement(强化)。变革失败通常因为在前几个要素就出了问题。",steps:["Awareness 认知：理解为什么需要变革","Desire 渴望：个人参与和支持变革的意愿","Knowledge 知识：知道如何变革","Ability 能力：能够实施新技能和行为","Reinforcement 强化：持续维持变革成果"],bestFor:"组织变革、新系统上线、流程再造",limitations:"偏线性，实际变革中各要素可能并行或倒退",combos:["ADKAR + PDCA（变革推进×持续改进）","ADKAR + 干系人分析（个人变革×关系管理）"]},
+
+  // ── 沟通表达 ──
+  {id:"pyramid",name:"金字塔原理",acronym:"Minto",category:"沟通表达",tags:["结构化表达","逻辑","汇报"],stars:5,complexity:"低",time:"短",origin:"Barbara Minto, McKinsey, 1987",desc:"结论先行、以上统下、归类分组、逻辑递进的组织和表达思想的方法。任何思想都可以归纳出一个中心论点，由3-7个论据支撑。纵向关系(问答)、横向关系(演绎/归纳)。SCQA故事框架：情境→冲突→问题→答案。",steps:["1. 结论先行：先说中心思想","2. 以上统下：上层是对下层的概括","3. 归类分组：每组思想属于同一范畴(MECE)","4. 逻辑递进：每组思想按逻辑顺序排列","5. SCQA序言：情境→冲突→问题→答案"],bestFor:"商业汇报、报告撰写、方案呈现、咨询沟通",limitations:"对创意发散类沟通过于刚性，不适合情感交流",combos:["金字塔原理 + MECE（表达结构×问题结构）","金字塔原理 → 电梯演讲（书面→口头精简）"]},
+  {id:"star",name:"STAR 法则",acronym:"STAR",category:"沟通表达",tags:["面试","行为描述","结构化"],stars:4,complexity:"极低",time:"短",origin:"行为面试实践, 1970s",desc:"Situation(情境)-Task(任务)-Action(行动)-Result(结果)：结构化的行为描述框架。广泛用于面试回答、绩效评估、案例陈述。",steps:["S 情境：当时的背景和情境是什么？","T 任务：需要完成什么任务/目标？","A 行动：你具体做了什么？（重点）","R 结果：取得了什么成果？（量化）"],bestFor:"面试回答、绩效自评、项目总结、案例分析",limitations:"过于压缩可能忽略学习过程和失败教训",combos:["STAR + SMART（故事框架×结果量化）","STAR → 复盘(个人反思→团队学习)"]},
+  {id:"scqa",name:"SCQA 故事框架",acronym:"SCQA",category:"沟通表达",tags:["故事","说服","汇报"],stars:4,complexity:"低",time:"短",origin:"Barbara Minto, 金字塔原理配套",desc:"构建引人入胜的商业叙事：Situation(情境-大家公认的事实)、Complication(冲突-发生了什么变化/问题)、Question(问题-因此需要回答什么问题)、Answer(答案-我的核心观点/方案)。",steps:["S 情境：描述稳定状态（'正如大家所知...'）","C 冲突：打破稳定的变化/问题（'但是...'）","Q 问题：自然引出的问题（'因此我们需要回答...'）","A 答案：你的核心观点/方案"],bestFor:"商业提案、汇报开场、方案推销、演讲",limitations:"需要根据听众调整冲突的表达力度，过度戏剧化可能适得其反",combos:["SCQA + 金字塔原理（叙事框架×逻辑结构）","SCQA → 电梯演讲（书面故事→口头精简）"]},
+
+  // ── 风险与安全 ──
+  {id:"fmea",name:"FMEA 失效模式与影响分析",acronym:"FMEA",category:"风险与安全",tags:["风险管理","预防","可靠性"],stars:5,complexity:"中",time:"中",origin:"US Military (MIL-P-1629), 1949; 汽车/航天推广",desc:"系统性地识别潜在失效模式、分析其影响、评估风险优先数(RPN=严重度×发生频率×可检测度)，然后优先对高风险项采取预防措施。包括DFMEA(设计)和PFMEA(过程)。",steps:["1. 定义分析范围和功能/过程","2. 识别潜在的失效模式","3. 分析每个失效的影响和后果","4. 评估严重度(S)、发生频率(O)、可检测度(D)(各1-10)","5. 计算RPN = S × O × D","6. 按RPN排序，优先改进高风险项","7. 制定预防/检测措施，重新评估RPN"],bestFor:"产品设计、制造过程、安全关键系统",limitations:"对复杂耦合失效覆盖不足，RPN乘法模型存在争议，耗时",combos:["FMEA + 鱼骨图（风险评估×原因分析）","FMEA → 8D（预防失效×失效发生后应对）"]},
+  {id:"bowtie",name:"蝴蝶结模型",acronym:"BowTie",category:"风险与安全",tags:["风险管理","可视化","屏障"],stars:4,complexity:"中",time:"中",origin:"Shell, 1970s; 石油天然气行业推广",desc:"将风险可视化为中心事件(蝴蝶结中心)，左侧是威胁和预防屏障，右侧是后果和缓解屏障。直观展示风险控制的'纵深防御'逻辑。",steps:["1. 定义中心事件（危险事件）","2. 左侧列出所有威胁（可能导致事件的因子）","3. 为每个威胁设置预防屏障","4. 右侧列出所有后果","5. 为每个后果设置缓解/恢复屏障","6. 评估每个屏障的有效性和'降解因素'","7. 确定关键控制措施"],bestFor:"过程安全、重大风险管理、合规审计",limitations:"偏定性，对多事件相互作用的建模不足",combos:["蝴蝶结 + FMEA（风险可视化×量化分析）","蝴蝶结 → Swiss Cheese（屏障逻辑→组织防御层）"]},
+  {id:"hazop",name:"HAZOP 危害与可操作性分析",acronym:"HAZOP",category:"风险与安全",tags:["过程安全","偏差分析","化工"],stars:4,complexity:"高",time:"长",origin:"ICI (Imperial Chemical Industries), 1960s",desc:"通过引导词(无、更多、更少、部分、反向等)系统性识别过程参数(流量、温度、压力等)偏离设计意图时的危害。最主流的过程危害分析方法(IEC 61882)。",steps:["1. 将系统分解为节点","2. 为每个节点定义设计意图和参数","3. 对每个参数应用引导词(No/More/Less/Reverse/...)","4. 分析每个偏差的原因","5. 评估每个偏差的后果","6. 识别已有防护措施","7. 提出改进建议(如果需要)"],"bestFor":"化工、石油天然气、制药过程安全分析","limitations":"耗时、需要多专业团队、不适合非过程类系统",combos:["HAZOP → LOPA(保护层分析)（定性→半定量）","HAZOP + FMEA（过程安全×设备可靠性）"]},
+];
+
+// ═══════════════════════════════════════════════
+//  领域快捷输入
+// ═══════════════════════════════════════════════
+const QUICK_INPUTS = {
+  strategy: "我们公司需要制定未来3-5年的战略规划，但市场环境高度不确定，技术变革快，竞争格局也在变化。需要一个系统性的分析框架来指导战略选择。",
+  process: "我们生产线的良品率一直在92%左右，目标是98%。已经尝试了很多改进但效果不稳定，需要系统性的方法来减少质量波动。",
+  problem: "用户投诉突然增加了30%，客服部门说是产品质量，生产部门说是客户使用不当。需要找到真正的原因并彻底解决。",
+  decision: "有三个技术方案可选：自研、采购成熟产品、外包定制开发。每个方案的成本、风险、长期收益都不同。如何系统评估？",
+  innovation: "我们的产品已经3年没有重大创新了，市场份额在下降。想用设计思维的方式重新理解用户需求，打造差异化的新产品。",
+  project: "跨部门的大型IT项目，已经延期2次、预算超支40%。团队士气低落，各部门互相推诿。需要重新建立项目管控。",
+  team: "团队扩张到50人后，沟通效率明显下降。重复造轮子、信息孤岛、职责边界模糊的问题越来越严重。"
+};
+
+// ═══════════════════════════════════════════════
+//  状态
+// ═══════════════════════════════════════════════
+let selectedDomain = null;
+let selectedCat = 'all';
+let activeAnalysis = null;
+
+// ═══════════════════════════════════════════════
+//  渲染方法论列表
+// ═══════════════════════════════════════════════
+function renderMethodList() {
+  const list = document.getElementById('methodList');
+  let filtered = METHOD_DB;
+
+  if (selectedCat !== 'all') {
+    filtered = filtered.filter(m => m.category === selectedCat);
+  }
+  if (selectedDomain) {
+    const domainMap = {
+      strategy: '战略与规划', process: '质量与改进', problem: '问题分析与解决',
+      decision: '决策支持', innovation: '创新与设计', project: '项目管理', team: '团队与人才'
+    };
+    const cat = domainMap[selectedDomain];
+    if (cat) filtered = filtered.filter(m => m.category === cat || m.id==='cynefin');
+  }
+
+  document.getElementById('methodCount').textContent = filtered.length;
+
+  list.innerHTML = filtered.map(m => `
+    <div class="method-item" data-id="${m.id}" onclick="showMethodDetail('${m.id}')">
+      <div class="name"><span class="acronym">${m.acronym}</span>${m.name}</div>
+      <div class="subtitle">${m.desc.slice(0, 60)}…</div>
+      <div class="tags-row">
+        <span class="mini-tag">${m.category}</span>
+        ${m.tags.slice(0,2).map(t => `<span class="mini-tag">${t}</span>`).join('')}
+        ${m.complexity !== '低' ? `<span class="mini-tag">复杂度${m.complexity}</span>` : ''}
+      </div>
+      <div class="star-rating">${'★'.repeat(m.stars)}${'☆'.repeat(5-m.stars)}</div>
+    </div>
+  `).join('');
+}
+
+// ═══════════════════════════════════════════════
+//  核心：问题诊断引擎
+// ═══════════════════════════════════════════════
+function diagnoseProblem(text) {
+  const t = text.toLowerCase();
+  const result = {
+    problemType: [], // 问题类型
+    complexity: '中', // 复杂度
+    urgency: '中', // 紧迫性
+    domain: [], // 所属领域
+    keywords: [], // 识别的关键词
+    rationale: [] // 诊断理由
+  };
+
+  // 关键词匹配规则
+  const rules = [
+    { words: ['战略','规划','未来','方向','竞争','市场','布局','愿景','长期','增长','行业','赛道','蓝海','红海'], type:'strategy',label:'战略规划类' },
+    { words: ['质量','缺陷','良品率','合格率','波动','稳定','标准','规范','减少变异','不良','次品','返工'], type:'quality',label:'质量控制类' },
+    { words: ['效率','浪费','流程','瓶颈','周期','交付','快','慢','优化','成本','消耗','精益'], type:'efficiency',label:'流程效率类' },
+    { words: ['根因','原因','为什么','根源','问题','故障','投诉','异常','出错','失败','bug','缺陷'], type:'rootcause',label:'根因分析类' },
+    { words: ['决策','选择','方案','评估','比较','权衡','哪个','选','取舍','优劣','投资'], type:'decision',label:'决策评估类' },
+    { words: ['创新','创意','设计','产品','想法','突破','原型','用户','体验','差异化','新'], type:'innovation',label:'创新设计类' },
+    { words: ['项目','延期','超支','进度','预算','交付','里程碑','范围','需求变更','资源'], type:'project',label:'项目管理类' },
+    { words: ['团队','协作','沟通','职责','分工','人','部门','跨部门','扯皮','士气','文化'], type:'team',label:'团队管理类' },
+    { words: ['风险','安全','预防','危害','失效','事故','隐患','危险','保护','应急'], type:'risk',label:'风险安全类' },
+    { words: ['汇报','表达','演讲','报告','呈现','说服','提案','方案','故事'], type:'communication',label:'沟通表达类' },
+    { words: ['变革','转型','组织','文化','改变','适应'], type:'change',label:'变革管理类' },
+    { words: ['混乱','不确定','复杂','混沌','多变','模糊','VUCA'], type:'complexity',label:'复杂性情境' },
+  ];
+
+  const typeMap = {
+    strategy: '战略与规划', quality: '质量与改进', efficiency: '质量与改进',
+    rootcause: '问题分析与解决', decision: '决策支持', innovation: '创新与设计',
+    project: '项目管理', team: '团队与人才', risk: '风险与安全',
+    communication: '沟通表达', change: '系统思维', complexity: '决策支持'
+  };
+
+  rules.forEach(rule => {
+    const matchCount = rule.words.filter(w => t.includes(w)).length;
+    if (matchCount >= 2) {
+      result.problemType.push(rule.label);
+      const domainCat = typeMap[rule.type];
+      if (domainCat && !result.domain.includes(domainCat)) {
+        result.domain.push(domainCat);
+      }
+      result.keywords.push(...rule.words.filter(w => t.includes(w)).slice(0,3));
+      result.rationale.push(`检测到关键词组合：${rule.words.filter(w=>t.includes(w)).slice(0,3).join('、')} → 偏向${rule.label}`);
+    }
+  });
+
+  // 复杂度判断
+  if (t.includes('多部门') || t.includes('跨') || t.includes('系统') || t.includes('复杂') || t.includes('集团')) {
+    result.complexity = '高';
+    result.rationale.push('检测到跨部门/系统性关键词 → 复杂度高');
+  }
+  if (t.includes('紧急') || t.includes('马上') || t.includes('立刻') || t.includes('危机')) {
+    result.urgency = '高';
+    result.rationale.push('检测到紧迫性关键词 → 紧急度高');
+  }
+  if (t.includes('简单') || t.includes('小') || t.includes('快速')) {
+    result.complexity = '低';
+  }
+
+  // 去重
+  result.problemType = [...new Set(result.problemType)];
+  result.domain = [...new Set(result.domain)];
+
+  // 兜底：如果什么都没匹配到
+  if (result.problemType.length === 0) {
+    result.problemType.push('通用问题分析');
+    result.rationale.push('未识别到特定模式，建议从Cynefin情境判断开始');
+  }
+
+  return result;
+}
+
+// ═══════════════════════════════════════════════
+//  核心：方法论匹配引擎
+// ═══════════════════════════════════════════════
+function matchMethodologies(diagnosis) {
+  const domainToMethods = {
+    '战略与规划': ['swot','pestel','porter5','bcg','blueocean','ansoff','balance','okr'],
+    '质量与改进': ['pdca','dmaic','lean','tqm','kaizen','8d'],
+    '问题分析与解决': ['5whys','fishbone','triz','mece','pareto'],
+    '决策支持': ['cynefin','decisionmatrix','ahp','cba','rapid'],
+    '创新与设计': ['designthinking','doublediamond','scamper','jtbd'],
+    '项目管理': ['agile','scrum','kanban','prince2','wbs'],
+    '团队与人才': ['grow','smart','raci','aar'],
+    '系统思维': ['cld','ssm','adkar'],
+    '沟通表达': ['pyramid','star','scqa'],
+    '风险与安全': ['fmea','bowtie','hazop'],
+  };
+
+  // 收集候选方法论
+  let candidates = new Set();
+  diagnosis.domain.forEach(d => {
+    const methods = domainToMethods[d] || [];
+    methods.forEach(m => candidates.add(m));
+  });
+
+  // 如果太少，加入通用方法论
+  if (candidates.size < 3) {
+    ['pdca','swot','5whys','cynefin','mece'].forEach(m => candidates.add(m));
+  }
+
+  // 为每个候选计算匹配得分
+  let scored = [];
+  candidates.forEach(id => {
+    const m = METHOD_DB.find(x => x.id === id);
+    if (!m) return;
+    let score = 0;
+    const rationale = [];
+
+    // 领域匹配
+    diagnosis.domain.forEach(d => {
+      if (m.category === d) { score += 40; rationale.push(`领域直接匹配：${d}`); }
+    });
+
+    // 复杂度匹配
+    const complexityMatch = {低:['极低','低'],中:['低','中'],高:['中','高']};
+    if (complexityMatch[diagnosis.complexity]?.includes(m.complexity)) {
+      score += 20; rationale.push(`复杂度匹配(${diagnosis.complexity}↔${m.complexity})`);
+    }
+
+    // 关键词匹配
+    diagnosis.keywords.forEach(kw => {
+      if (m.desc.includes(kw) || m.tags.some(t => kw.includes(t) || t.includes(kw))) {
+        score += 5; rationale.push(`关键词匹配：${kw}`);
+      }
+    });
+
+    // 紧急度权重：紧急时更推荐快速方法论
+    if (diagnosis.urgency === '高' && ['低','极低'].includes(m.complexity)) {
+      score += 10; rationale.push('紧急度高，推荐低复杂度工具');
+    }
+
+    // 星级加分
+    score += m.stars * 2;
+
+    scored.push({ ...m, score, matchRationale: rationale });
+  });
+
+  scored.sort((a,b) => b.score - a.score);
+  return scored.slice(0, 6); // 返回Top 6
+}
+
+// ═══════════════════════════════════════════════
+//  生成组合建议
+// ═══════════════════════════════════════════════
+function generateCombos(topMethods, diagnosis) {
+  const combos = [];
+  const ids = topMethods.map(m => m.id);
+
+  // Cynefin总是优先推荐（如果没在Top中）
+  if (!ids.includes('cynefin')) {
+    combos.push({
+      type: '前置',
+      description: '建议先用 Cynefin 框架判断问题情境（清晰/繁杂/复杂/混沌），再选择对应域的方法论。这是"方法论的方法论"。',
+      methods: ['cynefin', ids[0]]
+    });
+  }
+
+  // 查找预定义的组合
+  topMethods.forEach(m => {
+    if (m.combos) {
+      m.combos.forEach(c => {
+        const parts = c.split(/[→+]/).map(s => s.trim());
+        const relatedMethod = parts.find(p => ids.includes(p.toLowerCase().replace(/\s+/g,'')) || METHOD_DB.some(x => x.name === p || x.acronym === p));
+        if (relatedMethod && !combos.some(cb => cb.description.includes(c))) {
+          combos.push({
+            type: '组合',
+            description: c,
+            methods: parts.filter(p => p.length < 15)
+          });
+        }
+      });
+    }
+  });
+
+  // 通用组合建议
+  if (ids.includes('pdca') && ids.includes('5whys')) {
+    combos.push({ type: '组合', description: 'PDCA + 5 Whys：在PDCA的Check阶段使用5 Whys做根因分析，形成改进-根因的闭环', methods: ['pdca','5whys'] });
+  }
+  if (ids.includes('swot') && ids.includes('pestel')) {
+    combos.push({ type: '组合', description: 'PESTEL → SWOT：先用PESTEL扫描宏观环境，将关键发现输入SWOT的O和T维度', methods: ['pestel','swot'] });
+  }
+  if (ids.includes('designthinking') && ids.includes('lean')) {
+    combos.push({ type: '组合', description: '设计思维 + 精益创业：用设计思维探索问题空间和方案空间，用精益创业的MVP快速验证', methods: ['designthinking','lean'] });
+  }
+
+  // 去重
+  return combos.slice(0, 4);
+}
+
+// ═══════════════════════════════════════════════
+//  生成实施路线图
+// ═══════════════════════════════════════════════
+function generateRoadmap(topMethods, diagnosis) {
+  const phases = [];
+
+  // 第一阶段：理解与结构化
+  const phase1Methods = topMethods.filter(m => ['cynefin','mece','pyramid','swot','pestel','5whys','fishbone','scqa'].includes(m.id));
+  if (phase1Methods.length > 0) {
+    phases.push({
+      phase: '第一阶段：理解与结构化',
+      duration: diagnosis.urgency === '高' ? '1-3天' : '1-2周',
+      goal: '理清问题边界、判断情境、构建分析框架',
+      methods: phase1Methods.slice(0,3).map(m => m.acronym).join(' → '),
+      detail: '先不急于解决，确保问对问题、理清全貌。用Cynefin判断情境，用MECE结构化分解，用SWOT/PESTEL做内外部分析。'
+    });
+  }
+
+  // 第二阶段：分析与诊断
+  const phase2Methods = topMethods.filter(m => ['5whys','fishbone','pareto','dmaic','cld','fmea','triz','jtbd'].includes(m.id));
+  if (phase2Methods.length > 0) {
+    phases.push({
+      phase: '第二阶段：分析与诊断',
+      duration: diagnosis.complexity === '高' ? '2-4周' : '1-2周',
+      goal: '深入根因、数据验证、识别关键杠杆点',
+      methods: phase2Methods.slice(0,3).map(m => m.acronym).join(' → '),
+      detail: '在第一阶段的框架下深入分析。用鱼骨图+5 Whys找根因，用帕累托聚焦关键少数，用因果回路图发现系统结构。'
+    });
+  }
+
+  // 第三阶段：方案与决策
+  const phase3Methods = topMethods.filter(m => ['decisionmatrix','ahp','cba','designthinking','doublediamond','scamper','blueocean','triz'].includes(m.id));
+  if (phase3Methods.length > 0) {
+    phases.push({
+      phase: '第三阶段：方案与决策',
+      duration: diagnosis.complexity === '高' ? '3-6周' : '1-3周',
+      goal: '生成方案、评估比较、做出决策',
+      methods: phase3Methods.slice(0,3).map(m => m.acronym).join(' → '),
+      detail: '发散构思多个方案，用决策矩阵/AHP进行多标准评估，选择最优方案。复杂问题可用设计思维的原型-测试循环。'
+    });
+  }
+
+  // 第四阶段：执行与闭环
+  const phase4Methods = topMethods.filter(m => ['pdca','agile','scrum','kanban','smart','raci','aar','grow','adkar','8d','kaizen'].includes(m.id));
+  if (phase4Methods.length > 0) {
+    phases.push({
+      phase: '第四阶段：执行与闭环',
+      duration: '持续',
+      goal: '落地执行、监控效果、持续改进',
+      methods: phase4Methods.slice(0,3).map(m => m.acronym).join(' → '),
+      detail: '用PDCA/Agile管理执行过程，用SMART设定里程碑，用复盘(AAR)持续学习和调整。如果是变革类问题，辅以ADKAR管理人的转变。'
+    });
+  }
+
+  // 如果匹配的方法太少，补充通用阶段
+  if (phases.length < 2) {
+    phases.push({
+      phase: '简化版流程',
+      duration: '1-4周',
+      goal: '问题定义 → 根因分析 → 方案生成 → 执行验证',
+      methods: topMethods.slice(0,4).map(m => m.acronym).join(' + '),
+      detail: '由于问题相对聚焦，可以压缩流程。直接使用匹配的方法论组合进行分析和解决。'
+    });
+  }
+
+  return phases;
+}
+
+// ═══════════════════════════════════════════════
+//  运行完整分析
+// ═══════════════════════════════════════════════
+function runAnalysis() {
+  const text = document.getElementById('problemInput').value.trim();
+  if (!text) {
+    document.getElementById('diagnosisBar').innerHTML = '<span class="diag-label" style="color:#dc2626;">请先在左侧输入问题描述，或点击领域标签快速填充场景</span>';
+    document.getElementById('resultContent').innerHTML = `
+      <div class="result-placeholder">
+        <div class="big-icon">⚠️</div>
+        <p>请先输入问题描述</p>
+        <p style="font-size:11px;margin-top:4px;color:#94a3b8;">在左侧文本框中描述你的场景，或点击"战略规划/流程改进/..."等标签快速填充</p>
+      </div>`;
+    return;
+  }
+
+  const diagnosis = diagnoseProblem(text);
+  const topMethods = matchMethodologies(diagnosis);
+  const combos = generateCombos(topMethods, diagnosis);
+  const roadmap = generateRoadmap(topMethods, diagnosis);
+
+  activeAnalysis = { diagnosis, topMethods, combos, roadmap };
+  renderResults();
+  renderMethodList(); // 高亮匹配的方法论
+}
+
+// ═══════════════════════════════════════════════
+//  渲染结果
+// ═══════════════════════════════════════════════
+function renderResults() {
+  if (!activeAnalysis) return;
+  const { diagnosis, topMethods, combos, roadmap } = activeAnalysis;
+
+  // 更新诊断条
+  const diagBar = document.getElementById('diagnosisBar');
+  const typeColors = {
+    '战略规划类':'diag-type-strategy','质量控制类':'diag-type-process','流程效率类':'diag-type-process',
+    '根因分析类':'diag-type-problem','决策评估类':'diag-type-decision','创新设计类':'diag-type-innovation',
+    '项目管理类':'diag-type-process','团队管理类':'diag-type-decision','风险安全类':'diag-type-problem',
+    '沟通表达类':'diag-type-innovation','变革管理类':'diag-type-decision','复杂性情境':'diag-type-decision',
+    '通用问题分析':'diag-type-decision'
+  };
+  diagBar.innerHTML = `
+    <span class="diag-label">诊断结果：</span>
+    ${diagnosis.problemType.map(t => `<span class="diag-value ${typeColors[t]||'diag-complexity'}">${t}</span>`).join(' ')}
+    <span class="diag-label">| 复杂度：</span>
+    <span class="diag-value diag-complexity">${diagnosis.complexity}</span>
+    <span class="diag-label">| 紧急度：</span>
+    <span class="diag-value diag-complexity">${diagnosis.urgency}</span>
+    <span class="diag-label">| 匹配：${topMethods.length}个方法论</span>
+  `;
+
+  // 渲染结果内容
+  const container = document.getElementById('resultContent');
+
+  const rankColors = ['#e2b04a','#94a3b8','#b45309','#64748b','#475569','#334155'];
+
+  container.innerHTML = `
+    <!-- 诊断理由 -->
+    <div class="rec-card expanded" style="border-left: 4px solid #e2b04a;">
+      <div class="rec-card-header" onclick="this.parentElement.classList.toggle('expanded')">
+        <span>诊断依据</span>
+        <span style="font-size:10px;color:#94a3b8;">点击展开/折叠</span>
+      </div>
+      <div class="rec-card-body">
+        <ul class="step-list">
+          ${diagnosis.rationale.map(r => `<li>${r}</li>`).join('')}
+        </ul>
+      </div>
+    </div>
+
+    <!-- 推荐方法论排行 -->
+    <div style="font-size:14px;font-weight:700;margin:4px 0;">推荐方法论 Top ${topMethods.length}</div>
+    ${topMethods.map((m,i) => `
+    <div class="rec-card expanded" style="border-left: 4px solid ${rankColors[i]};" id="rec-${m.id}">
+      <div class="rec-card-header" style="cursor:default;">
+        <div style="display:flex;align-items:center;gap:10px;flex:1;min-width:0;" onclick="event.stopPropagation();showMethodDetail('${m.id}')" title="点击查看完整详情">
+          <span class="rank-badge" style="background:${rankColors[i]};">${i+1}</span>
+          <span style="cursor:pointer;text-decoration:underline;text-underline-offset:2px;text-decoration-color:#e2b04a;"><strong>${m.acronym}</strong> ${m.name}</span>
+          <span style="font-size:10px;color:#94a3b8;">${m.category} · ${'★'.repeat(m.stars)} · 难度${m.complexity}</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <span style="font-size:10px;color:#e2b04a;font-weight:700;">匹配度 ${m.score}分</span>
+          <span style="font-size:10px;color:#94a3b8;cursor:pointer;user-select:none;" onclick="event.stopPropagation();this.closest('.rec-card').classList.toggle('expanded')" title="展开/折叠">${'▾'}</span>
+        </div>
+      </div>
+      <div class="rec-card-body">
+        <div class="section">
+          <div class="section-title">概述</div>
+          <div class="section-content">${m.desc}</div>
+        </div>
+        <div class="section">
+          <div class="section-title">操作步骤</div>
+          <ul class="step-list">${m.steps.map(s => `<li>${s}</li>`).join('')}</ul>
+        </div>
+        <div class="section">
+          <div class="section-title">最佳适用场景</div>
+          <div class="section-content">${m.bestFor}</div>
+        </div>
+        <div class="section">
+          <div class="section-title">局限性</div>
+          <div class="section-content" style="color:#991b1b;">${m.limitations}</div>
+        </div>
+        <div class="section">
+          <div class="section-title">推荐组合</div>
+          <div class="section-content">${m.combos ? m.combos.map(c => `<span class="combo-badge combo-secondary">${c}</span>`).join(' ') : '独立使用'}</div>
+        </div>
+        <div class="section">
+          <div class="section-title">匹配理由</div>
+          <div class="section-content">${m.matchRationale.join('；')}</div>
+        </div>
+        <div style="margin-top:8px;padding-top:8px;border-top:1px solid #e5e7eb;">
+          <span style="color:#e2b04a;font-weight:700;font-size:11px;cursor:pointer;text-decoration:underline;text-underline-offset:2px;" onclick="event.stopPropagation();showMethodDetail('${m.id}')">查看完整详情 →</span>
+        </div>
+      </div>
+    </div>
+    `).join('')}
+
+    <!-- 组合建议 -->
+    <div style="font-size:14px;font-weight:700;margin:8px 0 4px;">方法论组合建议</div>
+    <div class="rec-card expanded" style="border-left: 4px solid #7c3aed;">
+      <div class="rec-card-header" onclick="this.parentElement.classList.toggle('expanded')">
+        <span>推荐组合方式</span>
+        <span style="font-size:10px;color:#94a3b8;">${combos.length}个组合建议</span>
+      </div>
+      <div class="rec-card-body">
+        ${combos.map((c,i) => `
+          <div style="margin-bottom:10px;padding:8px;background:#f8fafc;border-radius:4px;">
+            <span class="combo-badge combo-primary">${c.type}</span>
+            <span style="font-size:11.5px;">${c.description}</span>
+            <div style="margin-top:4px;">
+              ${c.methods.map(m => `<span class="combo-badge combo-secondary">${m}</span>`).join(' → ')}
+            </div>
+          </div>
+        `).join('')}
+        ${combos.length === 0 ? '<p style="font-size:11px;color:#94a3b8;">基于匹配的方法论，建议按顺序逐一应用，形成完整的工作流。</p>' : ''}
+      </div>
+    </div>
+
+    <!-- 实施路线图 -->
+    <div style="font-size:14px;font-weight:700;margin:8px 0 4px;">实施路线图</div>
+    ${roadmap.map((p,i) => `
+    <div class="rec-card expanded" style="border-left: 4px solid ${['#2563eb','#dc2626','#e2b04a','#059669'][i]};">
+      <div class="rec-card-header" onclick="this.parentElement.classList.toggle('expanded')">
+        <div style="display:flex;align-items:center;gap:8px;">
+          <span style="font-size:20px;">${['①','②','③','④'][i]}</span>
+          <span><strong>${p.phase}</strong></span>
+          <span style="font-size:10px;background:#f1f5f9;padding:2px 8px;border-radius:10px;">预计 ${p.duration}</span>
+        </div>
+        <span style="font-size:11px;color:#64748b;">${p.methods}</span>
+      </div>
+      <div class="rec-card-body">
+        <div class="section-content"><strong>目标：</strong>${p.goal}</div>
+        <div class="section-content" style="margin-top:4px;">${p.detail}</div>
+      </div>
+    </div>
+    `).join('')}
+
+    <!-- 快速对照表 -->
+    <div style="font-size:14px;font-weight:700;margin:8px 0 4px;">推荐方法论速览</div>
+    <div class="rec-card expanded">
+      <div class="rec-card-body" style="padding-top:10px;">
+        <div class="compare-table-wrapper">
+        <table class="compare-table">
+          <thead>
+            <tr><th>排名</th><th>方法论</th><th>用途</th><th>复杂度</th><th>耗时</th><th>适用阶段</th></tr>
+          </thead>
+          <tbody>
+            ${topMethods.map((m,i) => `
+            <tr>
+              <td><strong>#${i+1}</strong></td>
+              <td><strong>${m.acronym}</strong> ${m.name}</td>
+              <td>${m.tags.slice(0,2).join('、')}</td>
+              <td>${m.complexity}</td>
+              <td>${m.time}</td>
+              <td>${m.category}</td>
+            </tr>
+            `).join('')}
+          </tbody>
+        </table>
+        </div>
+      </div>
+    </div>
+  `;
+
+  // 滚动到顶部并确保可见
+  container.scrollTop = 0;
+  container.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+  // 自动展开所有推荐卡片
+  setTimeout(() => {
+    container.querySelectorAll('.rec-card').forEach(c => c.classList.add('expanded'));
+  }, 200);
+
+  // 高亮左侧列表中的匹配项
+  document.querySelectorAll('.method-item').forEach(el => {
+    const id = el.dataset.id;
+    if (topMethods.some(m => m.id === id)) {
+      el.classList.add('selected');
+    } else {
+      el.classList.remove('selected');
+    }
+  });
+}
+
+// ═══════════════════════════════════════════════
+//  方法论配图渲染引擎
+// ═══════════════════════════════════════════════
+function getMethodDiagram(id) {
+  const W=520, H=280;
+  const svg=(body)=>'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 '+W+' '+H+'" style="width:100%;max-width:520px;height:auto;display:block;margin:0 auto;border-radius:8px;background:#fafbfc;border:1px solid #e5e7eb;">'+body+'</svg>';
+  const d={};
+
+  d.swot=svg('<rect x="10" y="10" width="248" height="128" rx="4" fill="#dbeafe" stroke="#93c5fd"/><text x="134" y="42" text-anchor="middle" font-size="13" font-weight="700" fill="#1e40af">S 优势</text><text x="134" y="62" text-anchor="middle" font-size="9" fill="#3b82f6">内部 / 积极</text><rect x="262" y="10" width="248" height="128" rx="4" fill="#fee2e2" stroke="#fca5a5"/><text x="386" y="42" text-anchor="middle" font-size="13" font-weight="700" fill="#991b1b">W 劣势</text><text x="386" y="62" text-anchor="middle" font-size="9" fill="#ef4444">内部 / 消极</text><rect x="10" y="142" width="248" height="128" rx="4" fill="#d1fae5" stroke="#6ee7b7"/><text x="134" y="174" text-anchor="middle" font-size="13" font-weight="700" fill="#065f46">O 机会</text><text x="134" y="194" text-anchor="middle" font-size="9" fill="#10b981">外部 / 积极</text><rect x="262" y="142" width="248" height="128" rx="4" fill="#fff7ed" stroke="#fdba74"/><text x="386" y="174" text-anchor="middle" font-size="13" font-weight="700" fill="#9a3412">T 威胁</text><text x="386" y="194" text-anchor="middle" font-size="9" fill="#f97316">外部 / 消极</text><line x1="260" y1="10" x2="260" y2="270" stroke="#d0d5dd" stroke-width="1" stroke-dasharray="4"/><line x1="10" y1="138" x2="510" y2="138" stroke="#d0d5dd" stroke-width="1" stroke-dasharray="4"/>');
+
+  d.pestel=svg(function(){var s='';var segs=[{l:'政治 P',c:'#dbeafe',t:'#1e40af',a:-90},{l:'经济 E',c:'#d1fae5',t:'#065f46',a:-30},{l:'社会 S',c:'#fef3c7',t:'#92400e',a:30},{l:'技术 T',c:'#ede9fe',t:'#5b21b6',a:90},{l:'环境 E',c:'#ccfbf1',t:'#0f766e',a:150},{l:'法律 L',c:'#fee2e2',t:'#991b1b',a:210}];var cx=260,cy=140,r=90;for(var i=0;i<segs.length;i++){var a1=(segs[i].a-55)*Math.PI/180,a2=(segs[i].a+55)*Math.PI/180;var x1=cx+r*Math.cos(a1),y1=cy+r*Math.sin(a1),x2=cx+r*Math.cos(a2),y2=cy+r*Math.sin(a2);s+='<path d="M'+cx+','+cy+' L'+x1+','+y1+' A'+r+','+r+' 0 0,1 '+x2+','+y2+' Z" fill="'+segs[i].c+'" stroke="#fff" stroke-width="2"/>';s+='<text x="'+(cx+(r+22)*Math.cos(segs[i].a*Math.PI/180))+'" y="'+(cy+(r+22)*Math.sin(segs[i].a*Math.PI/180))+'" text-anchor="middle" font-size="10" font-weight="700" fill="'+segs[i].t+'" dy="3">'+segs[i].l+'</text>';}s+='<circle cx="260" cy="140" r="35" fill="#fff" stroke="#d0d5dd"/><text x="260" y="144" text-anchor="middle" font-size="11" font-weight="700" fill="#1a1a2e">PESTEL</text>';return s;}());
+
+  d.porter5=svg('<rect x="180" y="100" width="160" height="80" rx="6" fill="#1a1a2e"/><text x="260" y="135" text-anchor="middle" font-size="12" font-weight="700" fill="#fff">行业竞争</text><text x="260" y="155" text-anchor="middle" font-size="9" fill="#94a3b8">现有竞争者</text><rect x="180" y="10" width="160" height="36" rx="4" fill="#dbeafe"/><text x="260" y="32" text-anchor="middle" font-size="10" font-weight="700" fill="#1e40af">新进入者威胁</text><rect x="180" y="234" width="160" height="36" rx="4" fill="#fee2e2"/><text x="260" y="256" text-anchor="middle" font-size="10" font-weight="700" fill="#991b1b">替代品威胁</text><rect x="10" y="100" width="160" height="36" rx="4" fill="#d1fae5"/><text x="90" y="122" text-anchor="middle" font-size="10" font-weight="700" fill="#065f46">供应商议价力</text><rect x="350" y="100" width="160" height="36" rx="4" fill="#fff7ed"/><text x="430" y="122" text-anchor="middle" font-size="10" font-weight="700" fill="#9a3412">买方议价力</text><text x="260" y="275" text-anchor="middle" font-size="8" fill="#94a3b8">五力决定行业利润率 · Michael Porter 1979</text>');
+
+  d.bcg=svg('<rect x="10" y="10" width="240" height="120" rx="4" fill="#dbeafe"/><text x="130" y="65" text-anchor="middle" font-size="13" font-weight="700" fill="#1e40af">Stars 明星</text><text x="130" y="85" text-anchor="middle" font-size="9" fill="#3b82f6">高增长 · 高份额 → 投资增长</text><rect x="256" y="10" width="240" height="120" rx="4" fill="#fff7ed"/><text x="376" y="65" text-anchor="middle" font-size="13" font-weight="700" fill="#9a3412">Question Marks</text><text x="376" y="85" text-anchor="middle" font-size="9" fill="#f97316">高增长 · 低份额 → 选择性投资</text><rect x="10" y="134" width="240" height="120" rx="4" fill="#d1fae5"/><text x="130" y="189" text-anchor="middle" font-size="13" font-weight="700" fill="#065f46">Cash Cows 金牛</text><text x="130" y="209" text-anchor="middle" font-size="9" fill="#10b981">低增长 · 高份额 → 收割现金流</text><rect x="256" y="134" width="240" height="120" rx="4" fill="#fee2e2"/><text x="376" y="189" text-anchor="middle" font-size="13" font-weight="700" fill="#991b1b">Dogs 瘦狗</text><text x="376" y="209" text-anchor="middle" font-size="9" fill="#ef4444">低增长 · 低份额 → 剥离关停</text><text x="260" y="275" text-anchor="middle" font-size="8" fill="#64748b">← 相对市场份额 → (x轴)  ↑ 市场增长率 ↑ (y轴)</text>');
+
+  d.pdca=svg('<circle cx="260" cy="140" r="110" fill="none" stroke="#e5e7eb" stroke-width="40"/><path d="M260,30 A110,110 0 0,1 370,140" fill="none" stroke="#2563eb" stroke-width="38"/><text x="315" y="70" font-size="14" font-weight="900" fill="#fff">Plan</text><text x="315" y="86" font-size="9" fill="#dbeafe">计划</text><path d="M370,140 A110,110 0 0,1 260,250" fill="none" stroke="#059669" stroke-width="38"/><text x="380" y="195" font-size="14" font-weight="900" fill="#fff">Do</text><text x="380" y="211" font-size="9" fill="#d1fae5">执行</text><path d="M260,250 A110,110 0 0,1 150,140" fill="none" stroke="#ea580c" stroke-width="38"/><text x="140" y="195" font-size="14" font-weight="900" fill="#fff">Check</text><text x="140" y="211" font-size="9" fill="#fff7ed">检查</text><path d="M150,140 A110,110 0 0,1 260,30" fill="none" stroke="#7c3aed" stroke-width="38"/><text x="195" y="70" font-size="14" font-weight="900" fill="#fff">Act</text><text x="195" y="86" font-size="9" fill="#ede9fe">行动</text><circle cx="260" cy="140" r="30" fill="#fff"/><text x="260" y="136" text-anchor="middle" font-size="10" font-weight="700" fill="#1a1a2e">PDCA</text><text x="260" y="150" text-anchor="middle" font-size="8" fill="#64748b">持续循环</text><text x="260" y="270" text-anchor="middle" font-size="8" fill="#94a3b8">Deming 环 · 所有改进活动的基础方法论</text>');
+
+  d.dmaic=svg(function(){var s='';var st=[{l:'Define',sub:'定义',x:52,c:'#2563eb'},{l:'Measure',sub:'测量',x:156,c:'#0891b2'},{l:'Analyze',sub:'分析',x:260,c:'#ea580c'},{l:'Improve',sub:'改进',x:364,c:'#059669'},{l:'Control',sub:'控制',x:468,c:'#7c3aed'}];for(var i=0;i<st.length;i++){s+='<rect x="'+(st[i].x-38)+'" y="60" width="76" height="65" rx="8" fill="'+st[i].c+'" opacity="0.12"/><rect x="'+(st[i].x-38)+'" y="60" width="76" height="65" rx="8" fill="none" stroke="'+st[i].c+'" stroke-width="2"/><text x="'+st[i].x+'" y="88" text-anchor="middle" font-size="12" font-weight="900" fill="'+st[i].c+'">'+st[i].l+'</text><text x="'+st[i].x+'" y="104" text-anchor="middle" font-size="8" fill="'+st[i].c+'">'+st[i].sub+'</text>';if(i<4)s+='<text x="'+(st[i].x+50)+'" y="97" font-size="14" fill="#94a3b8">→</text>';}s+='<text x="260" y="170" text-anchor="middle" font-size="9" fill="#64748b">六西格玛核心 · 数据驱动减少变异 · 3.4 DPMO</text>';return s;}());
+
+  d.lean=svg('<rect x="20" y="40" width="100" height="56" rx="6" fill="#fee2e2"/><text x="70" y="63" text-anchor="middle" font-size="10" font-weight="700" fill="#991b1b">运输</text><text x="70" y="78" text-anchor="middle" font-size="7" fill="#dc2626">Transport</text><rect x="130" y="40" width="100" height="56" rx="6" fill="#fee2e2"/><text x="180" y="63" text-anchor="middle" font-size="10" font-weight="700" fill="#991b1b">库存</text><text x="180" y="78" text-anchor="middle" font-size="7" fill="#dc2626">Inventory</text><rect x="240" y="40" width="100" height="56" rx="6" fill="#fee2e2"/><text x="290" y="63" text-anchor="middle" font-size="10" font-weight="700" fill="#991b1b">动作</text><text x="290" y="78" text-anchor="middle" font-size="7" fill="#dc2626">Motion</text><rect x="350" y="40" width="100" height="56" rx="6" fill="#fee2e2"/><text x="400" y="63" text-anchor="middle" font-size="10" font-weight="700" fill="#991b1b">等待</text><text x="400" y="78" text-anchor="middle" font-size="7" fill="#dc2626">Waiting</text><rect x="75" y="115" width="100" height="56" rx="6" fill="#fed7aa"/><text x="125" y="138" text-anchor="middle" font-size="10" font-weight="700" fill="#9a3412">过度加工</text><rect x="190" y="115" width="100" height="56" rx="6" fill="#fed7aa"/><text x="240" y="138" text-anchor="middle" font-size="10" font-weight="700" fill="#9a3412">过度生产</text><rect x="305" y="115" width="100" height="56" rx="6" fill="#fed7aa"/><text x="355" y="138" text-anchor="middle" font-size="10" font-weight="700" fill="#9a3412">缺陷</text><text x="260" y="215" text-anchor="middle" font-size="12" font-weight="900" fill="#dc2626">7 大浪费 (Muda)</text><text x="260" y="235" text-anchor="middle" font-size="8" fill="#64748b">精益原则：价值 → 价值流 → 流动 → 拉动 → 完美</text><text x="260" y="252" text-anchor="middle" font-size="8" fill="#94a3b8">源自 Toyota Production System</text>');
+
+  d.fishbone=svg(function(){var s='<line x1="480" y1="140" x2="180" y2="140" stroke="#1a1a2e" stroke-width="4"/><polygon points="500,140 480,128 480,152" fill="#1a1a2e"/><text x="495" y="125" font-size="9" font-weight="700" fill="#dc2626">问题</text>';var b=[{l:'人员',y:50,c:'#2563eb',x1:300,x2:200},{l:'机器',y:80,c:'#059669',x1:350,x2:280},{l:'材料',y:110,c:'#ea580c',x1:380,x2:340},{l:'方法',y:170,c:'#7c3aed',x1:380,x2:340},{l:'测量',y:200,c:'#0891b2',x1:350,x2:280},{l:'环境',y:230,c:'#be123c',x1:300,x2:200}];for(var i=0;i<b.length;i++){s+='<line x1="'+b[i].x1+'" y1="140" x2="'+b[i].x2+'" y2="'+b[i].y+'" stroke="'+b[i].c+'" stroke-width="1.5"/><text x="'+(b[i].x2-30)+'" y="'+(b[i].y-5)+'" font-size="8" font-weight="700" fill="'+b[i].c+'">'+b[i].l+'</text>';}return s+'<text x="260" y="270" text-anchor="middle" font-size="8" fill="#64748b">石川图 (Ishikawa) · 5M1E 维度系统性探寻原因</text>';}());
+
+  d.mece=svg('<rect x="150" y="15" width="220" height="38" rx="6" fill="#1a1a2e"/><text x="260" y="39" text-anchor="middle" font-size="12" font-weight="700" fill="#e2b04a">核心问题</text><rect x="70" y="85" width="170" height="34" rx="5" fill="#dbeafe"/><text x="155" y="106" text-anchor="middle" font-size="10" font-weight="700" fill="#1e40af">子问题 A（互斥）</text><rect x="280" y="85" width="170" height="34" rx="5" fill="#dbeafe"/><text x="365" y="106" text-anchor="middle" font-size="10" font-weight="700" fill="#1e40af">子问题 B（互斥）</text><rect x="30" y="150" width="145" height="28" rx="4" fill="#dbeafe" opacity="0.6"/><text x="102" y="168" text-anchor="middle" font-size="9" fill="#3b82f6">A1</text><rect x="190" y="150" width="145" height="28" rx="4" fill="#dbeafe" opacity="0.6"/><text x="262" y="168" text-anchor="middle" font-size="9" fill="#3b82f6">A2</text><rect x="350" y="150" width="145" height="28" rx="4" fill="#dbeafe" opacity="0.6"/><text x="422" y="168" text-anchor="middle" font-size="9" fill="#3b82f6">B1</text><text x="260" y="215" text-anchor="middle" font-size="10" font-weight="700" fill="#059669">ME 相互独立 · CE 完全穷尽</text><text x="260" y="238" text-anchor="middle" font-size="8" fill="#64748b">Mutually Exclusive, Collectively Exhaustive</text><text x="260" y="258" text-anchor="middle" font-size="8" fill="#94a3b8">金字塔原理基础 · McKinsey 核心方法论</text>');
+
+  d.cynefin=svg('<rect x="10" y="10" width="240" height="118" rx="6" fill="#dbeafe" opacity="0.5"/><text x="130" y="50" text-anchor="middle" font-size="13" font-weight="700" fill="#1e40af">Clear 清晰</text><text x="130" y="70" text-anchor="middle" font-size="9" fill="#3b82f6">感知→分类→响应</text><text x="130" y="90" text-anchor="middle" font-size="8" fill="#64748b">最佳实践 Best Practice</text><rect x="260" y="10" width="250" height="118" rx="6" fill="#fef3c7" opacity="0.5"/><text x="385" y="50" text-anchor="middle" font-size="13" font-weight="700" fill="#92400e">Complicated 繁杂</text><text x="385" y="70" text-anchor="middle" font-size="9" fill="#b45309">感知→分析→响应</text><text x="385" y="90" text-anchor="middle" font-size="8" fill="#64748b">专家判断 Good Practice</text><rect x="10" y="142" width="240" height="118" rx="6" fill="#d1fae5" opacity="0.5"/><text x="130" y="182" text-anchor="middle" font-size="13" font-weight="700" fill="#065f46">Complex 复杂</text><text x="130" y="202" text-anchor="middle" font-size="9" fill="#059669">试探→感知→响应</text><text x="130" y="222" text-anchor="middle" font-size="8" fill="#64748b">涌现实践 Emergent</text><rect x="260" y="142" width="250" height="118" rx="6" fill="#fee2e2" opacity="0.5"/><text x="385" y="182" text-anchor="middle" font-size="13" font-weight="700" fill="#991b1b">Chaotic 混沌</text><text x="385" y="202" text-anchor="middle" font-size="9" fill="#dc2626">行动→感知→响应</text><text x="385" y="222" text-anchor="middle" font-size="8" fill="#64748b">创新实践 Novel</text><circle cx="260" cy="136" r="18" fill="#fff" stroke="#94a3b8"/><text x="260" y="140" text-anchor="middle" font-size="7" fill="#94a3b8">混乱</text><text x="260" y="278" text-anchor="middle" font-size="8" fill="#94a3b8">Dave Snowden · "方法论的方法论" — 先判断情境，再选择方法</text>');
+
+  d.designthinking=svg(function(){var s='';var st=[{l:'共情',sub:'Empathize',x:52,c:'#2563eb',e:'👤'},{l:'定义',sub:'Define',x:156,c:'#0891b2',e:'📋'},{l:'构思',sub:'Ideate',x:260,c:'#ea580c',e:'💡'},{l:'原型',sub:'Prototype',x:364,c:'#059669',e:'🔧'},{l:'测试',sub:'Test',x:468,c:'#7c3aed',e:'✅'}];for(var i=0;i<st.length;i++){s+='<circle cx="'+st[i].x+'" cy="90" r="28" fill="'+st[i].c+'" opacity="0.1"/><circle cx="'+st[i].x+'" cy="90" r="28" fill="none" stroke="'+st[i].c+'" stroke-width="2"/><text x="'+st[i].x+'" y="84" text-anchor="middle" font-size="16">'+st[i].e+'</text><text x="'+st[i].x+'" y="105" text-anchor="middle" font-size="8" font-weight="700" fill="'+st[i].c+'">'+st[i].l+'</text><text x="'+st[i].x+'" y="116" text-anchor="middle" font-size="7" fill="'+st[i].c+'">'+st[i].sub+'</text>';if(i<4)s+='<text x="'+(st[i].x+55)+'" y="94" font-size="12" fill="#94a3b8">→</text>';}s+='<path d="M65,140 C120,190 200,190 260,160" fill="none" stroke="#2563eb" stroke-width="1" stroke-dasharray="4" opacity="0.4"/><path d="M260,160 C320,130 400,130 455,160" fill="none" stroke="#059669" stroke-width="1" stroke-dasharray="4" opacity="0.4"/><text x="160" y="220" text-anchor="middle" font-size="9" fill="#2563eb" font-weight="700">← 问题空间 (发散→收敛) →</text><text x="360" y="220" text-anchor="middle" font-size="9" fill="#059669" font-weight="700">← 方案空间 (发散→收敛) →</text><text x="260" y="255" text-anchor="middle" font-size="8" fill="#94a3b8">IDEO / Stanford d.school · 以人为本的创新方法论</text>';return s;}());
+
+  d.decisionmatrix=svg(function(){var s='';s+='<rect x="10" y="10" width="100" height="30" rx="3" fill="#1a1a2e"/><text x="60" y="30" text-anchor="middle" font-size="9" font-weight="700" fill="#e2b04a">方案 / 标准</text><rect x="115" y="10" width="100" height="30" rx="3" fill="#dbeafe"/><text x="165" y="30" text-anchor="middle" font-size="9" font-weight="700" fill="#1e40af">成本(30%)</text><rect x="220" y="10" width="100" height="30" rx="3" fill="#d1fae5"/><text x="270" y="30" text-anchor="middle" font-size="9" font-weight="700" fill="#065f46">质量(40%)</text><rect x="325" y="10" width="100" height="30" rx="3" fill="#fff7ed"/><text x="375" y="30" text-anchor="middle" font-size="9" font-weight="700" fill="#9a3412">速度(30%)</text><rect x="430" y="10" width="80" height="30" rx="3" fill="#f1f5f9"/><text x="470" y="30" text-anchor="middle" font-size="9" font-weight="700" fill="#64748b">总分</text>';var rows=[['方案A','7/2.1','8/3.2','6/1.8','7.1'],['方案B','6/1.8','9/3.6','8/2.4','7.8✓'],['方案C','9/2.7','6/2.4','7/2.1','7.2']];for(var i=0;i<rows.length;i++){var y=50+i*36,bg=i===1?'#f0fdf4':'#fafbfc',tc=i===1?'#059669':'#1a1a2e';s+='<rect x="10" y="'+y+'" width="100" height="32" rx="3" fill="'+bg+'"/><text x="60" y="'+(y+21)+'" text-anchor="middle" font-size="10" font-weight="700">'+rows[i][0]+'</text>';for(var j=1;j<=3;j++)s+='<rect x="'+(115+(j-1)*105)+'" y="'+y+'" width="100" height="32" rx="3" fill="'+bg+'"/><text x="'+(165+(j-1)*105)+'" y="'+(y+21)+'" text-anchor="middle" font-size="9">'+rows[i][j]+'</text>';s+='<rect x="430" y="'+y+'" width="80" height="32" rx="3" fill="'+bg+'"/><text x="470" y="'+(y+21)+'" text-anchor="middle" font-size="10" font-weight="700" fill="'+tc+'">'+rows[i][4]+'</text>';}s+='<text x="260" y="185" text-anchor="middle" font-size="8" fill="#94a3b8">加权评分 = 评分 × 权重  |  Pugh Matrix · MCDA</text>';return s;}());
+
+  d.kanban=svg('<rect x="10" y="15" width="155" height="230" rx="4" fill="#dbeafe" opacity="0.3"/><text x="87" y="35" text-anchor="middle" font-size="10" font-weight="700" fill="#1e40af">To Do 待办</text><text x="87" y="50" text-anchor="middle" font-size="8" fill="#3b82f6">WIP: 3</text><rect x="25" y="65" width="125" height="28" rx="3" fill="#fff" stroke="#93c5fd"/><text x="87" y="83" text-anchor="middle" font-size="9">用户登录优化</text><rect x="25" y="98" width="125" height="28" rx="3" fill="#fff" stroke="#93c5fd"/><text x="87" y="116" text-anchor="middle" font-size="9">数据导出功能</text><rect x="172" y="15" width="155" height="230" rx="4" fill="#fef3c7" opacity="0.3"/><text x="249" y="35" text-anchor="middle" font-size="10" font-weight="700" fill="#92400e">In Progress</text><text x="249" y="50" text-anchor="middle" font-size="8" fill="#b45309">WIP: 2</text><rect x="187" y="65" width="125" height="28" rx="3" fill="#fff" stroke="#fcd34d"/><text x="249" y="83" text-anchor="middle" font-size="9">API 重构</text><rect x="334" y="15" width="155" height="230" rx="4" fill="#d1fae5" opacity="0.3"/><text x="411" y="35" text-anchor="middle" font-size="10" font-weight="700" fill="#065f46">Done 完成</text><rect x="349" y="65" width="125" height="28" rx="3" fill="#fff" stroke="#6ee7b7"/><text x="411" y="83" text-anchor="middle" font-size="9">Bug 修复</text><text x="260" y="270" text-anchor="middle" font-size="8" fill="#64748b">可视化工作流 · 限制 WIP · 拉动式 · 优化瓶颈</text>');
+
+  d.grow=svg(function(){var s='';var st=[{l:'G',sub:'Goal 目标',x:65,c:'#2563eb'},{l:'R',sub:'Reality 现实',x:195,c:'#059669'},{l:'O',sub:'Options 选项',x:325,c:'#ea580c'},{l:'W',sub:'Will 意愿',x:455,c:'#7c3aed'}];for(var i=0;i<st.length;i++){s+='<circle cx="'+st[i].x+'" cy="100" r="32" fill="'+st[i].c+'" opacity="0.1"/><circle cx="'+st[i].x+'" cy="100" r="32" fill="none" stroke="'+st[i].c+'" stroke-width="2.5"/><text x="'+st[i].x+'" y="96" text-anchor="middle" font-size="20" font-weight="900" fill="'+st[i].c+'">'+st[i].l+'</text><text x="'+st[i].x+'" y="114" text-anchor="middle" font-size="8" fill="'+st[i].c+'">'+st[i].sub+'</text>';if(i<3)s+='<text x="'+(st[i].x+65)+'" y="104" font-size="14" fill="#94a3b8">→</text>';}s+='<text x="260" y="178" text-anchor="middle" font-size="9" fill="#64748b">结构化教练对话框架 · 激发觉察和责任感</text><text x="260" y="198" text-anchor="middle" font-size="8" fill="#94a3b8">"你想达成什么？→ 现状如何？→ 有哪些选择？→ 决定怎么做？"</text><text x="260" y="218" text-anchor="middle" font-size="8" fill="#94a3b8">Sir John Whitmore · 最广泛使用的教练模型</text>';return s;}());
+
+  d.cld=svg('<circle cx="160" cy="100" r="32" fill="#dbeafe" stroke="#3b82f6" stroke-width="2"/><text x="160" y="97" text-anchor="middle" font-size="9" font-weight="700" fill="#1e40af">销售量</text><text x="160" y="111" text-anchor="middle" font-size="7" fill="#3b82f6">Sales</text><circle cx="360" cy="100" r="32" fill="#d1fae5" stroke="#10b981" stroke-width="2"/><text x="360" y="97" text-anchor="middle" font-size="9" font-weight="700" fill="#065f46">利润</text><text x="360" y="111" text-anchor="middle" font-size="7" fill="#059669">Profit</text><circle cx="260" cy="200" r="32" fill="#fee2e2" stroke="#ef4444" stroke-width="2"/><text x="260" y="197" text-anchor="middle" font-size="9" font-weight="700" fill="#991b1b">价格</text><text x="260" y="211" text-anchor="middle" font-size="7" fill="#dc2626">Price</text><path d="M192,100 C230,80 280,80 328,100" fill="none" stroke="#059669" stroke-width="2"/><text x="260" y="76" text-anchor="middle" font-size="8" fill="#059669">+ 同向</text><path d="M230,200 C200,175 190,145 188,132" fill="none" stroke="#dc2626" stroke-width="2" stroke-dasharray="5,3"/><text x="155" y="175" font-size="8" fill="#dc2626">−</text><text x="260" y="260" text-anchor="middle" font-size="9" fill="#7c3aed" font-weight="700">R 增强回路 (Reinforcing Loop)</text><text x="260" y="275" text-anchor="middle" font-size="8" fill="#94a3b8">系统动力学核心工具 · MIT Jay Forrester</text>');
+
+  d.pyramid=svg('<polygon points="260,15 60,190 460,190" fill="#e2b04a" opacity="0.12" stroke="#e2b04a" stroke-width="2"/><text x="260" y="50" text-anchor="middle" font-size="13" font-weight="900" fill="#1a1a2e">核心结论</text><text x="260" y="65" text-anchor="middle" font-size="8" fill="#64748b">结论先行</text><text x="140" y="135" text-anchor="middle" font-size="10" font-weight="700" fill="#334155">论据 1</text><text x="260" y="135" text-anchor="middle" font-size="10" font-weight="700" fill="#334155">论据 2</text><text x="380" y="135" text-anchor="middle" font-size="10" font-weight="700" fill="#334155">论据 3</text><text x="260" y="225" text-anchor="middle" font-size="9" fill="#64748b">以上统下 · 归类分组 (MECE) · 逻辑递进</text><text x="260" y="245" text-anchor="middle" font-size="8" fill="#94a3b8">SCQA 序言框架: 情境→冲突→问题→答案</text><text x="260" y="262" text-anchor="middle" font-size="7" fill="#94a3b8">Barbara Minto · McKinsey</text>');
+
+  d.fmea=svg(function(){var s='<rect x="10" y="10" width="500" height="34" rx="4" fill="#1a1a2e"/><text x="25" y="32" font-size="9" font-weight="700" fill="#e2b04a">失效模式</text><text x="200" y="32" font-size="9" font-weight="700" fill="#e2b04a">S 严重度</text><text x="310" y="32" font-size="9" font-weight="700" fill="#e2b04a">O 频率</text><text x="400" y="32" font-size="9" font-weight="700" fill="#e2b04a">D 可检测度</text><text x="480" y="32" font-size="9" font-weight="700" fill="#dc2626">RPN</text>';var rows=[['焊接断裂','8','4','5','160'],['密封失效','9','3','6','162'],['过热停机','7','5','4','140']];for(var i=0;i<rows.length;i++){var y=54+i*36,bg=i===1?'#fef2f2':'#fafbfc';s+='<rect x="10" y="'+y+'" width="500" height="32" rx="3" fill="'+bg+'"/><text x="20" y="'+(y+21)+'" font-size="9">'+rows[i][0]+'</text>';for(var j=1;j<=3;j++)s+='<text x="'+(205+(j-1)*105)+'" y="'+(y+21)+'" text-anchor="middle" font-size="10" font-weight="700">'+rows[i][j]+'</text>';s+='<text x="490" y="'+(y+21)+'" text-anchor="middle" font-size="10" font-weight="900" fill="'+(i===1?'#dc2626':'#ea580c')+'">'+rows[i][4]+'</text>';}s+='<text x="260" y="182" text-anchor="middle" font-size="9" fill="#dc2626" font-weight="700">RPN = S × O × D  |  优先改进最高 RPN 项</text><text x="260" y="200" text-anchor="middle" font-size="8" fill="#94a3b8">DFMEA(设计) / PFMEA(过程)  ·  MIL-STD-1629</text>';return s;}());
+
+  d.bowtie=svg('<circle cx="260" cy="130" r="28" fill="#fee2e2" stroke="#dc2626" stroke-width="2.5"/><text x="260" y="127" text-anchor="middle" font-size="8" font-weight="700" fill="#991b1b">危险</text><text x="260" y="140" text-anchor="middle" font-size="7" fill="#991b1b">事件</text><polygon points="260,102 320,130 260,158" fill="#dbeafe" opacity="0.3"/><polygon points="260,102 200,130 260,158" fill="#d1fae5" opacity="0.3"/><rect x="50" y="50" width="70" height="26" rx="3" fill="#fee2e2"/><text x="85" y="67" text-anchor="middle" font-size="8" fill="#991b1b">威胁 1</text><rect x="50" y="88" width="70" height="26" rx="3" fill="#fee2e2"/><text x="85" y="105" text-anchor="middle" font-size="8" fill="#991b1b">威胁 2</text><rect x="50" y="170" width="70" height="26" rx="3" fill="#fee2e2"/><text x="85" y="187" text-anchor="middle" font-size="8" fill="#991b1b">威胁 3</text><rect x="140" y="50" width="50" height="18" rx="3" fill="#dbeafe"/><text x="165" y="63" text-anchor="middle" font-size="7" fill="#1e40af">预防</text><rect x="140" y="88" width="50" height="18" rx="3" fill="#dbeafe"/><text x="165" y="101" text-anchor="middle" font-size="7" fill="#1e40af">预防</text><rect x="140" y="170" width="50" height="18" rx="3" fill="#dbeafe"/><text x="165" y="183" text-anchor="middle" font-size="7" fill="#1e40af">预防</text><rect x="330" y="60" width="50" height="18" rx="3" fill="#d1fae5"/><text x="355" y="73" text-anchor="middle" font-size="7" fill="#065f46">缓解</text><rect x="330" y="120" width="50" height="18" rx="3" fill="#d1fae5"/><text x="355" y="133" text-anchor="middle" font-size="7" fill="#065f46">缓解</text><rect x="400" y="50" width="70" height="26" rx="3" fill="#fff7ed"/><text x="435" y="67" text-anchor="middle" font-size="8" fill="#9a3412">后果 1</text><rect x="400" y="110" width="70" height="26" rx="3" fill="#fff7ed"/><text x="435" y="127" text-anchor="middle" font-size="8" fill="#9a3412">后果 2</text><text x="260" y="242" text-anchor="middle" font-size="8" fill="#64748b">左: 预防屏障 (威胁→事件)  ┃  右: 缓解屏障 (事件→后果)</text><text x="260" y="260" text-anchor="middle" font-size="8" fill="#94a3b8">纵深防御可视化 · Shell / 石油天然气行业</text>');
+
+  function defaultDiagram(id) {
+    return svg('<rect x="60" y="40" width="400" height="180" rx="10" fill="#f8fafc" stroke="#e5e7eb" stroke-width="1.5" stroke-dasharray="6"/><text x="260" y="115" text-anchor="middle" font-size="24">📊</text><text x="260" y="145" text-anchor="middle" font-size="12" font-weight="700" fill="#64748b">' + id.toUpperCase() + ' 框架示意图</text><text x="260" y="165" text-anchor="middle" font-size="9" fill="#94a3b8">方法论概念可视化</text>');
+  }
+
+  return d[id] || defaultDiagram(id);
+}
+
+// ═══════════════════════════════════════════════
+//  方法论详情弹窗
+// ═══════════════════════════════════════════════
+function showMethodDetail(id) {
+  const m = METHOD_DB.find(x => x.id === id);
+  if (!m) return;
+
+  const overlay = document.getElementById('modalOverlay');
+  const box = document.getElementById('modalBox');
+
+  box.innerHTML = `
+    <div class="modal-header">
+      <h3><span style="color:#e2b04a;">${m.acronym}</span> ${m.name}</h3>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="meta-row">
+        <span class="meta-item" style="background:#fef3c7;">分类：${m.category}</span>
+        <span class="meta-item" style="background:#dbeafe;">起源：${m.origin}</span>
+        <span class="meta-item" style="background:#d1fae5;">复杂度：${m.complexity}</span>
+        <span class="meta-item" style="background:#ede9fe;">耗时：${m.time}</span>
+        <span class="meta-item" style="background:#fff7ed;">评级：${'★'.repeat(m.stars)}</span>
+      </div>
+
+      <div style="margin-bottom:16px;text-align:center;">
+        ${getMethodDiagram(m.id)}
+      </div>
+
+      <div style="margin-bottom:16px;">
+        <strong>概述</strong>
+        <p style="margin-top:4px;">${m.desc}</p>
+      </div>
+
+      <div style="margin-bottom:16px;">
+        <strong>操作步骤</strong>
+        <ol style="margin-top:4px;padding-left:20px;">${m.steps.map(s => `<li style="margin:4px 0;">${s}</li>`).join('')}</ol>
+      </div>
+
+      <div class="meta-row">
+        <div style="flex:1;min-width:200px;">
+          <strong style="color:#065f46;">最佳适用场景</strong>
+          <p style="margin-top:4px;">${m.bestFor}</p>
+        </div>
+        <div style="flex:1;min-width:200px;">
+          <strong style="color:#991b1b;">局限性</strong>
+          <p style="margin-top:4px;">${m.limitations}</p>
+        </div>
+      </div>
+
+      <div style="margin-top:12px;">
+        <strong>推荐组合</strong>
+        <p style="margin-top:4px;">${m.combos ? m.combos.map(c => `<span class="combo-badge combo-secondary">${c}</span>`).join(' ') : '可独立使用'}</p>
+      </div>
+
+      <div style="margin-top:16px;padding:12px;background:#fef9e7;border-radius:6px;font-size:11px;color:#92400e;">
+        <strong>提示：</strong>点击左侧"诊断问题 → 匹配方法论"按钮，系统会自动判断该方法论是否适合你的场景。
+      </div>
+    </div>
+  `;
+
+  overlay.classList.remove('hidden');
+}
+
+function closeModal() {
+  document.getElementById('modalOverlay').classList.add('hidden');
+}
+
+// ═══════════════════════════════════════════════
+//  事件绑定
+// ═══════════════════════════════════════════════
+// analyzeBtn 的事件在 runAnalysis 重新赋值后绑定（见下方）
+
+// 领域标签
+document.querySelectorAll('#domainTags .domain-tag').forEach(tag => {
+  tag.addEventListener('click', function() {
+    const domain = this.dataset.domain;
+    // toggle
+    if (this.classList.contains('active')) {
+      this.classList.remove('active');
+      selectedDomain = null;
+      document.getElementById('problemInput').value = '';
+    } else {
+      document.querySelectorAll('#domainTags .domain-tag').forEach(t => t.classList.remove('active'));
+      this.classList.add('active');
+      selectedDomain = domain;
+      document.getElementById('problemInput').value = QUICK_INPUTS[domain] || '';
+    }
+    renderMethodList();
+    // 不清除分析结果
+  });
+});
+
+// 分类筛选
+document.querySelectorAll('#categoryFilter .cat-chip').forEach(chip => {
+  chip.addEventListener('click', function() {
+    document.querySelectorAll('#categoryFilter .cat-chip').forEach(c => c.classList.remove('active'));
+    this.classList.add('active');
+    selectedCat = this.dataset.cat;
+    renderMethodList();
+  });
+});
+
+// 模态窗关闭
+document.getElementById('modalOverlay').addEventListener('click', function(e) {
+  if (e.target === this) closeModal();
+});
+
+// 键盘支持
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') closeModal();
+  if (e.ctrlKey && e.key === 'Enter') runAnalysis();
+});
+
+// 输入框 Ctrl+Enter 触发分析
+document.getElementById('problemInput').addEventListener('keydown', function(e) {
+  if (e.ctrlKey && e.key === 'Enter') {
+    e.preventDefault();
+    runAnalysis();
+  }
+});
+
+// ═══════════════════════════════════════════════
+//  API 配置与 LLM 调用
+// ═══════════════════════════════════════════════
+const API_STORAGE_KEY = 'methodology_advisor_api_config';
+let API_CONFIG = null;
+let apiAbortController = null;
+let _originalRunAnalysis = null; // 保存原始函数引用
+
+function loadApiConfig() {
+  try {
+    const raw = localStorage.getItem(API_STORAGE_KEY);
+    API_CONFIG = raw ? JSON.parse(raw) : null;
+  } catch(e) { API_CONFIG = null; }
+  // 默认配置：DeepSeek
+  if (!API_CONFIG) {
+    API_CONFIG = {
+      provider: 'custom',
+      apiKey: 'sk-707a90a4206b45e9962d606d7a6434f3',
+      endpoint: 'https://api.deepseek.com/v1/chat/completions',
+      model: 'deepseek-v4-pro',
+      timeout: 60
+    };
+  }
+  updateApiStatus();
+  if (API_CONFIG) {
+    document.getElementById('apiProvider').value = API_CONFIG.provider || 'openai';
+    document.getElementById('apiKey').value = API_CONFIG.apiKey || '';
+    document.getElementById('apiEndpoint').value = API_CONFIG.endpoint || '';
+    document.getElementById('apiModel').value = API_CONFIG.model || '';
+    document.getElementById('apiTimeout').value = API_CONFIG.timeout || '60';
+    onProviderChange();
+  }
+}
+
+function saveConfig() {
+  const config = {
+    provider: document.getElementById('apiProvider').value,
+    apiKey: document.getElementById('apiKey').value.trim(),
+    endpoint: document.getElementById('apiEndpoint').value.trim(),
+    model: document.getElementById('apiModel').value.trim(),
+    timeout: parseInt(document.getElementById('apiTimeout').value) || 30
+  };
+  if (!config.apiKey) { alert('请输入 API Key'); return; }
+  if (!config.model) { alert('请输入模型名称'); return; }
+  localStorage.setItem(API_STORAGE_KEY, JSON.stringify(config));
+  API_CONFIG = config;
+  updateApiStatus();
+  closeSettings();
+  document.getElementById('testResult').innerHTML = '';
+}
+
+function clearConfig() {
+  if (!confirm('确定清除 API 配置？清除后将恢复本地关键词匹配模式。')) return;
+  localStorage.removeItem(API_STORAGE_KEY);
+  API_CONFIG = null;
+  document.getElementById('apiKey').value = '';
+  document.getElementById('apiModel').value = '';
+  document.getElementById('testResult').innerHTML = '';
+  updateApiStatus();
+}
+
+function onProviderChange() {
+  const provider = document.getElementById('apiProvider').value;
+  const epGroup = document.getElementById('endpointGroup');
+  const epInput = document.getElementById('apiEndpoint');
+  const modelInput = document.getElementById('apiModel');
+  if (provider === 'custom') {
+    epGroup.style.display = 'block';
+    if (!epInput.value) epInput.value = 'https://api.openai.com/v1/chat/completions';
+  } else {
+    epGroup.style.display = 'none';
+  }
+  if (!modelInput.value) {
+    const defaults = { openai: 'gpt-4o', anthropic: 'claude-sonnet-4-6', custom: '' };
+    modelInput.value = defaults[provider] || '';
+  }
+}
+
+function getEndpoint() {
+  if (!API_CONFIG) return '';
+  if (API_CONFIG.provider === 'openai') return 'https://api.openai.com/v1/chat/completions';
+  if (API_CONFIG.provider === 'anthropic') return 'https://api.anthropic.com/v1/messages';
+  return API_CONFIG.endpoint || 'https://api.openai.com/v1/chat/completions';
+}
+
+async function testConnection() {
+  const resultDiv = document.getElementById('testResult');
+  resultDiv.innerHTML = '<div class="test-result testing">正在测试连接…</div>';
+  // 临时保存配置用于测试
+  const tempConfig = {
+    provider: document.getElementById('apiProvider').value,
+    apiKey: document.getElementById('apiKey').value.trim(),
+    endpoint: document.getElementById('apiEndpoint').value.trim(),
+    model: document.getElementById('apiModel').value.trim(),
+    timeout: parseInt(document.getElementById('apiTimeout').value) || 30
+  };
+  if (!tempConfig.apiKey) { resultDiv.innerHTML = '<div class="test-result error">请输入 API Key</div>'; return; }
+  if (!tempConfig.model) { resultDiv.innerHTML = '<div class="test-result error">请输入模型名称</div>'; return; }
+
+  try {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 15000);
+    const endpoint = tempConfig.provider === 'openai' ? 'https://api.openai.com/v1/chat/completions'
+      : tempConfig.provider === 'anthropic' ? 'https://api.anthropic.com/v1/messages'
+      : (tempConfig.endpoint || 'https://api.openai.com/v1/chat/completions');
+
+    let resp;
+    if (tempConfig.provider === 'anthropic') {
+      resp = await fetch(endpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'x-api-key': tempConfig.apiKey, 'anthropic-version': '2023-06-01' },
+        body: JSON.stringify({ model: tempConfig.model, max_tokens: 50, messages: [{ role: 'user', content: 'Hello, respond with just "OK".' }] }),
+        signal: controller.signal
+      });
+    } else {
+      resp = await fetch(endpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + tempConfig.apiKey },
+        body: JSON.stringify({ model: tempConfig.model, max_tokens: 50, messages: [{ role: 'user', content: 'Hello, respond with just "OK".' }] }),
+        signal: controller.signal
+      });
+    }
+    clearTimeout(timeout);
+
+    if (resp.ok) {
+      resultDiv.innerHTML = '<div class="test-result success">连接成功！模型 ' + tempConfig.model + ' 正常响应</div>';
+    } else {
+      const errText = await resp.text().catch(() => '');
+      resultDiv.innerHTML = '<div class="test-result error">连接失败 HTTP ' + resp.status + ': ' + (errText.slice(0, 150) || resp.statusText) + '</div>';
+    }
+  } catch(e) {
+    resultDiv.innerHTML = '<div class="test-result error">连接失败: ' + (e.name === 'AbortError' ? '请求超时' : e.message) + '</div>';
+  }
+}
+
+function updateApiStatus() {
+  const dot = document.getElementById('apiStatusDot');
+  const label = document.getElementById('apiStatusLabel');
+  if (API_CONFIG && API_CONFIG.apiKey) {
+    dot.className = 'api-status-dot active';
+    dot.title = 'API 已配置: ' + API_CONFIG.model;
+    label.textContent = 'API: ' + API_CONFIG.model;
+    label.style.color = '#22c55e';
+  } else {
+    dot.className = 'api-status-dot';
+    dot.title = 'API 未配置';
+    label.textContent = '未接入API';
+    label.style.color = '#94a3b8';
+  }
+}
+
+function showLoading(model) {
+  const overlay = document.getElementById('loadingOverlay');
+  overlay.style.display = 'flex';
+  document.getElementById('loadingText').textContent = '正在通过 AI 大模型理解问题…';
+  document.getElementById('loadingModel').textContent = '模型: ' + (model || '未知');
+}
+
+function hideLoading() {
+  document.getElementById('loadingOverlay').style.display = 'none';
+}
+
+function cancelApiCall() {
+  if (apiAbortController) {
+    apiAbortController.abort();
+    apiAbortController = null;
+  }
+  hideLoading();
+  document.getElementById('diagnosisBar').innerHTML = '<span class="diag-label">API 调用已取消，恢复本地匹配模式</span>';
+  // 降级到本地分析
+  if (_originalRunAnalysis) {
+    const text = document.getElementById('problemInput').value.trim();
+    if (text) _originalRunAnalysis();
+  }
+}
+
+// ═══════════════════════════════════════════════
+//  LLM API 调用 —— 理解问题并推荐方法论
+// ═══════════════════════════════════════════════
+async function callLLMApi(problemText) {
+  if (!API_CONFIG || !API_CONFIG.apiKey) return null;
+
+  const endpoint = getEndpoint();
+  const isAnthropic = API_CONFIG.provider === 'anthropic';
+
+  const systemPrompt = `你是一个方法论匹配专家。你的任务是理解用户描述的问题，然后给出结构化的分析结果。
+
+请分析以下维度并返回严格的 JSON 格式（不要包含任何其他文字）:
+
+{
+  "problemSummary": "用一句话概括用户的核心问题",
+  "problemTypes": ["类型1", "类型2"],
+  "complexity": "低/中/高",
+  "urgency": "低/中/高",
+  "domains": ["领域1", "领域2"],
+  "recommendedMethods": ["方法论ID1", "方法论ID2", ...],
+  "methodRationale": { "方法论ID": "推荐理由" },
+  "comboSuggestions": ["组合建议1", "组合建议2"],
+  "analysisText": "一段200字以内的问题分析和建议"
+}
+
+可用领域: 战略与规划、质量与改进、问题分析与解决、决策支持、创新与设计、项目管理、团队与人才、系统思维、沟通表达、风险与安全
+
+可用方法论ID: swot, pestel, porter5, bcg, blueocean, ansoff, balance, okr, pdca, dmaic, lean, tqm, kaizen, 8d, 5whys, fishbone, triz, mece, pareto, cynefin, decisionmatrix, ahp, cba, rapid, designthinking, doublediamond, scamper, jtbd, agile, scrum, kanban, prince2, wbs, grow, smart, raci, aar, cld, ssm, adkar, pyramid, star, scqa, fmea, bowtie, hazop
+
+请根据问题类型和复杂度推荐最合适的2-4个方法论，优先推荐星级高且复杂度匹配的方法论。`;
+
+  const userPrompt = '用户问题: ' + problemText;
+
+  apiAbortController = new AbortController();
+  const timeoutMs = (API_CONFIG.timeout || 30) * 1000;
+  const timeout = setTimeout(() => apiAbortController.abort(), timeoutMs);
+
+  try {
+    let resp, data;
+    if (isAnthropic) {
+      resp = await fetch(endpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'x-api-key': API_CONFIG.apiKey, 'anthropic-version': '2023-06-01' },
+        body: JSON.stringify({ model: API_CONFIG.model, max_tokens: 1500, system: systemPrompt, messages: [{ role: 'user', content: userPrompt }] }),
+        signal: apiAbortController.signal
+      });
+      data = await resp.json();
+      if (!resp.ok) throw new Error('API Error ' + resp.status + ': ' + (data.error?.message || ''));
+      const content = data.content?.[0]?.text || '';
+      return parseLLMResponse(content);
+    } else {
+      resp = await fetch(endpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + API_CONFIG.apiKey },
+        body: JSON.stringify({ model: API_CONFIG.model, max_tokens: 1500, temperature: 0.3, messages: [{ role: 'system', content: systemPrompt }, { role: 'user', content: userPrompt }] }),
+        signal: apiAbortController.signal
+      });
+      data = await resp.json();
+      if (!resp.ok) throw new Error('API Error ' + resp.status + ': ' + (data.error?.message || ''));
+      const content = data.choices?.[0]?.message?.content || '';
+      return parseLLMResponse(content);
+    }
+  } catch(e) {
+    if (e.name === 'AbortError') throw new Error('API 调用超时（' + (API_CONFIG.timeout || 30) + '秒）');
+    throw e;
+  } finally {
+    clearTimeout(timeout);
+    apiAbortController = null;
+  }
+}
+
+function parseLLMResponse(content) {
+  // 尝试从回复中提取 JSON
+  let json = null;
+  // 先尝试直接解析
+  try { json = JSON.parse(content); } catch(e) {}
+  // 尝试提取 ```json 代码块
+  if (!json) {
+    const match = content.match(/```(?:json)?\s*([\s\S]*?)```/);
+    if (match) { try { json = JSON.parse(match[1]); } catch(e) {} }
+  }
+  // 尝试提取裸 JSON 对象
+  if (!json) {
+    const match = content.match(/\{[\s\S]*\}/);
+    if (match) { try { json = JSON.parse(match[0]); } catch(e) {} }
+  }
+  if (!json) return null;
+
+  // 标准化返回值
+  return {
+    problemSummary: json.problemSummary || '',
+    problemTypes: json.problemTypes || [],
+    complexity: json.complexity || '中',
+    urgency: json.urgency || '中',
+    domains: json.domains || [],
+    recommendedMethods: json.recommendedMethods || [],
+    methodRationale: json.methodRationale || {},
+    comboSuggestions: json.comboSuggestions || [],
+    analysisText: json.analysisText || ''
+  };
+}
+
+// ═══════════════════════════════════════════════
+//  增强版 runAnalysis —— 优先用 API
+// ═══════════════════════════════════════════════
+const _runAnalysisLocal = runAnalysis; // 保存本地版本
+
+runAnalysis = async function() {
+  const text = document.getElementById('problemInput').value.trim();
+  if (!text) {
+    document.getElementById('diagnosisBar').innerHTML = '<span class="diag-label" style="color:#dc2626;">请先在左侧输入问题描述，或点击领域标签快速填充场景</span>';
+    document.getElementById('resultContent').innerHTML = `
+      <div class="result-placeholder">
+        <div class="big-icon">&#9888;&#65039;</div>
+        <p>请先输入问题描述</p>
+        <p style="font-size:11px;margin-top:4px;color:#94a3b8;">在左侧文本框中描述你的场景，或点击"战略规划/流程改进/..."等标签快速填充</p>
+      </div>`;
+    return;
+  }
+
+  // 如果配置了 API，使用 LLM 分析
+  if (API_CONFIG && API_CONFIG.apiKey) {
+    showLoading(API_CONFIG.model);
+    try {
+      const llmResult = await callLLMApi(text);
+      hideLoading();
+
+      if (llmResult && llmResult.recommendedMethods && llmResult.recommendedMethods.length > 0) {
+        // LLM 分析成功，使用其结果
+        renderLLMResults(llmResult, text);
+        // 更新诊断条
+        const diagBar = document.getElementById('diagnosisBar');
+        const typeColors = {
+          '战略规划类':'diag-type-strategy','质量控制类':'diag-type-process','流程效率类':'diag-type-process',
+          '根因分析类':'diag-type-problem','决策评估类':'diag-type-decision','创新设计类':'diag-type-innovation',
+          '项目管理类':'diag-type-process','团队管理类':'diag-type-decision','风险安全类':'diag-type-problem',
+          '沟通表达类':'diag-type-innovation','变革管理类':'diag-type-decision','复杂性情境':'diag-type-decision',
+          '通用问题分析':'diag-type-decision'
+        };
+        diagBar.innerHTML = `
+          <span class="diag-label" style="color:#22c55e;">&#9679; AI 分析</span>
+          ${(llmResult.problemTypes || []).map(t => '<span class="diag-value ' + (typeColors[t]||'diag-complexity') + '">' + t + '</span>').join(' ')}
+          <span class="diag-label">| 复杂度：</span>
+          <span class="diag-value diag-complexity">${llmResult.complexity || '中'}</span>
+          <span class="diag-label">| 模型：</span>
+          <span class="diag-value" style="background:#fef3c7;color:#92400e;">${API_CONFIG.model}</span>
+        `;
+        return;
+      }
+      // LLM 返回无效结果，降级
+      document.getElementById('diagnosisBar').innerHTML = '<span class="diag-label" style="color:#ea580c;">&#9888; AI 返回格式异常，已自动降级为本地匹配</span>';
+      _runAnalysisLocal();
+      return;
+    } catch(e) {
+      hideLoading();
+      document.getElementById('diagnosisBar').innerHTML = '<span class="diag-label" style="color:#dc2626;">&#10060; API 调用失败: ' + e.message + '</span>';
+      document.getElementById('resultContent').innerHTML = `
+        <div class="result-placeholder">
+          <div class="big-icon">&#9888;&#65039;</div>
+          <p>API 调用失败</p>
+          <p style="font-size:11px;margin-top:4px;color:#dc2626;">${e.message}</p>
+          <p style="font-size:11px;margin-top:8px;color:#94a3b8;">请检查 API 配置或<a href="javascript:openSettings()" style="color:#e2b04a;">重新设置</a></p>
+          <button class="loading-cancel" style="margin-top:12px;" onclick="runAnalysis = _runAnalysisLocal; document.getElementById('analyzeBtn').click();">使用本地匹配</button>
+        </div>`;
+      return;
+    }
+  }
+
+  // 未配置 API：使用本地分析引擎
+  _runAnalysisLocal();
+};
+
+// 保存本地分析函数引用（用于降级）
+_originalRunAnalysis = _runAnalysisLocal;
+
+// 重新绑定 analyzeBtn 事件（指向增强版 runAnalysis）
+document.getElementById('analyzeBtn').addEventListener('click', function() { runAnalysis(); });
+
+// ═══════════════════════════════════════════════
+//  渲染 LLM 分析结果
+// ═══════════════════════════════════════════════
+function renderLLMResults(llmResult, originalText) {
+  const container = document.getElementById('resultContent');
+  const rankColors = ['#e2b04a','#94a3b8','#b45309','#64748b','#475569','#334155'];
+
+  // 根据 LLM 推荐的方法论 ID 获取完整数据
+  const recommendedMethods = llmResult.recommendedMethods
+    .map(id => METHOD_DB.find(m => m.id === id))
+    .filter(Boolean);
+
+  // 如果 LLM 推荐的方法论不足，补充
+  if (recommendedMethods.length < 2) {
+    const diagnosis = diagnoseProblem(originalText);
+    const localTop = matchMethodologies(diagnosis);
+    localTop.forEach(m => {
+      if (!recommendedMethods.find(rm => rm.id === m.id)) {
+        recommendedMethods.push(m);
+      }
+    });
+  }
+
+  // 生成 LLM 组合建议
+  const combos = [];
+  if (llmResult.comboSuggestions && llmResult.comboSuggestions.length > 0) {
+    llmResult.comboSuggestions.forEach((c, i) => {
+      combos.push({ type: i === 0 ? 'AI推荐' : '组合', description: c, methods: [] });
+    });
+  }
+
+  // 生成路线图
+  const roadmap = generateRoadmap(recommendedMethods, {
+    complexity: llmResult.complexity || '中',
+    urgency: llmResult.urgency || '中'
+  });
+
+  container.innerHTML = `
+    <!-- AI 分析概述 -->
+    <div class="rec-card expanded" style="border-left: 4px solid #22c55e;">
+      <div class="rec-card-header" onclick="this.parentElement.classList.toggle('expanded')">
+        <span>&#129504; AI 分析概述</span>
+        <span style="font-size:10px;color:#22c55e;">由 ${API_CONFIG.model} 生成</span>
+      </div>
+      <div class="rec-card-body">
+        <div class="section-content" style="line-height:1.8;">${llmResult.analysisText || llmResult.problemSummary || '分析完成'}</div>
+        ${llmResult.problemSummary ? '<div class="section" style="margin-top:8px;"><div class="section-title">问题概要</div><div class="section-content">' + llmResult.problemSummary + '</div></div>' : ''}
+      </div>
+    </div>
+
+    <!-- 推荐方法论 -->
+    <div style="font-size:14px;font-weight:700;margin:8px 0 4px;">AI 推荐方法论 Top ${recommendedMethods.length}</div>
+    ${recommendedMethods.map((m, i) => `
+    <div class="rec-card expanded" style="border-left: 4px solid ${rankColors[i]};" id="rec-${m.id}">
+      <div class="rec-card-header" style="cursor:default;">
+        <div style="display:flex;align-items:center;gap:10px;flex:1;min-width:0;" onclick="event.stopPropagation();showMethodDetail('${m.id}')" title="点击查看完整详情">
+          <span class="rank-badge" style="background:${rankColors[i]};font-size:12px;">${i+1}</span>
+          <span style="cursor:pointer;text-decoration:underline;text-underline-offset:2px;text-decoration-color:#e2b04a;"><strong>${m.acronym}</strong> ${m.name}</span>
+          <span style="font-size:10px;color:#94a3b8;">${m.category} · ${'★'.repeat(m.stars)} · 难度${m.complexity}</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;">
+          ${llmResult.methodRationale && llmResult.methodRationale[m.id] ? '<span style="font-size:10px;color:#22c55e;font-weight:500;" title="' + llmResult.methodRationale[m.id] + '">AI 推荐</span>' : ''}
+          <span style="font-size:10px;color:#94a3b8;cursor:pointer;user-select:none;" onclick="event.stopPropagation();this.closest('.rec-card').classList.toggle('expanded')" title="展开/折叠">▾</span>
+        </div>
+      </div>
+      <div class="rec-card-body">
+        <div class="section">
+          <div class="section-title">概述</div>
+          <div class="section-content">${m.desc}</div>
+        </div>
+        ${llmResult.methodRationale && llmResult.methodRationale[m.id] ? `
+        <div class="section">
+          <div class="section-title">AI 推荐理由</div>
+          <div class="section-content" style="color:#065f46;">${llmResult.methodRationale[m.id]}</div>
+        </div>` : ''}
+        <div class="section">
+          <div class="section-title">操作步骤</div>
+          <ul class="step-list">${m.steps.map(s => '<li>' + s + '</li>').join('')}</ul>
+        </div>
+        <div class="section">
+          <div class="section-title">最佳适用场景</div>
+          <div class="section-content">${m.bestFor}</div>
+        </div>
+        <div class="section">
+          <div class="section-title">局限性</div>
+          <div class="section-content" style="color:#991b1b;">${m.limitations}</div>
+        </div>
+        <div class="section">
+          <div class="section-title">推荐组合</div>
+          <div class="section-content">${m.combos ? m.combos.map(c => '<span class="combo-badge combo-secondary">' + c + '</span>').join(' ') : '独立使用'}</div>
+        </div>
+        <div style="margin-top:8px;padding-top:8px;border-top:1px solid #e5e7eb;">
+          <span style="color:#e2b04a;font-weight:700;font-size:11px;cursor:pointer;text-decoration:underline;" onclick="event.stopPropagation();showMethodDetail('${m.id}')">查看完整详情 →</span>
+        </div>
+      </div>
+    </div>
+    `).join('')}
+
+    <!-- 组合建议 -->
+    ${combos.length > 0 ? `
+    <div style="font-size:14px;font-weight:700;margin:8px 0 4px;">AI 组合建议</div>
+    <div class="rec-card expanded" style="border-left: 4px solid #22c55e;">
+      <div class="rec-card-header" onclick="this.parentElement.classList.toggle('expanded')">
+        <span>推荐组合方式</span>
+        <span style="font-size:10px;color:#22c55e;">${combos.length}个建议</span>
+      </div>
+      <div class="rec-card-body">
+        ${combos.map(c => '<div style="margin-bottom:8px;padding:8px;background:#f8fafc;border-radius:4px;"><span class="combo-badge combo-primary">' + c.type + '</span> <span style="font-size:11.5px;">' + c.description + '</span></div>').join('')}
+      </div>
+    </div>` : ''}
+
+    <!-- 实施路线图 -->
+    <div style="font-size:14px;font-weight:700;margin:8px 0 4px;">实施路线图</div>
+    ${roadmap.map((p, i) => `
+    <div class="rec-card expanded" style="border-left: 4px solid ${['#2563eb','#dc2626','#e2b04a','#059669'][i]};">
+      <div class="rec-card-header" onclick="this.parentElement.classList.toggle('expanded')">
+        <div style="display:flex;align-items:center;gap:8px;">
+          <span style="font-size:20px;">${['①','②','③','④'][i]}</span>
+          <span><strong>${p.phase}</strong></span>
+          <span style="font-size:10px;background:#f1f5f9;padding:2px 8px;border-radius:10px;">预计 ${p.duration}</span>
+        </div>
+        <span style="font-size:11px;color:#64748b;">${p.methods}</span>
+      </div>
+      <div class="rec-card-body">
+        <div class="section-content"><strong>目标：</strong>${p.goal}</div>
+        <div class="section-content" style="margin-top:4px;">${p.detail}</div>
+      </div>
+    </div>
+    `).join('')}
+
+    <!-- 速览 -->
+    <div style="font-size:14px;font-weight:700;margin:8px 0 4px;">推荐方法论速览</div>
+    <div class="rec-card expanded">
+      <div class="rec-card-body" style="padding-top:10px;">
+        <div class="compare-table-wrapper">
+        <table class="compare-table">
+          <thead><tr><th>排名</th><th>方法论</th><th>用途</th><th>复杂度</th><th>耗时</th><th>适用阶段</th></tr></thead>
+          <tbody>
+            ${recommendedMethods.map((m, i) => '<tr><td><strong>#' + (i+1) + '</strong></td><td><strong>' + m.acronym + '</strong> ' + m.name + '</td><td>' + m.tags.slice(0,2).join('、') + '</td><td>' + m.complexity + '</td><td>' + m.time + '</td><td>' + m.category + '</td></tr>').join('')}
+          </tbody>
+        </table>
+        </div>
+      </div>
+    </div>
+  `;
+
+  container.scrollTop = 0;
+}
+
+// ═══════════════════════════════════════════════
+//  设置弹窗控制
+// ═══════════════════════════════════════════════
+function openSettings() {
+  document.getElementById('settingsModalOverlay').classList.remove('hidden');
+  if (API_CONFIG) {
+    document.getElementById('apiProvider').value = API_CONFIG.provider || 'openai';
+    document.getElementById('apiKey').value = API_CONFIG.apiKey || '';
+    document.getElementById('apiEndpoint').value = API_CONFIG.endpoint || '';
+    document.getElementById('apiModel').value = API_CONFIG.model || '';
+    document.getElementById('apiTimeout').value = API_CONFIG.timeout || '30';
+    onProviderChange();
+  }
+}
+
+function closeSettings() {
+  document.getElementById('settingsModalOverlay').classList.add('hidden');
+  document.getElementById('testResult').innerHTML = '';
+}
+
+document.getElementById('settingsModalOverlay').addEventListener('click', function(e) {
+  if (e.target === this) closeSettings();
+});
+
+// ═══════════════════════════════════════════════
+//  初始化
+// ═══════════════════════════════════════════════
+loadApiConfig();
+renderMethodList();
+</script>
+</body>
+</html>

@@ -1,0 +1,269 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>评估报告 — 运动功能量化评估系统</title>
+<style>
+  :root {
+    --surface: #0d1520; --surface-2: #111927; --border: #2d3951;
+    --text: #edf2ff; --sub: #b7c8e6; --ok: #3bb273; --warn: #f0b44e; --risk: #e75d5d;
+    --brand: #1f6feb; --brand-soft: #68d4ff;
+  }
+  * { box-sizing:border-box; margin:0; padding:0 }
+  body {
+    font-family: system-ui, -apple-system, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+    background: radial-gradient(circle at top, #1a2230, #0b0f15 55%);
+    color: var(--text); min-height:100vh; padding:16px;
+  }
+  .sheet { max-width:860px; margin:0 auto }
+  .header {
+    display:flex; justify-content:space-between; align-items:flex-end;
+    border-bottom:2px solid var(--brand-soft); padding-bottom:12px; margin-bottom:20px;
+    flex-wrap:wrap; gap:8px;
+  }
+  .header h1 { font-size:1.2rem; font-weight:700; color:#eaf3ff }
+  .header .meta { font-size:.75rem; color:var(--sub) }
+
+  .card {
+    border:1px solid var(--border); border-radius:10px;
+    padding:16px; background:rgba(14,20,30,.82); margin-bottom:14px;
+  }
+  .card h3 { font-size:.82rem; color:var(--sub); margin-bottom:10px; letter-spacing:.03em }
+  .card h3::before { content:"■"; font-size:.5rem; margin-right:6px; color:#5da8ff; vertical-align:middle }
+
+  table { width:100%; border-collapse:collapse; font-size:.78rem }
+  th, td { padding:8px 12px; border:1px solid var(--border); text-align:center }
+  th { background:var(--surface-2); font-weight:600 }
+  .good { color:var(--ok) } .warn { color:var(--warn) } .risk { color:var(--risk) }
+
+  .score-big { display:flex; align-items:center; gap:20px; margin-bottom:12px }
+  .score-big .ring {
+    width:90px; height:90px; border-radius:50%; display:flex;
+    align-items:center; justify-content:center; font-size:2rem; font-weight:800;
+    border:5px solid var(--border); flex-shrink:0;
+  }
+  .ring.excellent { border-color:var(--ok); color:var(--ok) }
+  .ring.good      { border-color:#2196f3; color:#2196f3 }
+  .ring.fair      { border-color:var(--warn); color:var(--warn) }
+  .ring.poor      { border-color:var(--risk); color:var(--risk) }
+
+  .conclusion {
+    background:#0f2035; border-left:4px solid var(--brand-soft);
+    padding:12px 16px; border-radius:0 8px 8px 0; font-size:.82rem; line-height:1.6;
+  }
+
+  .chart-wrap { text-align:center }
+  .chart-wrap canvas { max-width:100%; background:#0b111b; border-radius:6px }
+
+  .btn-row { display:flex; gap:8px; margin-top:16px; flex-wrap:wrap }
+  button {
+    border:0; border-radius:8px; padding:9px 16px; cursor:pointer;
+    font-weight:700; font-size:.8rem; transition:transform .12s;
+  }
+  button:hover { filter:brightness(1.06); transform:translateY(-1px) }
+  button:active { transform:scale(.97) }
+  .btn-brand { background:var(--brand-soft); color:#05131a }
+  .btn-secondary { background:#9db6ff; color:#0b1430 }
+  .btn-ghost { background:#1a2538; color:#cfe1ff; border:1px solid #43587f }
+
+  .empty { text-align:center; padding:60px 20px; color:var(--sub) }
+  .empty h2 { margin-bottom:12px }
+
+  input, select {
+    border:1px solid var(--border); border-radius:8px; padding:7px 10px;
+    background:var(--surface); color:var(--text); font-size:.8rem;
+  }
+
+  @media print {
+    body { background:#fff!important; color:#000!important; padding:0 }
+    .card { border:1px solid #ccc; background:#fff; box-shadow:none; color:#000 }
+    .header { border-color:#333 }
+    .header h1, .header .meta { color:#000 }
+    .card h3 { color:#333 }
+    .btn-row { display:none }
+    .conclusion { background:#f0f7ff; border-color:#1a6fb5; color:#000 }
+    table th { background:#f0f0f0; color:#000 }
+    .good { color:#0d904f } .warn { color:#e68a00 } .risk { color:#c62828 }
+    .ring.excellent, .ring.good, .ring.fair, .ring.poor { color:#000!important; border-color:#999!important }
+  }
+</style>
+</head>
+<body>
+<div class="sheet" id="sheet">
+  <div class="header">
+    <div>
+      <h1>运动功能量化评估报告</h1>
+      <div class="meta" id="reportMeta">加载中...</div>
+    </div>
+    <div class="meta" id="reportDate"></div>
+  </div>
+  <div id="reportContent"></div>
+  <div class="btn-row">
+    <button class="btn-secondary" onclick="window.print()">🖨 打印报告</button>
+    <button class="btn-brand" onclick="exportReportJSON()">📥 导出 JSON</button>
+    <button class="btn-ghost" onclick="exportReportHTML()">📄 导出 HTML</button>
+    <button class="btn-ghost" onclick="window.close()">✕ 关闭</button>
+  </div>
+</div>
+
+<script>
+// helpers
+const clamp = (v,l,h) => Math.min(h,Math.max(l,v));
+
+function calcScore(avgROM, std, romL, romR) {
+  const err=Math.abs(avgROM-std);
+  const rs=Math.max(0,100-err*1.2);
+  let ss=100;
+  if(romL!=null&&romR!=null){const mx=Math.max(romL,romR);if(mx>0)ss=Math.max(0,(1-Math.abs(romL-romR)/mx)*100)}
+  return Math.round(rs*.7+ss*.3);
+}
+function grade(s) {
+  if(s>=90) return {cls:'excellent',txt:'优秀',desc:'关节活动度正常，动作完成标准'};
+  if(s>=75) return {cls:'good',txt:'良好',desc:'关节活动度轻度受限，动作完成尚可'};
+  if(s>=60) return {cls:'fair',txt:'一般',desc:'关节活动度部分受限，需进一步评估'};
+  return {cls:'poor',txt:'受限',desc:'关节活动度明显受限，动作完成不达标'};
+}
+
+function drawBarChart(canvasId, leftVal, rightVal, standardVal, label) {
+  const canvas = document.getElementById(canvasId);
+  if(!canvas) return;
+  const ctx=canvas.getContext('2d'), W=canvas.width=600, H=canvas.height=280;
+  ctx.clearRect(0,0,W,H);
+  const pad={top:30,right:40,bottom:50,left:60}, pw=W-pad.left-pad.right, ph=H-pad.top-pad.bottom;
+  const yMax=standardVal*1.25;
+
+  // grid
+  ctx.strokeStyle='#2a3956'; ctx.lineWidth=1;
+  for(let i=0;i<=5;i++){const y=pad.top+ph*(1-i/5);ctx.beginPath();ctx.moveTo(pad.left,y);ctx.lineTo(W-pad.right,y);ctx.stroke();ctx.fillStyle='#6b7280';ctx.font='11px system-ui';ctx.textAlign='right';ctx.fillText(Math.round(yMax*i/5)+'°',pad.left-8,y+4)}
+
+  // standard line
+  const sy=pad.top+ph*(1-standardVal/yMax);
+  ctx.strokeStyle='#ff8f9b'; ctx.lineWidth=2; ctx.setLineDash([6,4]);
+  ctx.beginPath();ctx.moveTo(pad.left,sy);ctx.lineTo(W-pad.right,sy);ctx.stroke();ctx.setLineDash([]);
+  ctx.fillStyle='#ff8f9b'; ctx.textAlign='left'; ctx.font='bold 11px system-ui';ctx.fillText('标准 '+standardVal+'°',W-pad.right+4,sy+4);
+
+  // bars
+  const groups=[{l:'左均值',v:leftVal,c:'#2196f3'},{l:'右均值',v:rightVal,c:'#4caf50'}];
+  const bw=pw/(groups.length*2.5), gap=bw*.6;
+  groups.forEach((g,i)=>{
+    const x=pad.left+(i+1)*gap+i*bw, bh=g.v/yMax*ph, y=pad.top+ph-bh;
+    ctx.fillStyle=g.c; ctx.fillRect(x,y,bw,bh);
+    ctx.fillStyle='#fff'; ctx.font='bold 12px system-ui'; ctx.textAlign='center';
+    ctx.fillText(g.v.toFixed(1)+'°',x+bw/2,y-8);
+    ctx.fillStyle='#6b7280'; ctx.font='11px system-ui'; ctx.fillText(g.l,x+bw/2,pad.top+ph+16);
+  });
+  ctx.fillStyle='#6b7280'; ctx.font='11px system-ui'; ctx.textAlign='center'; ctx.fillText(label,W/2,H-6);
+}
+
+function renderReport(data) {
+  const mv=data.movement; const sl=data.romStats.left, sr=data.romStats.right;
+  const avgL=sl.avg, avgR=sr.avg;
+  const score=data.latestScore??(avgL!=null?calcScore((avgL+(avgR??avgL))/2,mv.std,avgL,avgR):null);
+  const g=score!=null?grade(score):null;
+  const symIdx=avgL!=null&&avgR!=null&&Math.max(avgL,avgR)>0?((1-Math.abs(avgL-avgR)/Math.max(avgL,avgR))*100).toFixed(1):null;
+  const now=new Date(data.timestamp).toLocaleString('zh-CN');
+
+  document.getElementById('reportDate').textContent = now;
+  document.getElementById('reportMeta').textContent = `动作: ${mv.name} | 标准ROM: ${mv.std}° | 测量: ${mv.label}`;
+
+  let rows='';
+  if(avgL!=null) rows+=`<tr><td>${mv.label}角度(均值)</td><td>${avgL.toFixed(1)}°</td><td>${avgR!=null?avgR.toFixed(1)+'°':'-'}</td><td>${mv.std}°</td><td>${(avgL/mv.std*100).toFixed(1)}%</td></tr>`;
+  if(sl.min!=null) rows+=`<tr><td>最小值</td><td>${sl.min.toFixed(1)}°</td><td>${sr.min!=null?sr.min.toFixed(1)+'°':'-'}</td><td>-</td><td>-</td></tr>`;
+  if(sl.max!=null) rows+=`<tr><td>最大值</td><td>${sl.max.toFixed(1)}°</td><td>${sr.max!=null?sr.max.toFixed(1)+'°':'-'}</td><td>-</td><td>-</td></tr>`;
+  rows+=`<tr><td>记录帧数</td><td colspan="2">${sl.n+sr.n}帧</td><td>-</td><td>-</td></tr>`;
+  if(symIdx!=null) rows+=`<tr><td>左右对称性</td><td colspan="2">${symIdx}%</td><td>≥90%</td><td class="${symIdx>=90?'good':'risk'}">${symIdx>=90?'✓ 正常':'✗ 不对称'}</td></tr>`;
+
+  document.getElementById('reportContent').innerHTML = `
+    <div class="card">
+      <h3>患者信息</h3>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;font-size:.8rem">
+        <div><label style="color:var(--sub)">患者ID</label><br><input id="patientId" style="width:100%" placeholder="选填"></div>
+        <div><label style="color:var(--sub)">诊断类型</label><br><select id="diagnosis" style="width:100%"><option value="">选填</option><option>肩痛综合征</option><option>肩关节术后</option><option>冻结肩</option><option>肩袖功能障碍</option><option>膝关节OA</option><option>膝关节术后</option><option>髋关节疼痛</option><option>综合康复</option></select></div>
+        <div><label style="color:var(--sub)">治疗师</label><br><input id="therapist" style="width:100%" placeholder="选填"></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>一、关节活动度 (ROM) 测量结果</h3>
+      <table>
+        <tr><th>指标</th><th>左侧</th><th>右侧</th><th>标准值</th><th>达标率</th></tr>
+        ${rows}
+      </table>
+    </div>
+
+    <div class="card">
+      <h3>二、ROM 达标对比图</h3>
+      <div class="chart-wrap"><canvas id="romChart"></canvas></div>
+    </div>
+
+    <div class="card">
+      <h3>三、综合评估结论</h3>
+      <div class="score-big">
+        <div class="ring ${g?g.cls:''}">${score!=null?score:'--'}</div>
+        <div style="font-size:.82rem;line-height:1.6">
+          <strong>${g?g.txt:'--'}</strong>
+          <p style="color:var(--sub)">${g?g.desc:'无数据'}</p>
+        </div>
+      </div>
+      <div class="conclusion">
+        <p>${avgL!=null?`左侧${mv.label}均值 ${avgL.toFixed(1)}°，右侧${mv.label}均值 ${avgR!=null?avgR.toFixed(1)+'°':'--'}，`:''}与临床标准值 ${mv.std}° 相比，${score!=null?(score>=90?'活动范围达到正常标准。':score>=75?'活动范围存在轻度受限，建议进一步评估并制定康复计划。':score>=60?'活动范围明显受限，需系统康复干预。':'活动范围严重受限，建议结合影像学检查综合判断。'):'暂无足够数据评估。'}</p>
+        ${symIdx!=null&&symIdx<90?`<p style="margin-top:6px;color:var(--risk)">⚠ 左右侧存在不对称 (${symIdx}%)，需关注是否存在单侧病变或代偿。</p>`:''}
+      </div>
+    </div>
+
+    <div style="font-size:.68rem;color:var(--sub);text-align:center;padding:10px">
+      本报告由「运动功能量化评估系统」自动生成 | 基于 MediaPipe Pose | 关节角度误差＜2°<br>仅供临床参考，不作为唯一诊断依据。数据可导出用于复诊对比及科研存档。
+    </div>
+  `;
+
+  // draw chart
+  requestAnimationFrame(()=>drawBarChart('romChart', avgL??0, avgR??0, mv.std, mv.label+'对比 (°)'));
+}
+
+function exportReportJSON() {
+  const data=JSON.parse(localStorage.getItem('clinic_report_data')||'{}');
+  const report={
+    ...data,
+    patient: document.getElementById('patientId')?.value||'',
+    diagnosis: document.getElementById('diagnosis')?.value||'',
+    therapist: document.getElementById('therapist')?.value||'',
+    exportedAt: new Date().toISOString(),
+  };
+  const blob=new Blob([JSON.stringify(report,null,2)],{type:'application/json'});
+  const u=URL.createObjectURL(blob), a=document.createElement('a');
+  a.href=u; a.download=`report_${Date.now()}.json`; a.click(); URL.revokeObjectURL(u);
+}
+
+function exportReportHTML() {
+  const html=document.documentElement.outerHTML;
+  const blob=new Blob(['<!doctype html>\n'+html],{type:'text/html'});
+  const u=URL.createObjectURL(blob), a=document.createElement('a');
+  a.href=u; a.download=`report_${Date.now()}.html`; a.click(); URL.revokeObjectURL(u);
+}
+
+// init
+function init() {
+  const raw = localStorage.getItem('clinic_report_data');
+  if (!raw) {
+    document.getElementById('reportContent').innerHTML = `
+      <div class="empty">
+        <h2>暂无评估数据</h2>
+        <p>请先在「运动功能量化评估系统」中完成动作检测并点击「评估报告」按钮。</p>
+        <p style="margin-top:12px;font-size:.78rem">或 <a href="clinic-assessment.html" style="color:var(--brand-soft)">返回评估页面</a></p>
+      </div>
+    `;
+    document.getElementById('reportMeta').textContent = '无数据';
+    return;
+  }
+  try {
+    const data = JSON.parse(raw);
+    renderReport(data);
+  } catch(e) {
+    document.getElementById('reportContent').innerHTML = '<div class="empty"><h2>数据解析失败</h2><p>请重新进行评估。</p></div>';
+  }
+}
+init();
+</script>
+</body>
+</html>

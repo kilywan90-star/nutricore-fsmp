@@ -1,0 +1,58 @@
+/* 个人中心 */
+
+.page-profile {
+  padding-bottom: 120rpx;
+}
+
+.profile-header {
+  background: linear-gradient(135deg, #07C160 0%, #00A650 100%);
+  padding: 60rpx 32rpx 40rpx;
+}
+
+.profile-avatar {
+  width: 140rpx;
+  height: 140rpx;
+  border-radius: 50%;
+  margin: 0 auto;
+  display: block;
+  border: 4rpx solid rgba(255,255,255,0.5);
+}
+
+.stats-row {
+  display: flex;
+  justify-content: space-around;
+}
+
+.stat-item {
+  text-align: center;
+  color: #fff;
+}
+
+.stat-value {
+  font-size: 36rpx;
+  font-weight: bold;
+  display: block;
+}
+
+.stat-label {
+  font-size: 22rpx;
+  opacity: 0.8;
+  margin-top: 4rpx;
+}
+
+.member-card, .menu-card {
+  margin-top: 24rpx;
+}
+
+.menu-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 24rpx 0;
+  font-size: 30rpx;
+  border-bottom: 1rpx solid #f0f0f0;
+}
+
+.menu-item:last-child {
+  border-bottom: none;
+}

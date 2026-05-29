@@ -1,6 +1,21 @@
 import pytest
 from httpx import AsyncClient, ASGITransport
 from src.main import app
+from src.api.auth_deps import get_current_user
+from src.models.user import User, UserRole
+import uuid
+
+
+async def mock_get_current_user():
+    user = User(id=uuid.uuid4(), phone_hash="test_hash", role=UserRole.PATIENT, is_active=True)
+    return user
+
+
+@pytest.fixture(autouse=True)
+def override_auth():
+    app.dependency_overrides[get_current_user] = mock_get_current_user
+    yield
+    app.dependency_overrides.clear()
 
 
 @pytest.fixture

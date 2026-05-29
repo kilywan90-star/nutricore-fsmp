@@ -1,0 +1,2082 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>AI 数字医生 · 成都高新智慧导诊</title>
+<style>
+:root {
+  --primary: #1a7ad9;
+  --primary-dark: #0d5ba8;
+  --primary-light: #e6f2fc;
+  --accent: #00a870;
+  --accent-light: #e6f7f1;
+  --danger: #d94841;
+  --warning: #f0a030;
+  --bg: #f2f4f7;
+  --card: #ffffff;
+  --text: #1a1a1a;
+  --text-secondary: #6b7280;
+  --text-hint: #9ca3af;
+  --border: #e8eaef;
+  --radius: 14px;
+  --radius-lg: 20px;
+  --radius-sm: 10px;
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.06);
+  --shadow: 0 2px 12px rgba(0,0,0,0.07);
+  --shadow-lg: 0 8px 30px rgba(0,0,0,0.10);
+  --nav-height: 64px;
+  --header-height: 52px;
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "PingFang SC", "Microsoft YaHei", sans-serif;
+  background: #e8ecf1; display: flex; justify-content: center; align-items: center;
+  min-height: 100vh; -webkit-font-smoothing: antialiased;
+}
+.app-shell {
+  width: 100%; max-width: 430px; height: 94vh; max-height: 900px;
+  background: var(--bg); border-radius: 6px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.18); display: flex; flex-direction: column;
+  overflow: hidden; position: relative;
+}
+
+/* ===== Page Container ===== */
+.page { flex:1; overflow-y:auto; display:none; flex-direction:column; }
+.page.active { display:flex; }
+.page::-webkit-scrollbar { width:0; }
+
+/* ===== Status Bar ===== */
+.status-bar {
+  height: 28px; background: var(--primary-dark); display:flex; align-items:center;
+  justify-content:space-between; padding:0 18px; color:rgba(255,255,255,0.8); font-size:10px; flex-shrink:0;
+}
+
+/* ===== Header ===== */
+.app-header {
+  background: linear-gradient(160deg, #1a7ad9 0%, #0f5fb5 100%);
+  padding: 18px 20px 22px; flex-shrink: 0; color: #fff; position: relative;
+  overflow: hidden;
+}
+.app-header::after {
+  content:''; position:absolute; top:-30px; right:-40px; width:140px; height:140px;
+  border-radius:50%; background:rgba(255,255,255,0.04);
+}
+.app-header .header-top { display:flex; align-items:center; justify-content:space-between; position:relative; z-index:1; }
+.app-header .hospital-name { font-size: 13px; opacity: 0.85; font-weight: 500; }
+.app-header .header-actions { display:flex; gap:14px; }
+.app-header .header-actions span { font-size:18px; cursor:pointer; opacity:0.85; }
+
+.app-header .greeting { font-size:20px; font-weight:700; margin-top:14px; position:relative; z-index:1; }
+.app-header .greeting-sub { font-size:12px; opacity:0.8; margin-top:4px; position:relative; z-index:1; }
+
+/* ===== Search Bar ===== */
+.search-bar {
+  margin: -16px 16px 0; background:#fff; border-radius:26px; padding:12px 18px;
+  display:flex; align-items:center; gap:10px; box-shadow:0 4px 16px rgba(0,0,0,0.08);
+  position:relative; z-index:2; cursor:pointer;
+}
+.search-bar .search-icon { font-size:18px; color:var(--text-hint); }
+.search-bar .search-text { flex:1; font-size:13px; color:var(--text-hint); }
+.search-bar .search-ai { font-size:11px; color:var(--primary); font-weight:600; background:var(--primary-light); padding:4px 10px; border-radius:12px; }
+
+/* ===== Banner ===== */
+.banner-wrap { padding: 20px 16px 6px; flex-shrink: 0; }
+.banner {
+  background: linear-gradient(135deg, #e8f4fd 0%, #d4eafa 100%);
+  border-radius: var(--radius-lg); padding:16px 18px; display:flex; align-items:center;
+  gap:12px; border:1px solid #d0e5f8;
+}
+.banner-icon { font-size:36px; flex-shrink:0; }
+.banner-info { flex:1; }
+.banner-info .banner-title { font-size:14px; font-weight:700; color:var(--primary-dark); }
+.banner-info .banner-desc { font-size:11px; color:var(--text-secondary); margin-top:2px; }
+.banner .banner-btn {
+  padding:8px 16px; border-radius:20px; background:var(--primary); color:#fff;
+  font-size:12px; font-weight:600; border:none; cursor:pointer; white-space:nowrap;
+}
+
+/* ===== Quick Grid ===== */
+.section-title {
+  font-size: 15px; font-weight: 700; color: var(--text);
+  padding: 18px 16px 10px; display:flex; align-items:center; justify-content:space-between;
+}
+.section-title .more { font-size:12px; color:var(--text-hint); font-weight:400; cursor:pointer; }
+.quick-grid {
+  display:grid; grid-template-columns:repeat(4, 1fr); gap:10px; padding:0 16px; flex-shrink:0;
+}
+.quick-item {
+  background:#fff; border-radius:var(--radius); padding:14px 8px; text-align:center;
+  cursor:pointer; transition:all 0.2s; box-shadow:var(--shadow-sm); display:flex;
+  flex-direction:column; align-items:center; gap:7px;
+}
+.quick-item:active { transform:scale(0.95); background:#f8faff; }
+.quick-item .q-icon {
+  width:44px; height:44px; border-radius:14px; display:flex; align-items:center;
+  justify-content:center; font-size:22px;
+}
+.q-icon.blue { background:#e8f4fd; } .q-icon.green { background:#e6f7f1; }
+.q-icon.orange { background:#fef5e7; } .q-icon.purple { background:#f3e8ff; }
+.quick-item .q-label { font-size:12px; font-weight:600; color:var(--text); }
+.quick-item .q-desc { font-size:10px; color:var(--text-hint); }
+
+/* ===== Feature Cards ===== */
+.feature-cards { padding:0 16px 10px; display:flex; flex-direction:column; gap:10px; flex-shrink:0; }
+.fcard {
+  background:#fff; border-radius:var(--radius); padding:16px; display:flex;
+  align-items:center; gap:14px; box-shadow:var(--shadow-sm); cursor:pointer;
+  transition:all 0.2s;
+}
+.fcard:active { background:#fafbfc; }
+.fcard .fc-icon { font-size:28px; flex-shrink:0; }
+.fcard .fc-info { flex:1; }
+.fcard .fc-title { font-size:14px; font-weight:600; }
+.fcard .fc-desc { font-size:11px; color:var(--text-secondary); margin-top:2px; }
+.fcard .fc-badge {
+  font-size:10px; padding:3px 9px; border-radius:10px; font-weight:600;
+  background:var(--accent-light); color:var(--accent);
+}
+
+/* ===== AI Ask Page ===== */
+.ai-page-header {
+  background: linear-gradient(160deg, #1a7ad9 0%, #0f5fb5 100%);
+  padding: 12px 18px 14px; flex-shrink:0; color:#fff; display:flex;
+  align-items:center; gap:12px;
+}
+.ai-page-header .back-btn { font-size:20px; cursor:pointer; flex-shrink:0; }
+.ai-avatar-sm { width:36px; height:36px; border-radius:50%; background:rgba(255,255,255,0.2); display:flex; align-items:center; justify-content:center; font-size:18px; flex-shrink:0; }
+.ai-page-header .ai-info { flex:1; }
+.ai-page-header .ai-name { font-size:14px; font-weight:600; }
+.ai-page-header .ai-status { font-size:10px; opacity:0.8; display:flex; align-items:center; gap:4px; }
+.ai-dot { width:6px; height:6px; border-radius:50%; background:#4caf50; }
+.mode-toggle-mini {
+  background:rgba(255,255,255,0.15); border:none; border-radius:14px; padding:6px 12px;
+  color:#fff; font-size:11px; cursor:pointer; display:flex; align-items:center; gap:5px;
+  white-space:nowrap;
+}
+.mode-toggle-mini.digital-active { background:rgba(0,229,255,0.25); box-shadow:0 0 10px rgba(0,229,255,0.2); }
+
+.ai-chat-area { flex:1; overflow-y:auto; padding:14px; display:flex; flex-direction:column; gap:12px; background:#f8f9fb; }
+.ai-chat-area::-webkit-scrollbar { width:0; }
+
+.msg { display:flex; gap:8px; animation:msg-in 0.35s ease-out; }
+@keyframes msg-in { from{opacity:0;transform:translateY(8px);} to{opacity:1;transform:translateY(0);} }
+.msg.doctor { align-self:flex-start; }
+.msg.user { flex-direction:row-reverse; align-self:flex-end; }
+.msg.system { align-self:center; max-width:88%; }
+.msg-avatar-sm { width:30px; height:30px; border-radius:50%; flex-shrink:0; display:flex; align-items:center; justify-content:center; font-size:14px; background:#e8f4fd; }
+.msg.user .msg-avatar-sm { background:#e6f7f1; }
+.msg-bubble {
+  max-width:78%; padding:11px 14px; border-radius:16px; font-size:13px; line-height:1.55;
+  word-break:break-word; position:relative;
+}
+.msg.doctor .msg-bubble { background:#fff; border:1px solid #e8eaef; border-bottom-left-radius:4px; box-shadow:0 1px 4px rgba(0,0,0,0.04); }
+.msg.user .msg-bubble { background:var(--primary); color:#fff; border-bottom-right-radius:4px; }
+.msg.system .msg-bubble { background:#fff9db; border-radius:12px; font-size:12px; text-align:center; border:1px solid #f0e68c; }
+
+.quick-chips-row { display:flex; flex-wrap:wrap; gap:6px; padding:4px 0; flex-shrink:0; }
+.quick-chips-row .chip {
+  padding:6px 13px; border-radius:18px; font-size:11px; background:#fff;
+  border:1px solid var(--border); cursor:pointer; transition:all 0.2s; white-space:nowrap;
+}
+.quick-chips-row .chip:active { background:var(--primary-light); border-color:var(--primary); color:var(--primary); }
+
+.ai-input-bar {
+  padding:10px 14px calc(10px + var(--safe-bottom)); display:flex; gap:8px;
+  border-top:1px solid var(--border); background:#fff; flex-shrink:0;
+}
+.ai-input-bar input {
+  flex:1; padding:11px 14px; border:1.5px solid var(--border); border-radius:22px;
+  font-size:13px; outline:none; font-family:inherit; background:#f8f9fb;
+  transition:border-color 0.2s;
+}
+.ai-input-bar input:focus { border-color:var(--primary); background:#fff; }
+.ai-input-bar .btn-send {
+  width:40px; height:40px; border-radius:50%; border:none; background:var(--primary);
+  color:#fff; font-size:16px; cursor:pointer; flex-shrink:0; transition:all 0.2s;
+  display:flex; align-items:center; justify-content:center;
+}
+.ai-input-bar .btn-mode-switch {
+  width:36px; height:36px; border-radius:50%; border:none;
+  background:transparent; color:var(--text-secondary); font-size:18px; cursor:pointer;
+  flex-shrink:0; transition:all 0.15s; display:flex; align-items:center; justify-content:center;
+}
+.ai-input-bar .btn-mode-switch:active { background:#e8eaef; }
+.ai-input-bar .btn-mode-switch.voice-active { color:var(--primary); }
+
+.ai-input-bar .btn-mic-hold {
+  flex:1; height:40px; border-radius:6px; border:none;
+  background:#f5f6f8; color:var(--text-secondary); font-size:14px; font-weight:500;
+  cursor:pointer; transition:all 0.15s ease; -webkit-tap-highlight-color:transparent;
+  user-select:none; touch-action:manipulation; display:none; align-items:center; justify-content:center;
+  letter-spacing:1px;
+}
+.ai-input-bar .btn-mic-hold.show { display:flex; }
+.ai-input-bar .btn-mic-hold:active { background:#d2d5da; }
+.ai-input-bar .btn-mic-hold.recording {
+  background:#c8e6c9; color:#2e7d32; font-weight:600;
+  animation:hold-ripple 1.2s ease-out infinite;
+}
+@keyframes hold-ripple {
+  0% { box-shadow:inset 0 0 0 0 rgba(46,125,50,0.15); }
+  100% { box-shadow:inset 0 0 0 20px rgba(46,125,50,0); }
+}
+
+/* hide old buttons */
+.btn-voice-toggle, .btn-mic { display:none !important; }
+
+/* Recording Overlay */
+.recording-overlay {
+  position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.7);
+  z-index:300; display:none; align-items:center; justify-content:center; flex-direction:column;
+}
+.recording-overlay.show { display:flex; }
+.recording-wave { display:flex; align-items:center; gap:3px; height:60px; margin-bottom:16px; }
+.recording-wave .bar { width:4px; border-radius:2px; background:#fff; animation:wave 1.2s ease-in-out infinite; }
+
+/* Recording Overlay */
+.recording-overlay {
+  position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.7);
+  z-index:300; display:none; align-items:center; justify-content:center; flex-direction:column;
+}
+.recording-overlay.show { display:flex; }
+.recording-wave { display:flex; align-items:center; gap:3px; height:60px; margin-bottom:16px; }
+.recording-wave .bar {
+  width:4px; border-radius:2px; background:#fff;
+  animation:wave 1.2s ease-in-out infinite;
+}
+.recording-wave .bar:nth-child(1){animation-delay:0s;height:20px}
+.recording-wave .bar:nth-child(2){animation-delay:0.1s;height:35px}
+.recording-wave .bar:nth-child(3){animation-delay:0.2s;height:50px}
+.recording-wave .bar:nth-child(4){animation-delay:0.3s;height:40px}
+.recording-wave .bar:nth-child(5){animation-delay:0.4s;height:55px}
+.recording-wave .bar:nth-child(6){animation-delay:0.5s;height:30px}
+.recording-wave .bar:nth-child(7){animation-delay:0.6s;height:45px}
+@keyframes wave { 0%,100%{transform:scaleY(0.5);opacity:0.5} 50%{transform:scaleY(1);opacity:1} }
+.recording-overlay .rec-text { color:#fff; font-size:14px; margin-bottom:8px; }
+.recording-overlay .rec-hint { color:rgba(255,255,255,0.6); font-size:12px; margin-bottom:20px; }
+.recording-overlay .btn-stop-rec {
+  width:64px; height:64px; border-radius:50%; border:3px solid #ea4335;
+  background:rgba(234,67,53,0.2); color:#fff; font-size:14px; cursor:pointer;
+  display:flex; align-items:center; justify-content:center; font-weight:700;
+}
+.recording-overlay .btn-stop-rec:active { transform:scale(0.9); }
+
+/* Doctor speaking indicator */
+.msg.doctor.speaking .msg-bubble {
+  border-left:3px solid #00e5ff; animation:speaking-glow 1.5s infinite;
+}
+@keyframes speaking-glow { 0%,100%{box-shadow:0 0 0 rgba(0,229,255,0)} 50%{box-shadow:0 0 12px rgba(0,229,255,0.2)} }
+.msg.doctor .btn-speak {
+  display:inline-block; margin-top:4px; font-size:10px; color:var(--primary);
+  cursor:pointer; background:none; border:none; padding:2px 6px;
+}
+
+/* Choice Buttons */
+.choice-buttons {
+  display:flex; flex-wrap:wrap; gap:6px; padding:6px 0 0 40px; /* 40px = avatar offset */
+}
+.choice-btn {
+  padding:8px 14px; border-radius:18px; border:1px solid #d0e3f5; background:#f0f7ff;
+  font-size:12px; font-weight:600; color:var(--primary); cursor:pointer;
+  transition:all 0.2s; white-space:nowrap; font-family:inherit;
+}
+.choice-btn:active { background:var(--primary); color:#fff; border-color:var(--primary); transform:scale(0.95); }
+.choice-btn.urgent { background:#fff0f0; border-color:#f5c6c6; color:#d94841; }
+.choice-btn.urgent:active { background:#d94841; color:#fff; }
+
+/* ===== Rec Panel (in chat) ===== */
+.rec-panel {
+  margin:6px 0; background:#fff; border-radius:var(--radius); box-shadow:var(--shadow);
+  overflow:hidden; animation:msg-in 0.5s ease-out;
+}
+.rec-panel .rec-header {
+  background:var(--primary); color:#fff; padding:10px 14px; font-size:13px; font-weight:600;
+  display:flex; align-items:center; justify-content:space-between;
+}
+.rec-panel .rec-header.emergency { background:var(--danger); }
+.rec-panel .rec-list { max-height:380px; overflow-y:auto; }
+.rec-item {
+  padding:12px 14px; border-bottom:1px solid #f3f4f6; cursor:pointer;
+  transition:background 0.15s; display:flex; gap:10px; align-items:center;
+}
+.rec-item:active { background:#f8faff; }
+.rec-rank {
+  width:24px; height:24px; border-radius:50%; display:flex; align-items:center;
+  justify-content:center; font-size:12px; font-weight:700; color:#fff; flex-shrink:0;
+}
+.rank-1{background:var(--danger)} .rank-2{background:var(--warning)} .rank-3{background:var(--primary)} .rank-4{background:#9ca3af}
+.rec-dept-icon { font-size:20px; flex-shrink:0; width:34px; text-align:center; }
+.rec-info { flex:1; min-width:0; }
+.rec-info .rec-hosp { font-size:13px; font-weight:600; }
+.rec-info .rec-dept { font-size:12px; color:var(--primary); font-weight:600; }
+.rec-info .rec-doc { font-size:10px; color:var(--text-secondary); }
+.rec-info .rec-addr { font-size:10px; color:var(--text-hint); }
+.rec-score { flex-shrink:0; text-align:right; }
+.rec-score .rs-bar { width:48px; height:5px; border-radius:3px; background:#e5e7eb; overflow:hidden; }
+.rec-score .rs-fill { height:100%; border-radius:3px; }
+.rs-high{background:var(--accent)} .rs-mid{background:var(--warning)} .rs-low{background:#fbbf24}
+.rec-score .rs-num { font-size:12px; font-weight:700; margin-top:2px; }
+.rec-score .rs-label { font-size:9px; color:var(--text-hint); }
+
+/* Level badge */
+.level-badge {
+  display:inline-block; font-size:9px; padding:1px 6px; border-radius:8px; font-weight:600; margin-left:4px;
+}
+.lv-3a{background:#fde8e8;color:#c5221f} .lv-3{background:#fef3c7;color:#92400e}
+.lv-2{background:#e8f4fd;color:#1a7ad9} .lv-1{background:#e6f7f1;color:#137333}
+
+/* ===== Quick Actions Strip ===== */
+.qa-strip { display:flex; gap:7px; padding:8px 14px; flex-shrink:0; overflow-x:auto; }
+.qa-strip::-webkit-scrollbar { height:0; }
+.qa-strip .qa-btn {
+  flex-shrink:0; padding:8px 14px; border-radius:18px; border:1px solid var(--border);
+  background:#fff; font-size:11px; font-weight:600; cursor:pointer; white-space:nowrap;
+  display:flex; align-items:center; gap:4px; transition:all 0.2s;
+}
+.qa-strip .qa-btn:active { background:var(--primary); color:#fff; border-color:var(--primary); }
+
+/* ===== Modal ===== */
+.modal-overlay {
+  position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.45);
+  z-index:100; display:flex; align-items:flex-end; justify-content:center;
+  animation:fade-in 0.25s ease;
+}
+@keyframes fade-in { from{opacity:0} to{opacity:1} }
+.slip-card {
+  background:#fff; border-radius:var(--radius-lg) var(--radius-lg) 0 0; width:100%;
+  max-width:430px; max-height:80vh; overflow-y:auto; box-shadow:0 -4px 30px rgba(0,0,0,0.12);
+  animation:slide-up 0.35s ease; padding-bottom:var(--safe-bottom);
+}
+@keyframes slide-up { from{transform:translateY(60px);opacity:0} to{transform:translateY(0);opacity:1} }
+.slip-handle { width:36px; height:4px; border-radius:2px; background:#d1d5db; margin:10px auto 0; }
+.slip-header { padding:18px 22px 14px; text-align:center; border-bottom:1px solid #f3f4f6; }
+.slip-header h2 { font-size:18px; }
+.slip-body { padding:14px 22px; }
+.slip-row { display:flex; justify-content:space-between; align-items:flex-start; padding:10px 0; border-bottom:1px solid #f9fafb; font-size:13px; gap:10px; }
+.slip-row .sl { color:var(--text-secondary); flex-shrink:0; }
+.slip-row .sv { font-weight:600; text-align:right; }
+.urg-badge { display:inline-block; padding:3px 9px; border-radius:10px; font-size:10px; font-weight:700; }
+.urg-red{background:#fde8e8;color:#c5221f} .urg-yellow{background:#fef3c7;color:#92400e} .urg-green{background:#e6f7f1;color:#137333}
+.slip-actions { padding:14px 22px; display:flex; gap:10px; }
+.slip-actions button { flex:1; padding:11px; border-radius:22px; border:none; font-size:13px; font-weight:600; cursor:pointer; }
+.btn-outline { background:#f3f4f6; color:var(--text); }
+.btn-primary { background:var(--primary); color:#fff; }
+
+/* ===== Bottom Nav ===== */
+.bottom-nav {
+  height:calc(var(--nav-height) + var(--safe-bottom)); padding-bottom:var(--safe-bottom);
+  background:#fff; border-top:1px solid var(--border); display:flex; flex-shrink:0;
+}
+.nav-item {
+  flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center;
+  gap:3px; cursor:pointer; transition:all 0.2s; color:var(--text-hint); font-size:10px;
+}
+.nav-item.active { color:var(--primary); }
+.nav-item .nav-icon { font-size:22px; }
+.nav-item .nav-label { font-weight:500; }
+.nav-item.ai-center .nav-icon {
+  width:46px; height:46px; border-radius:50%; background:linear-gradient(135deg, #1a7ad9, #0f5fb5);
+  display:flex; align-items:center; justify-content:center; font-size:22px; color:#fff;
+  margin-top:-18px; box-shadow:0 4px 16px rgba(26,122,217,0.35);
+}
+
+/* ===== Profile Page ===== */
+.profile-page { padding:16px; }
+.profile-card {
+  background:#fff; border-radius:var(--radius-lg); padding:20px; text-align:center;
+  box-shadow:var(--shadow-sm);
+}
+.profile-avatar { width:64px; height:64px; border-radius:50%; background:var(--primary-light); margin:0 auto 12px; display:flex; align-items:center; justify-content:center; font-size:30px; }
+.profile-name { font-size:18px; font-weight:700; }
+.profile-id { font-size:12px; color:var(--text-hint); margin-top:2px; }
+.profile-stats { display:flex; margin-top:16px; border-top:1px solid #f3f4f6; padding-top:14px; }
+.profile-stat { flex:1; text-align:center; }
+.profile-stat .ps-num { font-size:20px; font-weight:700; color:var(--primary); }
+.profile-stat .ps-label { font-size:10px; color:var(--text-hint); margin-top:2px; }
+
+.menu-list { margin-top:14px; background:#fff; border-radius:var(--radius); overflow:hidden; box-shadow:var(--shadow-sm); }
+.menu-item {
+  padding:15px 18px; display:flex; align-items:center; gap:12px; border-bottom:1px solid #f3f4f6;
+  font-size:14px; cursor:pointer;
+}
+.menu-item:last-child { border-bottom:none; }
+.menu-item .mi-icon { font-size:20px; width:24px; text-align:center; }
+.menu-item .mi-arrow { margin-left:auto; color:var(--text-hint); }
+
+/* ===== Clone Panel ===== */
+.clone-overlay {
+  position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.5);
+  z-index:200; display:none; align-items:flex-end; justify-content:center;
+}
+.clone-overlay.show { display:flex; }
+.clone-card {
+  background:#fff; border-radius:var(--radius-lg) var(--radius-lg) 0 0; width:100%;
+  max-width:430px; max-height:85vh; overflow-y:auto; padding:20px 20px calc(20px + var(--safe-bottom));
+  animation:slide-up 0.3s ease;
+}
+.clone-card h3 { font-size:17px; margin-bottom:6px; }
+.clone-card .clone-desc { font-size:12px; color:var(--text-hint); margin-bottom:16px; }
+.clone-avatar-area {
+  display:flex; flex-direction:column; align-items:center; gap:10px; margin-bottom:18px;
+}
+.clone-avatar-preview {
+  width:80px; height:80px; border-radius:50%; background:var(--primary-light);
+  display:flex; align-items:center; justify-content:center; font-size:36px;
+  overflow:hidden; cursor:pointer; border:3px dashed #d0e3f5; transition:all 0.2s;
+}
+.clone-avatar-preview:hover { border-color:var(--primary); }
+.clone-avatar-preview.has-photo { border-style:solid; border-color:var(--primary); }
+.clone-avatar-preview img { width:100%; height:100%; object-fit:cover; }
+.clone-btn-row { display:flex; gap:8px; flex-wrap:wrap; }
+.clone-btn {
+  flex:1; min-width:100px; padding:12px; border-radius:12px; border:1px solid #d0e3f5;
+  background:#f8faff; font-size:12px; font-weight:600; cursor:pointer;
+  text-align:center; transition:all 0.2s; font-family:inherit; color:var(--text);
+}
+.clone-btn:active { background:var(--primary); color:#fff; }
+.clone-btn.primary { background:var(--primary); color:#fff; border-color:var(--primary); }
+.clone-btn.primary:active { background:var(--primary-dark); }
+.clone-field { margin-bottom:14px; }
+.clone-field label { font-size:12px; color:var(--text-secondary); display:block; margin-bottom:4px; }
+.clone-field input {
+  width:100%; padding:10px 12px; border:1px solid var(--border); border-radius:10px;
+  font-size:13px; font-family:inherit;
+}
+.clone-field input:focus { border-color:var(--primary); outline:none; }
+.clone-status {
+  font-size:11px; padding:8px 12px; border-radius:8px; margin-top:8px; text-align:center;
+  display:none;
+}
+.clone-status.show { display:block; }
+.clone-status.success { background:#e6f4ea; color:#137333; }
+.clone-status.error { background:#fde8e8; color:#c5221f; }
+.clone-status.info { background:#e8f4fd; color:#1a7ad9; }
+.settings-overlay {
+  position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.45);
+  z-index:200; display:none; align-items:flex-end; justify-content:center;
+}
+.settings-overlay.show { display:flex; }
+.settings-card {
+  background:#fff; border-radius:var(--radius-lg) var(--radius-lg) 0 0; width:100%;
+  max-width:430px; padding:20px; animation:slide-up 0.3s ease;
+}
+.settings-card h3 { font-size:16px; margin-bottom:14px; }
+.settings-card label { font-size:12px; color:var(--text-secondary); display:block; margin-bottom:4px; }
+.settings-card input {
+  width:100%; padding:10px 12px; border:1px solid var(--border); border-radius:10px;
+  font-size:12px; margin-bottom:10px; font-family:monospace;
+}
+.settings-card .hint { font-size:10px; color:var(--text-hint); margin-top:-6px; margin-bottom:8px; }
+.settings-card .btn-close-settings {
+  width:100%; padding:12px; border-radius:12px; border:none; background:var(--primary);
+  color:#fff; font-size:14px; font-weight:600; cursor:pointer; margin-top:6px;
+}
+
+/* ===== Question progress ===== */
+.question-progress {
+  font-size:10px; color:var(--primary); font-weight:700; text-align:center; padding:6px;
+  background:var(--primary-light); border-radius:10px; margin:0 14px 4px; display:none;
+}
+.question-progress.show { display:block; }
+</style>
+</head>
+<body>
+<div class="app-shell" id="appShell">
+
+<!-- ==================== Page 1: Home ==================== -->
+<div class="page active" id="pageHome">
+  <div class="status-bar"><span class="live-time">9:41</span><span style="font-size:10px;color:#f5c842;font-weight:600;">万锋作品  18328474765</span><span>HD</span></div>
+  <div class="app-header">
+    <div class="header-top">
+      <span class="hospital-name">&#127973; 成都高新 · 智慧医疗平台</span>
+      <div class="header-actions">
+        <span onclick="openSettings()">&#9881;</span>
+      </div>
+    </div>
+    <div class="greeting">您好，有什么可以帮您？</div>
+    <div class="greeting-sub">AI数字医生24小时在线，守护您的健康</div>
+  </div>
+
+  <div class="search-bar" onclick="switchTab('ask')">
+    <span class="search-icon">&#128269;</span>
+    <span class="search-text">描述症状，AI为您智能导诊...</span>
+    <span class="search-ai">AI问诊</span>
+  </div>
+
+  <div class="banner-wrap">
+    <div class="banner">
+      <span class="banner-icon">&#129657;</span>
+      <div class="banner-info">
+        <div class="banner-title">AI 数字医生 · 全新升级</div>
+        <div class="banner-desc">3轮精准问诊 + 成都高新区12家医院实时推荐</div>
+      </div>
+      <button class="banner-btn" onclick="switchTab('ask')">立即体验</button>
+    </div>
+  </div>
+
+  <div class="section-title">医疗服务<span class="more">全部 ></span></div>
+  <div class="quick-grid">
+    <div class="quick-item" onclick="switchTab('ask')">
+      <div class="q-icon blue">&#129657;</div>
+      <div class="q-label">AI智能导诊</div>
+      <div class="q-desc">症状→科室推荐</div>
+    </div>
+    <div class="quick-item" onclick="handleQuickAction('register');switchTab('ask')">
+      <div class="q-icon green">&#128203;</div>
+      <div class="q-label">预约挂号</div>
+      <div class="q-desc">在线预约</div>
+    </div>
+    <div class="quick-item" onclick="handleQuickAction('payment');switchTab('ask')">
+      <div class="q-icon orange">&#128179;</div>
+      <div class="q-label">门诊缴费</div>
+      <div class="q-desc">医保/自费</div>
+    </div>
+    <div class="quick-item" onclick="handleQuickAction('exam');switchTab('ask')">
+      <div class="q-icon purple">&#128300;</div>
+      <div class="q-label">检查预约</div>
+      <div class="q-desc">CT/B超/检验</div>
+    </div>
+  </div>
+
+  <div class="section-title">热门科室<span class="more">查看全部 ></span></div>
+  <div class="feature-cards">
+    <div class="fcard" onclick="quickConsult('头痛发烧')">
+      <span class="fc-icon">&#129504;</span>
+      <div class="fc-info"><div class="fc-title">神经内科</div><div class="fc-desc">头痛、头晕、失眠、中风预防</div></div>
+      <span class="fc-badge">热门</span>
+    </div>
+    <div class="fcard" onclick="quickConsult('胸口闷痛')">
+      <span class="fc-icon">&#129654;</span>
+      <div class="fc-info"><div class="fc-title">心血管内科</div><div class="fc-desc">胸痛、心悸、高血压、冠心病</div></div>
+      <span class="fc-badge">重点</span>
+    </div>
+    <div class="fcard" onclick="quickConsult('咳嗽发热')">
+      <span class="fc-icon">&#129655;</span>
+      <div class="fc-info"><div class="fc-title">呼吸内科</div><div class="fc-desc">咳嗽、发热、哮喘、肺部感染</div></div>
+    </div>
+    <div class="fcard" onclick="quickConsult('肚子疼腹泻')">
+      <span class="fc-icon">&#129656;</span>
+      <div class="fc-info"><div class="fc-title">消化内科</div><div class="fc-desc">腹痛、腹泻、胃病、肝病</div></div>
+    </div>
+  </div>
+
+  <div style="height:20px;flex-shrink:0;"></div>
+</div>
+
+<!-- ==================== Page 2: AI Ask ==================== -->
+<div class="page" id="pageAsk">
+  <div class="ai-page-header" id="aiHeader">
+    <span class="back-btn" onclick="switchTab('home')">&#8592;</span>
+    <span style="font-size:10px;color:#f5c842;font-weight:600;">万锋作品  18328474765</span>
+    <div class="ai-avatar-sm" id="aiAvatarSmall">&#129657;</div>
+    <div class="ai-info">
+      <div class="ai-name" id="aiName">AI 数字医生</div>
+      <div class="ai-status"><span class="ai-dot" id="aiDot"></span><span id="aiStatusText">在线 · 智慧导诊</span></div>
+    </div>
+    <button class="mode-toggle-mini" id="modeToggleMini" onclick="toggleAvatarMode()">
+      &#9889; <span id="modeToggleLabel">数字人</span>
+    </button>
+  </div>
+  <div class="question-progress" id="questionProgress"></div>
+  <div class="qa-strip" id="qaStrip">
+    <button class="qa-btn" onclick="handleQuickAction('register')">&#128203; 挂号指引</button>
+    <button class="qa-btn" onclick="handleQuickAction('payment')">&#128179; 缴费流程</button>
+    <button class="qa-btn" onclick="handleQuickAction('exam')">&#128300; 检查预约</button>
+    <button class="qa-btn" onclick="handleQuickAction('prepare')">&#128137; 诊前准备</button>
+  </div>
+  <div class="ai-chat-area" id="chatArea"></div>
+  <div class="quick-chips-row" style="padding:0 14px 6px;" id="quickChips">
+    <span class="chip" onclick="sendChip(this)">头痛发烧</span>
+    <span class="chip" onclick="sendChip(this)">胸口闷痛</span>
+    <span class="chip" onclick="sendChip(this)">肚子疼腹泻</span>
+    <span class="chip" onclick="sendChip(this)">皮肤红疹</span>
+    <span class="chip" onclick="sendChip(this)">腰疼</span>
+    <span class="chip" onclick="sendChip(this)">牙疼</span>
+    <span class="chip" onclick="sendChip(this)">咳嗽发热</span>
+    <span class="chip" onclick="sendChip(this)">头晕</span>
+  </div>
+  <div class="ai-input-bar">
+    <button class="btn-mode-switch" id="btnModeSwitch" onclick="toggleInputMode()">🎤</button>
+    <input type="text" id="userInput" placeholder="描述您的症状..." autocomplete="off" onkeydown="if(event.key==='Enter')sendMsg()">
+    <button class="btn-mic-hold" id="btnMicHold" title="按住说话">按住说话</button>
+    <button class="btn-send" id="btnSend" onclick="sendMsg()">&#10148;</button>
+  </div>
+
+  <!-- Recording Overlay -->
+  <div class="recording-overlay" id="recordingOverlay">
+    <div class="recording-wave"><div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div></div>
+    <div class="rec-text">正在聆听...</div>
+    <div class="rec-hint" id="recHint">请说出您的症状</div>
+    <button class="btn-stop-rec" onclick="stopRecording()">结束</button>
+  </div>
+</div>
+
+<!-- ==================== Page 3: Profile ==================== -->
+<div class="page" id="pageProfile">
+  <div class="status-bar"><span class="live-time">9:41</span><span style="font-size:10px;color:#f5c842;font-weight:600;">万锋作品  18328474765</span><span>HD</span></div>
+  <div class="app-header" style="padding-bottom:18px;">
+    <div class="header-top">
+      <span class="hospital-name">&#127973; 成都高新 · 智慧医疗平台</span>
+    </div>
+    <div style="text-align:center;margin-top:10px;position:relative;z-index:1;">
+      <div style="font-size:16px;font-weight:600;">我的</div>
+    </div>
+  </div>
+  <div class="profile-page">
+    <div class="profile-card">
+      <div class="profile-avatar">&#128100;</div>
+      <div class="profile-name">访客用户</div>
+      <div class="profile-id">AI数字医生 · 智能导诊服务</div>
+      <div class="profile-stats">
+        <div class="profile-stat"><div class="ps-num" id="statConsults">0</div><div class="ps-label">累计问诊</div></div>
+        <div class="profile-stat"><div class="ps-num" id="statHospitals">12</div><div class="ps-label">接入医院</div></div>
+        <div class="profile-stat"><div class="ps-num" id="statDepts">80+</div><div class="ps-label">覆盖科室</div></div>
+      </div>
+    </div>
+    <div class="menu-list">
+      <div class="menu-item" onclick="switchTab('ask')"><span class="mi-icon">&#129657;</span>AI智能导诊<span class="mi-arrow">></span></div>
+      <div class="menu-item" onclick="handleQuickAction('register');switchTab('ask')"><span class="mi-icon">&#128203;</span>我的挂号<span class="mi-arrow">></span></div>
+      <div class="menu-item" onclick="handleQuickAction('payment');switchTab('ask')"><span class="mi-icon">&#128179;</span>缴费记录<span class="mi-arrow">></span></div>
+      <div class="menu-item" onclick="openSettings()"><span class="mi-icon">&#9881;</span>API 设置<span class="mi-arrow">></span></div>
+      <div class="menu-item" onclick="openClone()"><span class="mi-icon">&#129657;</span>数字分身<span class="mi-arrow">></span></div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== Bottom Nav ==================== -->
+<div class="bottom-nav">
+  <div class="nav-item active" id="navHome" onclick="switchTab('home')">
+    <span class="nav-icon">&#127968;</span><span class="nav-label">首页</span>
+  </div>
+  <div class="nav-item" id="navAsk" onclick="switchTab('ask')">
+    <span class="nav-icon">&#128172;</span><span class="nav-label">AI问诊</span>
+  </div>
+  <div class="nav-item" id="navProfile" onclick="switchTab('profile')">
+    <span class="nav-icon">&#128100;</span><span class="nav-label">我的</span>
+  </div>
+</div>
+
+<!-- ==================== Slip Modal ==================== -->
+<div class="modal-overlay" id="slipModal" style="display:none" onclick="if(event.target===this)closeSlip()">
+  <div class="slip-card" id="slipCard"></div>
+</div>
+
+<!-- ==================== Settings ==================== -->
+<div class="settings-overlay" id="settingsOverlay" onclick="if(event.target===this)closeSettings()">
+  <div class="settings-card">
+    <h3>&#9881; 设置</h3>
+    <div style="font-size:11px;padding:6px 10px;border-radius:8px;margin-bottom:10px;text-align:center;font-weight:600;" id="settingsModeBadge">加载中...</div>
+    <label>DeepSeek API Key</label>
+    <input type="password" id="apiKeyInput" placeholder="sk-..." onchange="saveSettings()">
+    <div class="hint">留空使用离线规则引擎</div>
+    <label>DashScope Key（百炼FunASR语音识别）</label>
+    <input type="password" id="dashscopeKeyInput" placeholder="sk-..." onchange="saveSettings()">
+    <div class="hint">阿里云百炼API Key，用于FunASR语音识别</div>
+    <label>API 地址</label>
+    <input type="text" id="apiUrlInput" value="https://api.deepseek.com/v1/chat/completions" onchange="saveSettings()">
+    <label>模型名称</label>
+    <input type="text" id="modelInput" value="deepseek-v4-flash" onchange="saveSettings()">
+    <div class="hint">deepseek-v4-flash（快速）/ deepseek-chat（标准）/ deepseek-reasoner（推理）</div>
+    <button class="btn-close-settings" onclick="closeSettings()">关闭</button>
+  </div>
+</div>
+
+<!-- Clone Panel -->
+<div class="clone-overlay" id="cloneOverlay" onclick="if(event.target===this)closeClone()">
+  <div class="clone-card">
+    <h3>数字医生分身</h3>
+    <div class="clone-desc">上传医生照片和声音样本，生成专属数字分身</div>
+    <div class="clone-avatar-area">
+      <div class="clone-avatar-preview" id="cloneAvatarPreview" onclick="document.getElementById('photoInput').click()">&#129657;</div>
+      <div style="font-size:11px;color:var(--text-hint);">点击更换头像</div>
+      <input type="file" id="photoInput" accept="image/*" style="display:none" onchange="handlePhotoUpload(event)">
+    </div>
+    <div class="clone-field">
+      <label>医生姓名</label>
+      <input type="text" id="cloneNameInput" placeholder="如：王主任" onchange="saveCloneConfig()">
+    </div>
+    <div class="clone-field">
+      <label>职称/科室</label>
+      <input type="text" id="cloneTitleInput" placeholder="如：心血管内科主任医师" onchange="saveCloneConfig()">
+    </div>
+    <div class="clone-field">
+      <label>声音样本（10-30秒语音介绍）</label>
+      <div class="clone-btn-row">
+        <button class="clone-btn" onclick="recordVoiceSample()" id="btnRecordVoice">录制声音</button>
+        <button class="clone-btn" onclick="document.getElementById('voiceInput').click()">上传音频</button>
+      </div>
+      <input type="file" id="voiceInput" accept="audio/*" style="display:none" onchange="handleVoiceUpload(event)">
+      <div class="clone-status" id="voiceStatus"></div>
+    </div>
+    <div class="clone-btn-row" style="margin-top:16px;">
+      <button class="clone-btn" onclick="closeClone()">取消</button>
+      <button class="clone-btn primary" onclick="applyClone()">应用分身</button>
+    </div>
+  </div>
+</div>
+
+</div><!-- /app-shell -->
+
+<script>
+// ==================== State ====================
+let avatarMode = localStorage.getItem('avatar_mode') || 'basic';
+let conversation = [], isProcessing = false, questionCount = 0, collectedSymptoms = [];
+const MIN_QUESTIONS = 3;
+let consultCount = parseInt(localStorage.getItem('consult_count')||'0');
+let currentAudio = null;
+let lastAIConclusion = ''; // Store AI's final conclusion for the slip // Track playing TTS audio
+
+function stopAllSpeech() {
+  if (synth) synth.cancel();
+  if (currentAudio) { currentAudio.pause(); currentAudio.src = ''; currentAudio = null; }
+}
+
+// ==================== Tab Navigation ====================
+function switchTab(tab) {
+  stopAllSpeech();
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+
+  if (tab === 'home') {
+    document.getElementById('pageHome').classList.add('active');
+    document.getElementById('navHome').classList.add('active');
+  } else if (tab === 'ask') {
+    document.getElementById('pageAsk').classList.add('active');
+    document.getElementById('navAsk').classList.add('active');
+    document.getElementById('userInput').focus();
+    if (document.getElementById('chatArea').children.length === 0) initChat();
+  } else if (tab === 'profile') {
+    document.getElementById('pageProfile').classList.add('active');
+    document.getElementById('navProfile').classList.add('active');
+    document.getElementById('statConsults').textContent = consultCount;
+  }
+}
+
+function quickConsult(symptom) {
+  switchTab('ask');
+  document.getElementById('userInput').value = symptom;
+  setTimeout(() => { sendMsg(); }, 400);
+}
+
+// ==================== Mode Toggle ====================
+function setAvatarMode(mode) {
+  avatarMode = mode;
+  localStorage.setItem('avatar_mode', mode);
+  applyModeVisuals();
+}
+function toggleAvatarMode() {
+  stopAllSpeech();
+  setAvatarMode(avatarMode === 'basic' ? 'digital' : 'basic');
+  addSystemMsg(avatarMode==='digital'?'已切换数字医生分身模式。我会通过3轮问诊了解您的病情。':'已切换基础导诊模式。');
+  scrollChat();
+}
+function applyModeVisuals() {
+  const isDig = avatarMode === 'digital';
+  document.getElementById('aiAvatarSmall').textContent = isDig ? '🤖' : '🩹';
+  document.getElementById('aiName').textContent = isDig ? 'AI 数字医生 · 分身' : 'AI 数字医生';
+  document.getElementById('aiStatusText').textContent = isDig ? '数字人 · 病案沉淀' : '在线 · 智慧导诊';
+  document.getElementById('aiDot').style.background = isDig ? '#00e5ff' : '#4caf50';
+  const toggle = document.getElementById('modeToggleMini');
+  toggle.classList.toggle('digital-active', isDig);
+  document.getElementById('modeToggleLabel').textContent = isDig ? '基础' : '数字人';
+  updateSettingsBadge();
+}
+function updateSettingsBadge() {
+  const b = document.getElementById('settingsModeBadge');
+  if (isApiReady()) { b.textContent = 'AI增强模式 (DeepSeek)'; b.style.background = '#d4edda'; b.style.color = '#155724'; }
+  else { b.textContent = '离线规则模式 (本地引擎)'; b.style.background = '#fff3cd'; b.style.color = '#856404'; }
+}
+function updateQuestionProgress() {
+  const el = document.getElementById('questionProgress');
+  if (questionCount > 0 && questionCount < MIN_QUESTIONS) {
+    const rem = MIN_QUESTIONS - questionCount;
+    el.textContent = '●'.repeat(questionCount) + '○'.repeat(rem) + `  还需${rem}轮问诊`;
+    el.classList.add('show');
+  } else if (questionCount >= MIN_QUESTIONS) {
+    el.textContent = '✓ 问诊充分，正在分析推荐...';
+    el.classList.add('show');
+  } else { el.classList.remove('show'); }
+}
+function resetConsultation() {
+  questionCount = 0; collectedSymptoms = []; conversation = []; updateQuestionProgress();
+}
+
+// ==================== Settings ====================
+function openSettings() {
+  document.getElementById('settingsOverlay').classList.add('show');
+  document.getElementById('apiKeyInput').value = getApiConfig().key;
+  document.getElementById('apiUrlInput').value = getApiConfig().url;
+  document.getElementById('modelInput').value = getApiConfig().model;
+  document.getElementById('dashscopeKeyInput').value = localStorage.getItem('dashscope_key')||'';
+  updateSettingsBadge();
+}
+function closeSettings() { document.getElementById('settingsOverlay').classList.remove('show'); }
+function saveSettings() {
+  localStorage.setItem('ds_api_key', document.getElementById('apiKeyInput').value.trim());
+  localStorage.setItem('ds_api_url', document.getElementById('apiUrlInput').value.trim());
+  localStorage.setItem('ds_model', document.getElementById('modelInput').value.trim()||'deepseek-v4-flash');
+  localStorage.setItem('dashscope_key', document.getElementById('dashscopeKeyInput').value.trim());
+  updateSettingsBadge();
+}
+function getApiConfig() {
+  return { key: localStorage.getItem('ds_api_key')||'', url: localStorage.getItem('ds_api_url')||'https://api.deepseek.com/v1/chat/completions', model: localStorage.getItem('ds_model')||'deepseek-v4-flash' };
+}
+function isApiReady() { return !!getApiConfig().key; }
+
+// ==================== Chat ====================
+function initChat() {
+  const area = document.getElementById('chatArea');
+  area.innerHTML = '';
+
+  const cloneName = localStorage.getItem('clone_name')||'';
+  const cloneTitle = localStorage.getItem('clone_title')||'';
+  const isDigital = avatarMode === 'digital';
+
+  // Build personalized intro
+  let greeting;
+  if (cloneName) {
+    const title = cloneTitle || '全科医师';
+    const expertise = cloneTitle ? `擅长${cloneTitle}相关疾病的诊疗。` : '擅长常见病、多发病的智能导诊与分诊。';
+    greeting = `您好，我是 ${cloneName}医生的数字分身，${title}。\n\n${expertise}\n\n我可以帮您：\n· 症状分析与科室推荐\n· 挂号引导与就诊准备\n· 检查预约与缴费指引\n\n请点击下方症状按钮描述您的情况，或按住麦克风直接语音对话。`;
+  } else if (isDigital) {
+    greeting = '您好，我是 AI数字医生·分身。我已沉淀大量门诊病历数据，擅长智能导诊分诊。\n\n我可以帮您：\n· 症状分析与科室推荐\n· 挂号引导与就诊准备\n· 检查预约与缴费指引\n\n请点击下方按钮描述症状，或按住🎤直接语音对话。';
+  } else {
+    greeting = '您好，我是 AI 数字医生。\n\n我可以帮您：\n· 症状分析与科室推荐\n· 挂号引导与就诊准备\n· 检查预约与缴费指引\n\n请点击下方症状按钮描述您的情况，或按住🎤直接语音对话。';
+  }
+
+  addSystemMsg(greeting);
+  resetConsultation();
+  applyModeVisuals();
+}
+
+function scrollChat() {
+  const el = document.getElementById('chatArea');
+  requestAnimationFrame(() => { el.scrollTop = el.scrollHeight; });
+}
+
+function addMsg(role, text, isHtml) {
+  const area = document.getElementById('chatArea');
+  const div = document.createElement('div');
+  div.className = `msg ${role}`;
+  const content = isHtml ? text : escapeHtml(text);
+  const avatarEmoji = avatarMode==='digital'?'🤖':'🩹';
+  if (role==='doctor') div.innerHTML = `<div class="msg-avatar-sm">${avatarEmoji}</div><div class="msg-bubble">${content}</div>`;
+  else if (role==='user') div.innerHTML = `<div class="msg-avatar-sm">👤</div><div class="msg-bubble">${content}</div>`;
+  else div.innerHTML = `<div class="msg-bubble">${content}</div>`;
+  area.appendChild(div);
+  scrollChat();
+}
+function addSystemMsg(text) { addMsg('system', text); }
+function escapeHtml(text) {
+  const d = document.createElement('div'); d.textContent = text;
+  return d.innerHTML.replace(/\n/g,'<br>');
+}
+
+// ==================== Quick Actions ====================
+function handleQuickAction(type) {
+  stopAllSpeech();
+  const actions = {
+    register: { title:'📋 挂号指引', content:`在线预约挂号流程：\n\n1. 微信搜索"健康高新"或各医院公众号 → 选科室 → 选医生 → 预约\n2. 下载"华医通"APP(华西系) → 在线建档 → 预约挂号\n3. 现场挂号：携带身份证/社保卡 → 医院自助机或窗口\n4. 电话预约：拨打推荐医院电话\n\n提示：专家号建议提前3-7天预约。` },
+    payment: { title:'💳 缴费流程', content:`门诊/住院缴费方式：\n\n1. 诊间支付：医生开单后直接扫码支付(微信/支付宝)\n2. 自助机缴费：医院各楼层自助机支付\n3. 窗口缴费：收费窗口现金/刷卡/扫码\n4. 线上缴费：医院APP/公众号 → "门诊缴费"\n\n医保报销：缴费时出示医保卡/电子医保码，系统自动结算。` },
+    exam: { title:'🔬 检查预约', content:`常见检查预约流程：\n\n1. CT/MRI：医生开单→缴费→放射科预约→按时间检查\n2. B超/彩超：缴费→超声科预约（部分需空腹/憋尿）\n3. 抽血化验：缴费→检验科取号→抽血（部分需空腹8-12h）\n4. 胃镜/肠镜：缴费→内镜中心预约→需提前心电图/清肠准备\n\n结果通常1-3个工作日出具，可在APP/公众号查询。` },
+    prepare: { title:'📝 诊前准备', content:`就诊前请准备：\n\n1. 必备证件：身份证、社保卡、电子医保码\n2. 既往病历、出院小结、手术记录\n3. 近期检查报告和影像资料\n4. 正在服用的药物(带药盒)、过敏史\n\n特殊准备：\n- 抽血：空腹8-12小时(可少量喝水)\n- 妇科检查：避开月经期\n- 泌尿B超：需憋尿\n- 初诊患者提前30分钟到院建档` }
+  };
+  const a = actions[type];
+  if (!a) return;
+  addMsg('doctor', `${a.title}\n\n${a.content}`, true);
+  scrollChat();
+}
+
+// ==================== Hospital DB (abbreviated) ====================
+const CD_HOSPITALS = [
+  { id:'h1',name:'成都市第一人民医院（南区）',level:'三级甲等',lk:'3a',addr:'高新区万象北路18号',tel:'028-85311726',depts:[
+    { n:'心血管内科',i:'🫀',k:'心内科',d:'国家级重点专科，冠脉支架/射频消融/起搏器',dr:['王志刚(主任医师)','李明(副主任医师)','张华(主治医师)']},
+    { n:'神经内科',i:'🧠',k:'神经内科',d:'省级重点专科，脑卒中/癫痫/帕金森',dr:['周伟(主任医师)','吴芳(副主任医师)']},
+    { n:'呼吸内科',i:'🫁',k:'呼吸内科',d:'国家级重点专科，哮喘/慢阻肺/肺纤维化',dr:['刘建国(主任医师)','陈静(副主任医师)']},
+    { n:'消化内科',i:'🔬',k:'消化内科',d:'市级重点专科，胃肠镜/肝病/胰腺炎',dr:['钱明(主任医师)','杨婷(主治医师)']},
+    { n:'骨科',i:'🦴',k:'骨科',d:'省级重点专科，关节置换/脊柱/创伤',dr:['郑军(主任医师)','王磊(副主任医师)']},
+    { n:'妇产科',i:'🤰',k:'妇科',d:'高危妊娠/微创妇科',dr:['黄丽(主任医师)','冯娟(副主任医师)']},
+    { n:'儿科',i:'👶',k:'儿科',d:'省级重点专科，儿童内科/新生儿',dr:['蒋敏(主任医师)','沈洁(副主任医师)']},
+    { n:'皮肤科',i:'🔍',k:'皮肤科',d:'中西医结合治疗湿疹/银屑病/痤疮',dr:['何静(副主任医师)']},
+    { n:'口腔科',i:'🦷',k:'口腔科',d:'种植牙/正畸/颌面外科',dr:['魏强(主任医师)','蒋芳(主治医师)']},
+    { n:'眼科',i:'👁️',k:'眼科',d:'白内障/青光眼/近视矫正',dr:['吕峰(主任医师)']},
+    { n:'耳鼻喉科',i:'👂',k:'耳鼻喉科',d:'耳显微外科/鼻内镜',dr:['韩磊(主任医师)']},
+    { n:'泌尿外科',i:'💧',k:'泌尿外科',d:'结石微创/前列腺/肾肿瘤',dr:['曹勇(主任医师)']},
+    { n:'肿瘤科',i:'🧬',k:'肿瘤科',d:'化疗/靶向/免疫治疗',dr:['曾强(主任医师)']},
+    { n:'急诊科',i:'🚑',k:'急诊科',d:'24h急诊/胸痛/卒中中心',dr:['谢军(主任医师)']},
+  ]},
+  { id:'h2',name:'华西医院上锦南府分院',level:'三级甲等',lk:'3a',addr:'高新西区尚锦路253号',tel:'028-62539114',depts:[
+    { n:'心血管内科',i:'🫀',k:'心内科',d:'华西派驻，胸痛中心/介入治疗',dr:['张伟(主任医师-华西)','刘洋(副主任医师)']},
+    { n:'神经内科',i:'🧠',k:'神经内科',d:'卒中中心核心科室',dr:['王明(主任医师-华西)','龙涛(副主任医师)']},
+    { n:'神经外科',i:'🧠',k:'神经外科',d:'脑肿瘤/颅脑创伤/介入',dr:['杨帆(主任医师-华西)']},
+    { n:'骨科',i:'🦴',k:'骨科',d:'华西派驻，关节/脊柱/足踝',dr:['李刚(主任医师-华西)','马超(副主任医师)']},
+    { n:'普外科(肝胆胰)',i:'🏥',k:'消化内科',d:'肝胆胰微创中心，年手术2000+',dr:['陈哲(主任医师-华西)']},
+    { n:'肿瘤科',i:'🧬',k:'肿瘤科',d:'化疗/靶向/免疫/介入',dr:['黄伟(主任医师)']},
+    { n:'呼吸科',i:'🫁',k:'呼吸内科',d:'呼吸危重症/肺癌',dr:['林涛(主任医师-华西)']},
+    { n:'消化内科',i:'🔬',k:'消化内科',d:'胃肠镜/ERCP/肝病',dr:['何强(副主任医师)']},
+    { n:'儿科',i:'👶',k:'儿科',d:'儿童呼吸/消化/神经',dr:['周敏(副主任医师-华西)']},
+    { n:'妇产科',i:'🤰',k:'妇科',d:'妇科微创/高危妊娠',dr:['吴萍(主任医师)']},
+    { n:'泌尿外科',i:'💧',k:'泌尿外科',d:'结石/前列腺/肿瘤微创',dr:['丁力(主任医师)']},
+    { n:'口腔科',i:'🦷',k:'口腔科',d:'种植/正畸/牙体牙髓',dr:['田甜(主治医师)']},
+    { n:'急诊科',i:'🚑',k:'急诊科',d:'24h急诊/三大中心',dr:['罗伟(主任医师-华西)']},
+  ]},
+  { id:'h3',name:'四川现代医院（高新院区）',level:'三级甲等',lk:'3a',addr:'中和街道仁和路713号',tel:'028-68711300',depts:[
+    { n:'骨科',i:'🦴',k:'骨科',d:'手外科/显微外科/关节置换',dr:['刘建国(主任医师)']},
+    { n:'心内科',i:'🫀',k:'心内科',d:'高血压/冠心病/心衰',dr:['陈明(主任医师)']},
+    { n:'神经内科',i:'🧠',k:'神经内科',d:'脑血管病/帕金森',dr:['王芳(副主任医师)']},
+    { n:'呼吸内科',i:'🫁',k:'呼吸内科',d:'慢阻肺/哮喘/肺部感染',dr:['李伟(主治医师)']},
+    { n:'消化内科',i:'🔬',k:'消化内科',d:'胃镜/肠镜/肝病',dr:['张丽(主治医师)']},
+    { n:'妇产科',i:'🤰',k:'妇科',d:'妇科炎症/月经不调',dr:['杨红(副主任医师)']},
+    { n:'儿科',i:'👶',k:'儿科',d:'小儿内科常见病',dr:['赵敏(主治医师)']},
+    { n:'急诊科',i:'🚑',k:'急诊科',d:'24h急诊/创伤急救',dr:['陈强(副主任医师)']},
+  ]},
+  { id:'h6',name:'电子科技大学医院',level:'二级甲等',lk:'2',addr:'天润路888号附1号',tel:'028-61830547',depts:[
+    { n:'内科',i:'💊',k:'内科',d:'常见内科疾病/慢病管理',dr:['刘医生(副主任医师)']},
+    { n:'外科',i:'🏥',k:'外科',d:'普外/创伤处理',dr:['李医生(主治医师)']},
+    { n:'口腔科',i:'🦷',k:'口腔科',d:'牙体牙髓/修复',dr:['王医生(主治医师)']},
+    { n:'眼科',i:'👁️',k:'眼科',d:'验光配镜/眼病',dr:['张医生(主治医师)']},
+    { n:'皮肤科',i:'🔍',k:'皮肤科',d:'常见皮肤病',dr:['陈医生(主治医师)']},
+  ]},
+  { id:'h7',name:'芳草社区卫生服务中心',level:'社区',lk:'1',addr:'创瑞街10号/泰和二街366号',tel:'028-85136980',depts:[
+    { n:'全科门诊',i:'💊',k:'内科',d:'华西专家坐诊，13科室覆盖',dr:['华西轮诊专家']},
+    { n:'中医科',i:'🌿',k:'中医科',d:'针灸/推拿/中药调理',dr:['中医团队']},
+    { n:'儿科',i:'👶',k:'儿科',d:'儿童常见病/儿保',dr:['儿科团队']},
+    { n:'妇科',i:'🤰',k:'妇科',d:'妇科常见病/孕产保健',dr:['妇科团队']},
+    { n:'口腔科',i:'🦷',k:'口腔科',d:'口腔常见病',dr:['口腔团队']},
+  ]},
+  { id:'h8',name:'中和社区卫生服务中心',level:'社区',lk:'1',addr:'中和大道三段56号/应龙北二路1105号',tel:'028-85658497',depts:[
+    { n:'全科门诊',i:'💊',k:'内科',d:'常见病/慢病管理/30名全科医生',dr:['全科团队']},
+    { n:'中医脾胃科',i:'🌿',k:'中医科',d:'全国基层中医药先进单位',dr:['中医团队']},
+    { n:'口腔科',i:'🦷',k:'口腔科',d:'口腔内科/修复',dr:['口腔团队']},
+    { n:'儿科',i:'👶',k:'儿科',d:'儿童常见病/生长发育',dr:['儿科团队']},
+    { n:'康复科',i:'🏃',k:'康复科',d:'综合康复/理疗',dr:['康复团队']},
+  ]},
+];
+
+// ==================== Triage Engine ====================
+// 融合：中国卫健委五级分诊标准 + 曼彻斯特分诊系统(MTS) + 200+症状-科室映射
+// 紧急度: red(即刻/0min) orange(≤15min) yellow(≤30min) green-a(≤2h) green-b(≤4h)
+const TRIAGE_RULES = [
+  // ── 🔴 Ⅰ级 急危 (即刻/0分钟) ──
+  
+  { kw:['视网膜脱离','视网膜脱落','网脱'],dept:'眼科',dk:'眼科',urg:'red',tips:'视网膜脱离是眼科急症，需24小时内手术！'},
+  { kw:['心绞痛','心绞痛发作','劳累后胸痛'],dept:'心内科',dk:'心内科',urg:'orange',tips:'心绞痛需尽快就医，可能是心梗前兆'},
+  { kw:['便血','大便带血','便中带血','黑便','柏油样便'],dept:'消化内科',dk:'消化内科',urg:'yellow',tips:'反复便血需做肠镜排除肠道肿瘤'},
+  { kw:['磕碰','磕碰伤','碰撞伤','挫伤'],dept:'急诊外科',dk:'急诊科',urg:'green-a',tips:'磕碰伤注意冰敷，观察有无皮下血肿'},
+{ kw:['心脏骤停','呼吸骤停','呼吸停止','心跳停止','没有呼吸','没有心跳','叫不醒','没有意识','瞳孔散大','濒死'],dept:'急诊科',dk:'急诊科',urg:'red',tips:'立即拨打120！实施心肺复苏(CPR)，AED除颤。'},
+  { kw:['大出血','动脉出血','喷射状出血','血流不止','失血性休克','出血不止'],dept:'急诊科',dk:'急诊科',urg:'red',tips:'立即按压止血并拨打120！抬高出血部位，保持平卧。'},
+  { kw:['严重过敏','喉头水肿','过敏性休克','呼吸困难伴皮疹','喘不上气伴过敏'],dept:'急诊科',dk:'急诊科',urg:'red',tips:'立即拨打120！如有肾上腺素笔请立即使用。'},
+  { kw:['窒息','气道梗阻','异物卡喉','无法呼吸','憋死'],dept:'急诊科',dk:'急诊科',urg:'red',tips:'立即海姆立克急救法！同时拨打120。'},
+  { kw:['严重创伤','车祸重伤','高处坠落','爆炸伤','挤压伤','多发伤','颅脑重伤'],dept:'急诊科',dk:'急诊科',urg:'red',tips:'立即拨打120！不要移动患者（尤其怀疑脊柱损伤时）。'},
+  { kw:['电击伤','雷击','溺水昏迷','重度烧伤','大面积烧伤'],dept:'急诊科',dk:'急诊科',urg:'red',tips:'立即拨打120！电击伤先切断电源，溺水者先清理气道。'},
+  { kw:['张力性气胸','开放性气胸','连枷胸','心包填塞'],dept:'急诊科',dk:'急诊科',urg:'red',tips:'立即拨打120！这是致命性胸外伤，需紧急穿刺减压。'},
+
+  // ── 🟠 Ⅱ级 急重 (≤15分钟) ── 中国五级标准 + MTS橙色
+  { kw:['中风','脑梗','脑出血','脑卒中','偏瘫','半身不遂','面瘫','口歪眼斜','嘴角歪','流口水单侧','一侧肢体无力','单侧手脚无力','突然不能说话','说不出话','说话不清','大舌头','言语障碍','言语不清','说不出话','卒中','FAST阳性'],dept:'神经内科',dk:'神经内科',urg:'red',tips:'疑似中风！立即拨打120！溶栓时间窗仅4.5小时。记下发病时间。'},
+  { kw:['急性心梗','心肌梗死','心梗','心前区压榨痛','胸口压榨','濒死感伴胸痛','持续胸痛大汗','胸痛超过20分钟','含服硝酸甘油不缓解','ST段抬高'],dept:'心内科',dk:'心内科',urg:'red',tips:'疑似急性心梗！立即拨打120！嚼服阿司匹林300mg（无禁忌）。'},
+  { kw:['主动脉夹层','撕裂样胸痛','背部撕裂痛','双上肢血压差异','主动脉瘤'],dept:'心内科',dk:'心内科',urg:'red',tips:'立即拨打120！主动脉夹层死亡率极高，需紧急手术。'},
+  { kw:['肺栓塞','胸痛咯血','胸痛伴呼吸困难咯血','下肢肿胀伴胸痛','DVT伴胸痛'],dept:'呼吸内科',dk:'呼吸内科',urg:'red',tips:'立即拨打120！肺栓塞危及生命，需要紧急溶栓或取栓。'},
+  { kw:['重度哮喘','哮喘持续状态','哮喘发作不能说话','哮喘持续不缓解','哮喘濒死感'],dept:'呼吸内科',dk:'呼吸内科',urg:'red',tips:'立即拨打120！使用急救吸入剂，保持坐位。'},
+  { kw:['癫痫','癫痫持续状态','持续抽搐','抽搐不止','癫痫发作','痉挛持续'],dept:'神经内科',dk:'神经内科',urg:'red',tips:'立即拨打120！清理周围危险物品，不要往嘴里塞东西。'},
+  { kw:['急性胰腺炎','剧烈上腹痛放射背','饱餐后剧烈腹痛','饮酒后剧烈腹痛','急性重症胰腺炎'],dept:'消化内科',dk:'消化内科',urg:'red',tips:'立即就医！急性胰腺炎可危及生命，需禁食水。'},
+  { kw:['宫外孕','停经伴剧烈腹痛','异位妊娠破裂','宫外孕破裂休克','停经腹痛阴道流血'],dept:'妇科',dk:'妇科',urg:'red',tips:'立即拨打120！宫外孕破裂大出血危及生命。'},
+  { kw:['睾丸扭转','睾丸剧痛','阴囊剧痛','睾丸肿痛'],dept:'泌尿外科',dk:'泌尿外科',urg:'red',tips:'立即就医！睾丸扭转6小时内是黄金救治窗口。'},
+  { kw:['急性闭角型青光眼','眼压急剧升高','眼痛伴视力骤降','眼痛恶心呕吐','眼睛红痛伴视力模糊','突然看不见'],dept:'眼科',dk:'眼科',urg:'red',tips:'立即就医！青光眼急性发作可在24小时内致盲。'},
+  { kw:['动脉栓塞','急性肢体缺血','肢体发白发凉剧痛','肢体动脉栓塞','腿突然发白剧痛'],dept:'血管外科',dk:'心内科',urg:'red',tips:'立即就医！急性动脉栓塞6-8小时内需手术取栓。'},
+
+  // ── 🟡 Ⅲ级 急症 (≤30分钟) ── 中国五级标准
+  { kw:['急性阑尾炎','转移性右下腹痛','右下腹痛伴发热','麦氏点压痛','阑尾炎'],dept:'普外科',dk:'外科',urg:'orange',tips:'疑似阑尾炎，尽快就医手术。禁食水，不要服止痛药。'},
+  { kw:['肠梗阻','腹痛腹胀停止排便排气','剧烈腹痛伴腹胀','呕吐粪样物'],dept:'普外科',dk:'消化内科',urg:'orange',tips:'尽快就医！禁食水，肠梗阻可能需手术。'},
+  { kw:['复杂性骨折','开放性骨折','骨折伴畸形','骨折伴神经损伤','骨折伴血管损伤'],dept:'骨科',dk:'骨科',urg:'orange',tips:'尽快就医！不要自行复位，简单固定后前往医院。'},
+  { kw:['中度哮喘','哮喘发作','喘息','气促伴哮鸣音','胸闷伴喘鸣'],dept:'呼吸内科',dk:'呼吸内科',urg:'orange',tips:'尽快就医。使用随身吸入剂，保持坐位。'},
+  { kw:['急性胆囊炎','右上腹痛伴发热','右上腹痛放射右肩','墨菲征阳性','胆绞痛'],dept:'肝胆外科',dk:'消化内科',urg:'orange',tips:'尽快就医。禁食水，可能需要手术。'},
+  { kw:['肾绞痛','输尿管结石绞痛','剧烈腰痛放射会阴','结石绞痛伴血尿','腰腹部绞痛伴恶心呕吐'],dept:'泌尿外科',dk:'泌尿外科',urg:'orange',tips:'尽快就医。多喝水，疼痛剧烈可先用止痛药。'},
+  { kw:['消化道出血','呕血','黑便','便血鲜红','消化道出血伴休克','柏油样便'],dept:'消化内科',dk:'消化内科',urg:'orange',tips:'尽快就医！禁食水，保持平卧，记录出血量。'},
+  { kw:['急性尿潴留','完全不能排尿','膀胱胀痛不能排尿','尿潴留','排不出尿'],dept:'泌尿外科',dk:'泌尿外科',urg:'orange',tips:'尽快就医！需要紧急导尿。'},
+
+  // ── 神经内科 ──
+  { kw:['头痛','头疼','偏头痛','太阳穴疼','后脑勺疼','后脑勺胀痛','前额疼','紧张性头痛','丛集性头痛','跳痛'],dept:'神经内科',dk:'神经内科',urg:'yellow',tips:'伴剧烈呕吐/意识模糊/颈部僵硬请直接去急诊'},
+  { kw:['头晕','眩晕','天旋地转','旋转感','头昏','脑胀','头重脚轻','站不稳','晕厥','昏倒','晕倒','眼前发黑'],dept:'神经内科',dk:'神经内科',urg:'yellow',tips:'体位性眩晕也可能与耳石症相关→可去耳鼻喉科'},
+  { kw:['手脚麻木','肢体麻木','手指麻木','脚趾麻木','单侧麻木','面部麻木','发麻','针刺感'],dept:'神经内科',dk:'神经内科',urg:'yellow',tips:'伴面瘫/言语障碍/肢体无力可能是中风前兆'},
+  { kw:['帕金森','手抖','震颤','静止性震颤','走路不稳','面具脸','肌张力高','动作迟缓'],dept:'神经内科',dk:'神经内科',urg:'green-a',tips:'慢性进展性疾病，规律服药和康复训练管理'},
+  { kw:['记忆减退','认知障碍','痴呆','阿尔茨海默','老年痴呆','健忘严重','记性差'],dept:'神经内科',dk:'神经内科',urg:'green-a',tips:'可去记忆门诊/认知障碍门诊评估'},
+
+  // ── 心血管内科 ──
+  { kw:['胸痛','胸闷','胸口闷','胸口疼','胸口痛','心口痛','心前区痛','胸骨后痛','压迫感','紧缩感','胸痛放射','心律失常','心律不齐','心动过速','心动过缓'],dept:'心内科',dk:'心内科',urg:'yellow',tips:'胸痛可能是心梗前兆，建议立即就医。不要自行驾车。'},
+  { kw:['心悸','心慌','心跳快','心跳不齐','心律不齐','早搏','心跳漏拍','心动过速','心房颤动','房颤'],dept:'心内科',dk:'心内科',urg:'yellow',tips:'建议做24h动态心电图。避免咖啡浓茶。'},
+  { kw:['冠心病','冠状动脉','高血压','血压高','高压','低压高','血压不稳','血压波动'],dept:'心内科',dk:'心内科',urg:'green-a',tips:'规律服药，低盐饮食，每日监测血压'},
+  { kw:['下肢水肿','腿肿','脚肿','踝部水肿','水肿伴气短','水肿伴喘'],dept:'心内科',dk:'心内科',urg:'yellow',tips:'伴呼吸困难可能是心衰，请尽快就医'},
+  { kw:['心衰','心力衰竭','端坐呼吸','夜间阵发性呼吸困难','心功能不全','EF降低'],dept:'心内科',dk:'心内科',urg:'orange',tips:'慢性心衰急性加重需尽快就医'},
+
+  // ── 呼吸内科 ──
+  { kw:['咳嗽','干咳','咳痰','痰多','黄痰','白痰','咳血','痰中带血','刺激性咳嗽','呛咳','慢性咳嗽','哮喘','喘息','肺炎','支气管炎','慢阻肺'],dept:'呼吸内科',dk:'呼吸内科',urg:'green-a',tips:'咳嗽超过3周建议做胸部CT'},
+  { kw:['发热','发烧','体温高','低烧','高烧','高热','发热不退','发热反复','午后低热','潮热','畏寒','寒战','怕冷','发冷'],dept:'呼吸内科',dk:'呼吸内科',urg:'yellow',tips:'体温超38.5℃或持续3天以上请尽快就诊。多喝水。'},
+  { kw:['喉咙痛','咽喉痛','嗓子疼','咽喉肿痛','咽痛','吞咽痛','扁桃体发炎','扁桃体肿大'],dept:'耳鼻喉科',dk:'耳鼻喉科',urg:'green-a',tips:'伴发热可能是急性扁桃体炎→也可去呼吸内科'},
+  { kw:['感冒','流感','伤风','鼻塞','流鼻涕','打喷嚏','流清涕','感冒症状'],dept:'呼吸内科',dk:'呼吸内科',urg:'green-b',tips:'多休息多喝水。发热超38.5℃可用退热药。'},
+  { kw:['气短','呼吸困难','喘不上气','憋气','呼吸不畅','气不够用','活动后气喘','爬楼梯喘'],dept:'呼吸内科',dk:'呼吸内科',urg:'yellow',tips:'伴胸痛请立即去急诊，排除肺栓塞可能'},
+  { kw:['打鼾','打呼噜','睡眠呼吸暂停','夜间憋醒','OSA','憋气醒来'],dept:'呼吸内科',dk:'呼吸内科',urg:'green-a',tips:'可做睡眠监测，严重者需CPAP治疗'},
+
+  // ── 消化内科 ──
+  { kw:['腹痛','肚子疼','胃痛','胃炎','胃溃疡','十二指肠溃疡','腹部疼痛','腹中痛','小腹痛','左下腹痛','左上腹痛','肚脐周围痛','脐周痛'],dept:'消化内科',dk:'消化内科',urg:'yellow',tips:'剧烈腹痛请直接去急诊科。不要自行服用止痛药。'},
+  { kw:['腹泻','拉肚子','拉稀','水样便','稀便','大便次数多','急性腹泻','腹泻不止'],dept:'消化内科',dk:'消化内科',urg:'yellow',tips:'大量腹泻需补水补盐。伴发热/便血请就医。'},
+  { kw:['便秘','大便干结','排便困难','大便次数少','长期便秘','慢性便秘'],dept:'消化内科',dk:'消化内科',urg:'green-b',tips:'多吃纤维素，多喝水，规律运动。长期便秘建议肠镜。'},
+  { kw:['恶心','想吐','干呕','反胃','食欲不振','胃口差'],dept:'消化内科',dk:'消化内科',urg:'green-a',tips:'持续恶心伴体重下降请就医检查'},
+  { kw:['反酸','烧心','胃灼热','胸骨后烧灼感','GERD','胃食管反流','胃酸','嗳气','打嗝'],dept:'消化内科',dk:'消化内科',urg:'green-a',tips:'避免辛辣油腻，睡前3小时不进食。可做胃镜。'},
+  { kw:['腹胀','肚子胀气','腹部胀满','排气多','胀气'],dept:'消化内科',dk:'消化内科',urg:'green-b',tips:'可尝试益生菌。持续腹胀伴体重下降请检查。'},
+  { kw:['黄疸','皮肤发黄','眼白发黄','巩膜黄染','小便黄如浓茶','黄疸伴腹痛'],dept:'消化内科',dk:'消化内科',urg:'yellow',tips:'尽快就医查肝功能和B超'},
+
+  // ── 骨科/运动医学 ──
+  { kw:['腰疼','腰痛','腰椎间盘突出','坐骨神经痛','下肢放射痛','腰肌劳损','腰椎管狭窄','半月板损伤','闪了腰'],dept:'骨科',dk:'骨科',urg:'green-a',tips:'急性期卧床休息。伴大小便障碍请即刻就医。'},
+  { kw:['背痛','后背疼','肩背痛','上背痛','后背僵硬','脊柱疼'],dept:'骨科',dk:'骨科',urg:'green-a',tips:'长期伏案可能是肌筋膜炎→也可去康复科'},
+  { kw:['关节痛','膝盖痛','膝关节痛','膝关节炎','肩关节痛','肘关节痛','腕关节痛','踝关节痛','髋关节痛','关节肿胀','关节积液'],dept:'骨科',dk:'骨科',urg:'green-a',tips:'伴红肿热痛可能是痛风/感染→需查尿酸'},
+  { kw:['颈椎','脖子疼','颈痛','颈肩痛','颈椎病','落枕','脖子僵硬','转头困难','手麻伴颈痛'],dept:'骨科',dk:'骨科',urg:'green-a',tips:'避免长时间低头。伴手麻可能是神经根型颈椎病。'},
+  { kw:['骨折','骨裂','摔断','创伤后畸形','外伤后不能动','疑似骨折'],dept:'骨科',dk:'骨科',urg:'yellow',tips:'用夹板/硬物简单固定后前往医院。不要自行复位。'},
+  { kw:['扭伤','崴脚','韧带拉伤','肌肉拉伤','软组织损伤','脚踝扭伤','手腕扭伤'],dept:'骨科',dk:'骨科',urg:'green-a',tips:'RICE原则：休息、冰敷、加压、抬高。48h后热敷。'},
+
+  // ── 皮肤科 ──
+  { kw:['皮疹','红疹','皮炎','湿疹','荨麻疹','风团','皮肤红','皮肤痒','全身痒','瘙痒','痒','痘痘','粉刺','痤疮','青春痘','酒糟鼻'],dept:'皮肤科',dk:'皮肤科',urg:'green-b',tips:'避免搔抓。伴发热/关节痛可能是系统性疾病'},
+  { kw:['脱发','掉头发','斑秃','秃顶','发际线后移','大量脱发'],dept:'皮肤科',dk:'皮肤科',urg:'green-b',tips:'雄激素性脱发可药物干预。建议查甲状腺功能'},
+  { kw:['灰指甲','甲癣','指甲变色','指甲增厚','甲沟炎','指甲周围红肿'],dept:'皮肤科',dk:'皮肤科',urg:'green-b',tips:'真菌感染，口服+外用抗真菌药物'},
+  { kw:['带状疱疹','蛇缠腰','缠腰龙','神经痛伴皮疹','皮肤水疱伴疼痛'],dept:'皮肤科',dk:'皮肤科',urg:'yellow',tips:'72h内抗病毒治疗可减少后遗神经痛'},
+  { kw:['银屑病','牛皮癣','皮肤脱屑','白色鳞屑','银屑','头皮屑多'],dept:'皮肤科',dk:'皮肤科',urg:'green-b',tips:'慢性病需长期管理。可去皮肤科/风湿免疫科。'},
+
+  // ── 妇科/产科 ──
+  { kw:['月经不调','月经紊乱','月经量多','月经量少','闭经','经期不规律','月经推迟','月经提前','功能性出血'],dept:'妇科',dk:'妇科',urg:'green-a',tips:'建议记录月经周期。需查性激素+超声。'},
+  { kw:['痛经','经期疼痛','来月经肚子疼','痛经严重','行经腹痛','经痛'],dept:'妇科',dk:'妇科',urg:'green-a',tips:'原发性痛经可用布洛芬。继发性需排除内膜异位。'},
+  { kw:['白带异常','白带多','白带异味','白带发黄','白带带血','外阴瘙痒','阴道瘙痒','阴道炎'],dept:'妇科',dk:'妇科',urg:'green-a',tips:'建议白带常规检查。避免自行用药。'},
+  { kw:['乳腺','乳房胀痛','乳房肿块','乳腺增生','乳头溢液','乳房结节','乳腺纤维瘤'],dept:'妇科',dk:'妇科',urg:'yellow',tips:'30岁以上建议每年乳腺超声。发现肿块尽早就医。'},
+  { kw:['怀孕','早孕','停经','验孕阳性','早孕反应','孕早期'],dept:'产科',dk:'妇科',urg:'green-a',tips:'停经6-8周做B超确认宫内孕。开始补充叶酸。'},
+  { kw:['更年期','更年期综合征','潮热','盗汗','围绝经期','月经稀发','更年','五十岁'],dept:'妇科',dk:'妇科',urg:'green-b',tips:'可考虑激素替代治疗(HRT)。建议骨密度检查。'},
+
+  // ── 儿科 ──
+  { kw:['儿童','小孩','宝宝','婴儿','幼儿','小儿','孩子','娃娃','新生儿','婴幼儿','3岁','2岁','1岁','4岁','5岁','6岁','7岁','8岁','9岁','10岁','11岁','12岁'],dept:'儿科',dk:'儿科',urg:'yellow',tips:'3个月以下婴儿发热需立即就诊'},
+  { kw:['儿童发热','小孩发烧','宝宝发烧','孩子发烧','小儿发热','幼儿发热','婴儿发热','婴幼儿发烧'],dept:'儿科',dk:'儿科',urg:'yellow',tips:'3月以下婴儿发热立即就医。≥38.5℃需退热处理。'},
+  { kw:['儿童咳嗽','小儿咳嗽','孩子咳嗽','宝宝咳嗽','小孩咳'],dept:'儿科',dk:'儿科',urg:'yellow',tips:'伴喘息/呼吸困难需尽快就医。可能是哮喘/肺炎。'},
+  { kw:['儿童腹泻','小儿腹泻','宝宝拉肚子','孩子拉肚子','小孩拉稀','秋季腹泻','轮状病毒'],dept:'儿科',dk:'儿科',urg:'yellow',tips:'注意补水防脱水。口服补液盐。伴血便立即就医。'},
+  { kw:['儿童皮疹','小儿皮疹','宝宝皮疹','孩子出疹','手足口病','水痘','幼儿急疹','猩红热','麻疹'],dept:'儿科',dk:'儿科',urg:'yellow',tips:'伴高热/精神差请立即就医。注意隔离。'},
+  { kw:['儿童腹痛','小儿腹痛','孩子肚子疼','宝宝肚子痛','肠套叠','肠系膜淋巴结炎','小儿阑尾'],dept:'儿科',dk:'儿科',urg:'yellow',tips:'阵发性哭闹伴果酱样便可能是肠套叠→立即就医'},
+  { kw:['生长发育','发育迟缓','不长个','身高体重不达标','语言发育迟','运动发育迟'],dept:'儿科',dk:'儿科',urg:'green-b',tips:'建议儿童保健科评估。定期测量生长曲线。'},
+
+  // ── 口腔科 ──
+  { kw:['牙疼','牙痛','牙龈肿','牙龈出血','牙齿敏感','智齿','长智齿','拔牙','补牙','蛀牙','龋齿','牙洞','牙齿松动'],dept:'口腔科',dk:'口腔科',urg:'green-b',tips:'建议提前预约。牙科急诊一般处理急性感染和外伤。'},
+  { kw:['口腔溃疡','口疮','嘴里起泡','口腔溃烂','复发性口腔溃疡','舌头溃疡'],dept:'口腔科',dk:'口腔科',urg:'green-b',tips:'反复发作可能与免疫相关→也可去风湿免疫科'},
+  { kw:['牙齿外伤','牙磕掉','牙齿折断','牙脱位','牙齿撞掉','牙外伤'],dept:'口腔科',dk:'口腔科',urg:'yellow',tips:'牙齿脱落2h内再植成功率最高！找到牙冠冲洗后含在舌下。'},
+
+  // ── 眼科 ──
+  { kw:['视力下降','视物模糊','看不清楚','视力模糊','视力减退','近视加深','远视','老花','看东西模糊'],dept:'眼科',dk:'眼科',urg:'yellow',tips:'突发视力下降需尽快就医，排除视网膜病变'},
+  { kw:['眼睛红','眼红','结膜充血','眼睛充血','红眼','结膜炎','红眼病'],dept:'眼科',dk:'眼科',urg:'green-a',tips:'传染性结膜炎需隔离。避免揉眼。'},
+  { kw:['眼干','眼涩','干眼症','眼睛干涩','眼疲劳','异物感','畏光','流泪多'],dept:'眼科',dk:'眼科',urg:'green-b',tips:'使用人工泪液。减少屏幕时间。'},
+  { kw:['白内障','晶状体混浊','视力逐渐下降','老人视力下降','看东西发白'],dept:'眼科',dk:'眼科',urg:'green-b',tips:'白内障手术是唯一有效治疗方法'},
+  { kw:['飞蚊症','眼前黑影','眼前飘动','玻璃体混浊','看到黑点'],dept:'眼科',dk:'眼科',urg:'yellow',tips:'突然大量飞蚊+闪光感可能是视网膜脱离→立即就医'},
+
+  // ── 耳鼻喉科 ──
+  { kw:['耳朵','耳痛','耳朵疼','耳鸣','耳朵嗡嗡响','听力下降','耳聋','中耳炎','外耳道炎','耳朵流脓','耳闷','耳朵进水'],dept:'耳鼻喉科',dk:'耳鼻喉科',urg:'green-a',tips:'突发听力下降需尽快（72h内）就医'},
+  { kw:['鼻子','鼻炎','鼻塞','鼻堵','流鼻血','鼻出血','鼻窦炎','嗅觉减退','嗅觉丧失','鼻子不通气'],dept:'耳鼻喉科',dk:'耳鼻喉科',urg:'green-b',tips:'反复鼻塞建议鼻内镜检查'},
+  { kw:['喉咙异物感','咽部异物感','嗓子有东西','喉咙不舒服','声音嘶哑','声嘶','失声','嗓子哑'],dept:'耳鼻喉科',dk:'耳鼻喉科',urg:'green-a',tips:'声音嘶哑超过2周需做喉镜检查'},
+  { kw:['过敏性鼻炎','打喷嚏','流清涕','鼻痒','鼻塞交替','花粉过敏','尘螨过敏'],dept:'耳鼻喉科',dk:'耳鼻喉科',urg:'green-b',tips:'可做过敏原检测。鼻用激素是首选治疗。'},
+
+  // ── 泌尿外科/男科 ──
+  { kw:['尿频','尿急','尿痛','尿不尽','排尿困难','尿等待','排尿痛','小便痛','尿路感染','膀胱炎'],dept:'泌尿外科',dk:'泌尿外科',urg:'yellow',tips:'多喝水。伴发热可能是肾盂肾炎→需抗生素。'},
+  { kw:['尿血','血尿','小便带血','尿中带血','肉眼血尿','酱油色尿'],dept:'泌尿外科',dk:'泌尿外科',urg:'yellow',tips:'无痛性血尿需警惕膀胱肿瘤。尽快就医检查。'},
+  { kw:['肾结石','腰腹部剧痛','背部剧痛伴血尿','结石','体外碎石','输尿管结石'],dept:'泌尿外科',dk:'泌尿外科',urg:'yellow',tips:'多喝水。<6mm结石可能自行排出。'},
+  { kw:['前列腺','前列腺增生','夜尿增多','排尿费力','尿线细','前列腺炎','会阴不适'],dept:'泌尿外科',dk:'泌尿外科',urg:'green-a',tips:'50岁以上建议每年PSA筛查'},
+  { kw:['男科','阳痿','勃起功能障碍','早泄','遗精','精液异常','不育','性功能'],dept:'泌尿外科',dk:'泌尿外科',urg:'green-b',tips:'可去男科门诊/泌尿外科。心理因素也需评估。'},
+
+  // ── 其他科室 ──
+  { kw:['糖尿病','血糖高','糖尿病足','胰岛素','降糖','糖化血红蛋白','多饮多食多尿消瘦','三多一少'],dept:'内分泌科',dk:'内分泌科',urg:'yellow',tips:'血糖异常波动请及时就医调整用药。随身带糖果防低血糖。'},
+  { kw:['甲状腺','甲亢','甲减','甲状腺结节','甲状腺肿','脖子粗','突眼','手抖伴消瘦','怕冷乏力','桥本'],dept:'内分泌科',dk:'内分泌科',urg:'green-a',tips:'建议查甲功五项+甲状腺超声'},
+  { kw:['肥胖','体重过重','超重','减肥','代谢综合征','高血脂','高尿酸'],dept:'内分泌科',dk:'内分泌科',urg:'green-b',tips:'可去内分泌科/临床营养科评估代谢状况'},
+  { kw:['精神','失眠','睡不着','入睡困难','早醒','多梦','心慌紧张','睡眠差','睡眠障碍','梦游'],dept:'精神心理科',dk:'神经内科',urg:'green-a',tips:'CBT-I认知行为疗法是失眠一线治疗'},
+  { kw:['抑郁','焦虑','情绪低落','心情差','不想动','兴趣丧失','想哭','不想活','自杀','自残','自伤'],dept:'精神心理科',dk:'神经内科',urg:'red',tips:'如有自伤/自杀倾向请立即拨打心理援助热线：400-161-9995'},
+  { kw:['强迫','反复检查','反复洗手','洁癖','社交恐惧','不敢社交','惊恐发作','恐惧症'],dept:'精神心理科',dk:'神经内科',urg:'green-a',tips:'药物治疗+心理治疗（CBT）效果最佳'},
+  { kw:['风湿','类风湿','晨僵','关节肿痛晨僵','红斑狼疮','干燥综合征','雷诺现象','手指遇冷变色'],dept:'风湿免疫科',dk:'内科',urg:'yellow',tips:'晨僵>30分钟可能是类风湿关节炎'},
+  { kw:['痛风','大脚趾红肿痛','突发关节红肿剧痛','高尿酸血症','痛风石','尿酸高'],dept:'风湿免疫科',dk:'内科',urg:'yellow',tips:'急性期用秋水仙碱/NSAIDs。避免啤酒海鲜内脏。'},
+  { kw:['贫血','头晕乏力','面色苍白','头晕乏力面色苍白','血红蛋白低','缺铁性贫血','巨幼细胞贫血','再障','白血病','血癌','血友病','凝血障碍','淋巴瘤','骨髓异常','出血点','瘀斑','皮下出血'],dept:'血液科',dk:'内科',urg:'yellow',tips:'建议查血常规+凝血功能。不明原因出血/瘀斑请尽快就诊。'},
+  { kw:['肿瘤','癌症','肿块','结节','瘤','化疗','放疗','靶向治疗','免疫治疗','消瘦伴包块','淋巴结肿大'],dept:'肿瘤科',dk:'肿瘤科',urg:'yellow',tips:'新发现肿块请尽早就诊明确性质。病理活检是金标准。'},
+  { kw:['感染','传染病','肝炎','乙肝','丙肝','结核','新冠','艾滋病','梅毒','寄生虫','发热待查','不明原因发热'],dept:'感染科',dk:'内科',urg:'yellow',tips:'传染病患者就诊请佩戴口罩。不明原因发热需系统排查。'},
+  { kw:['中医','中药','调理','针灸','拔罐','推拿','气血','阳虚','阴虚','上火','湿气','经络','体虚','脾胃虚弱','肝火旺','肾虚'],dept:'中医科',dk:'中医科',urg:'green-b',tips:'中医辨证论治。建议去正规医院中医科。'},
+  { kw:['康复','理疗','复健','中风后康复','术后康复','康复训练','康复治疗','物理治疗','作业治疗','言语治疗'],dept:'康复科',dk:'康复科',urg:'green-b',tips:'早期康复介入效果最佳。建议康复科评估制定计划。'},
+  { kw:['体检','健康检查','年度体检','身体检查','入职体检','婚前检查','全面体检','防癌体检','体检套餐'],dept:'体检中心',dk:'内科',urg:'green-b',tips:'体检前空腹8-12h。女性避开月经期。'},
+  { kw:['痔疮','便血鲜红','肛门疼痛','肛裂','肛瘘','肛周脓肿','肛门瘙痒','脱肛','肛门异物'],dept:'肛肠科',dk:'消化内科',urg:'green-a',tips:'便血需做肛门指检+肠镜排除肿瘤'},
+  { kw:['腿部沉重','小腿胀','静脉曲张','下肢静脉曲张','小腿静脉突出','蚯蚓腿','腿胀沉','静脉溃疡'],dept:'血管外科',dk:'心内科',urg:'green-a',tips:'避免久站久坐。穿弹力袜。严重者需手术。'},
+  { kw:['伤口','外伤','擦伤','割伤','划伤','切伤','刺伤','需要缝针','伤口感染','伤口化脓','破伤风','动物咬伤','狗咬','猫抓','蛇咬'],dept:'急诊外科',dk:'急诊科',urg:'yellow',tips:'动物咬伤需注射狂犬疫苗+破伤风。深伤口需清创缝合。'},
+  { kw:['烫伤','烧伤','热水烫伤','火焰烧伤','化学烧伤','电烧伤','烫伤水泡','烫伤起泡'],dept:'急诊外科',dk:'急诊科',urg:'yellow',tips:'冷水冲洗至少15分钟。不要涂抹牙膏/酱油。面积大请直接去急诊。'},
+  { kw:['疼痛','全身痛','肌肉痛','神经痛','慢性疼痛','癌痛','顽固性疼痛','疼痛管理'],dept:'疼痛科',dk:'内科',urg:'green-a',tips:'慢性疼痛可去疼痛科综合治疗。不要长期自行服用止痛药。'},
+  { kw:['乏力','疲劳','没精神','浑身无力','疲倦','累','没劲','虚弱','没力气'],dept:'内科',dk:'内科',urg:'green-a',tips:'持续乏力伴体重下降/发热建议全面检查。'},
+  { kw:['体重下降','体重减轻','消瘦','瘦了','不明原因消瘦','体重骤降','体重一直掉'],dept:'内分泌科',dk:'内分泌科',urg:'yellow',tips:'不明原因体重下降需排查糖尿病/甲亢/肿瘤。建议查血糖甲功。'},
+{ kw:['卵巢囊肿','子宫肌瘤','乳腺纤维瘤','乳腺增生'],dept:'妇科',dk:'妇科',urg:'green-a',tips:'建议定期复查超声'},
+  { kw:['血管突出','下肢沉重','血管凸起'],dept:'血管外科',dk:'心内科',urg:'green-a',tips:'避免久站，穿弹力袜'},
+  { kw:['癫痫','癫痫发作','痉挛','抽搐'],dept:'神经内科',dk:'神经内科',urg:'red',tips:'癫痫发作时清理周围危险物品'},
+  { kw:['脑外伤','脑震荡','头部撞击','头部外伤'],dept:'神经外科',dk:'神经内科',urg:'orange',tips:'头部外伤后出现意识障碍需立即就医'},
+  { kw:['胆囊炎','胆结石','胆绞痛','胆道感染'],dept:'肝胆外科',dk:'消化内科',urg:'orange',tips:'急性胆囊炎需尽快就医，禁食水'},
+  { kw:['肺炎','支气管炎','慢阻肺','COPD','肺气肿'],dept:'呼吸内科',dk:'呼吸内科',urg:'yellow',tips:'建议拍胸部CT明确诊断'},
+  { kw:['肛门痛','肛周脓肿','肛裂','肛瘘'],dept:'肛肠科',dk:'消化内科',urg:'yellow',tips:'肛周脓肿需尽快手术引流'},
+  { kw:['青光眼','眼压高','视力急剧下降'],dept:'眼科',dk:'眼科',urg:'orange',tips:'青光眼急性发作需立即就医降压'},
+  { kw:['冠心病','冠脉狭窄','冠脉堵塞','心肌缺血'],dept:'心内科',dk:'心内科',urg:'orange',tips:'建议做冠脉CTA或造影检查'},
+  { kw:['心律失常','心律不齐','心动过速','心动过缓','心跳不规律','早搏'],dept:'心内科',dk:'心内科',urg:'yellow',tips:'建议做24h动态心电图'},
+  { kw:['半月板损伤','韧带撕裂','交叉韧带','半月板','膝关节损伤'],dept:'骨科',dk:'骨科',urg:'yellow',tips:'建议做膝关节MRI明确损伤程度', kw:['关节脱位','脱臼','半月板损伤','韧带撕裂','膝关节损伤']},
+  { kw:['跟腱炎','足底筋膜炎','足跟痛','足底痛'],dept:'骨科',dk:'骨科',urg:'green-a',tips:'减少活动，冰敷，穿有支撑的鞋子'},
+
+  { kw:['关节脱位','脱臼','骨折不愈合'],dept:'骨科',dk:'骨科',urg:'yellow',tips:'需拍X光确认脱位程度，及时复位固定'},
+   { kw:['摔伤','摔倒','跌倒','磕碰伤'],dept:'急诊外科',dk:'急诊科',urg:'yellow',tips:'摔伤后注意观察意识变化，老年人需排除骨折'},
+   { kw:['角膜炎','角膜溃疡','虹膜炎','虹膜睫状体炎'],dept:'眼科',dk:'眼科',urg:'yellow',tips:'角膜炎需及时抗感染治疗，避免角膜穿孔'},
+   { kw:['大便带血','便血反复','便血不止'],dept:'消化内科',dk:'消化内科',urg:'yellow',tips:'反复便血需做肠镜检查排除肠道肿瘤'},
+];
+
+function stripJSON(text) {
+  text = text.replace(/\`\`\`json[\s\S]*?\`\`\`/g, '').trim();
+  text = text.replace(/\{[^{}]*"(?:department|triage_level|urgency|科室|分诊|reason)"[^}]*\}/gi, '').trim();
+  text = text.replace(/^\s*\{[^}]*\}\s*$/gm, '').trim();
+  text = text.replace(/\n{3,}/g, '\n\n');
+  return beautifyText(text || '抱歉，AI未能生成有效的回复');
+}
+
+function beautifyText(text) {
+  if (!text || text.length < 10) return text;
+
+  // Medical keywords to highlight
+  const highlightWords = ['皮肤科','心内科','神经内科','消化内科','呼吸内科','骨科','儿科','妇科','眼科','耳鼻喉科','口腔科','泌尿外科','急诊科','中医科','康复科','内分泌科','肿瘤科','血液科','感染科','风湿免疫科','疼痛科','肛肠科','血管外科'];
+  const diseaseWords = ['银屑病','湿疹','荨麻疹','皮炎','痤疮','带状疱疹','高血压','糖尿病','冠心病','心梗','中风','肺炎','哮喘','阑尾炎','结石','痛风','类风湿','甲亢','甲减','贫血','白血病','肝硬化','肾炎'];
+
+  let result = text;
+
+  // 1) Add paragraph breaks before key sections
+  const sectionBreaks = ['推荐科室','就医建议','注意事项','用药建议','检查建议','治疗建议','诊断考虑','可能疾病','温馨提示','饮食建议','生活建议','初步考虑','就诊指引'];
+  sectionBreaks.forEach(s => {
+    result = result.replace(new RegExp(`([。！？])(${s})`, 'g'), '$1<br><br>$2');
+  });
+
+  // 2) Bold section headers with color
+  const allKeys = [...sectionBreaks, '复诊建议','预防建议','健康指导','处理建议','科室推荐','进一步检查','需警惕','紧急提醒','随访建议'];
+  allKeys.forEach(k => {
+    const re = new RegExp(`(${k}[：:])`, 'g');
+    result = result.replace(re, '<span style="font-weight:800;color:#1a7ad9;font-size:14px;">$1</span>');
+  });
+
+  // 3) Bold department names
+  highlightWords.forEach(w => {
+    result = result.replace(new RegExp(`(${w})`, 'g'), '<span style="font-weight:700;color:#1557b0;">$1</span>');
+  });
+
+  // 4) Bold disease names
+  diseaseWords.forEach(w => {
+    result = result.replace(new RegExp(`(${w})`, 'g'), '<span style="font-weight:600;color:#c5221f;">$1</span>');
+  });
+
+  // 5) Bold numbers and measurements
+  result = result.replace(/(\d+\.?\d*(?:℃|[度分]|[天周月年]|[小分秒]时|ml|mg|kg|次|级|%|分))/g, '<span style="font-weight:700;color:#333;">$1</span>');
+
+  // 6) Bold action verbs
+  result = result.replace(/(避免|建议|注意|警惕|立即|尽快|必须|不要|可以|应该|需要|请勿)/g, '<span style="font-weight:700;">$1</span>');
+
+  // 7) Line breaks
+  result = result.replace(/\n/g, '<br>');
+
+  return result;
+}
+
+// Parse choices from AI responses - handles [x], x、x、x, 1.x 2.x formats
+function parseChoices(text) {
+  let choices = [];
+  // 1) Bracket format: [option1][option2]
+  const bracketRe = /\[([^\]]+)\]/g; let m;
+  while ((m = bracketRe.exec(text)) !== null) {
+    const opt = m[1].trim();
+    if (opt.length > 1 && opt.length < 30 && !/[<>{}]/.test(opt)) choices.push(opt);
+  }
+  // 2) Chinese comma separated: A、B、C or A，B，C
+  if (choices.length === 0) {
+    const commaMatch = text.match(/[：:][\s\n]*([^。！？\n]{5,60})/);
+    if (commaMatch) {
+      const segment = commaMatch[1];
+      const parts = segment.split(/[、，,；;]/).map(s => s.trim()).filter(s => s.length > 1 && s.length < 25);
+      if (parts.length >= 2 && parts.length <= 6) choices = parts;
+    }
+  }
+  // 3) Numbered: 1.xxx 2.xxx or 1)xxx 2)xxx
+  if (choices.length === 0) {
+    const numbered = text.match(/(?:\d[\.\)、]\s*[^\d\n]{2,20}){2,6}/);
+    if (numbered) {
+      const nums = numbered[0].split(/\d[\.\)、]\s*/).filter(s => s.trim().length > 0).map(s => s.trim());
+      if (nums.length >= 2) choices = nums;
+    }
+  }
+  // Clean text
+  let cleanText = text.replace(/\[([^\]]+)\]/g, '').replace(/\s{2,}/g, ' ').trim();
+  if (!cleanText) cleanText = '请选择：';
+  return { text: cleanText, choices: choices.slice(0, 6) };
+}
+
+function triageByRules(input) {
+  const text = input.toLowerCase(); let bm=null,bs=0;
+  for (const r of TRIAGE_RULES) { let s=0; for (const k of r.kw) { if(text.includes(k)) s+=k.length; } if(s>bs){bs=s;bm=r;} }
+  return bm;
+}
+
+// ==================== Similarity Engine ====================
+function getAllDeptEntries() {
+  const e=[]; for(const h of CD_HOSPITALS) for(const d of h.depts) e.push({hospital:h,department:d}); return e;
+}
+function calcSimilarity(input, entry) {
+  const d=entry.department,h=entry.hospital; let s=0;
+
+  // 1) Rule engine match (most weight - 50%)
+  const rule=triageByRules(input);
+  if(rule){
+    // Exact dept key match
+    if(d.k===rule.dk) s+=50;
+    // Dept name contains the rule's department name
+    else if(d.n.includes(rule.dept) || rule.dept.includes(d.n)) s+=35;
+    // Partial: same first 2 chars of key
+    else if(d.k.slice(0,2)===rule.dk?.slice(0,2)) s+=20;
+    // Broader category match
+    else if(d.k.includes(rule.dk?.slice(0,1)) || rule.dk?.includes(d.k?.slice(0,1))) s+=8;
+  }
+
+  // 2) Keyword matching (30% weight)
+  const kw=[d.n,d.k,d.d].join(' ').toLowerCase();
+  const inputWords = input.split(/[\s,，、/]+/).filter(w=>w.length>=2);
+  let kwHits=0;
+  for(const w of inputWords){
+    if(kw.includes(w)) kwHits+=w.length;
+  }
+  s+=(kwHits/Math.max(input.length,1))*30;
+
+  // 3) Hospital level bonus (12% max)
+  if(h.lk==='3a') s+=12;else if(h.lk==='3') s+=9;else if(h.lk==='2') s+=5;else s+=2;
+
+  // 4) Doctor count bonus (8% max)
+  s+=Math.min(d.dr.length*2, 8);
+
+  return Math.min(Math.round(s),99);
+}
+function rankRecommendations(input) {
+  // Use accumulated symptoms for better matching
+  const fullInput = collectedSymptoms.join(' ') + ' ' + input;
+  const entries=getAllDeptEntries().map(e=>({...e,score:calcSimilarity(fullInput,e)}));
+  entries.sort((a,b)=>b.score-a.score);
+  const threshold=Math.max(entries[0]?.score*0.3||20,15);
+  let results=entries.filter(e=>e.score>=threshold).slice(0,8);
+  if(results.length<3)results=entries.slice(0,3);
+  const seen=new Set();
+  return results.filter(e=>{const k=`${e.hospital.id}|${e.department.k}`;if(seen.has(k))return false;seen.add(k);return true;}).slice(0,8);
+}
+
+// ==================== Follow-up Questions (Context-Aware Structured) ====================
+function generateFollowUp(input, round) {
+  const text = (collectedSymptoms.join(' ') + ' ' + input).toLowerCase();
+
+  // ── Symptom-specific question sequences ──
+  const sequences = {
+    // 腹痛/腹泻/消化
+    abdomen: [
+      {q:'疼痛在哪个部位？', choices:['上腹(胃部)','右上腹','左上腹','肚脐周围','下腹(小腹)','右下腹']},
+      {q:'疼痛是哪种类型？', choices:['绞痛/痉挛','胀痛','隐痛/钝痛','针刺样','灼烧感','说不清楚']},
+      {q:'大便是什么性状？', choices:['水样便','稀便','黏液便','带血','正常','没注意']},
+      {q:'一天腹泻几次？', choices:['不腹泻','1-3次','4-6次','7次以上']},
+      {q:'有没有恶心呕吐？', choices:['又吐又泻','只有恶心','只有呕吐','都没有']},
+      {q:'发病前吃了什么？', choices:['油腻/辛辣','生冷食物','海鲜','隔夜饭菜','饮酒','正常饮食']},
+      {q:'有没有发热？', choices:['没有发热','低烧37-38℃','高烧38℃以上']},
+    ],
+    // 头痛
+    head: [
+      {q:'头痛在哪个位置？', choices:['太阳穴两侧','前额','后脑勺','整个头部','单侧','头顶']},
+      {q:'是哪种痛感？', choices:['跳着痛/搏动','胀痛/紧箍感','针刺/电击','钝痛/沉重感','说不清楚']},
+      {q:'有没有伴随症状？', choices:['恶心/呕吐','怕光/怕声音','头晕','视力模糊','没有']},
+      {q:'头痛发作频率？', choices:['第一次出现','偶尔发作','每周几次','每天都有','持续好几天了']},
+      {q:'什么情况会诱发？', choices:['劳累/压力大','月经前后','饮酒后','睡眠不好','天气变化','没有规律']},
+      {q:'头痛影响睡眠吗？', choices:['不影响','偶尔影响','严重影响','持续无法入睡']},
+    ],
+    // 头晕/眩晕
+    dizzy: [
+      {q:'是什么样的晕？', choices:['天旋地转','头重脚轻/飘忽感','眼前发黑快要晕倒','走路不稳']},
+      {q:'头晕持续多久？', choices:['几秒-几分钟','半小时左右','几个小时','整天都晕']},
+      {q:'什么情况诱发？', choices:['起床/翻身时','转头时','劳累后','饥饿时','没有规律']},
+      {q:'有没有伴随症状？', choices:['耳鸣','听力下降','恶心/呕吐','心慌/出汗','没有']},
+      {q:'以前有过类似头晕吗？', choices:['第一次','偶尔有过','经常发作','正在服降压药']},
+    ],
+    // 胸痛/心脏
+    chest: [
+      {q:'胸痛在哪个位置？', choices:['胸骨正后方','左胸前','右胸','整个胸部','不确定']},
+      {q:'疼痛有放射吗？', choices:['没有放射','向左肩/左臂','向背部','向下颌','向腹部']},
+      {q:'疼痛持续多久了？', choices:['几秒-几分钟','10-30分钟','半小时以上','反复发作']},
+      {q:'什么情况诱发？', choices:['活动/劳累时','情绪激动','休息时','饭后','没有规律']},
+      {q:'有没有伴随症状？', choices:['出冷汗','呼吸困难','心慌心悸','恶心','没有']},
+      {q:'含服硝酸甘油能缓解吗？', choices:['没吃过','能缓解','不能缓解','不确定']},
+    ],
+    // 发热/感冒/呼吸道
+    fever: [
+      {q:'体温大概多少？', choices:['37.3-38℃(低烧)','38-39℃(中烧)','39℃以上(高烧)','没量体温']},
+      {q:'发热持续多久了？', choices:['半天以内','1-2天','3-5天','5天以上','退了又烧']},
+      {q:'有没有以下症状？', choices:['咳嗽','喉咙痛','鼻塞流涕','全身酸痛','头痛','发冷/寒战']},
+      {q:'有没有咳痰？', choices:['干咳无痰','白痰','黄痰/绿痰','痰中带血丝','没咳嗽']},
+      {q:'自己吃过什么药？', choices:['没吃药','退烧药','感冒药','抗生素','中药']},
+    ],
+    // 咳嗽
+    cough: [
+      {q:'咳嗽多久了？', choices:['3天以内','3-7天','1-3周','3周以上','反复咳了很久']},
+      {q:'咳嗽有痰吗？', choices:['干咳无痰','白痰','黄痰/绿痰','痰多但咳不出']},
+      {q:'什么时间咳得厉害？', choices:['早上','晚上/夜间','白天','没有规律']},
+      {q:'有没有伴随症状？', choices:['发热','胸闷/气喘','喉咙痒','鼻塞/流涕','没有']},
+      {q:'什么情况会诱发咳嗽？', choices:['冷空气','说话多','躺下时','油烟/异味','没有规律']},
+    ],
+    // 腰疼/骨科
+    back: [
+      {q:'具体哪个部位？', choices:['颈部','上背部','腰部','臀部','整条脊柱','膝关节']},
+      {q:'有没有腿麻或放射痛？', choices:['没有','大腿前侧','大腿后侧','小腿/脚底','手臂/手指']},
+      {q:'是急性的还是慢性的？', choices:['突然扭伤/拉伤','几天内逐渐加重','慢性长期疼痛','反复发作好久了']},
+      {q:'什么动作会加重？', choices:['弯腰','久坐','久站','走路','咳嗽/打喷嚏','翻身/起床']},
+      {q:'有没有肿胀或活动受限？', choices:['没有','有肿胀','活动范围受限','不能承重','都有']},
+    ],
+    // 皮肤
+    skin: [
+      {q:'皮疹在哪个部位？', choices:['面部','颈部','躯干/胸背','四肢','手心/脚底','全身都有']},
+      {q:'是什么样子的？', choices:['红色斑点/丘疹','凸起疙瘩','水疱','脱屑/干裂','风团/荨麻疹']},
+      {q:'痒不痒？', choices:['非常痒','轻微痒','不痒','灼热/刺痛感']},
+      {q:'出现多久了？', choices:['几小时内','1-3天','一周以上','反复发作']},
+      {q:'有没有过敏史或接触史？', choices:['没有','吃了特殊食物','接触化学品/植物','换了新护肤品','正在服药']},
+    ],
+    // 牙疼/口腔
+    tooth: [
+      {q:'哪颗牙疼？', choices:['门牙','后槽牙/大牙','智齿','上面牙齿','下面牙齿','不确定哪颗']},
+      {q:'疼痛是哪种类型？', choices:['持续性钝痛','阵发性剧痛','冷热刺激痛','咬合时痛','隐隐作痛']},
+      {q:'牙龈有没有问题？', choices:['牙龈红肿','牙龈出血','牙龈萎缩','有脓包','没有']},
+      {q:'疼痛多久了？', choices:['刚开始','1-3天','一周左右','反复发作好久了']},
+      {q:'有没有以下情况？', choices:['有蛀牙/龋齿','牙齿松动','做过根管治疗','正在矫正牙齿','都没有']},
+    ],
+    // 眼睛
+    eye: [
+      {q:'是哪个眼睛？', choices:['左眼','右眼','双眼都有']},
+      {q:'主要症状是什么？', choices:['视力突然下降','眼前有黑影','眼红/眼痛','怕光/流泪','干涩/异物感']},
+      {q:'出现多久了？', choices:['几小时内','1-3天','一周以上','慢性长期']},
+      {q:'有没有以下情况？', choices:['高血压/糖尿病','高度近视','近期眼部外伤','长时间看屏幕','都没有']},
+    ],
+    // 耳鼻喉
+    ent: [
+      {q:'是哪个部位不适？', choices:['耳朵','鼻子','喉咙/咽喉','都有']},
+      {q:'具体什么症状？', choices:['疼痛','堵塞感/闷胀','耳鸣/听力下降','流脓/分泌物','异物感']},
+      {q:'出现多久了？', choices:['刚出现','1-3天','一周左右','反复发作']},
+      {q:'有没有伴随症状？', choices:['发热','头痛','咳嗽','没有']},
+    ],
+    // 泌尿
+    urine: [
+      {q:'主要是什么问题？', choices:['尿痛/尿急/尿频','尿血','排尿困难','腰腹部剧痛','泡沫尿/水肿']},
+      {q:'出现多久了？', choices:['刚刚出现','1-3天','一周左右','反复发作']},
+      {q:'有没有伴随症状？', choices:['发热','腰痛','恶心/呕吐','没有']},
+      {q:'以前有过类似情况吗？', choices:['第一次','以前有过结石','有前列腺问题','有肾炎病史','没有']},
+    ],
+  };
+
+  // Detect symptom category (order matters for overlaps)
+  let category = null;
+  if (/儿童|小孩|宝宝|婴儿|幼儿|小儿|孩子/.test(text)) category = 'child';
+  else if (/牙|口腔|牙龈|蛀牙|龋齿|智齿/.test(text)) category = 'tooth';
+  else if (/眼|视力|看东西|模糊|近视|白内|青光|结膜/.test(text)) category = 'eye';
+  else if (/耳|听力|耳鸣|鼻|鼻炎|鼻塞|喉咙|咽喉|嗓子|声带|声音/.test(text)) category = 'ent';
+  else if (/小便|尿|膀胱|肾|前列|结石/.test(text)) category = 'urine';
+  else if (/腹|肚|胃|肠|腹泻|拉肚子|消化|便|呕|阑尾/.test(text)) category = 'abdomen';
+  else if (/头晕|眩晕|天旋|昏倒|晕厥|眼前发黑|站不稳/.test(text)) category = 'dizzy';
+  else if (/头|偏头痛|太阳穴/.test(text)) category = 'head';
+  else if (/胸|心|闷痛|心悸|心慌|心绞痛|气短|呼吸困|憋气/.test(text)) category = 'chest';
+  else if (/咳|痰|气喘/.test(text) && !/发热|发烧|感冒/.test(text)) category = 'cough';
+  else if (/发热|发烧|感冒|流感|体温|咽痛|全身酸/.test(text)) category = 'fever';
+  else if (/腰|背|颈|关节|骨|扭|腿疼|膝|肩|脚踝/.test(text)) category = 'back';
+  else if (/皮|疹|痒|痘|斑|过敏|湿疹|荨麻|银屑/.test(text)) category = 'skin';
+  else if (/牙|口腔|牙龈|蛀牙/.test(text)) category = 'tooth';
+
+  if (category && sequences[category]) {
+    const seq = sequences[category];
+    return seq[Math.min(round, seq.length - 1)];
+  }
+
+  // Generic fallback
+  const generic = [
+    {q:'症状持续多久了？', choices:['几小时内','1-3天','3-7天','1-4周','一个月以上']},
+    {q:'不适程度打分？', choices:['轻微(1-3分)','中度(4-6分)','严重(7-9分)','无法忍受(10分)']},
+    {q:'有没有伴随症状？', choices:['发热','恶心呕吐','头痛头晕','乏力','没有']},
+    {q:'什么情况会加重？', choices:['活动后','休息时','吃饭后','情绪波动','没有规律']},
+    {q:'您的年龄段？', choices:['儿童','青少年','成年人','老年人']},
+  ];
+  return generic[Math.min(round, generic.length - 1)];
+}
+
+function addChoiceButtons(choices, callback) {
+  const chatArea = document.getElementById('chatArea');
+  const lastDoctorBubble = chatArea.querySelector('.msg.doctor:last-of-type .msg-bubble');
+  if (!lastDoctorBubble) return;
+
+  const isMulti = choices.length > 3; // 4+ options = multi-select mode
+  let selected = [];
+
+  const wrap = document.createElement('div');
+  wrap.style.cssText = 'display:flex;flex-wrap:wrap;gap:6px;margin-top:10px;';
+
+  choices.forEach(c => {
+    const btn = document.createElement('button');
+    btn.className = 'choice-btn';
+    btn.textContent = c;
+    btn.style.cssText = 'padding:7px 13px;border-radius:16px;border:1px solid #d0e3f5;background:#f0f7ff;font-size:12px;font-weight:600;color:#1a7ad9;cursor:pointer;transition:all 0.15s;white-space:nowrap;font-family:inherit;';
+    btn.onpointerdown = function(e) { e.preventDefault(); };
+
+    if (isMulti) {
+      // Multi-select mode
+      btn.onclick = function() {
+        const idx = selected.indexOf(c);
+        if (idx >= 0) {
+          selected.splice(idx, 1);
+          btn.style.background = '#f0f7ff';
+          btn.style.color = '#1a7ad9';
+          btn.style.borderColor = '#d0e3f5';
+        } else {
+          selected.push(c);
+          btn.style.background = '#1a7ad9';
+          btn.style.color = '#fff';
+          btn.style.borderColor = '#1a7ad9';
+        }
+        // Show/hide confirm button
+        const confirmBtn = wrap.querySelector('.choice-confirm');
+        if (confirmBtn) confirmBtn.style.display = selected.length > 0 ? '' : 'none';
+      };
+    } else {
+      // Single-select: tap = auto-send
+      btn.onclick = function() {
+        wrap.querySelectorAll('button').forEach(b => { b.disabled = true; b.style.opacity = '0.5'; b.style.pointerEvents = 'none'; });
+        callback(c);
+      };
+    }
+
+    wrap.appendChild(btn);
+  });
+
+  if (isMulti) {
+    // Add confirm button
+    const confirmBtn = document.createElement('button');
+    confirmBtn.className = 'choice-btn choice-confirm';
+    confirmBtn.textContent = '确定 ✓';
+    confirmBtn.style.cssText = 'padding:7px 14px;border-radius:16px;border:none;background:#1a7ad9;color:#fff;font-size:12px;font-weight:700;cursor:pointer;display:none;font-family:inherit;';
+    confirmBtn.onclick = function() {
+      if (selected.length === 0) return;
+      wrap.querySelectorAll('button').forEach(b => { b.disabled = true; b.style.opacity = '0.5'; b.style.pointerEvents = 'none'; });
+      callback(selected.join('，'));
+    };
+    wrap.appendChild(confirmBtn);
+  }
+
+  lastDoctorBubble.appendChild(wrap);
+  scrollChat();
+}
+
+// Override addMsg to support choice buttons
+const _origAddMsg = addMsg;
+addMsg = function(role, text, isHtml, choices, choiceCb) {
+  const result = _origAddMsg(role, text, isHtml);
+  if (choices && choices.length > 0 && choiceCb) {
+    setTimeout(() => addChoiceButtons(choices, choiceCb), 100);
+  }
+  return result;
+};
+
+// ==================== Recommendation Panel ====================
+function renderRecPanel(input) {
+  const fullInput = collectedSymptoms.join(' ') + ' ' + input;
+  const results=rankRecommendations(fullInput);
+  const ll={'3a':'三甲','3':'三级','2':'二甲','1':'社区'},lc={'3a':'lv-3a','3':'lv-3','2':'lv-2','1':'lv-1'};
+  const rule=triageByRules(input);
+  const isEmerg=rule&&rule.urg==='red';
+  let html=`<div class="rec-panel"><div class="rec-header${isEmerg?' emergency':''}"><span>&#127973; 推荐科室 · 成都高新区</span><span>${results.length}个匹配</span></div><div class="rec-list">`;
+  results.forEach((e,i)=>{
+    const d=e.department,h=e.hospital,sc=e.score;
+    const rc=i===0?'rank-1':i===1?'rank-2':i===2?'rank-3':'rank-4';
+    const scls=sc>=70?'rs-high':sc>=40?'rs-mid':'rs-low';
+    html+=`<div class="rec-item" onclick="showSlip('${h.id}','${d.n.replace(/'/g,"\\'")}','${input.replace(/'/g,"\\'")}')">
+      <div class="rec-rank ${rc}">${i+1}</div><div class="rec-dept-icon">${d.i}</div>
+      <div class="rec-info"><div class="rec-hosp">${h.name}<span class="level-badge ${lc[h.lk]}">${ll[h.lk]}</span></div>
+      <div class="rec-dept">${d.n}</div><div class="rec-doc">${d.dr.slice(0,2).join(' / ')}</div>
+      <div class="rec-addr">📍 ${h.addr}  📞 ${h.tel}</div></div>
+      <div class="rec-score"><div class="rs-bar"><div class="rs-fill ${scls}" style="width:${sc}%"></div></div>
+      <div class="rs-num">${sc}%</div><div class="rs-label">${sc>=70?'高':sc>=40?'中':'一般'}</div></div></div>`;
+  });
+  html+=`</div></div>`;
+  const chatArea=document.getElementById('chatArea');
+  const div=document.createElement('div'); div.innerHTML=html;
+  chatArea.appendChild(div.firstElementChild);
+  scrollChat();
+}
+
+function showSlip(hospId, deptName, input, aiText) {
+  const h=CD_HOSPITALS.find(x=>x.id===hospId);
+  const d=h?.depts.find(x=>x.n===deptName);
+  if(!h||!d)return;
+  const rule=triageByRules(input);
+  const urg=rule?.urg||'green-b';
+  const um={
+    red:{t:'Ⅰ级 即刻',c:'urg-red',wait:'即刻抢救',color:'#c5221f',bg:'#fde8e8',icon:'🔴'},
+    orange:{t:'Ⅱ级 急重',c:'urg-red',wait:'≤15分钟',color:'#e37400',bg:'#fff4e8',icon:'🟠'},
+    yellow:{t:'Ⅲ级 急症',c:'urg-yellow',wait:'≤30分钟',color:'#92400e',bg:'#fffbeb',icon:'🟡'},
+    'green-a':{t:'Ⅳa 亚急',c:'urg-green',wait:'≤2小时',color:'#137333',bg:'#e6f4ea',icon:'🟢'},
+    'green-b':{t:'Ⅳb 非急',c:'urg-green',wait:'≤4小时',color:'#1a7ad9',bg:'#e8f4fd',icon:'🔵'},
+    green:{t:'常规',c:'urg-green',wait:'约15-30分钟',color:'#137333',bg:'#e6f4ea',icon:'🟢'}
+  };
+  const u=um[urg];
+  const now=new Date();
+  const sid='TRIAGE-'+now.getFullYear()+String(now.getMonth()+1).padStart(2,'0')+String(now.getDate()).padStart(2,'0')+'-'+Math.floor(Math.random()*9000+1000);
+
+  const alertText = urg==='red' ? '立即就医！请尽快前往急诊科' :
+    urg==='orange' ? '紧急情况，请尽快前往医院就诊' :
+    urg==='yellow' ? '需要就医，建议尽快安排就诊' : '可择期就诊，建议提前预约';
+
+  const deptKW = rule?.kw?.slice(0,3).join('、') || d.n;
+  const checkItems = urg==='red' ? [
+    {icon:'🚑',txt:'立即前往急诊科'},
+    {icon:'📞',txt:'拨打120或由家人护送'},
+    {icon:'🚫',txt:'不要自行驾车'},
+    {icon:'💊',txt:'带上正在服用的药物'}
+  ] : urg==='orange' ? [
+    {icon:'🏥',txt:'尽快前往医院就诊'},
+    {icon:'👤',txt:'建议家属陪同'},
+    {icon:'🪪',txt:'带好身份证和医保卡'},
+    {icon:'🩸',txt:'检查前可能需要空腹'}
+  ] : [
+    {icon:'📅',txt:'提前预约挂号'},
+    {icon:'🪪',txt:'带好身份证和医保卡'},
+    {icon:'💉',txt:'如需抽血建议空腹'},
+    {icon:'📝',txt:'记录症状变化情况'}
+  ];
+
+  document.getElementById('slipCard').innerHTML=`
+    <div class="slip-handle"></div>
+    <div class="slip-header"><h2>智能导诊建议</h2><div style="font-size:10px;opacity:0.7;margin-top:4px;">${sid} | ${now.toLocaleString('zh-CN')}</div></div>
+    <div class="slip-body" style="padding:0 18px;">
+
+      <!-- Urgency Banner -->
+      <div style="background:${u.bg};border-left:5px solid ${u.color};padding:12px 16px;margin:12px 0;border-radius:0 10px 10px 0;">
+        <div style="font-size:13px;color:${u.color};font-weight:800;letter-spacing:0.5px;">${u.icon} ${u.t} · ${u.wait}</div>
+        <div style="font-size:16px;font-weight:800;color:${u.color};margin-top:3px;">${alertText}</div>
+        <div style="font-size:11px;color:#666;margin-top:4px;">${rule?.tips||''}</div>
+      </div>
+
+      <!-- Department - Large centered -->
+      <div style="text-align:center;padding:10px 0 14px;">
+        <div style="font-size:24px;font-weight:800;color:#1a7ad9;letter-spacing:1px;">${d.n}</div>
+        <div style="font-size:13px;font-weight:600;color:#333;margin-top:4px;">${h.name}</div>
+        <div style="display:inline-block;font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px;background:#e8f4fd;color:#1a7ad9;margin-top:3px;">${h.level}</div>
+        <div style="font-size:11px;color:#999;margin-top:4px;">📍 ${h.addr}  ·  📞 ${h.tel}</div>
+      </div>
+
+      ${aiText ? `
+      <!-- AI Analysis - Purple card -->
+      <div style="background:#faf5ff;border-radius:12px;padding:14px 16px;margin:8px 0;border:1px solid #e8d5f5;">
+        <div style="font-size:12px;font-weight:800;color:#7c3aed;text-transform:uppercase;letter-spacing:2px;margin-bottom:8px;">AI 分析结论</div>
+        <div style="font-size:13px;color:#333;line-height:1.7;">${aiText.replace(/\n/g,'<br>')}</div>
+      </div>
+      ` : ''}
+
+      <!-- 初步考虑 - Blue card -->
+      <div style="background:#f3f7ff;border-radius:12px;padding:14px 16px;margin:8px 0;border:1px solid #dce8fa;">
+        <div style="font-size:12px;font-weight:800;color:#1a7ad9;text-transform:uppercase;letter-spacing:2px;margin-bottom:8px;">初步考虑</div>
+        <div style="font-size:13px;color:#333;line-height:1.8;">
+          <div style="margin-bottom:6px;">根据您描述的<span style="font-weight:700;color:#1557b0;">${deptKW}</span>等症状，初步考虑与<span style="font-weight:800;color:#1a7ad9;font-size:14px;">${d.n}</span>相关疾病可能。</div>
+          <div style="color:#666;font-size:11px;border-top:1px dashed #dce8fa;padding-top:6px;">${beautifyText(d.d || '')}</div>
+        </div>
+      </div>
+
+      <!-- 推荐医生 - Green card -->
+      <div style="background:#f2faf5;border-radius:12px;padding:14px 16px;margin:8px 0;border:1px solid #d4efe0;">
+        <div style="font-size:12px;font-weight:800;color:#137333;text-transform:uppercase;letter-spacing:2px;margin-bottom:8px;">推荐医生</div>
+        <div style="font-size:13px;font-weight:600;color:#222;line-height:1.8;">${d.dr.map(dr => `<span style="background:#fff;padding:4px 10px;border-radius:14px;border:1px solid #d4efe0;display:inline-block;margin:2px 4px 2px 0;">${dr}</span>`).join('')}</div>
+      </div>
+
+      <!-- 就医建议 - Orange card -->
+      <div style="background:#fffaf5;border-radius:12px;padding:14px 16px;margin:8px 0;border:1px solid #fce8d8;">
+        <div style="font-size:12px;font-weight:800;color:#e37400;text-transform:uppercase;letter-spacing:2px;margin-bottom:8px;">需就医检查的情况</div>
+        ${checkItems.map(c => `<div style="display:flex;align-items:center;gap:8px;padding:5px 0;font-size:12px;color:#555;"><span>${c.icon}</span><span style="font-weight:600;color:#333;">${c.txt}</span></div>`).join('')}
+      </div>
+
+      <!-- Hospital footer -->
+      <div style="text-align:center;padding:8px 0;font-size:10px;color:#bbb;">${sid}</div>
+    </div>
+    <div class="slip-actions"><button class="btn-outline" onclick="closeSlip()">关闭</button><button class="btn-primary" onclick="showRegGuide('${h.id}','${d.n.replace(/'/g,"\\'")}')">挂号引导</button></div>`;
+  document.getElementById('slipModal').style.display='flex';
+}
+function closeSlip(){document.getElementById('slipModal').style.display='none';}
+
+function showRegGuide(hospId, deptName) {
+  closeSlip();
+  const h=CD_HOSPITALS.find(x=>x.id===hospId);
+  const d=h?.depts.find(x=>x.n===deptName);
+  if(!h||!d)return;
+
+  const routes = [
+    { name:'微信公众号', icon:'💬', desc:`搜索"${h.alias||h.name}"公众号 → 关注 → 预约挂号 → ${d.n} → 选择医生 → 选择时间 → 支付挂号费` },
+    { name:h.name.includes('华西')?'华医通APP':'医院官方APP', icon:'📱', desc:`下载"${h.name.includes('华西')?'华医通':h.name.slice(0,6)+'APP'}" → 在线建档（需身份证号）→ 预约挂号 → ${d.n} → 选医生和时间 → 确认支付` },
+    { name:'现场挂号', icon:'🏥', desc:`携带身份证/社保卡 → ${h.addr} → 门诊大厅自助机或挂号窗口 → ${d.n} → 取号候诊` },
+    { name:'电话预约', icon:'📞', desc:`拨打 ${h.tel} → 转人工服务 → 告知预约${d.n} → 提供个人信息 → 获取预约号` },
+  ];
+
+  let html = `<div class="slip-handle"></div>
+    <div class="slip-header"><h2>📋 ${h.name}</h2><div style="font-size:11px;opacity:0.8;margin-top:4px;">${d.n} · 挂号渠道引导</div></div>
+    <div class="slip-body">`;
+
+  routes.forEach((r, i) => {
+    html += `<div style="padding:12px 0;border-bottom:1px solid #f3f4f6;">
+      <div style="font-size:14px;font-weight:700;display:flex;align-items:center;gap:8px;"><span>${r.icon}</span> ${i+1}. ${r.name}</div>
+      <div style="font-size:12px;color:#6b7280;margin-top:4px;line-height:1.6;">${r.desc}</div>
+    </div>`;
+  });
+
+  html += `<div style="margin-top:14px;padding:12px;background:#f0f7ff;border-radius:10px;font-size:12px;color:#1a7ad9;">
+    💡 挂号提示<br>
+    · 专家号建议提前3-7天预约<br>
+    · ${d.dr[0]?.split('(')[0]||'科室医生'} 为首诊推荐<br>
+    · 首次就诊需携带身份证原件建档<br>
+    · 号源通常在每日上午8:00更新
+  </div></div>
+  <div class="slip-actions"><button class="btn-outline" onclick="closeSlip()">关闭</button><button class="btn-primary" onclick="quickDial('${h.tel.replace(/-/g,'')}')">📞 一键拨号</button></div>`;
+
+  document.getElementById('slipCard').innerHTML = html;
+  document.getElementById('slipModal').style.display='flex';
+}
+
+function quickDial(tel) {
+  window.open('tel:'+tel, '_self');
+}
+
+// ==================== Core Flow ====================
+async function sendMsg(text) {
+  if(isProcessing)return;
+  stopAllSpeech();
+  const input=document.getElementById('userInput');
+  const btn=document.getElementById('btnSend');
+  const msg=text||input.value.trim();
+  if(!msg)return;
+  input.value='';isProcessing=true;btn.disabled=true;
+
+  addMsg('user',msg);
+  collectedSymptoms.push(msg);
+  questionCount++;
+  updateQuestionProgress();
+
+  const rule=triageByRules(msg);
+  const isEmerg=rule&&rule.urg==='red';
+  const shouldShow=questionCount>=MIN_QUESTIONS||isEmerg;
+
+  if(isApiReady()){
+    if(!shouldShow){
+      conversation.push({role:'user',content:msg});
+      try{
+        const remaining=MIN_QUESTIONS-questionCount;
+        const sysPrompt=`你是医院分诊医生。你需要再问${remaining}个问题。请严格按以下格式回复：
+第一行：简短追问（15字以内）
+第二行：[选项1][选项2][选项3][选项4]
+示例：
+请问疼痛是哪种类型？
+[跳着痛][胀痛][重物压迫感][说不清楚]
+每个选项不超过10个字，方括号必须保留。只提问，不给建议，不要输出JSON或代码块。`;
+        const reply=await callAI([{role:'system',content:sysPrompt},...conversation]);
+        const cleaned = stripJSON(reply);
+        const parsed = parseChoices(cleaned);
+        // If AI didn't give brackets, show text + keep manual input available
+        addMsg('doctor', parsed.text, true, parsed.choices, (choice) => {
+          document.getElementById('userInput').value = choice;
+          sendMsg();
+        });
+        conversation.push({role:'assistant',content:reply});
+      }catch(e){
+        const fu = generateFollowUp(msg,questionCount);
+        addMsg('doctor','让我继续了解：\n\n'+fu.q, false, fu.choices, (choice) => {
+          document.getElementById('userInput').value = choice;
+          sendMsg();
+        });
+      }
+    }else{
+      conversation.push({role:'user',content:msg});
+      conversation.push({role:'system',content:'请用自然语言给出分诊结论和建议，不要输出JSON或代码块。格式：简要总结病情→推荐科室→就医建议。'});
+      try{
+        const reply=await callAI(conversation);
+        const cleaned = stripJSON(reply);
+        const parsed = parseChoices(cleaned);
+        lastAIConclusion = parsed.text;
+        addMsg('doctor', parsed.text, true, parsed.choices.length > 0 ? parsed.choices : null, parsed.choices.length > 0 ? (choice) => {
+          document.getElementById('userInput').value = choice;
+          sendMsg();
+        } : null);
+        renderRecPanel(msg);
+        const results=rankRecommendations(msg);
+        if(results.length>0)setTimeout(()=>showSlip(results[0].hospital.id,results[0].department.n,msg,lastAIConclusion),400);
+      }catch(e){addDoctorMsgFromRule(rule,msg);renderRecPanel(msg);}
+      consultCount++;localStorage.setItem('consult_count',consultCount);
+      resetConsultation();
+    }
+  }else{
+    if(!shouldShow){
+      const fu=generateFollowUp(msg,questionCount);
+      const hint=rule?`我初步注意到「${msg.slice(0,10)}」，让我再了解：\n\n${fu.q}`:`为了更好地帮您分诊：\n\n${fu.q}`;
+      addMsg('doctor',hint, false, fu.choices, (choice) => {
+        document.getElementById('userInput').value = choice;
+        sendMsg();
+      });
+    }else{
+      if(isEmerg)addMsg('doctor',`🔴 根据${questionCount}轮问诊，这是紧急情况！请立即就医。`);
+      else addMsg('doctor',`已完成${questionCount}轮问诊。为您匹配以下推荐：`);
+      addMsg('doctor','下方已按相似度和置信度排序。点击卡片查看详情。',true);
+      renderRecPanel(msg);
+      const results=rankRecommendations(msg);
+      if(results.length>0)setTimeout(()=>showSlip(results[0].hospital.id,results[0].department.n,msg,''),500);
+      consultCount++;localStorage.setItem('consult_count',consultCount);
+      resetConsultation();
+    }
+  }
+
+  isProcessing=false;btn.disabled=false;input.focus();
+}
+
+function addDoctorMsgFromRule(rule,msg){
+  if(rule)addMsg('doctor',(rule.urg==='red'?'🔴 紧急情况——':'根据问诊信息，为您匹配：'));
+  else addMsg('doctor','根据您的描述，已给出分析。');
+}
+
+async function callAI(messages){
+  const cfg=getApiConfig();
+  const res=await fetch(cfg.url,{method:'POST',headers:{'Content-Type':'application/json','Authorization':`Bearer ${cfg.key}`},body:JSON.stringify({model:cfg.model||'deepseek-v4-flash',messages,temperature:0.5,max_tokens:500})});
+  if(!res.ok)throw new Error(`API ${res.status}`);
+  const d=await res.json();
+  return d.choices[0].message.content;
+}
+
+function sendChip(el){sendMsg(el.textContent);}
+
+// ==================== Voice (FunASR + Browser Fallback) ====================
+let mediaRecorder = null, audioChunks = [];
+let synth = window.speechSynthesis;
+let isRecording = false, holdTimer = null, inputMode = 'text'; // 'text' or 'voice'
+
+function toggleInputMode() {
+  inputMode = inputMode === 'text' ? 'voice' : 'text';
+  const btn = document.getElementById('btnModeSwitch');
+  const input = document.getElementById('userInput');
+  const send = document.getElementById('btnSend');
+  const hold = document.getElementById('btnMicHold');
+  if (inputMode === 'voice') {
+    btn.textContent = '⌨️'; btn.classList.add('voice-active');
+    input.style.display = 'none'; send.style.display = 'none';
+    hold.classList.add('show');
+  } else {
+    btn.textContent = '🎤'; btn.classList.remove('voice-active');
+    input.style.display = ''; send.style.display = '';
+    hold.classList.remove('show');
+  }
+}
+
+function initHoldToTalk() {
+  const btn = document.getElementById('btnMicHold');
+  if (!btn) return;
+  btn.addEventListener('pointerdown', function(e) {
+    e.preventDefault();
+    holdTimer = setTimeout(() => startRecording(), 150);
+  });
+  btn.addEventListener('pointerup', function(e) {
+    e.preventDefault();
+    clearTimeout(holdTimer);
+    if (isRecording) stopRecording(true);
+  });
+  btn.addEventListener('pointerleave', function(e) {
+    clearTimeout(holdTimer);
+    if (isRecording) stopRecording(true);
+  });
+  btn.addEventListener('pointercancel', function(e) {
+    clearTimeout(holdTimer);
+    if (isRecording) stopRecording(false);
+  });
+  let touchStartY = 0;
+  btn.addEventListener('touchstart', function(e) { touchStartY = e.touches[0].clientY; }, {passive: true});
+  btn.addEventListener('touchmove', function(e) {
+    const dy = touchStartY - e.touches[0].clientY;
+    if (dy > 50 && isRecording) {
+      document.getElementById('recHint').textContent = '松开取消发送';
+      document.getElementById('recordingOverlay').style.background = 'rgba(180,0,0,0.75)';
+    } else if (isRecording) {
+      document.getElementById('recHint').textContent = '正在聆听...';
+      document.getElementById('recordingOverlay').style.background = 'rgba(0,0,0,0.7)';
+    }
+  }, {passive: true});
+  btn.addEventListener('touchend', function(e) {
+    const dy = touchStartY - (e.changedTouches[0]?.clientY || touchStartY);
+    if (dy > 60 && isRecording) { stopRecording(false); document.getElementById('userInput').value = ''; }
+  });
+}
+
+async function funasrRecognize(audioBlob) {
+  const apiKey = localStorage.getItem('dashscope_key')||'';
+  if (!apiKey) throw new Error('No API key');
+  const formData = new FormData();
+  formData.append('model', 'paraformer-v2');
+  formData.append('file', audioBlob, 'recording.wav');
+  formData.append('language_hints', 'zh');
+  const res = await fetch('https://dashscope.aliyuncs.com/compatible-mode/v1/audio/transcriptions', {
+    method: 'POST', headers: { 'Authorization': `Bearer ${apiKey}` }, body: formData
+  });
+  if (!res.ok) throw new Error(`ASR ${res.status}`);
+  const data = await res.json();
+  return data.text || '';
+}
+
+function startRecording() {
+  if (isRecording) return;
+  const btn = document.getElementById('btnMicHold');
+  const useBrowser = !(localStorage.getItem('dashscope_key')||'');
+  if (useBrowser) {
+    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SR) { alert('请配置DashScope API Key使用语音，或用Chrome浏览器。'); return; }
+    const r = new SR(); r.lang = 'zh-CN'; r.interimResults = true; r.continuous = true; r.maxAlternatives = 1;
+    let ft = '';
+    r.onresult = function(e) { let im = ''; for (let i = e.resultIndex; i < e.results.length; i++) { if (e.results[i].isFinal) ft += e.results[i][0].transcript; else im += e.results[i][0].transcript; } document.getElementById('recHint').textContent = ft + im || '正在聆听...'; };
+    r.onerror = function(e) { if (e.error === 'not-allowed') alert('请允许麦克风权限'); stopRecording(false); };
+    r.onend = function() { if (isRecording) r.start(); };
+    r.start(); isRecording = true;
+    btn.classList.add('recording');
+    document.getElementById('recordingOverlay').classList.add('show');
+    document.getElementById('recHint').textContent = '正在聆听...';
+    window._br = r;
+  } else {
+    navigator.mediaDevices.getUserMedia({audio:true}).then(s => {
+      mediaRecorder = new MediaRecorder(s, {mimeType:'audio/webm;codecs=opus'}); audioChunks = [];
+      mediaRecorder.ondataavailable = e => { if(e.data.size>0) audioChunks.push(e.data); };
+      mediaRecorder.onstop = async () => {
+        s.getTracks().forEach(t=>t.stop());
+        const blob = new Blob(audioChunks, {type:'audio/webm'});
+        const h = document.getElementById('recHint'); h.textContent = '识别中...';
+        try {
+          const t = await funasrRecognize(blob);
+          if (t) { document.getElementById('userInput').value = t; setTimeout(()=>sendMsg(),200); }
+          else h.textContent = '未识别到语音';
+        } catch(e) { h.textContent = '识别失败'; }
+        finally {
+          document.getElementById('recordingOverlay').classList.remove('show');
+          btn.classList.remove('recording'); h.textContent = '请说出您的症状'; isRecording = false;
+        }
+      };
+      mediaRecorder.start(); isRecording = true;
+      btn.classList.add('recording');
+      document.getElementById('recordingOverlay').classList.add('show');
+      document.getElementById('recHint').textContent = '正在聆听...';
+    }).catch(e => { alert('无法访问麦克风'); });
+  }
+}
+
+function stopRecording(shouldSend) {
+  if (!isRecording) return;
+  isRecording = false;
+  const btn = document.getElementById('btnMicHold');
+  btn.classList.remove('recording');
+  if (mediaRecorder && mediaRecorder.state === 'recording') { mediaRecorder.stop(); return; }
+  if (window._br) { window._br.onend = null; window._br.stop(); window._br = null; }
+  document.getElementById('recordingOverlay').classList.remove('show');
+  document.getElementById('recordingOverlay').style.background = 'rgba(0,0,0,0.7)';
+  if (shouldSend) {
+    const t = document.getElementById('recHint').textContent.trim();
+    if (t && t !== '正在聆听...' && t !== '松开取消发送') {
+      document.getElementById('userInput').value = t; setTimeout(()=>sendMsg(),200);
+    }
+  }
+  document.getElementById('recHint').textContent = '请说出您的症状';
+}
+
+// TTS: DashScope CosyVoice (自然语音) + Browser fallback
+async function speakText(text) {
+  const div = document.createElement('div');
+  div.innerHTML = text;
+  let cleanText = (div.textContent || div.innerText || '')
+    .replace(/[🔴🟠🟡🟢🔵🏥📍📞💡📋💳🔬💉🩹🤖🩺🧠🫀🫁🦴👶🤰🦷👁️👂💧🧬🚑🌿💊🏃🔍⭐☎️📱⌨️🎤🎙️➤★☆⚡]/g, '')
+    .replace(/[●○$]/g, '').replace(/Ⅰ级|Ⅱ级|Ⅲ级|Ⅳa|Ⅳb|≤|→|—/g, '').trim();
+  if (!cleanText || cleanText.length < 2) return;
+  if (cleanText.length > 200) cleanText = cleanText.substring(0, 200);
+
+  const dashKey = localStorage.getItem('dashscope_key')||'';
+  if (dashKey) {
+    try {
+      const audioUrl = await dashscopeTTS(cleanText, dashKey);
+      if (audioUrl) { stopAllSpeech(); currentAudio = new Audio(audioUrl); currentAudio.play().catch(()=>{}); return; }
+    } catch(e) { console.log('TTS fallback to browser:', e.message); }
+  }
+  browserTTS(cleanText);
+}
+
+async function dashscopeTTS(text, apiKey) {
+  const res = await fetch('https://dashscope.aliyuncs.com/compatible-mode/v1/audio/speech', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` },
+    body: JSON.stringify({ model: 'cosyvoice-v1', input: text, voice: 'longxiaoxia', response_format: 'mp3', speed: 1.0 })
+  });
+  if (!res.ok) throw new Error(`TTS ${res.status}`);
+  const blob = await res.blob();
+  return URL.createObjectURL(blob);
+}
+
+function browserTTS(cleanText) {
+  if (!synth) return;
+  synth.cancel();
+  let voices = synth.getVoices();
+  if (voices.length === 0) voices = synth.getVoices();
+  const preferred = ['Google 普通话','Google 中文','Microsoft Xiaoxiao','Microsoft Yunyang','Tingting','Microsoft Yaoyao'];
+  let best = null;
+  for (const p of preferred) { best = voices.find(v => v.name.includes(p) && v.lang.startsWith('zh')); if (best) break; }
+  if (!best) best = voices.find(v => v.lang.startsWith('zh'));
+  const sentences = cleanText.split(/[。！？\n]+/).filter(s => s.trim());
+  if (sentences.length > 4) {
+    const u = new SpeechSynthesisUtterance(sentences.slice(0,3).join('。')+'。');
+    u.lang='zh-CN'; u.rate=1.0; u.pitch=1.0; u.volume=1.0; if(best)u.voice=best;
+    synth.speak(u);
+  } else {
+    let idx = 0;
+    function next() {
+      if (idx >= sentences.length) return;
+      const s = sentences[idx].trim(); idx++;
+      if (!s) { next(); return; }
+      const u = new SpeechSynthesisUtterance(s);
+      u.lang='zh-CN'; u.rate=0.95; u.pitch=1.0; u.volume=1.0; if(best)u.voice=best;
+      u.onend = () => setTimeout(next, 200);
+      synth.speak(u);
+    }
+    next();
+  }
+}
+
+// Override addMsg to auto-speak doctor responses
+const _originalAddMsg = addMsg;
+addMsg = function(role, text, isHtml, choices, choiceCb) {
+  const result = _originalAddMsg(role, text, isHtml, choices, choiceCb);
+  if (role === 'doctor') {
+    const content = isHtml ? text : (typeof text === 'string' ? text : '');
+    if (content && content.length > 2 && content.length < 800) {
+      setTimeout(() => speakText(content), 300);
+    }
+  }
+  return result;
+};
+if (synth) { synth.getVoices(); synth.onvoiceschanged = () => synth.getVoices(); }
+
+// ==================== Clone ====================
+function openClone() { document.getElementById('cloneOverlay').classList.add('show'); loadCloneConfig(); }
+function closeClone() { document.getElementById('cloneOverlay').classList.remove('show'); }
+function loadCloneConfig() {
+  document.getElementById('cloneNameInput').value = localStorage.getItem('clone_name')||'';
+  document.getElementById('cloneTitleInput').value = localStorage.getItem('clone_title')||'';
+  const photo = localStorage.getItem('clone_photo');
+  const preview = document.getElementById('cloneAvatarPreview');
+  if (photo) { preview.innerHTML = `<img src="${photo}" alt="doctor">`; preview.classList.add('has-photo'); }
+  else { preview.innerHTML = '&#129657;'; preview.classList.remove('has-photo'); }
+}
+
+function handlePhotoUpload(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(ev) {
+    const base64 = ev.target.result;
+    localStorage.setItem('clone_photo', base64);
+    const preview = document.getElementById('cloneAvatarPreview');
+    preview.innerHTML = `<img src="${base64}" alt="doctor">`;
+    preview.classList.add('has-photo');
+    applyClone();
+  };
+  reader.readAsDataURL(file);
+}
+
+function handleVoiceUpload(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const st = document.getElementById('voiceStatus');
+  st.className = 'clone-status show info'; st.textContent = '正在处理声音样本...';
+
+  const reader = new FileReader();
+  reader.onload = function(ev) {
+    localStorage.setItem('clone_voice', ev.target.result);
+    st.className = 'clone-status show success'; st.textContent = '声音样本已保存，将用于数字分身语音。';
+    setTimeout(() => { st.className = 'clone-status'; }, 3000);
+  };
+  reader.readAsDataURL(file);
+}
+
+let voiceRecorder = null, voiceChunks = [];
+async function recordVoiceSample() {
+  const st = document.getElementById('voiceStatus');
+  const btn = document.getElementById('btnRecordVoice');
+  if (voiceRecorder && voiceRecorder.state === 'recording') {
+    voiceRecorder.stop();
+    btn.textContent = '录制声音';
+    st.className = 'clone-status show info'; st.textContent = '正在保存...';
+    return;
+  }
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    voiceRecorder = new MediaRecorder(stream, { mimeType: 'audio/webm;codecs=opus' });
+    voiceChunks = [];
+    voiceRecorder.ondataavailable = e => { if (e.data.size > 0) voiceChunks.push(e.data); };
+    voiceRecorder.onstop = () => {
+      stream.getTracks().forEach(t => t.stop());
+      const blob = new Blob(voiceChunks, { type: 'audio/webm' });
+      const reader = new FileReader();
+      reader.onload = ev => {
+        localStorage.setItem('clone_voice', ev.target.result);
+        st.className = 'clone-status show success'; st.textContent = '声音录制完成！';
+        setTimeout(() => { st.className = 'clone-status'; }, 3000);
+      };
+      reader.readAsDataURL(blob);
+    };
+    voiceRecorder.start();
+    btn.textContent = '停止录制';
+    st.className = 'clone-status show info'; st.textContent = '正在录制...请说10-30秒介绍';
+  } catch(e) {
+    st.className = 'clone-status show error'; st.textContent = '无法访问麦克风';
+  }
+}
+
+function saveCloneConfig() {
+  localStorage.setItem('clone_name', document.getElementById('cloneNameInput').value.trim());
+  localStorage.setItem('clone_title', document.getElementById('cloneTitleInput').value.trim());
+}
+
+function applyClone() {
+  saveCloneConfig();
+  const name = localStorage.getItem('clone_name')||'';
+  const photo = localStorage.getItem('clone_photo');
+  const title = localStorage.getItem('clone_title')||'';
+  if (name) document.getElementById('aiName').textContent = 'Dr.' + name;
+  if (title) document.getElementById('aiStatusText').textContent = title;
+  applyAvatarPhoto();
+  closeClone();
+  addSystemMsg(name ? `已切换为 Dr.${name} 的数字分身。` : '数字分身已更新。');
+}
+
+function applyAvatarPhoto() {
+  const photo = localStorage.getItem('clone_photo');
+  const avatar = document.getElementById('aiAvatarSmall');
+  if (photo && avatar) { avatar.innerHTML = `<img src="${photo}" style="width:36px;height:36px;border-radius:50%;object-fit:cover;">`; }
+}
+
+// Auto-apply clone on init
+function initClone() {
+  const photo = localStorage.getItem('clone_photo');
+  const name = localStorage.getItem('clone_name');
+  if (name) document.getElementById('aiName').textContent = 'Dr.' + name;
+  if (photo) applyAvatarPhoto();
+}
+initClone();
+function updateLiveTime() {
+  const now = new Date();
+  const h = now.getHours().toString().padStart(2,'0');
+  const m = now.getMinutes().toString().padStart(2,'0');
+  const timeStr = h + ':' + m;
+  document.querySelectorAll('.live-time').forEach(el => el.textContent = timeStr);
+}
+updateLiveTime();
+setInterval(updateLiveTime, 60000);
+initHoldToTalk();
+document.getElementById('apiKeyInput').value=getApiConfig().key;
+document.getElementById('apiUrlInput').value=getApiConfig().url;
+applyModeVisuals();
+</script>
+</body>
+</html>

@@ -1,0 +1,125 @@
+<!-- 首页 - 钓鱼指数 + 动态流 -->
+<view class="page">
+
+  <!-- 钓鱼指数卡片 -->
+  <view class="index-card">
+    <view class="index-header flex-between">
+      <view class="flex">
+        <text class="index-icon">🎣</text>
+        <view>
+          <text class="index-title">今日钓鱼指数</text>
+          <text class="text-sm text-muted">数据更新时间 刚刚</text>
+        </view>
+      </view>
+      <view class="index-score {{indexClass}}">
+        <text class="text-xl text-bold">{{fishingIndex.score}}</text>
+        <text class="text-sm">分</text>
+      </view>
+    </view>
+
+    <view class="index-summary">{{fishingIndex.summary}}</view>
+
+    <!-- 关键气象 -->
+    <view class="weather-grid">
+      <view class="weather-item">
+        <text class="weather-icon">🌡</text>
+        <text class="weather-value">{{weather.temp}}°C</text>
+        <text class="weather-label">温度</text>
+      </view>
+      <view class="weather-item">
+        <text class="weather-icon">💧</text>
+        <text class="weather-value">{{weather.humidity}}%</text>
+        <text class="weather-label">湿度</text>
+      </view>
+      <view class="weather-item">
+        <text class="weather-icon">🌬</text>
+        <text class="weather-value">{{weather.wind_speed}}km/h</text>
+        <text class="weather-label">{{weather.wind_direction}}</text>
+      </view>
+      <view class="weather-item">
+        <text class="weather-icon">🦟</text>
+        <text class="weather-value">Lv.{{insect.level}}</text>
+        <text class="weather-label">蚊虫</text>
+      </view>
+    </view>
+
+    <!-- 蚊虫+装备快捷入口 -->
+    <view class="index-actions flex-between mt-16">
+      <text class="text-sm text-muted">防蚊建议: {{insect.advice}}</text>
+      <navigator url="/pages/index/gear?data={{gearData}}" class="text-sm" style="color:#07C160">装备清单 ></navigator>
+    </view>
+  </view>
+
+  <!-- 快捷入口 -->
+  <view class="quick-actions card">
+    <view class="flex-between">
+      <view class="quick-item" bindtap="goToSpots">
+        <text class="quick-icon">📍</text>
+        <text class="quick-label">附近钓点</text>
+      </view>
+      <view class="quick-item" bindtap="goToYuediao">
+        <text class="quick-icon">🤝</text>
+        <text class="quick-label">找人约钓</text>
+      </view>
+      <view class="quick-item" bindtap="goToWeather">
+        <text class="quick-icon">📊</text>
+        <text class="quick-label">详细天气</text>
+      </view>
+      <view class="quick-item" bindtap="goToCompanion">
+        <text class="quick-icon">👤</text>
+        <text class="quick-label">找陪钓</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 社区动态流 -->
+  <view class="feed-section">
+    <view class="section-header flex-between p-24">
+      <text class="text-lg text-bold">钓友动态</text>
+      <navigator url="/pages/community/community" class="text-sm text-muted">更多 ></navigator>
+    </view>
+
+    <block wx:for="{{feedList}}" wx:key="id">
+      <view class="card feed-item">
+        <view class="flex">
+          <image class="avatar" src="{{item.user.avatar || '/static/default-avatar.png'}}" mode="aspectFill" />
+          <view class="flex-1 ml-16">
+            <view class="flex-between">
+              <text class="text-bold">{{item.user.nickname}}</text>
+              <text class="text-sm text-muted">{{item.created_at}}</text>
+            </view>
+            <view class="tag mt-8" wx:if="{{item.type}}">
+              <text class="tag-green">{{item.type}}</text>
+            </view>
+            <text class="feed-content mt-8">{{item.content}}</text>
+            <!-- 鱼获信息 -->
+            <view class="fish-info mt-8" wx:if="{{item.fish_info.species}}">
+              <text class="text-sm">🐟 {{item.fish_info.species}} {{item.fish_info.weight}}斤</text>
+            </view>
+            <!-- 图片 -->
+            <view class="feed-images mt-8" wx:if="{{item.images.length > 0}}">
+              <image wx:for="{{item.images}}" wx:key="*this" wx:for-item="img"
+                src="{{img}}" mode="aspectFill" class="feed-img" />
+            </view>
+            <!-- 钓点标签 -->
+            <view class="mt-8" wx:if="{{item.spot}}">
+              <text class="text-sm text-muted">📍 {{item.spot.name}}</text>
+            </view>
+            <!-- 互动 -->
+            <view class="flex-between mt-16">
+              <view class="flex">
+                <text class="text-sm text-muted">❤ {{item.likes_count}}</text>
+                <text class="text-sm text-muted" style="margin-left:24rpx">💬 {{item.comments_count}}</text>
+              </view>
+            </view>
+          </view>
+        </view>
+      </view>
+    </block>
+
+    <view wx:if="{{feedList.length === 0}}" class="text-center p-24 text-muted">
+      <text>暂无动态，去社区看看吧</text>
+    </view>
+  </view>
+
+</view>

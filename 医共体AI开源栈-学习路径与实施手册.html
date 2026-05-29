@@ -1,0 +1,1041 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>医共体AI开源栈 — 虚拟机部署学习路径与实施手册</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700;900&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Noto Sans SC', 'Microsoft YaHei', sans-serif;
+    background: #1a1f2e;
+    display: flex;
+    justify-content: center;
+    padding: 24px;
+    color: #222;
+  }
+
+  .page {
+    width: 1260px;
+    background: #fff;
+    padding: 32px 38px;
+    box-shadow: 0 8px 48px rgba(0,0,0,.4);
+    line-height: 1.8;
+    font-size: 13px;
+  }
+
+  /* ── 标题区 ── */
+  .title-block {
+    border-bottom: 3px solid #1a3a5c;
+    padding-bottom: 16px;
+    margin-bottom: 24px;
+  }
+  .title-block h1 {
+    font-size: 28px; font-weight: 900; color: #1a3a5c;
+  }
+  .title-block .sub {
+    font-size: 14px; color: #666; margin-top: 4px;
+  }
+
+  /* ── 路线图概览 ── */
+  .roadmap-bar {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 28px;
+  }
+  .roadmap-step {
+    flex: 1;
+    text-align: center;
+    padding: 14px 10px;
+    border-radius: 8px;
+    background: #f0f4f8;
+    border-top: 3px solid #90a4ae;
+    font-size: 11px;
+    line-height: 1.6;
+  }
+  .roadmap-step.active { border-top-color: #1a73e8; background: #e8f0fe; }
+  .roadmap-step .step-num {
+    font-size: 22px; font-weight: 900; color: #1a73e8;
+  }
+  .roadmap-step h3 { font-size: 13px; margin: 4px 0; }
+
+  /* ── 章节样式 ── */
+  .chapter {
+    margin-bottom: 28px;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    overflow: hidden;
+  }
+  .chapter-hdr {
+    background: #1a3a5c;
+    color: #fff;
+    padding: 12px 20px;
+    font-size: 15px;
+    font-weight: 700;
+  }
+  .chapter-body {
+    padding: 18px 22px;
+  }
+
+  h4 {
+    font-size: 13px;
+    color: #1a3a5c;
+    margin: 16px 0 8px;
+    padding-left: 10px;
+    border-left: 3px solid #1a73e8;
+  }
+  h4:first-child { margin-top: 0; }
+
+  /* ── 代码块 ── */
+  pre {
+    background: #1e293b;
+    color: #e2e8f0;
+    padding: 14px 18px;
+    border-radius: 6px;
+    font-size: 11px;
+    overflow-x: auto;
+    line-height: 1.7;
+    margin: 10px 0;
+  }
+  code {
+    font-family: 'Cascadia Code', 'JetBrains Mono', 'Consolas', monospace;
+    font-size: 11px;
+  }
+  :not(pre) > code {
+    background: #f0f0f0;
+    padding: 2px 6px;
+    border-radius: 3px;
+    color: #c62828;
+  }
+
+  /* ── 表格 ── */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 11px;
+    margin: 12px 0;
+  }
+  thead th {
+    background: #1a3a5c; color: #fff;
+    padding: 7px 10px; font-weight: 500; font-size: 11px;
+  }
+  tbody td {
+    padding: 6px 10px; border-bottom: 1px solid #eee;
+    vertical-align: top; line-height: 1.6;
+  }
+  tbody tr:nth-child(even) { background: #f8f9fb; }
+
+  /* ── 提示框 ── */
+  .note {
+    background: #e8f0fe; border-left: 4px solid #1a73e8;
+    padding: 10px 14px; border-radius: 4px;
+    font-size: 11px; margin: 12px 0; line-height: 1.6;
+  }
+  .warn {
+    background: #fff3e0; border-left: 4px solid #ef6c00;
+    padding: 10px 14px; border-radius: 4px;
+    font-size: 11px; margin: 12px 0; line-height: 1.6;
+  }
+  .tip {
+    background: #e8f5e9; border-left: 4px solid #2e7d32;
+    padding: 10px 14px; border-radius: 4px;
+    font-size: 11px; margin: 12px 0; line-height: 1.6;
+  }
+
+  /* ── 步骤列表 ── */
+  .step-list {
+    counter-reset: step;
+    list-style: none;
+    padding: 0;
+  }
+  .step-list li {
+    counter-increment: step;
+    position: relative;
+    padding: 10px 14px 10px 48px;
+    margin-bottom: 8px;
+    background: #f8f9fb;
+    border-radius: 6px;
+    font-size: 12px;
+    line-height: 1.7;
+  }
+  .step-list li::before {
+    content: counter(step);
+    position: absolute;
+    left: 10px; top: 10px;
+    width: 26px; height: 26px;
+    background: #1a73e8; color: #fff;
+    border-radius: 50%;
+    text-align: center;
+    line-height: 26px;
+    font-weight: 700;
+    font-size: 12px;
+  }
+
+  /* ── 架构图简易版 ── */
+  .arch-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    padding: 14px;
+    background: #fafafa;
+    font-size: 11px;
+  }
+  .arch-layer {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 8px 12px;
+    border-radius: 4px;
+  }
+  .arch-layer .label {
+    width: 120px;
+    text-align: right;
+    font-weight: 700;
+    color: #546e7a;
+    flex-shrink: 0;
+  }
+  .arch-layer .content {
+    display: flex; gap: 8px; flex-wrap: wrap;
+  }
+  .arch-layer .pkg {
+    background: #fff; border: 1px solid #dde;
+    padding: 3px 10px; border-radius: 4px;
+    font-size: 10px;
+    white-space: nowrap;
+  }
+  .arch-layer.app { background: #e8f0fe; }
+  .arch-layer.ai   { background: #f3e5f5; }
+  .arch-layer.infra{ background: #e8f5e9; }
+
+  @media print {
+    body { background: #fff; padding: 0; }
+    .page { box-shadow: none; width: 100%; }
+    .chapter { break-inside: avoid; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <!-- ═══ 标题 ═══ -->
+  <div class="title-block">
+    <h1>医共体AI开源栈：虚拟机部署学习路径与实施手册</h1>
+    <div class="sub">从零开始 —— Windows本机 → Hyper-V虚拟机 → Docker → Dify → 模型部署 → 20项AI能力逐步搭建</div>
+  </div>
+
+  <!-- ═══ 学习路线概览 ═══ -->
+  <div class="roadmap-bar">
+    <div class="roadmap-step active">
+      <div class="step-num">W1</div>
+      <h3>环境准备</h3>
+      <p>Hyper-V + Ubuntu + Docker</p>
+    </div>
+    <div class="roadmap-step active">
+      <div class="step-num">W2</div>
+      <h3>基础设施</h3>
+      <p>Dify + Xinference + 模型部署</p>
+    </div>
+    <div class="roadmap-step active">
+      <div class="step-num">W3</div>
+      <h3>知识库</h3>
+      <p>医学知识库 + RAG调优</p>
+    </div>
+    <div class="roadmap-step active">
+      <div class="step-num">W4-6</div>
+      <h3>Agent开发</h3>
+      <p>逐个搭建AI应用</p>
+    </div>
+    <div class="roadmap-step active">
+      <div class="step-num">W7+</div>
+      <h3>集成联调</h3>
+      <p>系统对接 + 端到端测试</p>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════ -->
+  <!-- 第0章：总览架构                -->
+  <!-- ═══════════════════════════════ -->
+  <div class="chapter">
+    <div class="chapter-hdr">第0章 目标架构总览（学习完成后你拥有的东西）</div>
+    <div class="chapter-body">
+      <div class="arch-stack">
+        <div class="arch-layer app">
+          <span class="label">应用层</span>
+          <div class="content">
+            <span class="pkg">数字医生分身</span><span class="pkg">AI语音随访</span>
+            <span class="pkg">慢病管理Agent</span><span class="pkg">CDSS诊断助手</span>
+            <span class="pkg">处方审核助手</span><span class="pkg">分诊转诊</span>
+            <span class="pkg">妇幼保健</span><span class="pkg">心理健康筛查</span>
+            <span class="pkg">医生培训</span><span class="pkg">健教生成</span>
+          </div>
+        </div>
+        <div class="arch-layer ai">
+          <span class="label">Dify平台层</span>
+          <div class="content">
+            <span class="pkg">知识库RAG</span><span class="pkg">Workflow编排</span>
+            <span class="pkg">Agent管理</span><span class="pkg">对话应用</span>
+            <span class="pkg">API网关</span><span class="pkg">日志审计</span>
+          </div>
+        </div>
+        <div class="arch-layer infra">
+          <span class="label">AI引擎层</span>
+          <div class="content">
+            <span class="pkg">Xinference (Qwen3/DeepSeek)</span><span class="pkg">Milvus 向量库</span>
+            <span class="pkg">FunASR 语音识别</span><span class="pkg">CosyVoice TTS</span>
+            <span class="pkg">Drools 规则引擎</span>
+          </div>
+        </div>
+        <div class="arch-layer infra">
+          <span class="label">基础设施层</span>
+          <div class="content">
+            <span class="pkg">Ubuntu 24.04 VM</span><span class="pkg">Docker Compose</span>
+            <span class="pkg">PostgreSQL</span><span class="pkg">Redis</span>
+            <span class="pkg">Nginx</span><span class="pkg">MinIO</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="note" style="margin-top:14px;">
+        <b>硬件要求：</b>建议给虚拟机分配 8核CPU + 32GB内存 + 200GB磁盘（最低：6核 + 16GB + 100GB）。你的Windows 11 Pro自带Hyper-V，无需额外安装虚拟化软件。
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════ -->
+  <!-- 第1章：W1 环境准备             -->
+  <!-- ═══════════════════════════════ -->
+  <div class="chapter">
+    <div class="chapter-hdr">第1章 W1：环境准备 — Hyper-V + Ubuntu + Docker</div>
+    <div class="chapter-body">
+
+      <h4>1.1 启用Hyper-V（Windows 11 Pro已内置）</h4>
+      <pre><code># 以管理员身份打开PowerShell，执行：
+
+Enable-WindowsOptionalFeature -Online -FeatureName Microsoft-Hyper-V-All
+
+# 重启电脑生效</code></pre>
+
+      <h4>1.2 下载Ubuntu Server 24.04 LTS</h4>
+      <pre><code># 官方下载地址（在宿主机浏览器打开）：
+https://releases.ubuntu.com/24.04/ubuntu-24.04.2-live-server-amd64.iso
+
+# 保存到 E:\iso\ 目录</code></pre>
+
+      <h4>1.3 创建Hyper-V虚拟机</h4>
+      <div class="step-list">
+        <li>打开 Hyper-V 管理器（Win键搜索"Hyper-V"）</li>
+        <li>右侧点击「新建」→「虚拟机」</li>
+        <li><b>名称：</b>dify-lab | <b>代：</b>第2代 | <b>内存：</b>32768 MB（不要勾选动态内存）</li>
+        <li><b>网络：</b>选择 Default Switch（NAT模式，可访问外网）</li>
+        <li><b>虚拟硬盘：</b>新建，大小 200GB，路径 E:\vm\dify-lab\</li>
+        <li><b>安装选项：</b>从映像文件安装，选择刚下载的 Ubuntu ISO</li>
+        <li>完成后右键虚拟机 →「设置」→ 处理器 → 8个虚拟处理器</li>
+        <li>右键 →「连接」→「启动」，进入Ubuntu安装</li>
+      </div>
+
+      <h4>1.4 Ubuntu安装要点</h4>
+      <pre><code># 安装过程中关键选择：
+1. 语言: English
+2. 安装类型: Ubuntu Server (minimized)  ← 选最小化，节省资源
+3. 网络: 默认DHCP即可
+4. 磁盘: Use entire disk (默认)
+5. 用户: difyadmin / 你的密码
+6. 安装OpenSSH: YES (勾选)  ← 重要！后续通过SSH操作</code></pre>
+
+      <h4>1.5 配置SSH登录（宿主机→虚拟机）</h4>
+      <pre><code># 虚拟机装好后，查看IP：
+ip addr show eth0
+# 假设IP为 172.x.x.x
+
+# 在Windows宿主机打开 PowerShell/Terminal：
+ssh difyadmin@172.x.x.x
+
+# 配置免密sudo（可选）：
+echo "difyadmin ALL=(ALL) NOPASSWD:ALL" | sudo tee /etc/sudoers.d/difyadmin</code></pre>
+
+      <h4>1.6 安装Docker环境（一键脚本）</h4>
+      <pre><code># SSH进入虚拟机后，依次执行：
+
+# 1. 更新系统
+sudo apt update && sudo apt upgrade -y
+
+# 2. 安装Docker官方脚本
+curl -fsSL https://get.docker.com | sudo bash
+
+# 3. 添加当前用户到docker组（免sudo运行docker）
+sudo usermod -aG docker $USER
+newgrp docker
+
+# 4. 验证
+docker --version      # 应显示 27.x+
+docker compose version # 应显示 v2.x+
+
+# 5. 设置Docker开机自启
+sudo systemctl enable docker
+
+# 6. 配置国内镜像加速（可选但推荐）
+sudo mkdir -p /etc/docker
+sudo tee /etc/docker/daemon.json &lt;&lt;'EOF'
+{
+  "registry-mirrors": [
+    "https://docker.1ms.run",
+    "https://docker.xuanyuan.me"
+  ],
+  "log-driver": "json-file",
+  "log-opts": { "max-size": "100m", "max-file": "3" }
+}
+EOF
+sudo systemctl daemon-reload
+sudo systemctl restart docker</code></pre>
+
+      <div class="warn">
+        <b>提醒：</b>虚拟机重启后IP可能会变。建议在Hyper-V中给虚拟机设置静态MAC地址，或在路由器中做DHCP绑定。生产环境建议配置静态IP：
+        <code>sudo vim /etc/netplan/00-installer-config.yaml</code>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════ -->
+  <!-- 第2章：W2 基础设施             -->
+  <!-- ═══════════════════════════════ -->
+  <div class="chapter">
+    <div class="chapter-hdr">第2章 W2：基础设施 — Dify + Xinference + 模型部署</div>
+    <div class="chapter-body">
+
+      <h4>2.1 安装Dify（Docker Compose方式）</h4>
+      <pre><code># 1. 克隆Dify仓库
+cd ~
+git clone https://github.com/langgenius/dify.git
+cd dify/docker
+
+# 2. 复制环境变量模板
+cp .env.example .env
+
+# 3. 编辑关键配置
+vim .env
+# 修改以下项：
+#   SECRET_KEY=           ← 运行 openssl rand -hex 32 生成
+#   CONSOLE_WEB_URL=http://虚拟机IP
+#   API_WEB_URL=http://虚拟机IP/api
+#   LOG_LEVEL=INFO
+#   SANDBOX_API_KEY=dify-sandbox
+
+# 4. 启动Dify全家桶
+docker compose up -d
+
+# 5. 检查所有容器运行状态
+docker compose ps
+# 应看到: api / worker / web / db / redis / weaviate / nginx / sandbox 全部 Up
+
+# 6. 访问Dify控制台
+# 浏览器打开: http://虚拟机IP
+# 首次设置管理员邮箱和密码</code></pre>
+
+      <h4>2.2 为什么不用Ollama，改用Xinference？</h4>
+      <table>
+        <thead><tr><th>对比维度</th><th>Ollama</th><th>Xinference</th></tr></thead>
+        <tbody>
+          <tr><td>并发请求</td><td>单请求排队，后续请求阻塞等待</td><td><b>原生支持并发</b>，适合多用户场景</td></tr>
+          <tr><td>推理后端</td><td>仅llama.cpp（GGUF格式）</td><td><b>多后端</b>：llama.cpp / Transformers / vLLM / SGLang 按需切换</td></tr>
+          <tr><td>模型管理</td><td>纯命令行，无界面</td><td><b>Web UI可视化管理</b>，一键加载/卸载/监控</td></tr>
+          <tr><td>模型格式</td><td>仅GGUF量化格式</td><td>GGUF + PyTorch + GPTQ/AWQ + MLX 全格式支持</td></tr>
+          <tr><td>Embedding/Reranker</td><td>需单独拉取，管理分散</td><td><b>统一管理</b>，LLM + Embedding + Reranker一起管</td></tr>
+          <tr><td>分布式部署</td><td>单机</td><td>支持<b>多机分布式</b>，未来医共体多院区可扩展</td></tr>
+          <tr><td>API兼容</td><td>自有API格式</td><td><b>OpenAI兼容API</b>，Dify原生支持，无需适配</td></tr>
+          <tr><td>CPU性能</td><td>仅llama.cpp（一般）</td><td>llama.cpp后端（同等性能）+ 可按场景切换</td></tr>
+          <tr><td>社区/文档</td><td>英文为主</td><td><b>中文生态</b>，国内团队维护，文档完善</td></tr>
+          <tr><td>生产就绪</td><td>偏向个人开发者</td><td><b>企业级</b>，适合医共体正式部署</td></tr>
+        </tbody>
+      </table>
+
+      <div class="tip">
+        <b>结论：</b>Ollama适合个人开发者快速体验，但在医共体场景（需要并发、可视化管理、生产稳定性）下，Xinference全面胜出。且Xinference的OpenAI兼容API可以直接对接Dify，无需额外适配层。
+      </div>
+
+      <h4>2.3 安装Xinference（Docker方式）</h4>
+      <pre><code># Xinference（星环）— 开源、生产级模型推理平台
+# 支持 llama.cpp(CPU优化) / Transformers / vLLM 三种后端
+# 提供Web管理界面 + OpenAI兼容API
+
+# 1. Docker部署（推荐，与Dify同一Docker网络）
+docker run -d --name xinference \
+  --restart always \
+  -p 9997:9997 \
+  -v ~/xinference-data:/root/.xinference \
+  -v ~/xinference-cache:/root/.cache/huggingface \
+  -e XINFERENCE_HOME=/root/.xinference \
+  -e XINFERENCE_MODEL_SRC=modelscope \
+  xprobe/xinference:latest
+
+# 2. 检查日志，确认启动成功
+docker logs -f xinference
+# 看到 "Uvicorn running on http://0.0.0.0:9997" 即成功
+
+# 3. 访问Xinference Web管理界面
+# 浏览器打开: http://虚拟机IP:9997
+# 可以看到模型管理控制台
+
+# 补充：XINFERENCE_MODEL_SRC=modelscope 表示从ModelScope拉模型
+# （国内网络比HuggingFace快很多，无需科学上网）</code></pre>
+
+      <div class="note">
+        <b>备选方案：llama.cpp 纯命令行极简部署（如果觉得Xinference太重）</b>
+        <pre style="margin-top:6px;"><code># llama.cpp server 模式 — 最轻量CPU推理，无Web界面
+docker run -d --name llamacpp \
+  --restart always \
+  -p 8080:8080 \
+  -v ~/models:/models \
+  ghcr.io/ggerganov/llama.cpp:server \
+  -m /models/qwen3-8b.Q4_K_M.gguf \
+  --host 0.0.00 --port 8080
+
+# API调用: curl http://localhost:8080/v1/chat/completions ...
+# 然后在Dify中通过「OpenAI-API-compatible」供应商接入
+# 缺点：没有管理界面，模型需手动下载GGUF文件</code></pre>
+      </div>
+
+      <h4>2.4 通过Xinference Web界面加载模型</h4>
+      <div class="step-list">
+        <li>浏览器打开 Xinference Web：http://虚拟机IP:9997</li>
+        <li>左侧菜单 →「Launch Model」→ 选择模型</li>
+        <li><b>LLM模型：</b>搜索 qwen3-instruct → 选择 8B/14B（GGUF格式，CPU优化）</li>
+        <li>后端选择 <b>llama.cpp</b>（CPU推理最优，GGUF量化格式）</li>
+        <li>量化版本选择 Q4_K_M（4bit量化，性能/精度最佳平衡，14B约9GB）</li>
+        <li>点击「Launch」→ 等待模型下载和加载（首次约15-30分钟）</li>
+        <li>同样操作加载 DeepSeek-R1-Distill-Qwen-7B（推理增强模型）</li>
+        <li><b>Embedding模型：</b>搜索 bge-m3 → 后端选 Transformers → 加载</li>
+        <li><b>Reranker模型：</b>搜索 bge-reranker-v2-m3 → 加载</li>
+      </div>
+
+      <div class="tip">
+        <b>模型选择建议（CPU场景）：</b>虚拟机无GPU时，务必选GGUF量化格式 + llama.cpp后端。
+        Q4_K_M量化是精度和速度的最佳平衡点。Qwen3-14B-Q4_K_M 需要约9GB内存，32GB虚拟机完全够用。
+      </div>
+
+      <h4>2.5 在Dify中接入Xinference（OpenAI兼容API）</h4>
+      <div class="step-list">
+        <li>登录Dify控制台 → 右上角头像 →「设置」→「模型供应商」</li>
+        <li>找到「OpenAI-API-compatible」→ 点击「添加模型」</li>
+        <li><b>模型名称：</b>qwen3-instruct（与Xinference中名称一致）</li>
+        <li><b>API Endpoint：</b>http://xinference:9997/v1</li>
+        <li><b>API Key：</b>xinference（Xinference默认不需要真实Key，填任意值即可）</li>
+        <li>同样添加 DeepSeek-R1模型</li>
+        <li>在「模型供应商」→「Embedding模型」中同样用OpenAI-API-compatible接入bge-m3</li>
+      </div>
+
+      <h4>2.6 命令行方式加载模型（替代Web UI操作）</h4>
+      <pre><code># 也可以通过命令行加载模型，适合脚本化部署：
+
+# 加载LLM（Qwen3 14B，GGUF格式，llama.cpp后端）
+curl -X POST http://localhost:9997/v1/models \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model_engine": "llama.cpp",
+    "model_name": "qwen3-instruct",
+    "model_format": "ggufv2",
+    "model_size_in_billions": 14,
+    "quantization": "Q4_K_M",
+    "model_uri": "qwen/Qwen3-14B-Instruct-GGUF"
+  }'
+
+# 加载Embedding模型（全精度，Transformers后端）
+curl -X POST http://localhost:9997/v1/models \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model_engine": "Transformers",
+    "model_name": "bge-m3",
+    "model_uri": "BAAI/bge-m3"
+  }'
+
+# 查看已加载的模型列表
+curl http://localhost:9997/v1/models
+
+# 测试推理
+curl http://localhost:9997/v1/chat/completions \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "qwen3-instruct",
+    "messages": [{"role":"user","content":"高血压的诊断标准是什么？"}],
+    "temperature": 0.1
+  }'</code></pre>
+
+      <h4>2.7 配置向量数据库（Dify已内置Weaviate，可选升级到Milvus）</h4>
+      <pre><code># Dify默认使用Weaviate，初学够用。后期数据量大时可换Milvus：
+# 在 docker-compose.yml 中取消milvus相关注释，或单独部署：
+
+docker run -d --name milvus-standalone \
+  --restart always \
+  -p 19530:19530 \
+  -p 9091:9091 \
+  -v ~/milvus-data:/var/lib/milvus \
+  milvusdb/milvus:latest
+
+# 然后在Dify .env中修改：
+# VECTOR_STORE=milvus
+# MILVUS_HOST=milvus-standalone
+# MILVUS_PORT=19530</code></pre>
+
+      <div class="note">
+        <b>当前阶段总结：</b>你现在拥有 Dify平台 + Xinference(Qwen3/DeepSeek模型 + Embedding + Reranker) + Weaviate向量库 = 生产级AI Agent开发栈。Xinference提供Web可视化管理，模型一键加载/卸载，资源监控一目了然。
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════ -->
+  <!-- 第3章：W3 知识库               -->
+  <!-- ═══════════════════════════════ -->
+  <div class="chapter">
+    <div class="chapter-hdr">第3章 W3：医学知识库建设 — RAG调优实践</div>
+    <div class="chapter-body">
+
+      <h4>3.1 知识库数据来源（开源医学知识）</h4>
+      <table>
+        <thead>
+          <tr><th>知识源</th><th>内容</th><th>获取方式</th><th>优先级</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>临床诊疗指南</td>
+            <td>中华医学会各专科诊疗指南PDF</td>
+            <td>公开下载 / 医学数据库</td>
+            <td>P0 — 核心知识</td>
+          </tr>
+          <tr>
+            <td>药典/药品说明书</td>
+            <td>中国药典、NMPA批准药品说明书</td>
+            <td>公开API / PDF批量导出</td>
+            <td>P0 — 处方审核依赖</td>
+          </tr>
+          <tr>
+            <td>MedQA / CMB</td>
+            <td>中文医学问答数据集（执业医师考试题）</td>
+            <td>GitHub开源：CMB-Chinese Medical Benchmark</td>
+            <td>P1 — 验证模型能力</td>
+          </tr>
+          <tr>
+            <td>ICD-11编码库</td>
+            <td>WHO疾病分类编码（中英文）</td>
+            <td>WHO官网下载</td>
+            <td>P1 — 病案编码依赖</td>
+          </tr>
+          <tr>
+            <td>PubMed中文摘要</td>
+            <td>生物医学文献（可翻译后导入）</td>
+            <td>PubMed API + 翻译</td>
+            <td>P2 — 前沿知识补充</td>
+          </tr>
+          <tr>
+            <td>默沙东诊疗手册</td>
+            <td>专业版+家庭版（中英文）</td>
+            <td>msdmanuals.cn 公开获取</td>
+            <td>P1 — 科普+分诊知识</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h4>3.2 在Dify中创建第一个知识库</h4>
+      <div class="step-list">
+        <li>Dify控制台 →「知识库」→「创建知识库」</li>
+        <li>名称：<b>基层常见病诊疗指南</b></li>
+        <li>上传文档（支持PDF/Word/Markdown/TXT），首次建议上传3-5份常见病指南</li>
+        <li>分段设置：<b>自动分段与清洗</b> | 分段最大长度：800 tokens | 重叠：100 tokens</li>
+        <li>索引方式：<b>高质量模式</b></li>
+        <li>Embedding模型：选择 bge-m3（通过Xinference接入的OpenAI-API-compatible）</li>
+        <li>点击「保存并嵌入」，等待处理完成</li>
+      </div>
+
+      <h4>3.3 RAG调优关键参数</h4>
+      <pre><code># 在Dify知识库「设置」中调试以下参数，找到你的数据的最佳配置：
+
+分段策略：
+  - 通用文档: 自动分段，800 tokens/chunk
+  - 药品说明书: 按"【适应症】""【用法用量】"等标题分段（自定义分隔符）
+  - 诊疗指南: 按章节标题分段
+
+检索设置：
+  - TopK: 3-5（医疗场景不要太大，减少无关信息干扰）
+  - Score阈值: 0.6-0.75（过滤低相关度片段）
+  - 重排序: 开启 Rerank 模型（bge-reranker-v2-m3）
+
+# 医疗RAG的核心是"精准"而非"全面"，宁可少召回也不要召回错误内容</code></pre>
+
+      <h4>3.4 快速验证：用Dify Playground测试知识库效果</h4>
+      <pre><code># 创建知识库后，在「知识库」页面点击右上角「测试检索」
+# 输入测试问题，观察召回片段是否准确：
+
+测试1: "高血压的诊断标准是什么？"
+  期望：召回到包含"收缩压≥140mmHg 和/或 舒张压≥90mmHg"的片段
+
+测试2: "二甲双胍的禁忌症有哪些？"
+  期望：召回到药品说明书中禁忌症段落
+
+测试3: "社区获得性肺炎的抗生素选择？"
+  期望：召回到指南中的分层治疗推荐</code></pre>
+
+      <div class="warn">
+        <b>关键提醒：</b>不要一上来就导入海量文档。先用3-5份核心指南把RAG质量调到满意，再逐步扩展。RAG效果80%取决于分段策略和检索参数，而不是知识库大小。
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════ -->
+  <!-- 第4章：W4-6 Agent开发          -->
+  <!-- ═══════════════════════════════ -->
+  <div class="chapter">
+    <div class="chapter-hdr">第4章 W4-6：Agent逐个搭建 — 从最简单到最复杂</div>
+    <div class="chapter-body">
+
+      <h4>4.0 搭建顺序（按难度递增，逐步上手）</h4>
+      <table>
+        <thead>
+          <tr><th>序号</th><th>应用</th><th>Dify模式</th><th>难度</th><th>预计耗时</th><th>涉及知识点</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>1</td><td>数字医生分身</td><td>对话应用 + 知识库</td><td>★</td><td>2-4h</td><td>知识库、对话变量、开场白</td></tr>
+          <tr><td>2</td><td>AI个性化健康教育</td><td>对话应用 + 知识库</td><td>★</td><td>2-4h</td><td>模板变量、标签条件</td></tr>
+          <tr><td>3</td><td>AI基层医生培训</td><td>对话应用 + 知识库</td><td>★★</td><td>4-6h</td><td>模拟问诊、答案评分</td></tr>
+          <tr><td>4</td><td>AI智能分诊转诊</td><td>Workflow</td><td>★★</td><td>4-8h</td><td>条件分支、变量传递、规则节点</td></tr>
+          <tr><td>5</td><td>AI心理健康筛查</td><td>对话应用 + Workflow</td><td>★★</td><td>4-8h</td><td>量表逻辑、结果计算</td></tr>
+          <tr><td>6</td><td>AI慢病主动管理</td><td>Workflow + 知识库</td><td>★★★</td><td>8-16h</td><td>多分支、分层逻辑、定时触发</td></tr>
+          <tr><td>7</td><td>AI语音随访</td><td>Workflow + API</td><td>★★★</td><td>8-16h</td><td>语音API对接、结构化提取</td></tr>
+          <tr><td>8</td><td>AI孕产妇儿童保健</td><td>Workflow + 知识库</td><td>★★★</td><td>8-16h</td><td>多节点计划、时间触发</td></tr>
+          <tr><td>9</td><td>AI处方前置审核</td><td>Workflow + 知识库 + 规则引擎</td><td>★★★★</td><td>16-24h</td><td>药品知识库、规则引擎、多规则交叉</td></tr>
+          <tr><td>10</td><td>AI辅助诊断CDSS</td><td>Workflow + LangGraph</td><td>★★★★★</td><td>24-40h</td><td>复杂推理链、鉴别诊断、LangGraph</td></tr>
+        </tbody>
+      </table>
+
+      <h4>4.1 第一个Agent：数字医生分身（2-4小时）</h4>
+      <div class="step-list">
+        <li>Dify →「创建应用」→「聊天助手」→ 命名"数字医生分身"</li>
+        <li>在「上下文」中添加之前创建的知识库「基层常见病诊疗指南」</li>
+        <li>在「提示词」中写入系统指令（见下方）</li>
+        <li>在「对话开场白」中设置欢迎语</li>
+        <li>在「下一步问题建议」中设置引导性问题</li>
+        <li>发布 → 测试 → 调优</li>
+      </div>
+      <pre><code># 数字医生分身 — 系统提示词模板：
+
+你是一位专业的数字医生助手，为基层居民提供健康咨询服务。
+
+核心原则：
+1. 你只提供健康咨询和就医建议，不进行诊断和处方
+2. 如果用户描述的症情严重（胸痛、呼吸困难、严重出血等），
+   立即建议前往最近医院就诊，并给出就医前注意事项
+3. 用通俗易懂的语言回答，避免过多专业术语
+4. 回答控制在200字以内，结构清晰
+
+工作流程：
+1. 首先理解用户的健康问题
+2. 给出科学的健康指导建议
+3. 判断是否需要线下就医（给出明确建议：建议观察 / 建议社区就诊 / 建议尽快就医）
+4. 提供相关的日常护理建议
+
+知识库：
+{context}</code></pre>
+
+      <div class="tip">
+        <b>完成标志：</b>你能在Dify预览窗口中与数字医生对话，它基于知识库准确回答常见健康问题。发送给朋友测试一下。
+      </div>
+
+      <h4>4.2 第二个Agent：AI智能分诊转诊（4-8小时）</h4>
+      <pre><code># Dify →「创建应用」→「Workflow」
+
+# Workflow节点设计：
+[开始] → [LLM提取症状] → [条件分支]
+  ├─ 急危重症（胸痛/呼吸困难/大出血/意识障碍）
+  │    → [LLM: 生成紧急建议] → [标记: 立即急诊]
+  ├─ 亚急性症状（发热1周+/疼痛持续/异常出血）
+  │    → [知识库查询: 对应科室疾病] → [LLM: 生成转诊建议] → [标记: 建议转诊]
+  └─ 轻症（感冒/轻微外伤/皮肤问题）
+       → [知识库查询: 健康指导] → [LLM: 生成自护建议] → [标记: 基层处理]
+
+# 变量设计：
+- symptom_text (String) : 用户主诉
+- severity (Enum)    : emergency / subacute / mild
+- recommendation (String) : 最终建议
+- target_department (String) : 推荐科室</code></pre>
+
+      <h4>4.3 AI慢病主动管理引擎（8-16小时）</h4>
+      <pre><code># 核心Workflow结构：
+
+[定时触发/API触发: 输入患者档案]
+  → [条件分支: 疾病类型]
+    ├─ 高血压 → [分层: 低危/中危/高危/很高危]
+    │           ├─ 低危: [生成: 3个月随访计划 + 生活方式指导]
+    │           ├─ 中危: [生成: 1个月随访计划 + 用药提醒 + 血压监测频率]
+    │           └─ 高危/很高危: [预警通知 + 建议立即就诊 + 通知签约医生]
+    ├─ 糖尿病 → [分层: 基于HbA1c/并发症]
+    └─ COPD   → [分层: GOLD分级]
+
+# 关键知识库：
+- 中国高血压防治指南
+- 中国2型糖尿病防治指南
+- GOLD COPD指南</code></pre>
+
+      <h4>4.4 AI处方前置审核（16-24小时 — 进阶挑战）</h4>
+      <pre><code># Workflow + 药品知识库 + 规则校验：
+
+[输入: 处方JSON {诊断, 药品列表, 患者信息}]
+  → [节点1: 适应症校验] — 药品适应症 vs 诊断
+  → [节点2: 剂量校验]   — 药品用量 vs 标准剂量范围
+  → [节点3: 相互作用校验] — 药品两两配对 → 查相互作用库
+  → [节点4: 禁忌症校验] — 患者过敏史/病史 vs 药品禁忌
+  → [节点5: 重复用药校验] — 同类药品检测
+  → [汇总LLM: 生成审核报告]
+  → [条件: 是否有拦截项]
+    ├─ 有: 返回 {通过: false, 原因: [...]}
+    └─ 无: 返回 {通过: true, 提醒: [...]}
+
+# 药品知识库字段（JSON Schema）：
+{
+  "drug_name": "二甲双胍",
+  "indications": ["2型糖尿病"],
+  "contraindications": ["严重肾功不全", "eGFR&lt;30"],
+  "dosage_range": {"min_mg": 500, "max_mg": 2550, "unit": "mg/d"},
+  "interactions": ["碘造影剂", "西咪替丁"],
+  "pregnancy_category": "B",
+  "category": "双胍类降糖药"
+}</code></pre>
+
+      <div class="warn">
+        <b>注意：</b>处方审核是高风险场景。Dify工作流只能做"提示和提醒"，最终决策必须由执业医师/药师确认。不要将其作为自动拦截系统使用，除非经过充分的临床验证。
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════ -->
+  <!-- 第5章：W7+ 集成与语音          -->
+  <!-- ═══════════════════════════════ -->
+  <div class="chapter">
+    <div class="chapter-hdr">第5章 W7+：集成与扩展 — 语音能力 + 系统对接</div>
+    <div class="chapter-body">
+
+      <h4>5.1 部署语音识别（FunASR）</h4>
+      <pre><code># FunASR是阿里开源的工业级ASR引擎，中文识别准确率极高
+
+# Docker部署（推荐）
+docker run -d --name funasr \
+  --restart always \
+  -p 10095:10095 \
+  -p 10096:10096 \
+  registry.cn-hangzhou.aliyuncs.com/funasr_repo/funasr:latest
+
+# API调用示例：
+curl -X POST http://localhost:10095/api/asr \
+  -F "audio=@recording.wav" \
+  -F "model=paraformer-zh"
+
+# Dify中创建「自定义工具」→ REST API：
+# 工具名: speech_to_text
+# URL: http://funasr:10095/api/asr
+# Method: POST</code></pre>
+
+      <h4>5.2 部署语音合成（CosyVoice TTS）</h4>
+      <pre><code># CosyVoice是阿里开源的TTS引擎，支持情感语音和方言
+
+# Docker部署
+docker run -d --name cosyvoice \
+  --restart always \
+  -p 50000:50000 \
+  registry.cn-hangzhou.aliyuncs.com/cosyvoice/cosyvoice:latest
+
+# 在Dify中添加自定义工具，用于语音随访等场景</code></pre>
+
+      <h4>5.3 部署医学专用规则引擎（Drools）</h4>
+      <pre><code># 用于处方审核、医保审核等确定性规则场景
+# Drools是Java生态的规则引擎，通过REST API暴露给Dify调用
+
+# 快速体验：使用Node.js版轻量规则引擎替代
+mkdir ~/rule-engine && cd ~/rule-engine
+npm init -y
+npm install json-rules-engine express
+
+# 创建规则服务 server.js（示例：药物相互作用规则）
+# 然后通过Dify的「自定义工具」调用 http://rule-engine:3000/validate</code></pre>
+
+      <h4>5.4 系统对接架构</h4>
+      <pre><code># Dify提供完整的REST API，可以用Nginx反向代理对外暴露
+
+# 在宿主机配置Nginx反向代理（/etc/nginx/sites-available/dify-api）：
+server {
+    listen 80;
+    server_name dify-api.local;
+
+    location / {
+        proxy_pass http://127.0.0.1:5001;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+    }
+}
+
+# 外部系统（HIS/EMR/公卫平台）通过API调用Dify：
+POST /v1/chat-messages        # 对话类应用
+POST /v1/workflows/run        # Workflow类应用
+GET  /v1/datasets             # 知识库管理
+
+# 每个Agent发布为独立API端点，供前端/小程序/院内系统调用</code></pre>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════ -->
+  <!-- 第6章：快速启动清单            -->
+  <!-- ═══════════════════════════════ -->
+  <div class="chapter">
+    <div class="chapter-hdr">第6章 快速启动清单（照着敲命令）</div>
+    <div class="chapter-body">
+      <table>
+        <thead>
+          <tr><th>#</th><th>步骤</th><th>命令/操作</th><th>预计耗时</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>1</td><td>启用Hyper-V</td><td>PowerShell管理员执行 Enable-WindowsOptionalFeature</td><td>5min + 重启</td></tr>
+          <tr><td>2</td><td>创建VM + 安装Ubuntu</td><td>Hyper-V管理器，8核/32G/200G</td><td>30min</td></tr>
+          <tr><td>3</td><td>安装Docker</td><td>curl get.docker.com | bash</td><td>10min</td></tr>
+          <tr><td>4</td><td>安装Dify</td><td>git clone + docker compose up -d</td><td>15min</td></tr>
+          <tr><td>5</td><td>安装Xinference</td><td>docker run xprobe/xinference</td><td>10min</td></tr>
+          <tr><td>6</td><td>加载模型</td><td>Web UI → Launch qwen3-instruct GGUF</td><td>20min(看网速)</td></tr>
+          <tr><td>7</td><td>Dify接入Xinference</td><td>设置→模型供应商→OpenAI-API-compatible</td><td>5min</td></tr>
+          <tr><td>8</td><td>创建知识库</td><td>上传3份指南PDF → 调RAG参数</td><td>1h</td></tr>
+          <tr><td>9</td><td>搭建第一个Agent</td><td>数字医生分身，对话应用模式</td><td>2-4h</td></tr>
+          <tr><td>10</td><td>逐步搭建其他Agent</td><td>按难度递增表逐个实现</td><td>5-8周</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════ -->
+  <!-- 第7章：常见问题与排错           -->
+  <!-- ═══════════════════════════════ -->
+  <div class="chapter">
+    <div class="chapter-hdr">第7章 常见问题与排错指南</div>
+    <div class="chapter-body">
+      <table>
+        <thead>
+          <tr><th>问题</th><th>可能原因</th><th>解决方法</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Dify容器启动失败</td>
+            <td>端口冲突（80/443被占用）</td>
+            <td>修改 .env 中 EXPOSE_NGINX_PORT 为其他端口</td>
+          </tr>
+          <tr>
+            <td>Xinference模型回答极慢</td>
+            <td>虚拟机CPU/内存不足，模型太大或未量化</td>
+            <td>换更小的模型(qwen3:8b-Q4_K_M)；确认使用GGUF量化+llama.cpp后端；给VM加资源</td>
+          </tr>
+          <tr>
+            <td>知识库检索不准确</td>
+            <td>分段策略不当 / TopK太大</td>
+            <td>减小chunk_size到500；降低TopK到3；开启Rerank</td>
+          </tr>
+          <tr>
+            <td>Dify连接不上Xinference</td>
+            <td>Docker网络隔离</td>
+            <td>把Xinference加入dify网络：docker network connect docker_default xinference</td>
+          </tr>
+          <tr>
+            <td>虚拟机IP每次重启都变</td>
+            <td>Hyper-V Default Switch是NAT，IP不固定</td>
+            <td>给VM设置静态IP，或创建Hyper-V内部交换机</td>
+          </tr>
+          <tr>
+            <td>Dify升级后数据丢失</td>
+            <td>docker compose down 默认不删volume</td>
+            <td>升级前备份：docker compose down && tar czf dify-data-backup.tar.gz ./volumes/</td>
+          </tr>
+          <tr>
+            <td>模型医学知识准确性差</td>
+            <td>通用模型未经医学微调</td>
+            <td>使用MedicalGPT/HuaTuoGPT2等医学微调模型替代；加强RAG知识库</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════ -->
+  <!-- 第8章：进阶学习资源             -->
+  <!-- ═══════════════════════════════ -->
+  <div class="chapter">
+    <div class="chapter-hdr">第8章 进阶学习资源与推荐阅读</div>
+    <div class="chapter-body">
+      <table>
+        <thead>
+          <tr><th>主题</th><th>资源</th><th>说明</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Dify官方文档</td>
+            <td>https://docs.dify.ai/zh-hans</td>
+            <td>入门必读，Workflow/知识库/Agent完整教程</td>
+          </tr>
+          <tr>
+            <td>Dify GitHub</td>
+            <td>https://github.com/langgenius/dify</td>
+            <td>源码、Issue、Discussion，遇到问题首选</td>
+          </tr>
+          <tr>
+            <td>LangGraph文档</td>
+            <td>https://langchain-ai.github.io/langgraph/</td>
+            <td>复杂Agent状态机编排，CDSS推理链必备</td>
+          </tr>
+          <tr>
+            <td>Xinference官方文档</td>
+            <td>https://inference.readthedocs.io/</td>
+            <td>模型推理平台，多后端支持，Web管理界面，OpenAI兼容API</td>
+          </tr>
+          <tr>
+            <td>Xinference GitHub</td>
+            <td>https://github.com/xorbitsai/inference</td>
+            <td>源码、Issue、模型配置示例</td>
+          </tr>
+          <tr>
+            <td>llama.cpp（备选轻量方案）</td>
+            <td>https://github.com/ggerganov/llama.cpp</td>
+            <td>纯CPU推理引擎，无界面但性能极致，适合最小资源场景</td>
+          </tr>
+          <tr>
+            <td>MedicalGPT</td>
+            <td>https://github.com/shibing624/MedicalGPT</td>
+            <td>中文医学GPT训练框架，可微调自己的医学模型</td>
+          </tr>
+          <tr>
+            <td>HuaTuoGPT2</td>
+            <td>https://github.com/FreedomIntelligence/HuatuoGPT-II</td>
+            <td>华佗GPT2，中文医学大模型，可用作RAG补充</td>
+          </tr>
+          <tr>
+            <td>CMB(中文医学基准)</td>
+            <td>https://github.com/slkcb/CMB</td>
+            <td>中文医学AI评测数据集，验证你的Agent医学能力</td>
+          </tr>
+          <tr>
+            <td>FunASR</td>
+            <td>https://github.com/modelscope/FunASR</td>
+            <td>阿里开源语音识别，中文ASR首选</td>
+          </tr>
+          <tr>
+            <td>MONAI</td>
+            <td>https://monai.io/</td>
+            <td>医学影像AI框架，Phase 3影像AI开发时使用</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ── 页脚 ── -->
+  <div style="border-top:2px solid #1a3a5c; padding-top:14px; margin-top:8px; font-size:10px; color:#999; display:flex; justify-content:space-between;">
+    <span>医共体AI开源栈 — 学习路径与实施手册 v1.0 | 2026-05-19</span>
+    <span>总耗时估算：6-10周（从零到全栈跑通）| 需要：1台Windows PC + 学习热情</span>
+  </div>
+
+</div>
+</body>
+</html>

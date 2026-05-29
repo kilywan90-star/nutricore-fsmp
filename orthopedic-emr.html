@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>四川省骨科医院 - 语音电子病历</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:"PingFang SC","Microsoft YaHei",sans-serif;background:#f0f2f5;color:#2c3e50}
+
+.topbar{background:#1a5276;color:#fff;padding:6px 16px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:4px}
+.topbar h1{font-size:1em;font-weight:600}
+.topbar .sub{font-size:.7em;opacity:.8}
+
+.wrap{max-width:1400px;margin:0 auto;padding:10px;display:grid;grid-template-columns:260px 1fr 350px;gap:10px}
+@media(max-width:1100px){.wrap{grid-template-columns:1fr}}
+
+/* ===== LEFT PANEL: Patient List ===== */
+.left-panel{display:flex;flex-direction:column;gap:8px;max-height:calc(100vh - 56px);overflow:hidden}
+.patient-card{background:#fff;border-radius:8px;box-shadow:0 1px 2px rgba(0,0,0,.06);display:flex;flex-direction:column;overflow:hidden}
+.patient-card h3{font-size:.8em;color:#1a5276;padding:10px 12px 8px;border-bottom:1px solid #eaf2f8;display:flex;align-items:center;gap:6px}
+.patient-card .count{font-size:.72em;color:#7f8c8d;font-weight:400}
+.patient-search{padding:8px 10px}
+.patient-search input{width:100%;padding:5px 8px;border:1px solid #dce1e8;border-radius:4px;font-size:.76em}
+.pt-list{flex:1;overflow-y:auto;min-height:0}
+.pt-item{padding:7px 10px;border-bottom:1px solid #f5f6fa;cursor:pointer;transition:background .1s;font-size:.74em;line-height:1.4}
+.pt-item:hover{background:#eaf2f8}
+.pt-item.active{background:#d4e6f1;border-left:3px solid #2980b9}
+.pt-item .pt-name{font-weight:600;display:flex;justify-content:space-between}
+.pt-item .pt-info{color:#7f8c8d;font-size:.92em}
+.pt-item .pt-dept{color:#2980b9;font-size:.85em}
+.pt-item .pt-type{font-size:.7em;padding:1px 5px;border-radius:3px;background:#eaf2f8}
+.pt-item .pt-type.urgent{background:#fdecea;color:#e74c3c}
+
+/* ===== CENTER: Main ===== */
+.tb{display:flex;align-items:center;gap:5px;padding:6px 10px;background:#fff;border-radius:8px;margin-bottom:8px;box-shadow:0 1px 2px rgba(0,0,0,.06);flex-wrap:wrap}
+.mic-btn{width:38px;height:38px;border-radius:50%;border:none;cursor:pointer;font-size:1em;display:flex;align-items:center;justify-content:center;transition:all .2s;flex-shrink:0}
+.mic-btn.off{background:#e8ecf0}.mic-btn.on{background:#e74c3c;color:#fff;animation:pulse 1.5s infinite}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(231,76,60,.4)}50%{box-shadow:0 0 0 8px rgba(231,76,60,0)}}
+.mic-hint{flex:1;font-size:.78em;color:#95a5a6;min-width:120px}
+.mic-hint.live{color:#2c3e50}
+.tb .sep{width:1px;height:20px;background:#dce1e8;margin:0 3px}
+.btn-xs{padding:4px 8px;border-radius:4px;border:1px solid #dce1e8;cursor:pointer;font-size:.73em;background:#fff;white-space:nowrap;transition:all .12s}
+.btn-xs:hover{background:#eaf2f8}
+.btn-xs.blue{background:#2980b9;color:#fff;border-color:#2980b9}.btn-xs.blue:hover{background:#1a5276}
+.btn-xs.green{background:#27ae60;color:#fff;border-color:#27ae60}.btn-xs.green:hover{background:#219a52}
+.lang-tag{font-size:.68em;background:#eaf2f8;padding:2px 5px;border-radius:3px;cursor:pointer;flex-shrink:0}
+.qc-badge{padding:2px 8px;border-radius:10px;font-size:.73em;font-weight:700;cursor:pointer;color:#fff;white-space:nowrap}
+.qc-badge:hover{filter:brightness(1.1)}
+
+.form{background:#fff;border-radius:8px;padding:14px 18px;box-shadow:0 1px 2px rgba(0,0,0,.06)}
+.form h2{font-size:.83em;color:#1a5276;padding-bottom:4px;border-bottom:1px solid #eaf2f8;margin:12px 0 6px;display:flex;align-items:center;gap:6px}
+.form h2:first-child{margin-top:0}
+.form h2 .req{color:#e74c3c;font-size:.72em}
+.form h2 .sec-acts{margin-left:auto;display:flex;gap:3px}
+.sec-act{width:20px;height:20px;border-radius:50%;border:1px solid #dce1e8;cursor:pointer;font-size:.65em;display:flex;align-items:center;justify-content:center;background:#fff;transition:all .12s}
+.sec-act.del:hover{background:#fdecea;border-color:#e74c3c;color:#e74c3c}
+.sec-act.chk:hover{background:#e8f8f0;border-color:#27ae60;color:#27ae60}
+.sec-act.chk.done{background:#27ae60;color:#fff;border-color:#27ae60}
+
+.row{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:6px;margin-bottom:4px}
+.grp{display:flex;flex-direction:column;gap:1px}
+.grp label{font-size:.73em;font-weight:600;color:#7f8c8d}
+.grp input,.grp select,.grp textarea{padding:5px 8px;border:1px solid #dce1e8;border-radius:4px;font-size:.8em;font-family:inherit;background:#fff;transition:all .12s}
+.grp input:focus,.grp select:focus,.grp textarea:focus{outline:none;border-color:#2980b9;box-shadow:0 0 0 2px rgba(41,128,185,.1)}
+.grp textarea{resize:vertical;min-height:40px}
+.grp input.missing,.grp textarea.missing{border-color:#e74c3c;background:#fff5f5;box-shadow:0 0 0 2px rgba(231,76,60,.12)}
+.grp select.missing{border-color:#e74c3c;background:#fff5f5}
+
+/* ===== RIGHT PANEL ===== */
+.right{display:flex;flex-direction:column;gap:8px;max-height:calc(100vh - 56px);overflow-y:auto;position:sticky;top:10px}
+.card{background:#fff;border-radius:8px;padding:10px 12px;box-shadow:0 1px 2px rgba(0,0,0,.06)}
+.card h3{font-size:.78em;color:#1a5276;margin-bottom:6px}
+.card .tabs{display:flex;margin-bottom:6px;border-bottom:1px solid #eee}
+.card .tab{padding:3px 8px;font-size:.7em;cursor:pointer;border-bottom:2px solid transparent;transition:all .12s}
+.card .tab.on{border-bottom-color:#2980b9;color:#2980b9;font-weight:600}
+
+.qc-score{text-align:center;padding:4px 0}
+.qc-score .num{font-size:2em;font-weight:700}
+.num.a{color:#27ae60}.num.b{color:#f39c12}.num.c{color:#e74c3c}
+.qc-score .label{font-size:.68em;color:#7f8c8d}
+.qc-item{display:flex;align-items:flex-start;gap:5px;padding:3px 0;font-size:.72em;border-bottom:1px solid #f5f6fa}
+.qc-item .dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;margin-top:3px}
+.dot.pass{background:#27ae60}.dot.warn{background:#f39c12}.dot.fail{background:#e74c3c}
+
+/* Triage drafts */
+.draft-item{font-size:.73em;padding:6px 8px;border:1px solid #e8ecf0;border-radius:4px;margin-bottom:4px;cursor:pointer;transition:all .12s}
+.draft-item:hover{border-color:#2980b9;background:#f0f7fd}
+.draft-item .dr-title{font-weight:600;color:#2c3e50}
+.draft-item .dr-preview{color:#7f8c8d;font-size:.9em;margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.draft-item .dr-tag{display:inline-block;font-size:.8em;padding:1px 5px;border-radius:2px;background:#eaf2f8;color:#2980b9;margin-right:3px}
+
+.rec-item{font-size:.72em;padding:5px 0;border-bottom:1px solid #f5f6fa}
+.rec-item audio{width:100%;height:22px;margin:3px 0}
+.rec-item .meta{color:#7f8c8d;display:flex;gap:8px;flex-wrap:wrap}
+.rec-item .transcript{color:#2c3e50;margin-top:2px;line-height:1.4}
+.rec-item .kw{display:inline-block;background:#fef3cd;padding:0 2px;border-radius:2px;margin:1px;cursor:pointer;font-size:.92em}
+
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);padding:8px 18px;border-radius:6px;color:#fff;font-size:.8em;z-index:999;opacity:0;transition:opacity .3s;pointer-events:none}
+.toast.show{opacity:1}.toast.ok{background:#27ae60}.toast.err{background:#e74c3c}
+.empty{text-align:center;color:#bdc3c7;padding:10px;font-size:.76em}
+
+.canvas-wrap{border:1px solid #dce1e8;border-radius:4px;overflow:hidden;margin-top:4px}
+.canvas-wrap canvas{display:block;width:100%;cursor:crosshair;background:#fff}
+.canvas-acts{display:flex;gap:4px;padding:3px 6px;background:#fafbfc;border-top:1px solid #eee}
+
+@media print{
+  .topbar,.tb,.left-panel,.right,.canvas-acts{display:none!important}
+  .wrap{display:block;max-width:100%}
+  .form{box-shadow:none}
+  .grp input.missing,.grp textarea.missing,.grp select.missing{border-color:#dce1e8!important;background:#fff!important;box-shadow:none!important}
+  .form h2 .sec-acts{display:none}
+}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div><h1>四川省骨科医院 — 语音生成结构化电子病历</h1><div class="sub">T/ISC 0097-2025 · 语音自动填写 · 实时质控 · 智能导诊</div></div>
+  <div class="sub" id="clock"></div>
+</div>
+
+<div class="wrap">
+  <!-- ===== LEFT: Patient List ===== -->
+  <div class="left-panel">
+    <div class="patient-card" style="flex:1">
+      <h3>👥 病人列表 <span class="count" id="ptCount"></span></h3>
+      <div class="patient-search"><input id="ptSearch" placeholder="搜索姓名/ID/科室..." oninput="renderPatients()"></div>
+      <div class="pt-list" id="ptList"></div>
+    </div>
+  </div>
+
+  <!-- ===== CENTER: Main ===== -->
+  <div>
+    <div class="tb">
+      <button class="mic-btn off" id="micBtn" onclick="toggleMic()">🎤</button>
+      <span class="mic-hint" id="micHint">点击麦克风开始语音录入</span>
+      <span class="lang-tag" onclick="toggleLang()" id="langTag">普通话</span>
+      <span class="sep"></span>
+      <button class="btn-xs blue" onclick="save()">💾 保存</button>
+      <button class="btn-xs" onclick="newRecord()">📄 新建</button>
+      <button class="btn-xs" onclick="print()">🖨️ 打印</button>
+      <button class="btn-xs" onclick="exportJSON()">📥 导出</button>
+      <button class="btn-xs" onclick="importJSON()">📤 导入</button>
+      <span class="sep"></span>
+      <button class="btn-xs green" onclick="sendToEMR()">📡 发送EMR</button>
+      <span class="sep"></span>
+      <div class="qc-badge" id="qcBadgeTop" onclick="runQC(true)">🔍 质控 -</div>
+    </div>
+
+    <div class="form" id="form" oninput="runQC(false)" onchange="runQC(false)">
+      <h2>基本信息 <span class="req">*</span><span class="sec-acts"><button class="sec-act chk" onclick="toggleSection(this)">✓</button><button class="sec-act del" onclick="clearSection('s_basic')">×</button></span></h2>
+      <div class="row" id="s_basic">
+        <div class="grp"><label>姓名</label><input id="f_name" placeholder="患者姓名" data-req="1"></div>
+        <div class="grp"><label>性别</label><select id="f_gender"><option value="">--</option><option>男</option><option>女</option></select></div>
+        <div class="grp"><label>年龄</label><input id="f_age" placeholder="岁"></div>
+        <div class="grp"><label>就诊日期</label><input type="date" id="f_date"></div>
+        <div class="grp"><label>门诊号</label><input id="f_outpatientNo" placeholder="门诊号"></div>
+        <div class="grp"><label>住院号</label><input id="f_inpatientNo" placeholder="住院号"></div>
+        <div class="grp"><label>病历号</label><input id="f_recordNo" readonly style="background:#f5f6fa"></div>
+        <div class="grp"><label>科室</label><select id="f_department"><option value="">--</option><option>创伤骨科</option><option>脊柱外科</option><option>关节外科</option><option>运动医学科</option><option>小儿骨科</option><option>手足外科</option><option>康复科</option></select></div>
+      </div>
+
+      <h2>主诉 <span class="req">*</span><span class="sec-acts"><button class="sec-act chk" onclick="toggleSection(this)">✓</button><button class="sec-act del" onclick="clearSection('s_chief')">×</button></span></h2>
+      <div class="row" id="s_chief"><div class="grp"><textarea id="f_chiefComplaint" rows="2" placeholder="症状/部位/持续时间" data-req="1"></textarea></div></div>
+
+      <h2>现病史<span class="sec-acts"><button class="sec-act chk" onclick="toggleSection(this)">✓</button><button class="sec-act del" onclick="clearSection('s_hpi')">×</button></span></h2>
+      <div class="row" id="s_hpi">
+        <div class="grp"><label>发病时间</label><input id="f_onsetTime" placeholder="如：3天前"></div>
+        <div class="grp"><label>受伤机制</label><select id="f_injuryMechanism"><option value="">--</option><option>摔伤/跌倒</option><option>交通事故</option><option>运动损伤</option><option>高处坠落</option><option>重物砸伤</option><option>扭伤</option><option>劳损</option><option>无明显诱因</option></select></div>
+        <div class="grp"><label>受伤部位</label><input id="f_injurySite" placeholder="如：左膝关节"></div>
+        <div class="grp"><textarea id="f_hpi" rows="3" placeholder="详细描述：受伤经过、症状演变..."></textarea></div>
+      </div>
+
+      <h2>既往史<span class="sec-acts"><button class="sec-act chk" onclick="toggleSection(this)">✓</button><button class="sec-act del" onclick="clearSection('s_past')">×</button></span></h2>
+      <div class="row" id="s_past">
+        <div class="grp"><label>基础疾病</label><input id="f_pmDisease" placeholder="高血压、糖尿病等"></div>
+        <div class="grp"><label>手术史</label><input id="f_surgeryHistory" placeholder="既往手术"></div>
+        <div class="grp"><label>药物过敏</label><input id="f_allergy" placeholder="如：青霉素过敏"></div>
+      </div>
+
+      <h2>骨科专科检查<span class="sec-acts"><button class="sec-act chk" onclick="toggleSection(this)">✓</button><button class="sec-act del" onclick="clearSection('s_pe')">×</button></span></h2>
+      <div class="row" id="s_pe"><div class="grp"><textarea id="f_physicalExam" rows="3" placeholder="视诊/触诊/动诊/特殊检查/神经血管检查"></textarea></div></div>
+
+      <h2>辅助检查<span class="sec-acts"><button class="sec-act chk" onclick="toggleSection(this)">✓</button><button class="sec-act del" onclick="clearSection('s_exam')">×</button></span></h2>
+      <div class="row" id="s_exam">
+        <div class="grp"><label>检查类型</label><select id="f_examType"><option value="">--</option><option>X线</option><option>CT</option><option>MRI</option><option>超声</option></select></div>
+        <div class="grp"><label>检查部位</label><input id="f_examSite" placeholder="检查部位"></div>
+        <div class="grp"><textarea id="f_imagingFindings" rows="2" placeholder="影像学所见"></textarea></div>
+      </div>
+
+      <h2>诊断 <span class="req">*</span><span class="sec-acts"><button class="sec-act chk" onclick="toggleSection(this)">✓</button><button class="sec-act del" onclick="clearSection('s_diag')">×</button></span></h2>
+      <div class="row" id="s_diag">
+        <div class="grp"><textarea id="f_diagnosis" rows="2" placeholder="主要诊断" data-req="1"></textarea></div>
+        <div class="grp"><label>骨折分型</label><select id="f_fractureClass"><option value="">不适用</option><option>Schatzker分型</option><option>AO/OTA分型</option><option>Garden分型</option><option>Neer分型</option><option>Weber分型</option><option>Tile分型</option></select></div>
+        <div class="grp"><label>分型等级</label><input id="f_fractureGrade" placeholder="如：II型"></div>
+      </div>
+
+      <h2>治疗意见<span class="sec-acts"><button class="sec-act chk" onclick="toggleSection(this)">✓</button><button class="sec-act del" onclick="clearSection('s_treat')">×</button></span></h2>
+      <div class="row" id="s_treat">
+        <div class="grp"><label>治疗方式</label><select id="f_treatmentType"><option value="">--</option><option>保守治疗（石膏/支具）</option><option>手术治疗</option><option>康复理疗</option><option>药物治疗</option></select></div>
+        <div class="grp"><label>是否住院</label><select id="f_admission"><option value="">--</option><option>门诊治疗</option><option>建议住院</option></select></div>
+      </div>
+      <div class="row"><div class="grp"><textarea id="f_treatmentPlan" rows="2" placeholder="治疗计划、医嘱..."></textarea></div></div>
+      <div class="row"><div class="grp"><label>医师签名</label><input id="f_physician" placeholder="医师姓名"></div></div>
+
+      <h2>手写备注 / 签名<span class="sec-acts"><button class="sec-act del" onclick="clearCanvas()">×</button></span></h2>
+      <div class="canvas-wrap">
+        <canvas id="signCanvas" width="800" height="140"></canvas>
+        <div class="canvas-acts">
+          <button class="btn-xs" onclick="clearCanvas()">清除</button>
+          <button class="btn-xs" onclick="setCanvasColor('#2c3e50')" style="background:#2c3e50;color:#fff;width:16px;height:16px;padding:0;border-radius:50%"></button>
+          <button class="btn-xs" onclick="setCanvasColor('#e74c3c')" style="background:#e74c3c;color:#fff;width:16px;height:16px;padding:0;border-radius:50%"></button>
+          <button class="btn-xs" onclick="setCanvasColor('#2980b9')" style="background:#2980b9;color:#fff;width:16px;height:16px;padding:0;border-radius:50%"></button>
+        </div>
+      </div>
+    </div>
+
+    <div class="tb" style="margin-top:8px">
+      <button class="btn-xs blue" onclick="save()">💾 保存病历</button>
+      <button class="btn-xs" onclick="newRecord()">📄 新建病历</button>
+      <button class="btn-xs" onclick="print()">🖨️ 打印 / PDF</button>
+      <button class="btn-xs" onclick="exportJSON()">📥 导出JSON</button>
+      <button class="btn-xs" onclick="importJSON()">📤 导入JSON</button>
+      <span class="sep"></span>
+      <button class="btn-xs green" onclick="sendToEMR()">📡 发送到EMR系统</button>
+    </div>
+  </div>
+
+  <!-- ===== RIGHT: QC + Drafts + Recordings ===== -->
+  <div class="right">
+    <div class="card">
+      <h3>📊 质控评分</h3>
+      <div class="qc-score"><div class="num" id="qcScore">-</div><div class="label">综合质量分</div></div>
+      <div id="qcItems"></div>
+    </div>
+
+    <div class="card">
+      <h3>💡 智能导诊草稿</h3>
+      <div style="font-size:.68em;color:#7f8c8d;margin-bottom:4px">点击草稿自动录入病历，减少录入量</div>
+      <div id="draftList"></div>
+    </div>
+
+    <div class="card">
+      <div class="tabs">
+        <div class="tab on" onclick="switchTab('recs')">🎙️ 录音</div>
+        <div class="tab" onclick="switchTab('drafts2')">📋 已存</div>
+      </div>
+      <div id="tab-recs" style="max-height:220px;overflow-y:auto"><div class="empty">暂无录音</div></div>
+      <div id="tab-drafts2" style="display:none;max-height:220px;overflow-y:auto">
+        <input id="searchInput2" placeholder="搜索已存病历..." style="width:100%;padding:4px 6px;border:1px solid #dce1e8;border-radius:4px;font-size:.73em;margin-bottom:4px" oninput="renderRecords()">
+        <div id="recordList"><div class="empty">暂无病历</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ====== SIMULATED PATIENTS (20) ======
+const simPatients = [
+  {id:'P2026001',name:'李建国',gender:'男',age:58,outpatientNo:'MZ20260501001',inpatientNo:'',department:'创伤骨科',type:'初诊'},
+  {id:'P2026002',name:'张秀兰',gender:'女',age:72,outpatientNo:'MZ20260501002',inpatientNo:'ZY20260428001',department:'脊柱外科',type:'复诊'},
+  {id:'P2026003',name:'王强',gender:'男',age:35,outpatientNo:'MZ20260501003',inpatientNo:'',department:'运动医学科',type:'初诊'},
+  {id:'P2026004',name:'陈桂芳',gender:'女',age:65,outpatientNo:'MZ20260501004',inpatientNo:'ZY20260501001',department:'关节外科',type:'急诊'},
+  {id:'P2026005',name:'刘伟',gender:'男',age:42,outpatientNo:'MZ20260501005',inpatientNo:'',department:'手足外科',type:'初诊'},
+  {id:'P2026006',name:'赵丽华',gender:'女',age:28,outpatientNo:'MZ20260501006',inpatientNo:'',department:'康复科',type:'复诊'},
+  {id:'P2026007',name:'孙志明',gender:'男',age:51,outpatientNo:'MZ20260501007',inpatientNo:'ZY20260430002',department:'脊柱外科',type:'复诊'},
+  {id:'P2026008',name:'周美琴',gender:'女',age:69,outpatientNo:'MZ20260501008',inpatientNo:'',department:'创伤骨科',type:'急诊'},
+  {id:'P2026009',name:'吴斌',gender:'男',age:19,outpatientNo:'MZ20260501009',inpatientNo:'',department:'小儿骨科',type:'初诊'},
+  {id:'P2026010',name:'郑秀英',gender:'女',age:55,outpatientNo:'MZ20260501010',inpatientNo:'ZY20260425003',department:'关节外科',type:'复诊'},
+  {id:'P2026011',name:'黄志强',gender:'男',age:47,outpatientNo:'MZ20260502001',inpatientNo:'',department:'运动医学科',type:'初诊'},
+  {id:'P2026012',name:'林玉兰',gender:'女',age:63,outpatientNo:'MZ20260502002',inpatientNo:'ZY20260501002',department:'创伤骨科',type:'急诊'},
+  {id:'P2026013',name:'杨军',gender:'男',age:31,outpatientNo:'MZ20260502003',inpatientNo:'',department:'手足外科',type:'初诊'},
+  {id:'P2026014',name:'何秀芳',gender:'女',age:76,outpatientNo:'MZ20260502004',inpatientNo:'ZY20260420004',department:'脊柱外科',type:'复诊'},
+  {id:'P2026015',name:'马洪',gender:'男',age:44,outpatientNo:'MZ20260502005',inpatientNo:'',department:'康复科',type:'复诊'},
+  {id:'P2026016',name:'罗玉珍',gender:'女',age:52,outpatientNo:'MZ20260502006',inpatientNo:'',department:'关节外科',type:'初诊'},
+  {id:'P2026017',name:'谢刚',gender:'男',age:26,outpatientNo:'MZ20260502007',inpatientNo:'',department:'运动医学科',type:'初诊'},
+  {id:'P2026018',name:'唐秀珍',gender:'女',age:81,outpatientNo:'MZ20260502008',inpatientNo:'ZY20260503001',department:'创伤骨科',type:'急诊'},
+  {id:'P2026019',name:'许建华',gender:'男',age:39,outpatientNo:'MZ20260502009',inpatientNo:'',department:'脊柱外科',type:'初诊'},
+  {id:'P2026020',name:'邓琴',gender:'女',age:67,outpatientNo:'MZ20260502010',inpatientNo:'ZY20260427005',department:'手足外科',type:'复诊'},
+];
+
+// ====== SMART TRIAGE DRAFTS ======
+const triageDrafts = [
+  {title:'膝关节疼痛待查',tags:['运动医学','关节外科'],preview:'左膝疼痛X天，活动受限...',
+    fill:{chiefComplaint:'左膝关节疼痛',injurySite:'左膝关节',physicalExam:'视：左膝关节轻度肿胀\n触：内侧关节间隙压痛\n动：屈曲受限\n特殊：McMurray试验待查',diagnosis:'左膝关节疼痛待查',treatmentPlan:'1.完善X线/MRI检查\n2.暂予止痛对症治疗\n3.门诊随访'}},
+  {title:'踝关节扭伤',tags:['运动医学','创伤骨科'],preview:'踝关节扭伤后肿痛，活动受限...',
+    fill:{chiefComplaint:'踝关节扭伤后肿痛X天',injuryMechanism:'扭伤',injurySite:'踝关节',physicalExam:'视：踝关节外侧肿胀，皮下瘀斑\n触：外踝前下方压痛明显\n动：踝关节背伸跖屈受限\n特殊：前抽屉试验待查',diagnosis:'踝关节扭伤',treatmentType:'保守治疗（石膏/支具）',treatmentPlan:'1.患肢抬高休息\n2.冰敷48小时内\n3.弹力绷带固定\n4.必要时X线排除骨折'}},
+  {title:'腰部外伤',tags:['脊柱外科'],preview:'腰部外伤后疼痛，活动受限...',
+    fill:{chiefComplaint:'腰部疼痛伴活动受限X天',injuryMechanism:'摔伤/跌倒',injurySite:'腰部',physicalExam:'视：腰椎生理曲度变直\n触：L4-L5棘突间压痛\n动：前屈后伸受限\n神经血管：双下肢感觉肌力正常',diagnosis:'腰部软组织损伤',treatmentType:'保守治疗（石膏/支具）',treatmentPlan:'1.卧硬板床休息\n2.口服止痛药\n3.必要时腰椎MRI\n4.康复理疗'}},
+  {title:'髋部骨折（老年）',tags:['创伤骨科','关节外科'],preview:'摔倒后髋部疼痛，不能站立...',
+    fill:{chiefComplaint:'摔倒后右髋部疼痛伴活动受限X小时',injuryMechanism:'摔伤/跌倒',injurySite:'右髋关节',onsetTime:'今日',physicalExam:'视：右下肢外旋短缩畸形\n触：右腹股沟区压痛\n动：右髋关节活动痛性受限\n神经血管：足背动脉可及',diagnosis:'右股骨颈骨折待查（Garden分型待定）',fractureClass:'Garden分型',treatmentType:'手术治疗',admission:'建议住院',treatmentPlan:'1.急诊完善X线/CT\n2.完善术前检查\n3.择期人工髋关节置换术'}},
+  {title:'肩关节脱位',tags:['运动医学','创伤骨科'],preview:'外伤后肩部疼痛，方肩畸形...',
+    fill:{chiefComplaint:'外伤后右肩关节疼痛伴活动受限X小时',injuryMechanism:'摔伤/跌倒',injurySite:'右肩关节',physicalExam:'视：方肩畸形\n触：肩峰下空虚感\n动：肩关节弹性固定\n神经血管：腋神经功能正常',diagnosis:'右肩关节前脱位',treatmentType:'保守治疗（石膏/支具）',treatmentPlan:'1.急诊手法复位\n2.复位后X线确认\n3.肩关节固定3周\n4.逐步康复锻炼'}},
+  {title:'手腕骨折（Colles）',tags:['创伤骨科','手足外科'],preview:'摔倒手掌撑地，腕部肿痛畸形...',
+    fill:{chiefComplaint:'摔倒后左腕部肿痛畸形X小时',injuryMechanism:'摔伤/跌倒',injurySite:'左腕关节',onsetTime:'今日',physicalExam:'视：左腕部餐叉样畸形\n触：桡骨远端压痛\n动：腕关节活动受限\n神经血管：手指感觉血运正常',diagnosis:'左桡骨远端骨折（Colles骨折）',fractureClass:'AO/OTA分型',treatmentType:'保守治疗（石膏/支具）',treatmentPlan:'1.手法复位\n2.前臂石膏固定\n3.复位后X线复查\n4.定期复查至骨折愈合'}},
+  {title:'颈椎病',tags:['脊柱外科','康复科'],preview:'颈部疼痛伴上肢麻木...',
+    fill:{chiefComplaint:'颈部疼痛伴右上肢麻木X周',injuryMechanism:'劳损',injurySite:'颈椎',physicalExam:'视：颈椎生理曲度变直\n触：C5-C6棘突旁压痛\n动：颈椎活动受限\n神经血管：右上肢肌力IV级，Hoffmann征(-)',diagnosis:'颈椎病（神经根型）',treatmentType:'康复理疗',treatmentPlan:'1.颈椎MRI平扫\n2.物理治疗+牵引\n3.口服神经营养药物\n4.避免长时间低头'}},
+  {title:'腰椎间盘突出',tags:['脊柱外科','康复科'],preview:'腰痛伴下肢放射痛，间歇性跛行...',
+    fill:{chiefComplaint:'腰痛伴左下肢放射痛X月',injuryMechanism:'劳损',injurySite:'腰部',physicalExam:'视：腰椎侧弯\n触：L4-L5、L5-S1棘突旁压痛\n动：前屈受限\n特殊：直腿抬高试验(+) 左侧60°\n神经血管：左足背伸肌力IV级',diagnosis:'腰椎间盘突出症（L4/5）',treatmentType:'康复理疗',treatmentPlan:'1.腰椎MRI平扫\n2.保守治疗：卧床+理疗+药物\n3.若保守无效考虑微创手术\n4.腰背肌功能锻炼'}},
+];
+
+// ====== STATE ======
+const KEY = 'emr_records';
+let records = JSON.parse(localStorage[KEY] || '[]');
+let rid = null;
+let rec = null; let listening = false; let lastScore = 0;
+let mediaRecorder = null; let audioChunks = []; let recordingStartTime = 0; let keywordMarkers = [];
+let recordings = JSON.parse(localStorage['emr_recordings'] || '[]');
+
+const FIELDS = 'name,gender,age,date,recordNo,outpatientNo,inpatientNo,department,chiefComplaint,onsetTime,injuryMechanism,injurySite,hpi,pmDisease,surgeryHistory,allergy,physicalExam,examType,examSite,imagingFindings,diagnosis,fractureClass,fractureGrade,treatmentType,admission,treatmentPlan,physician'.split(',');
+
+function getData() { const d={}; FIELDS.forEach(f=>{const el=document.getElementById('f_'+f);d[f]=el?el.value:'';}); return d; }
+function setData(d) { FIELDS.forEach(f=>{const el=document.getElementById('f_'+f);if(el&&d[f]!==undefined)el.value=d[f]||'';}); }
+function clearForm() { FIELDS.forEach(f=>{const el=document.getElementById('f_'+f);if(el){if(el.tagName==='SELECT')el.selectedIndex=0;else el.value='';}}); document.getElementById('f_date').value=new Date().toISOString().slice(0,10); document.getElementById('f_recordNo').value=genNo(); clearCanvas(); }
+
+// ====== PATIENT LIST ======
+let selectedPtId = null;
+function renderPatients() {
+  const s = (document.getElementById('ptSearch')?.value||'').toLowerCase();
+  const filtered = s ? simPatients.filter(p => p.name.includes(s) || p.id.includes(s) || p.department.includes(s)) : simPatients;
+  document.getElementById('ptCount').textContent = `(${simPatients.length}人)`;
+  document.getElementById('ptList').innerHTML = filtered.map(p => {
+    const urgent = p.type==='急诊';
+    return `<div class="pt-item${p.id===selectedPtId?' active':''}" onclick="selectPatient('${p.id}')">
+      <div class="pt-name"><span>${p.name}</span><span class="pt-type${urgent?' urgent':''}">${p.type}</span></div>
+      <div class="pt-info">${p.gender} · ${p.age}岁 · ${p.id}</div>
+      <div class="pt-info">门诊: ${p.outpatientNo} ${p.inpatientNo?'| 住院: '+p.inpatientNo:''}</div>
+      <div class="pt-dept">${p.department}</div>
+    </div>`;
+  }).join('');
+}
+
+function selectPatient(pid) {
+  const p = simPatients.find(x=>x.id===pid); if(!p) return;
+  selectedPtId = pid;
+  // Clear form and fill patient info
+  clearForm();
+  setData({
+    name: p.name, gender: p.gender, age: String(p.age),
+    outpatientNo: p.outpatientNo, inpatientNo: p.inpatientNo,
+    department: p.department,
+    recordNo: genNo()
+  });
+  document.getElementById('f_recordNo').value = genNo();
+  runQC(false);
+  renderPatients();
+  toast(`已选择: ${p.name} (${p.department})`,'ok');
+}
+
+// ====== SMART TRIAGE DRAFTS ======
+function renderDrafts() {
+  document.getElementById('draftList').innerHTML = triageDrafts.map((d,i) => `
+    <div class="draft-item" onclick="applyDraft(${i})">
+      <div class="dr-title">
+        ${d.tags.map(t=>`<span class="dr-tag">${t}</span>`).join('')}
+        ${d.title}
+      </div>
+      <div class="dr-preview">${d.preview}</div>
+    </div>
+  `).join('');
+}
+
+function applyDraft(idx) {
+  const d = triageDrafts[idx]; if (!d) return;
+  const current = getData();
+  // Merge: only fill fields not already filled by the doctor
+  for (const [k,v] of Object.entries(d.fill)) {
+    const el = document.getElementById('f_'+k);
+    if (!el) continue;
+    const cur = el.value.trim();
+    if (!cur) el.value = v;
+  }
+  runQC(false);
+  toast(`已应用导诊草稿: ${d.title}`,'ok');
+}
+
+// ====== VOICE ======
+function saveRecordings() { localStorage['emr_recordings'] = JSON.stringify(recordings.map(r => ({id:r.id, startTime:r.startTime, endTime:r.endTime, transcript:r.transcript, keywords:r.keywords}))); }
+function loadRecordingBlobs() { recordings.forEach(r => { if (!r.blobUrl) r.blobUrl = localStorage['emr_blob_'+r.id]; }); }
+
+async function startRecording() {
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({audio:true});
+    mediaRecorder = new MediaRecorder(stream, {mimeType: MediaRecorder.isTypeSupported('audio/webm;codecs=opus')?'audio/webm;codecs=opus':'audio/webm'});
+    audioChunks = []; keywordMarkers = []; recordingStartTime = Date.now();
+    mediaRecorder.ondataavailable = e => { if (e.data.size>0) audioChunks.push(e.data); };
+    mediaRecorder.onstop = () => {
+      const blob = new Blob(audioChunks, {type:mediaRecorder.mimeType});
+      const blobUrl = URL.createObjectURL(blob);
+      const id = Date.now().toString(36);
+      const entry = {id, blobUrl, startTime: new Date(recordingStartTime).toISOString(), endTime: new Date().toISOString(), transcript: document.getElementById('micHint').textContent.replace('🔴 ',''), keywords: keywordMarkers};
+      recordings.unshift(entry); if (recordings.length > 20) recordings.pop();
+      const reader = new FileReader(); reader.onload = () => { localStorage['emr_blob_'+id] = reader.result; saveRecordings(); };
+      reader.readAsDataURL(blob);
+      saveRecordings(); renderRecordings();
+      stream.getTracks().forEach(t=>t.stop());
+    };
+    mediaRecorder.start(250); return true;
+  } catch(e) { toast('无法访问麦克风: '+e.message,'err'); return false; }
+}
+function markKeyword(kw) { if (!mediaRecorder || mediaRecorder.state !== 'recording') return; keywordMarkers.push({time: parseFloat(((Date.now()-recordingStartTime)/1000).toFixed(1)), keyword: kw}); }
+function renderRecordings() {
+  loadRecordingBlobs();
+  const el = document.getElementById('tab-recs');
+  if (!recordings.length) { el.innerHTML = '<div class="empty">暂无录音</div>'; return; }
+  el.innerHTML = recordings.map(r => {
+    const st = new Date(r.startTime), et = new Date(r.endTime), dur = Math.round((et-st)/1000);
+    const fmt = d => d.toLocaleTimeString('zh-CN',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+    const kws = (r.keywords||[]).map(k => `<span class="kw" title="${k.time}秒: ${k.keyword}">${k.keyword}(${k.time}s)</span>`).join(' ');
+    return `<div class="rec-item">
+      <audio src="${r.blobUrl||localStorage['emr_blob_'+r.id]||''}" controls preload="metadata"></audio>
+      <div class="meta"><span>${fmt(st)}</span>→<span>${fmt(et)}</span><span>${dur}秒</span></div>
+      ${kws?`<div>🔑 ${kws}</div>`:''}
+      <div class="transcript">📝 ${esc(r.transcript||'(无内容)')}</div>
+    </div>`;
+  }).join('');
+}
+
+function initSR() {
+  const S = window.SpeechRecognition || window.webkitSpeechRecognition; if (!S) return null;
+  const r = new S(); r.lang = 'zh-CN'; r.interimResults = true; r.continuous = true;
+  r.onresult = e => { let t=''; for (let i=e.resultIndex;i<e.results.length;i++) t+=e.results[i][0].transcript; document.getElementById('micHint').textContent='🔴 '+t; document.getElementById('micHint').classList.add('live'); };
+  r.onerror = e => { if (!['no-speech','aborted'].includes(e.error)) toast('语音错误: '+e.error,'err'); stopMic(); };
+  r.onend = () => { if (listening) try{r.start()}catch(e){stopMic()} else stopMic(); };
+  return r;
+}
+function toggleMic() { listening ? stopMic() : startMic(); }
+async function startMic() {
+  const ok = await startRecording(); if (!ok) return;
+  if (!rec) rec = initSR(); if (!rec) { toast('请用Chrome或Edge','err'); return; }
+  try { rec.start(); listening=true; }catch(e){toast('启动失败,请刷新','err');return;}
+  document.getElementById('micBtn').classList.replace('off','on'); document.getElementById('micHint').textContent='🔴 聆听中...';
+}
+function stopMic() {
+  listening=false; try{rec.stop();}catch(e){}
+  document.getElementById('micBtn').classList.replace('on','off');
+  if (mediaRecorder&&mediaRecorder.state==='recording') mediaRecorder.stop();
+  const text = document.getElementById('micHint').textContent.replace('🔴 ','').trim();
+  document.getElementById('micHint').classList.remove('live');
+  if (text && !text.includes('聆听中') && !text.includes('点击麦克风')) { autoFill(text); document.getElementById('micHint').textContent='已自动填写 (点击麦克风继续录入)'; }
+  else { document.getElementById('micHint').textContent='点击麦克风开始语音录入'; }
+}
+function toggleLang() {
+  if (!rec) rec = initSR();
+  const langs = [{c:'zh-CN',l:'普通话'},{c:'zh-HK',l:'粤语'},{c:'en-US',l:'English'}];
+  const i = langs.findIndex(x=>x.c===rec.lang); const n = langs[(i+1)%langs.length]; rec.lang=n.c; document.getElementById('langTag').textContent=n.l;
+}
+
+// ====== AUTO-FILL ======
+function autoFill(text) {
+  if (!text) return;
+  const d = getData(); const kwHits = [];
+  const rules = [
+    {re:/(?:姓名|患者|病人)(?:是|叫|为|：|:)?\s*([一-龥]{2,4})/g,field:'name',fn:m=>m[1],kw:'姓名'},
+    {re:/(\d{1,3})\s*岁/g,field:'age',fn:m=>m[1],kw:'年龄'},
+    {re:/(男[性的]?|女[性的]?)(?:患者|病人|性)?/g,field:'gender',fn:m=>m[1].startsWith('男')?'男':'女',kw:'性别'},
+    {re:/(创伤骨科|脊柱外科|关节外科|运动医学|小儿骨科|手足外科|康复科)/g,field:'department',fn:m=>m[1],kw:'科室'},
+    {re:/(?:主诉|主要症状|患者自述)(?:是|为|：|:)?\s*([^。，,\n]{4,30}?)(?:[。，,]|$)/g,field:'chiefComplaint',fn:m=>m[1].trim(),kw:'主诉'},
+    {re:/(\S{2,4}(?:疼痛|肿胀|麻木|活动受限|畸形|跛行))(\d+[天周月年])?/g,field:'chiefComplaint',fn:m=>{const s=m[1]+(m[2]||'');return !d.chiefComplaint?s:(d.chiefComplaint+'；'+s);},kw:'主诉'},
+    {re:/(\d+[天周月年]前|\d{4}[-/]\d{1,2}[-/]\d{1,2})(?:开始|发病|受伤)?/g,field:'onsetTime',fn:m=>m[1],kw:'发病时间'},
+    {re:/(摔伤|摔倒|跌倒|车祸|交通事故|运动[中时]?受伤|高处坠落|砸伤|扭伤|崴[脚了]|劳损)/g,field:'injuryMechanism',fn:m=>({'摔伤':'摔伤/跌倒','摔倒':'摔伤/跌倒','跌倒':'摔伤/跌倒','车祸':'交通事故','运动受伤':'运动损伤','运动时受伤':'运动损伤','高处坠落':'高处坠落','砸伤':'重物砸伤','扭伤':'扭伤','崴脚':'扭伤','崴了':'扭伤','劳损':'劳损'}[m[1]]||m[1]),kw:'受伤机制'},
+    {re:/(?:受伤|损伤|疼痛|肿胀)(?:部位)?(?:在|位于)?\s*(左|右|双)?\s*(膝|髋|踝|腕|肘|肩|脊柱|腰|颈|手|足|股骨|胫骨|腓骨|肱骨|桡骨|尺骨|锁骨|骨盆)(?:关节|部|处)?/g,field:'injurySite',fn:m=>(m[1]||'')+m[2]+'关节',kw:'受伤部位'},
+    {re:/(X[线光]|CT|MRI|磁共振|超声|B超)(?:检查)?(?:示|显示|提示|可见|：|:)?\s*(.+?)(?:[。，,]|$)/g,field:'imagingFindings',fn:m=>{const t=m[0].replace(/^(X[线光]|CT|MRI|磁共振|超声|B超)(?:检查)?(?:示|显示|提示|可见)?[：:]?\s*/,'');return t.trim();},kw:'影像'},
+    {re:/(X[线光]|CT|MRI|磁共振|超声|B超)/g,field:'examType',fn:m=>({'X线':'X线','X光':'X线','CT':'CT','MRI':'MRI','磁共振':'MRI','超声':'超声','B超':'超声'}[m[1]]||''),kw:'检查类型'},
+    {re:/(?:诊断|考虑|印象)(?:是|为|：|:)?\s*(.+?)(?:[。，,]\s*(?:治疗|处理|建议|手术|$))/g,field:'diagnosis',fn:m=>m[1].trim(),kw:'诊断'},
+    {re:/(左|右|双)?\s*(膝|髋|踝|腕|肘|肩|脊柱|腰|颈|手|足|股骨|胫骨|腓骨|肱骨|桡骨|尺骨|锁骨|骨盆)\s*(骨折|脱位|扭伤|半月板损伤|韧带损伤|关节炎|椎间盘突出|滑膜炎|筋膜炎)/g,field:'diagnosis',fn:m=>{const s=(m[1]||'')+m[2]+m[3];return !d.diagnosis?s:(d.diagnosis+'；'+s);},kw:'诊断'},
+    {re:/(Schatzker|AO|OTA|Garden|Neer|Weber|Tile)\s*(分型)?\s*([ⅠⅡⅢⅣⅤIVI]+型|[ABCD]\d*)/gi,field:'fractureGrade',fn:m=>m[3]||m[0],kw:'骨折分型'},
+    {re:/(保守治疗|石膏|支具|手术|康复|理疗|药物|观察|随访)/g,field:'treatmentType',fn:m=>({'保守治疗':'保守治疗（石膏/支具）','石膏':'保守治疗（石膏/支具）','支具':'保守治疗（石膏/支具）','手术':'手术治疗','康复':'康复理疗','理疗':'康复理疗','药物':'药物治疗','观察':'观察随访','随访':'观察随访'}[m[1]]||''),kw:'治疗方式'},
+    {re:/(住院|入院|留观|门诊)/g,field:'admission',fn:m=>m[1]==='住院'||m[1]==='入院'?'建议住院':m[1]==='留观'?'急诊留观':'门诊治疗',kw:'住院'},
+    {re:/(?:医师签名|医师|医生)(?:是|为|：|:)?\s*([一-龥]{2,4})(?:[。，,签]|$)/g,field:'physician',fn:m=>m[1],kw:'医师'},
+  ];
+  let filled=false;
+  rules.forEach(rule=>{
+    const el=document.getElementById('f_'+rule.field); if(!el)return;
+    if ((el.tagName==='SELECT'?el.value:el.value.trim())) return;
+    rule.re.lastIndex=0; let m;
+    while((m=rule.re.exec(text))!==null){const val=rule.fn(m);if(!val)continue;
+      if(el.tagName==='SELECT'){const opts=[...el.options].map(o=>o.value);const match=opts.find(o=>o===val||o.includes(val));if(match){el.value=match;filled=true;kwHits.push(rule.kw);break;}}
+      else{el.value=val;filled=true;kwHits.push(rule.kw);break;}
+    }
+  });
+  kwHits.forEach(kw=>markKeyword(kw));
+  if(!filled){const hpi=document.getElementById('f_hpi');if(hpi)hpi.value=(hpi.value?hpi.value+'\n':'')+text;}
+  runQC(false);
+}
+
+// ====== SECTION CONTROLS ======
+function toggleSection(btn){btn.classList.toggle('done');}
+function clearSection(sid){const el=document.getElementById(sid);if(!el)return;el.querySelectorAll('input:not([readonly]),textarea,select').forEach(e=>{if(e.tagName==='SELECT')e.selectedIndex=0;else e.value='';});runQC(false);}
+
+// ====== CANVAS ======
+(function(){
+  const canvas=document.getElementById('signCanvas'); if(!canvas)return;
+  const ctx=canvas.getContext('2d'); let drawing=false;
+  canvas.onmousedown=e=>{drawing=true;ctx.beginPath();ctx.moveTo(e.offsetX,e.offsetY);};
+  canvas.onmousemove=e=>{if(!drawing)return;ctx.lineWidth=2;ctx.lineCap='round';ctx.strokeStyle=ctx.strokeStyle||'#2c3e50';ctx.lineTo(e.offsetX,e.offsetY);ctx.stroke();};
+  canvas.onmouseup=()=>drawing=false; canvas.onmouseleave=()=>drawing=false;
+  canvas.ontouchstart=e=>{e.preventDefault();const r=canvas.getBoundingClientRect(),t=e.touches[0];drawing=true;ctx.beginPath();ctx.moveTo(t.clientX-r.left,t.clientY-r.top);};
+  canvas.ontouchmove=e=>{e.preventDefault();if(!drawing)return;const r=canvas.getBoundingClientRect(),t=e.touches[0];ctx.lineWidth=2;ctx.lineCap='round';ctx.lineTo(t.clientX-r.left,t.clientY-r.top);ctx.stroke();};
+  canvas.ontouchend=()=>drawing=false;
+})();
+function clearCanvas(){const c=document.getElementById('signCanvas');c.getContext('2d').clearRect(0,0,c.width,c.height);}
+function setCanvasColor(color){document.getElementById('signCanvas').getContext('2d').strokeStyle=color;}
+
+// ====== CRUD ======
+function genNo(){const d=new Date();return `SCGK-${d.getFullYear()}${String(d.getMonth()+1).padStart(2,'0')}${String(d.getDate()).padStart(2,'0')}-${String(records.length+1).padStart(3,'0')}`;}
+function newRecord(){rid=null;selectedPtId=null;clearForm();renderPatients();runQC(false);toast('新病历','ok');}
+function save(){
+  const d=getData(); if(!d.name){toast('请填写患者姓名','err');return;}
+  if(!d.recordNo)d.recordNo=genNo();
+  if(rid){const i=records.findIndex(r=>r.id===rid);if(i>=0)records[i]={...records[i],...d,updatedAt:new Date().toISOString(),score:lastScore};}
+  else{const r={id:Date.now().toString(36)+Math.random().toString(36).slice(2,6),...d,createdAt:new Date().toISOString(),updatedAt:new Date().toISOString(),score:lastScore};records.unshift(r);rid=r.id;}
+  localStorage[KEY]=JSON.stringify(records);renderRecords();toast('已保存','ok');
+}
+function load(id){const r=records.find(r=>r.id===id);if(!r)return;rid=id;setData(r);renderRecords();runQC(false);}
+
+// ====== QC ======
+function runQC(showToast_){
+  const d=getData();const issues=[];let score=100;
+  [{field:'name',label:'姓名'},{field:'chiefComplaint',label:'主诉'},{field:'diagnosis',label:'诊断'}].forEach(r=>{if(!(d[r.field]||'').trim()){issues.push({s:'fail',m:r.label+'未填写'});score-=20;}});
+  const filled=FIELDS.filter(f=>{const v=d[f]?.trim?.()??d[f];return v&&v!=='';}).length;
+  const pct=Math.round(filled/FIELDS.length*100);
+  if(pct<50){issues.push({s:'warn',m:`完整度仅 ${pct}%`});score-=10;}else if(pct<80){issues.push({s:'warn',m:`完整度 ${pct}%（建议≥80%）`});score-=5;}else{issues.push({s:'pass',m:`完整度 ${pct}%`});}
+  const diag=(d.diagnosis||'').toLowerCase(),cc=d.chiefComplaint||'';
+  if(d.fractureClass&&!diag.includes('骨折')){issues.push({s:'warn',m:'骨折分型已选，诊断未提及"骨折"'});score-=10;}
+  if(d.fractureClass&&!d.fractureGrade){issues.push({s:'warn',m:'骨折分型未填等级'});score-=5;}
+  if((d.treatmentType||'').includes('手术')&&d.admission!=='建议住院'){issues.push({s:'warn',m:'选择手术但未建议住院'});score-=5;}
+  if(d.injuryMechanism&&diag&&!diag.includes('骨折')&&!diag.includes('损伤')&&!diag.includes('扭伤')){issues.push({s:'warn',m:'有受伤机制但诊断未反映创伤'});score-=5;}
+  if(cc&&!/\d/.test(cc)){issues.push({s:'warn',m:'主诉建议含持续时间（如"3天"）'});score-=3;}
+  if((d.diagnosis||'').length<4){issues.push({s:'warn',m:'诊断过短，建议含部位+病变'});score-=5;}
+  ['待查','不明','大概','好像'].forEach(t=>{Object.entries(d).forEach(([k,v])=>{if(typeof v==='string'&&v.includes(t)){issues.push({s:'warn',m:`"${t}"出现在${k}中`});score-=3;}});});
+  score=Math.max(0,Math.min(100,score));lastScore=score;
+  const grade=score>=80?'a':score>=60?'b':'c';
+  document.getElementById('qcScore').textContent=score;document.getElementById('qcScore').className='num '+grade;
+  const badge=document.getElementById('qcBadgeTop');badge.textContent='🔍 质控 '+score+'分';badge.style.background=grade==='a'?'#27ae60':grade==='b'?'#f39c12':'#e74c3c';
+  document.getElementById('qcItems').innerHTML=issues.map(i=>`<div class="qc-item"><span class="dot ${i.s}"></span><span class="msg">${i.m}</span></div>`).join('');
+  [{field:'name'},{field:'chiefComplaint'},{field:'diagnosis'}].forEach(r=>{const el=document.getElementById('f_'+r.field);if(el){if(!(d[r.field]||'').trim())el.classList.add('missing');else el.classList.remove('missing');}});
+  if(showToast_)toast(`质控评分: ${score} 分 (${grade==='a'?'优':grade==='b'?'良':'差'})`,grade==='a'?'ok':grade==='b'?'ok':'err');
+}
+
+// ====== TABS ======
+function switchTab(tab){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('on'));
+  document.querySelectorAll('[id^="tab-"]').forEach(e=>e.style.display='none');
+  if(tab==='recs'){document.querySelectorAll('.tab')[0].classList.add('on');document.getElementById('tab-recs').style.display='';}
+  else{document.querySelectorAll('.tab')[1].classList.add('on');document.getElementById('tab-drafts2').style.display='';}
+}
+
+// ====== RECORDS ======
+function renderRecords(){
+  const s=(document.getElementById('searchInput2')?.value||'').toLowerCase();
+  const filtered=s?records.filter(r=>(r.name||'').toLowerCase().includes(s)||(r.diagnosis||'').toLowerCase().includes(s)):records;
+  const el=document.getElementById('recordList');
+  if(!filtered.length){el.innerHTML='<div class="empty">'+(s?'无匹配':'暂无病历')+'</div>';return;}
+  el.innerHTML=filtered.map(r=>{const sc=r.score||0;const g=sc>=80?'a':sc>=60?'b':'c';return`<div class="record-item${r.id===rid?' active':''}" onclick="load('${r.id}')" style="padding:4px 6px;font-size:.73em;border-bottom:1px solid #f5f6fa;cursor:pointer;display:flex;justify-content:space-between"><span>${esc(r.name||'?')}</span><span style="color:#7f8c8d;font-size:.9em">${esc((r.diagnosis||'').slice(0,10))||'--'}</span><span style="font-weight:600;font-size:.9em;color:${sc>=80?'#27ae60':sc>=60?'#f39c12':'#e74c3c'}">${sc||'-'}</span></div>`;}).join('');
+}
+
+// ====== EXPORT/IMPORT/EMR ======
+function exportJSON(){const data=rid?[records.find(r=>r.id===rid)].filter(Boolean):records;if(!data.length)return toast('无数据','err');const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(data,null,2)],{type:'application/json'}));a.download=`骨科病历_${new Date().toISOString().slice(0,10)}.json`;a.click();}
+function importJSON(){const inp=document.createElement('input');inp.type='file';inp.accept='.json';inp.onchange=e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=ev=>{try{const data=JSON.parse(ev.target.result);if(!Array.isArray(data))throw new Error('数组格式');let n=0;data.forEach(x=>{if(!records.find(y=>y.id===x.id)){records.unshift(x);n++;}});if(n){localStorage[KEY]=JSON.stringify(records);renderRecords();toast(`导入 ${n} 份`,'ok');}else toast('无新增','err');}catch(e){toast('格式错误','err');}};r.readAsText(f);};inp.click();}
+function sendToEMR(){const d=getData();if(!d.name){toast('请先填写患者姓名','err');return;}runQC(true);if(lastScore<60){if(!confirm(`质控评分仅${lastScore}分，仍要发送到EMR系统吗？`))return;}const payload={system:'EMR',hospital:'四川省骨科医院',record:d,timestamp:new Date().toISOString(),score:lastScore};console.log('📡 发送到EMR:',JSON.stringify(payload,null,2));toast('已发送到EMR系统 ✓','ok');}
+function esc(s){const d=document.createElement('div');d.textContent=s;return d.innerHTML;}
+function toast(m,t){const e=document.getElementById('toast');e.textContent=m;e.className='toast '+t+' show';clearTimeout(e._t);e._t=setTimeout(()=>e.classList.remove('show'),2200);}
+
+// Keyboard
+document.onkeydown=e=>{if(e.ctrlKey&&e.key==='m'){e.preventDefault();toggleMic();}if(e.ctrlKey&&e.key==='s'){e.preventDefault();save();}};
+setInterval(()=>{document.getElementById('clock').textContent=new Date().toLocaleString('zh-CN');},1000);
+
+// Init
+document.getElementById('f_date').value=new Date().toISOString().slice(0,10);
+document.getElementById('f_recordNo').value=genNo();
+loadRecordingBlobs();
+renderPatients();
+renderDrafts();
+renderRecords();
+renderRecordings();
+runQC(false);
+</script>
+</body>
+</html>

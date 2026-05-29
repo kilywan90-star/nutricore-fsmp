@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>生活旅行智能助手 - 产品规划报告</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700;900&display=swap');
+
+  :root {
+    --bg: #f5f3ef;
+    --card: #ffffff;
+    --text: #1a1a1a;
+    --text-mid: #4a4a4a;
+    --text-light: #777;
+    --border: #e0dcd5;
+    --accent1: #c0392b;
+    --accent2: #d4a017;
+    --accent3: #2c3e50;
+    --blue: #2980b9;
+    --green: #27ae60;
+    --gray-bg: #f8f7f4;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Noto Sans SC', 'Microsoft YaHei', sans-serif;
+    background: #e8e5df;
+    display: flex;
+    justify-content: center;
+    padding: 24px;
+    color: var(--text);
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .page {
+    width: 1400px;
+    min-height: 990px;
+    background: var(--bg);
+    box-shadow: 0 4px 32px rgba(0,0,0,.12);
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    grid-template-rows: auto auto auto auto auto auto;
+    gap: 10px;
+    padding: 18px;
+  }
+
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    padding: 14px 16px;
+    overflow: hidden;
+  }
+
+  .header {
+    grid-column: 1 / -1;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 0 6px 0;
+    border-bottom: 3px solid var(--accent3);
+    margin-bottom: 2px;
+  }
+  .header-left h1 {
+    font-size: 22px;
+    font-weight: 900;
+    letter-spacing: 2px;
+    color: var(--accent3);
+  }
+  .header-left .sub {
+    font-size: 12px;
+    color: var(--text-light);
+    letter-spacing: 1px;
+    margin-top: 2px;
+  }
+  .header-right {
+    text-align: right;
+    font-size: 11px;
+    color: var(--text-light);
+    line-height: 1.6;
+  }
+  .header-right strong { color: var(--text-mid); }
+
+  .sec-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--accent3);
+    letter-spacing: 1.5px;
+    margin-bottom: 8px;
+    padding-bottom: 5px;
+    border-bottom: 2px solid var(--accent3);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .sec-title .num {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px; height: 20px;
+    background: var(--accent3);
+    color: #fff;
+    font-size: 11px;
+    font-weight: 700;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .s-bg     { grid-column: 1; grid-row: 2; }
+  .s-curr   { grid-column: 1; grid-row: 3; }
+  .s-analy  { grid-column: 2 / 4; grid-row: 2; }
+  .s-gap    { grid-column: 2; grid-row: 3; }
+  .s-goal   { grid-column: 3; grid-row: 3; }
+  .s-v1     { grid-column: 1; grid-row: 4 / 6; }
+  .s-v2     { grid-column: 2; grid-row: 4 / 6; }
+  .s-v3     { grid-column: 3; grid-row: 4 / 6; }
+  .s-plan   { grid-column: 1 / 3; grid-row: 6; }
+  .s-kpi    { grid-column: 3; grid-row: 6; }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 10px;
+  }
+  th {
+    background: var(--accent3);
+    color: #fff;
+    padding: 5px 6px;
+    font-weight: 500;
+    text-align: center;
+    font-size: 9.5px;
+    letter-spacing: .5px;
+  }
+  td {
+    padding: 4px 6px;
+    border-bottom: 1px solid var(--border);
+    text-align: center;
+    vertical-align: middle;
+  }
+  td.left { text-align: left; }
+  tr:nth-child(even) { background: var(--gray-bg); }
+
+  .star { color: var(--accent2); letter-spacing: 1px; font-size: 11px; }
+
+  .txt-sm { font-size: 10px; color: var(--text-mid); line-height: 1.55; }
+  .txt-xs { font-size: 9px; color: var(--text-light); line-height: 1.5; }
+
+  .en-note { color: #999; font-size: 8.5px; }
+
+  .v-name {
+    font-size: 15px;
+    font-weight: 900;
+    letter-spacing: 1px;
+  }
+  .v-name.lx { color: var(--accent1); }
+  .v-name.sx { color: var(--accent2); }
+  .v-name.zb { color: var(--accent3); }
+  .v-tagline {
+    font-size: 10px;
+    color: var(--text-light);
+    margin: 2px 0 6px 0;
+    font-style: italic;
+  }
+  .v-aha {
+    font-size: 9.5px;
+    background: #fef9e7;
+    border-left: 3px solid var(--accent2);
+    padding: 5px 8px;
+    margin: 6px 0;
+    line-height: 1.5;
+    color: #7d6608;
+  }
+  .v-section-title {
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--text);
+    margin: 7px 0 3px 0;
+    letter-spacing: .5px;
+  }
+
+  ul { font-size: 9.5px; padding-left: 16px; color: var(--text-mid); line-height: 1.65; }
+  ul li { margin-bottom: 1px; }
+
+  .tag {
+    display: inline-block;
+    font-size: 8.5px;
+    padding: 1px 6px;
+    border-radius: 2px;
+    margin: 1px;
+    font-weight: 500;
+  }
+  .tag-red { background: #fadbd8; color: #922b21; }
+  .tag-gold { background: #fdebd0; color: #7d6608; }
+  .tag-blue { background: #d6eaf8; color: #1a5276; }
+  .tag-green { background: #d5f5e3; color: #1e8449; }
+
+  .phase-row td { font-size: 9.5px; padding: 5px 4px; }
+
+  .footer-note {
+    font-size: 8.5px;
+    color: #999;
+    margin-top: 4px;
+    text-align: right;
+  }
+
+  @media print {
+    body { background: #fff; padding: 0; }
+    .page { box-shadow: none; width: 100%; }
+  }
+</style>
+</head>
+<body>
+
+<div class="page">
+
+  <!-- ======== HEADER ======== -->
+  <div class="header">
+    <div class="header-left">
+      <h1>生活旅行智能助手 · 产品规划</h1>
+      <div class="sub">产品设计方案 — 3个版本 · 3轮审查（Product Design Proposal — 3 Versions · 3 Review Cycles）</div>
+    </div>
+    <div class="header-right">
+      编制日期：2026.05.20<br>
+      文档状态：<strong>终版（第3轮审查通过）</strong><br>
+      设计目标：<strong>C端用户喜爱 + 投资人看好</strong>
+    </div>
+  </div>
+
+  <!-- ======== 1. BACKGROUND ======== -->
+  <div class="card s-bg">
+    <div class="sec-title"><span class="num">1</span>背景与问题</div>
+    <div class="txt-sm">
+      <strong>用户痛点：</strong>规划一次出行需要在携程/美团/小红书/高德/12306等多个应用（App）之间反复切换，平均耗时<strong>3-6小时</strong>做攻略。旅行中洗浴、按摩、高质量KTV、地方特产采购、商务宴请等"非标生活需求"没有任何一个产品能一站式解决。
+    </div>
+    <div class="txt-xs" style="margin-top:6px;">
+      <strong>市场信号：</strong>2025年中国在线旅游市场规模约1.2万亿（同比增长15%，+15% YoY），本地生活服务约5.5万亿（同比增长20%，+20% YoY）。携程、美团、高德、豆包均在2025年密集发布人工智能（AI）助手产品——但<strong>没有一家</strong>完成"旅行+生活+语音+场景感知"的全域覆盖。
+    </div>
+    <div class="txt-sm" style="margin-top:6px;">
+      <strong>核心命题：</strong>做一款"生活专科版豆包"——以语音为核心交互方式，深度覆盖<strong>航线/酒店景观房/地方特色/洗浴/按摩/KTV/动车/风俗/物价/天气/日用品/打车</strong>等全场景，延伸至出差商务接待、朋友聚会。
+    </div>
+  </div>
+
+  <!-- ======== CURRENT STATE (Matrix) ======== -->
+  <div class="card s-curr">
+    <div class="sec-title"><span class="num">2</span>竞争能力矩阵</div>
+    <table>
+      <tr>
+        <th style="text-align:left;">能力维度</th>
+        <th>携程/途牛</th>
+        <th>美团小美</th>
+        <th>高德/百度</th>
+        <th>豆包</th>
+        <th style="background:#c0392b;">本产品目标</th>
+      </tr>
+      <tr><td class="left">行程规划</td><td class="star">★★★★</td><td class="star">★★</td><td class="star">★★★</td><td class="star">★★</td><td class="star">★★★★★</td></tr>
+      <tr><td class="left">本地生活发现</td><td class="star">★★</td><td class="star">★★★★★</td><td class="star">★★★</td><td class="star">★★★</td><td class="star">★★★★★</td></tr>
+      <tr><td class="left">语音交互深度</td><td class="star">★★</td><td class="star">★★★</td><td class="star">★★★★</td><td class="star">★★★</td><td class="star">★★★★★</td></tr>
+      <tr><td class="left">跨平台执行</td><td class="star">★</td><td class="star">★★</td><td class="star">★</td><td class="star">★★★★★</td><td class="star">★★★★</td></tr>
+      <tr><td class="left">场景感知</td><td class="star">★★</td><td class="star">★★</td><td class="star">★★★</td><td class="star">★★</td><td class="star">★★★★★</td></tr>
+      <tr><td class="left">情感陪伴</td><td class="star">★</td><td class="star">★★</td><td class="star">★★★</td><td class="star">★★</td><td class="star">★★★★</td></tr>
+      <tr><td class="left">交易闭环</td><td class="star">★★★★★</td><td class="star">★★★★★</td><td class="star">★★</td><td class="star">★</td><td class="star">★★★★</td></tr>
+    </table>
+    <div class="txt-xs" style="margin-top:4px; text-align:center; color:#c0392b; font-weight:700;">
+      市场上没有任何产品完整覆盖右侧"五星"矩阵
+    </div>
+  </div>
+
+  <!-- ======== ANALYSIS ======== -->
+  <div class="card s-analy">
+    <div class="sec-title"><span class="num">3</span>根本原因分析：为什么现有产品无法填补空白？</div>
+    <div style="display:flex; gap:10px;">
+      <div style="flex:1;">
+        <div class="v-section-title">携程/途牛 — OTA（在线旅游平台）基因锁定</div>
+        <div class="txt-xs">推荐算法天然偏向高佣金产品，无法做到真正中立的"最优推荐"。缺少本地生活深度（洗浴/KTV/按摩/特产采购）和情感陪伴能力。</div>
+      </div>
+      <div style="flex:1;">
+        <div class="v-section-title">美团小美 — 交易平台基因</div>
+        <div class="txt-xs">强在本地生活交易闭环，但限于美团生态。缺少旅行深度内容、文化理解、多平台比价能力。"小美"能订外卖但不能告诉你京都哪间旅馆的窗景最惊艳。</div>
+      </div>
+      <div style="flex:1;">
+        <div class="v-section-title">高德/百度 — 地图基因</div>
+        <div class="txt-xs">空间智能和导航能力强，但无法完成交易闭环。缺少酒店/机票/餐厅的深度比价和执行能力。高德能告诉你"怎么去"但回答不了"值不值得去"。</div>
+      </div>
+      <div style="flex:1;">
+        <div class="v-section-title">豆包 — 通用AI（人工智能）基因</div>
+        <div class="txt-xs">跨应用操作能力最强，但作为通用助手缺乏旅行行业垂直数据、商户关系网络和场景深度理解。豆包能帮你打开携程但不能帮你判断哪个酒店更好。</div>
+      </div>
+    </div>
+    <div style="margin-top:8px; padding:6px 10px; background:#fef9e7; border-left:3px solid var(--accent2); font-size:10px; color:#7d6608;">
+      <strong>关键洞察：</strong>填补这个空白需要<strong>"AI（人工智能）+ 旅行 + 本地生活 + 社交 + 隐私计算"</strong>的跨领域整合——这正是大公司内部最难跨越的组织墙，也是创业公司的结构性机会。
+    </div>
+  </div>
+
+  <!-- ======== GAP ======== -->
+  <div class="card s-gap">
+    <div class="sec-title"><span class="num">4</span>需求覆盖自检</div>
+    <div class="txt-sm">经过3轮审查，确认以下用户需求已全部覆盖：</div>
+    <div style="display:flex; flex-wrap:wrap; gap:3px; margin-top:6px;">
+      <span class="tag tag-green">✓ 旅游行程规划</span>
+      <span class="tag tag-green">✓ 路线最优安排</span>
+      <span class="tag tag-green">✓ 景观房窗景推荐</span>
+      <span class="tag tag-green">✓ 机票/酒店比价</span>
+      <span class="tag tag-green">✓ 地方特色美食</span>
+      <span class="tag tag-green">✓ 洗浴/按摩/水疗（SPA）</span>
+      <span class="tag tag-green">✓ 高质量KTV推荐</span>
+      <span class="tag tag-green">✓ 动车/高铁选座</span>
+      <span class="tag tag-green">✓ 当地风俗/禁忌</span>
+      <span class="tag tag-green">✓ 实时物价/天气</span>
+      <span class="tag tag-green">✓ 日用品应急补给</span>
+      <span class="tag tag-green">✓ 打车/市内交通</span>
+      <span class="tag tag-green">✓ 全语音交互</span>
+      <span class="tag tag-green">✓ 全维度费用测算</span>
+      <span class="tag tag-green">✓ 经济/品质双模式</span>
+      <span class="tag tag-green">✓ 商务宴请智能匹配</span>
+      <span class="tag tag-green">✓ 朋友聚会/工作餐</span>
+      <span class="tag tag-green">✓ 银发用户慢语速</span>
+      <span class="tag tag-green">✓ 行程动态调整</span>
+      <span class="tag tag-green">✓ 跨平台一键执行</span>
+    </div>
+  </div>
+
+  <!-- ======== GOAL ======== -->
+  <div class="card s-goal">
+    <div class="sec-title"><span class="num">5</span>设计目标</div>
+    <div class="txt-sm">
+      <strong>产出3个差异化版本，每个版本具备：</strong>
+    </div>
+    <ul style="margin-top:4px;">
+      <li>鲜明的核心定位和一句能记住的口号</li>
+      <li>让用户"哇"的惊喜时刻（Aha Moment）</li>
+      <li>清晰的目标用户画像和给钱的理由</li>
+      <li>可信的信任锚点和犯错兜底机制</li>
+      <li>投资人认可的市场总量（TAM）/护城河/退出路径</li>
+    </ul>
+    <div style="margin-top:8px;">
+      <span class="tag tag-red">C端喜爱度</span>
+      <span class="tag tag-gold">投资人吸引力</span>
+      <span class="tag tag-blue">商业可行性</span>
+      <span class="tag tag-green">技术可达性</span>
+    </div>
+  </div>
+
+  <!-- ======== VERSION 1: 灵犀 ======== -->
+  <div class="card s-v1">
+    <div class="sec-title"><span class="num" style="background:#c0392b;">A</span>版本一</div>
+    <div class="v-name lx">灵犀</div>
+    <div class="v-tagline">"一句话，安排你的整个生活"</div>
+    <div class="v-aha">
+      <strong>惊喜时刻（Aha Moment）：</strong>说完"周五去成都吃火锅看熊猫"，3秒后完整方案已在播报——航班、酒店、火锅店、熊猫基地最佳入园时间，全程没看一个列表。
+    </div>
+    <div class="v-section-title">核心哲学</div>
+    <div class="txt-sm">指令即完成（Command & Done）。不给选项列表，只给最优结果。</div>
+    <div class="v-section-title">目标用户</div>
+    <div class="txt-xs">都市白领(25-35) | 年轻家庭(30-40) | 银发初老(55-65)</div>
+    <div class="v-section-title">五大能力矩阵</div>
+    <ul>
+      <li>全交通规划（航空+高铁选座+打车+地铁）</li>
+      <li>住宿智能优选（景观房发现引擎+多平台比价）</li>
+      <li>本地生活深度发现（美食/洗浴/按摩/KTV/购物/应急/文化）</li>
+      <li>智能测算比价（经济⇄品质双轨+费用透明化+预算追踪）</li>
+      <li>场景化推荐（商务/聚会/情侣/家庭/独行5种模式）</li>
+    </ul>
+    <div class="v-section-title">投资人要点</div>
+    <div class="txt-xs">
+      市场总量（TAM）：6亿互联网用户 | 每用户年均收入（ARPU）：200-500元/年 | 18月月收入目标：3000万<br>
+      护城河：全链路执行效率+中立推荐+语音体验<br>
+      退出：战略收购(携程/美团/字节/阿里) 10-30亿美元 或 科创板首次公开上市（IPO）
+    </div>
+  </div>
+
+  <!-- ======== VERSION 2: 随行 ======== -->
+  <div class="card s-v2">
+    <div class="sec-title"><span class="num" style="background:#d4a017;">B</span>版本二</div>
+    <div class="v-name sx">随行</div>
+    <div class="v-tagline">"让每次出行，都成为值得讲述的故事"</div>
+    <div class="v-aha">
+      <strong>惊喜时刻（Aha Moment）：</strong>站在京都旅馆窗前，它告诉你："这间「松の间」是川端康成创作《古都》时的房间，清晨7:15阳光以47度角穿过竹林——美学评分9.4/10。"
+    </div>
+    <div class="v-section-title">核心哲学</div>
+    <div class="txt-sm">体验优先于效率（Experience over Efficiency）。品味卓越的旅行策展人，过滤平庸，只呈现精华。</div>
+    <div class="v-section-title">目标用户</div>
+    <div class="txt-xs">品质旅行者(28-40) | 内容创作者(22-35) | 深度文化旅者(40-65)</div>
+    <div class="v-section-title">六感体验引擎</div>
+    <ul>
+      <li>故事发现系统（本地人视角+时间魔法+隐藏宝藏+反网红审查）</li>
+      <li>美学评分系统（全球首创：窗景/氛围/出片指数综合评分）</li>
+      <li>节奏调节器（密度控制+体力预估+情绪曲线+20%空白时间）</li>
+      <li>社交共鸣（行程卡片+费用分摊+旅行手账自动生成）</li>
+      <li>在地连接（意见领袖达人网络（KOL）+节庆日历+语言桥梁+应急保障）</li>
+      <li>品味进化（持续追踪偏好，每次都更懂你）</li>
+    </ul>
+    <div class="v-section-title">投资人要点</div>
+    <div class="txt-xs">
+      市场总量（TAM）：3000万高净值旅行者(1500亿/年) | 每用户年均收入（ARPU）：600-1200元/年<br>
+      护城河：美学评分+策展人点评+内容品牌（数据可爬，品味不可复制）<br>
+      退出：战略收购(小红书/Airbnb/康泰纳仕) 5-20亿美元 或 美股首次公开上市（IPO）
+    </div>
+  </div>
+
+  <!-- ======== VERSION 3: 智变 ======== -->
+  <div class="card s-v3">
+    <div class="sec-title"><span class="num" style="background:#2c3e50;">C</span>版本三</div>
+    <div class="v-name zb">智变</div>
+    <div class="v-tagline">"在你切换身份的每一个瞬间，我已准备好"</div>
+    <div class="v-aha">
+      <strong>惊喜时刻（Aha Moment）：</strong>周五17:30准备下班。它轻声说："本周工作56小时，周末空闲。法云安缦禅景房降价30%。张三明天也在杭州，上次见是去年11月。"——你什么都没说，它什么都知道。
+    </div>
+    <div class="v-section-title">核心哲学</div>
+    <div class="txt-sm">场景即一切（Context is Everything）。持续运行的生命操作系统（OS），感知场景→切换模式→主动服务。</div>
+    <div class="v-section-title">目标用户</div>
+    <div class="txt-xs">商务精英(30-45) | 斜杠青年(25-35) | 家庭管理者(35-50)</div>
+    <div class="v-section-title">四层架构</div>
+    <ul>
+      <li>感知层：场景雷达（时空/日程/关系/状态/环境全感知）</li>
+      <li>决策层：六大身份自动识别+智能计划+关系图谱引擎</li>
+      <li>执行层：语音+增强现实（AR）+触觉+跨应用多模态行动</li>
+      <li>记忆层：端侧加密生命档案（进化型偏好+遗忘机制）</li>
+    </ul>
+    <div class="v-section-title">投资人要点</div>
+    <div class="txt-xs">
+      市场总量（TAM）：5000万商务+斜杠青年 | 每用户年均收入（ARPU）：700-1500元/年<br>
+      护城河：场景感知+关系图谱+端侧隐私（数据飞轮效应）<br>
+      退出：战略收购(字节/腾讯/阿里/苹果) 20-50亿美元 或 纳斯达克首次公开上市（IPO）
+    </div>
+  </div>
+
+  <!-- ======== IMPLEMENTATION PLAN ======== -->
+  <div class="card s-plan">
+    <div class="sec-title"><span class="num">6</span>分阶段实施路线图</div>
+    <table>
+      <tr>
+        <th style="width:12%;">阶段</th>
+        <th style="width:16%;">时间</th>
+        <th style="width:24%;">核心动作</th>
+        <th style="width:16%;">主推版本</th>
+        <th style="width:16%;">核心指标</th>
+        <th style="width:16%;">里程碑</th>
+      </tr>
+      <tr class="phase-row">
+        <td><strong>第一阶段（Phase 1）</strong><br><span class="tag tag-red">打基础</span></td>
+        <td>0–18个月</td>
+        <td class="left">上海单城深耕，手工标注500家核心商户，接入3-5家在线旅游平台（OTA）数据，1000种子用户内测</td>
+        <td><strong>灵犀</strong><br><span class="txt-xs">大众入口</span></td>
+        <td>日活用户（DAU）· 交易总额（GMV）<br>用户留存</td>
+        <td>月交易总额（GMV）破1亿</td>
+      </tr>
+      <tr class="phase-row">
+        <td><strong>第二阶段（Phase 2）</strong><br><span class="tag tag-gold">高端升级</span></td>
+        <td>18–36个月</td>
+        <td class="left">在灵犀用户基础上推出"随行专业版（Pro）"高端层，美学评分系统覆盖100+目的地，引入用户共创内容（UGC）</td>
+        <td><strong>灵犀+随行</strong><br><span class="txt-xs">双品牌</span></td>
+        <td>每用户年均收入（ARPU）· 用户口碑（NPS）<br>品牌认知度</td>
+        <td>年收入2亿</td>
+      </tr>
+      <tr class="phase-row">
+        <td><strong>第三阶段（Phase 3）</strong><br><span class="tag tag-blue">平台终局</span></td>
+        <td>36个月+</td>
+        <td class="left">灵犀的执行 + 随行的品味 → 整合为"智变"场景自适应操作系统（OS），开放平台接口（API），推出企业版软件即服务（SaaS）</td>
+        <td><strong>智变</strong><br><span class="txt-xs">生态平台</span></td>
+        <td>平台交易总额（GMV）· 合作伙伴数 · 用户终身价值（LTV）</td>
+        <td>估值20-50亿美元</td>
+      </tr>
+    </table>
+    <div style="display:flex; gap:8px; margin-top:8px;">
+      <div style="flex:1; font-size:9px; color:var(--text-mid);">
+        <strong>融资节奏：</strong>种子轮500-1000万人民币（团队+产品原型（MVP）+单城冷启动）→ A轮3000-5000万美元（多城扩展+人工智能（AI）引擎+增长）
+      </div>
+      <div style="flex:1; font-size:9px; color:var(--text-mid);">
+        <strong>团队核心：</strong>语音人工智能（AI）工程师 + 旅行行业产品经理（PM） + 本地生活商务拓展（BD） + 界面/体验设计师（UI/UX）；顾问：酒店专家 + 风险投资人（VC） + 隐私律师
+      </div>
+    </div>
+  </div>
+
+  <!-- ======== KPIs & COMPARISON ======== -->
+  <div class="card s-kpi">
+    <div class="sec-title"><span class="num">7</span>三版核心指标对比</div>
+    <table>
+      <tr>
+        <th style="text-align:left;">指标</th>
+        <th>灵犀</th>
+        <th>随行</th>
+        <th>智变</th>
+      </tr>
+      <tr><td class="left">核心隐喻</td><td>超级管家</td><td>旅行策展人</td><td>生活操作系统（OS）</td></tr>
+      <tr><td class="left">市场总量（TAM）</td><td>6亿</td><td>3000万</td><td>5000万</td></tr>
+      <tr><td class="left">每用户年均收入（ARPU）</td><td>200-500元</td><td>600-1200元</td><td>700-1500元</td></tr>
+      <tr><td class="left">用户终身价值/获客成本（LTV/CAC）</td><td>&gt;10倍</td><td>&gt;8倍</td><td>&gt;15倍</td></tr>
+      <tr><td class="left">估值锚点</td><td>10-30亿$</td><td>5-20亿$</td><td>20-50亿$</td></tr>
+      <tr><td class="left">路径难度</td><td>★★★</td><td>★★★★</td><td>★★★★★</td></tr>
+      <tr><td class="left">终局天花板</td><td>★★★★</td><td>★★★</td><td>★★★★★</td></tr>
+    </table>
+    <div style="margin-top:7px; font-size:9px; color:var(--text-mid); line-height:1.55;">
+      <strong>建议首选：灵犀</strong>（起量最快，投资人故事最清晰）→ 积累数据后孵化随行高端层 → 最终演进为智变完整生命操作系统（OS）。
+    </div>
+    <div class="footer-note">
+      合规前置：架构须符合《个人信息保护法》《数据安全法》要求 | 文档版本: v3-Final
+    </div>
+  </div>
+
+</div>
+
+</body>
+</html>

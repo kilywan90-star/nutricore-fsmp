@@ -1,0 +1,103 @@
+<!-- 社区广场 -->
+<view class="page">
+  <!-- 顶部Tab -->
+  <view class="feed-tabs">
+    <view class="tab-item {{currentTab === 'all' ? 'active' : ''}}" bindtap="switchTab" data-tab="all">
+      <text>推荐</text>
+    </view>
+    <view class="tab-item {{currentTab === 'yuhuo' ? 'active' : ''}}" bindtap="switchTab" data-tab="yuhuo">
+      <text>🐟 鱼获</text>
+    </view>
+    <view class="tab-item {{currentTab === 'fengjing' ? 'active' : ''}}" bindtap="switchTab" data-tab="fengjing">
+      <text>🏞 风景</text>
+    </view>
+    <view class="tab-item {{currentTab === 'jingyan' ? 'active' : ''}}" bindtap="switchTab" data-tab="jingyan">
+      <text>💡 经验</text>
+    </view>
+  </view>
+
+  <!-- 动态列表 -->
+  <scroll-view class="feed-scroll" scroll-y bindscrolltolower="loadMore">
+    <block wx:for="{{posts}}" wx:key="id">
+      <view class="card post-card">
+        <view class="flex">
+          <image class="avatar" src="{{item.user.avatar || '/static/default-avatar.png'}}" mode="aspectFill" />
+          <view class="flex-1" style="margin-left:16rpx">
+            <view class="flex-between">
+              <view>
+                <text class="text-bold">{{item.user.nickname}}</text>
+                <text class="tag tag-green" style="margin-left:8rpx">{{item.type}}</text>
+              </view>
+              <text class="text-sm text-muted">{{item.created_at}}</text>
+            </view>
+          </view>
+        </view>
+
+        <view class="post-content mt-16">
+          <text>{{item.content}}</text>
+        </view>
+
+        <!-- 鱼获信息 -->
+        <view class="fish-card mt-16" wx:if="{{item.fish_info && item.fish_info.species}}">
+          <text class="text-bold">🐟 {{item.fish_info.species}}</text>
+          <text wx:if="{{item.fish_info.weight}}"> {{item.fish_info.weight}}斤</text>
+          <text wx:if="{{item.fish_info.length}}"> {{item.fish_info.length}}cm</text>
+          <text wx:if="{{item.fish_info.bait}}"> 饵料: {{item.fish_info.bait}}</text>
+        </view>
+
+        <!-- 图片 -->
+        <view class="post-images mt-16" wx:if="{{item.images && item.images.length > 0}}">
+          <image wx:for="{{item.images}}" wx:for-item="img" wx:key="*this"
+            src="{{img}}" mode="aspectFill" class="post-img" />
+        </view>
+
+        <view class="mt-8" wx:if="{{item.spot && item.spot.name}}">
+          <text class="text-sm text-muted">📍 {{item.spot.name}}</text>
+        </view>
+
+        <view class="flex-between mt-16 post-actions">
+          <view class="flex">
+            <text class="text-sm" bindtap="onLike" data-id="{{item.id}}">❤ {{item.likes_count}}</text>
+            <text class="text-sm" style="margin-left:32rpx">💬 {{item.comments_count}}</text>
+          </view>
+          <text class="text-sm text-muted">分享</text>
+        </view>
+      </view>
+    </block>
+
+    <view wx:if="{{posts.length === 0 && !loading}}" class="text-center p-24 text-muted">
+      <text>还没有动态，发布第一条吧！</text>
+    </view>
+
+    <view wx:if="{{loading}}" class="text-center p-24 text-muted">
+      <text>加载中...</text>
+    </view>
+  </scroll-view>
+
+  <!-- 发布按钮 -->
+  <view class="fab" bindtap="showPublish">
+    <text class="fab-text">+</text>
+  </view>
+
+  <!-- 发布弹窗 -->
+  <view class="publish-modal" wx:if="{{showPublishModal}}">
+    <view class="modal-mask" bindtap="hidePublish"></view>
+    <view class="modal-content">
+      <view class="flex-between p-24">
+        <text class="text-lg text-bold">发布动态</text>
+        <text bindtap="hidePublish" style="font-size:40rpx;color:#999">✕</text>
+      </view>
+      <view class="p-24">
+        <picker mode="selector" range="{{postTypes}}" bindchange="onPostTypeChange">
+          <view class="select-type">{{publishForm.type || '选择类型'}}</view>
+        </picker>
+        <textarea class="publish-input mt-16"
+          placeholder="分享你的钓鱼经历..."
+          value="{{publishForm.content}}"
+          bindinput="onContentInput"
+          maxlength="500" />
+        <button class="btn-primary mt-24" style="width:100%" bindtap="submitPost">发布</button>
+      </view>
+    </view>
+  </view>
+</view>

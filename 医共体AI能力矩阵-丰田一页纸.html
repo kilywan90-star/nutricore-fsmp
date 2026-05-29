@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>医共体基层AI能力矩阵 — 丰田一页纸</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700;900&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Noto Sans SC', 'Microsoft YaHei', sans-serif;
+    background: #f0f2f5;
+    display: flex;
+    justify-content: center;
+    padding: 20px;
+  }
+
+  .a3 {
+    width: 1189px;
+    min-height: 1682px;
+    background: #fff;
+    padding: 28px 32px;
+    box-shadow: 0 4px 24px rgba(0,0,0,.12);
+    display: grid;
+    grid-template-rows: auto auto 1fr auto;
+    gap: 16px;
+  }
+
+  /* ── 标题栏 ── */
+  .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    border-bottom: 3px solid #1a3a5c;
+    padding-bottom: 12px;
+  }
+  .header h1 {
+    font-size: 28px;
+    font-weight: 900;
+    color: #1a3a5c;
+    letter-spacing: 2px;
+  }
+  .header .meta {
+    text-align: right;
+    font-size: 12px;
+    color: #666;
+    line-height: 1.6;
+  }
+
+  /* ── 背景栏 ── */
+  .context-bar {
+    display: flex;
+    gap: 16px;
+  }
+  .context-box {
+    flex: 1;
+    background: #e8f0fe;
+    border-left: 4px solid #1a73e8;
+    padding: 10px 14px;
+    border-radius: 4px;
+    font-size: 13px;
+    line-height: 1.6;
+    color: #1a3a5c;
+  }
+  .context-box strong { color: #0d47a1; }
+  .context-box.north {
+    background: #e8f5e9;
+    border-left-color: #2e7d32;
+  }
+
+  /* ── 矩阵总表 ── */
+  .section-title {
+    font-size: 15px;
+    font-weight: 700;
+    color: #1a3a5c;
+    padding: 4px 0;
+    border-bottom: 1px solid #ddd;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 4px;
+  }
+  .section-title .num { background: #1a3a5c; color: #fff; border-radius: 50%; width: 22px; height: 22px; display: flex; align-items: center; justify-content: center; font-size: 12px; }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 11px;
+    line-height: 1.5;
+  }
+  thead th {
+    background: #1a3a5c;
+    color: #fff;
+    font-weight: 500;
+    padding: 7px 6px;
+    text-align: center;
+    font-size: 11px;
+    white-space: nowrap;
+  }
+  thead th:first-child { width: 30px; }
+  thead th:nth-child(2) { width: 85px; }
+  thead th:nth-child(3) { width: 120px; }
+  thead th:nth-child(4) { text-align: left; padding-left: 10px; }
+  thead th:nth-child(5) { width: 70px; }
+  thead th:nth-child(6) { width: 65px; }
+
+  tbody td {
+    padding: 5px 6px;
+    text-align: center;
+    border-bottom: 1px solid #eee;
+    vertical-align: middle;
+  }
+  tbody td:nth-child(4) { text-align: left; padding-left: 10px; font-size: 11px; color: #333; }
+  tbody tr:nth-child(even) { background: #f8f9fb; }
+  tbody tr:hover { background: #e8f0fe; }
+
+  .cat-tag {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 3px;
+    font-size: 10px;
+    font-weight: 700;
+    white-space: nowrap;
+  }
+  .cat-diag   { background: #ffebee; color: #c62828; }
+  .cat-drug   { background: #fff3e0; color: #e65100; }
+  .cat-chronic{ background: #e8f5e9; color: #1b5e20; }
+  .cat-public { background: #e3f2fd; color: #0d47a1; }
+  .cat-doc    { background: #f3e5f5; color: #6a1b9a; }
+  .cat-emerg  { background: #ffebee; color: #b71c1c; }
+  .cat-train  { background: #e0f7fa; color: #006064; }
+  .cat-ops    { background: #f9fbe7; color: #827717; }
+  .cat-patient{ background: #fce4ec; color: #880e4f; }
+
+  .priority {
+    display: inline-block;
+    width: 22px; height: 22px;
+    border-radius: 4px;
+    font-weight: 900; font-size: 11px;
+    color: #fff; line-height: 22px;
+  }
+  .pri-p0 { background: #d32f2f; }
+  .pri-p1 { background: #ef6c00; }
+  .pri-p2 { background: #1976d2; }
+  .pri-p3 { background: #757575; }
+
+  .roi-badge {
+    display: inline-block;
+    padding: 1px 6px;
+    border-radius: 3px;
+    font-size: 10px;
+    font-weight: 700;
+  }
+  .roi-high  { background: #c8e6c9; color: #1b5e20; }
+  .roi-mid   { background: #fff9c4; color: #f57f17; }
+  .roi-social{ background: #bbdefb; color: #0d47a1; }
+
+  /* ── 底部 ── */
+  .footer-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    margin-top: 8px;
+  }
+  .footer-box {
+    background: #f8f9fb;
+    border: 1px solid #e0e0e0;
+    border-radius: 4px;
+    padding: 12px 16px;
+    font-size: 12px;
+    line-height: 1.7;
+  }
+  .footer-box h4 {
+    font-size: 13px;
+    font-weight: 700;
+    color: #1a3a5c;
+    margin-bottom: 6px;
+  }
+  .footer-box.rec {
+    grid-column: 1 / -1;
+    background: linear-gradient(135deg, #e8f0fe 0%, #e8f5e9 100%);
+    border-color: #90caf9;
+  }
+
+  .roadmap {
+    display: flex;
+    gap: 8px;
+    margin-top: 6px;
+    flex-wrap: wrap;
+  }
+  .roadmap-stage {
+    flex: 1;
+    min-width: 150px;
+    background: #fff;
+    border-radius: 4px;
+    padding: 10px;
+    border-top: 3px solid #1a73e8;
+    font-size: 11px;
+    line-height: 1.6;
+  }
+  .roadmap-stage h5 { font-size: 12px; color: #1a3a5c; margin-bottom: 4px; }
+  .roadmap-stage ul { padding-left: 16px; }
+  .roadmap-stage.ph2 { border-top-color: #ef6c00; }
+  .roadmap-stage.ph3 { border-top-color: #2e7d32; }
+
+  @media print {
+    body { background: #fff; padding: 0; }
+    .a3 { box-shadow: none; width: 100%; page-break-after: avoid; }
+  }
+</style>
+</head>
+<body>
+<div class="a3">
+
+  <!-- ═══ 标题栏 ═══ -->
+  <div class="header">
+    <div>
+      <h1>医共体基层AI能力矩阵</h1>
+      <div style="font-size:13px;color:#666;margin-top:2px;">县域医共体人工智能应用全景图 — 丰田A3一页纸</div>
+    </div>
+    <div class="meta">
+      <div>版本 v1.0</div>
+      <div>日期 2026-05-19</div>
+      <div>密级 内部</div>
+    </div>
+  </div>
+
+  <!-- ═══ 背景栏 ═══ -->
+  <div class="context-bar">
+    <div class="context-box">
+      <strong>核心矛盾</strong><br>
+      基层"看不了病、管不好人、写不完表"——
+      诊断能力不足导致漏诊误诊，慢病管理缺位导致并发症高发，
+      文书负担过重挤占诊疗时间。AI的核心价值是<b>兜底安全 + 拉升下限</b>。
+    </div>
+    <div class="context-box north">
+      <strong>设计原则</strong><br>
+      让水平一般的基层医生做出<b>不低于基准线</b>的决策，
+      而非追求顶级医院的疑难杂症能力。
+      所有AI围绕"同质化医疗服务下沉"定位展开。
+    </div>
+  </div>
+
+  <!-- ═══ 能力矩阵总表 ═══ -->
+  <div>
+    <div class="section-title"><span class="num">1</span> 20项AI能力全景矩阵（按落地价值排序）</div>
+    <table>
+      <thead>
+        <tr>
+          <th>#</th><th>大类</th><th>AI能力</th><th>解决什么基层痛点</th>
+          <th>优先级</th><th>投入回报</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>1</td><td><span class="cat-tag cat-diag">诊断补强</span></td><td>影像AI辅助诊断</td>
+          <td>基层缺影像科医生，CT/DR设备闲置，肺结节/骨折/脑出血无人判读</td>
+          <td><span class="priority pri-p0">P0</span></td>
+          <td><span class="roi-badge roi-high">高</span></td>
+        </tr>
+        <tr>
+          <td>2</td><td><span class="cat-tag cat-drug">用药医保</span></td><td>AI处方前置审核</td>
+          <td>基层不合理用药率高（抗生素滥用、激素滥用、配伍禁忌），处方合格率低</td>
+          <td><span class="priority pri-p0">P0</span></td>
+          <td><span class="roi-badge roi-high">高</span></td>
+        </tr>
+        <tr>
+          <td>3</td><td><span class="cat-tag cat-diag">诊断补强</span></td><td>AI辅助诊断(CDSS)</td>
+          <td>基层医生诊断经验不足，急危重症（心梗/脑卒中/急腹症）早期识别率低</td>
+          <td><span class="priority pri-p0">P0</span></td>
+          <td><span class="roi-badge roi-high">高</span></td>
+        </tr>
+        <tr>
+          <td>4</td><td><span class="cat-tag cat-chronic">慢病管理</span></td><td>AI慢病主动管理引擎</td>
+          <td>高血压/糖尿病/COPD患者缺乏持续管理、依从性差，住院率居高不下</td>
+          <td><span class="priority pri-p0">P0</span></td>
+          <td><span class="roi-badge roi-high">住院率降10-15%</span></td>
+        </tr>
+        <tr>
+          <td>5</td><td><span class="cat-tag cat-drug">用药医保</span></td><td>医保AI智能审核</td>
+          <td>人工审核覆盖率<5%，违规行为难以及时发现，基金安全面临风险</td>
+          <td><span class="priority pri-p1">P1</span></td>
+          <td><span class="roi-badge roi-high">违规拦截率>90%</span></td>
+        </tr>
+        <tr>
+          <td>6</td><td><span class="cat-tag cat-doc">文书减负</span></td><td>AI语音电子病历</td>
+          <td>基层医生大量时间花在写病历、填公卫表格上，日均门诊效率低</td>
+          <td><span class="priority pri-p1">P1</span></td>
+          <td><span class="roi-badge roi-high">日均多看10-15人</span></td>
+        </tr>
+        <tr>
+          <td>7</td><td><span class="cat-tag cat-diag">诊断补强</span></td><td>AI心电/超声实时辅助</td>
+          <td>基层心电图操作不规范、不会判读，心梗/心律失常漏诊导致严重后果</td>
+          <td><span class="priority pri-p1">P1</span></td>
+          <td><span class="roi-badge roi-mid">中</span></td>
+        </tr>
+        <tr>
+          <td>8</td><td><span class="cat-tag cat-diag">诊断补强</span></td><td>AI皮肤病/眼底/口腔筛查</td>
+          <td>基层无皮肤科眼科口腔科，但此类就诊占15-20%，手机拍照即可筛查</td>
+          <td><span class="priority pri-p1">P1</span></td>
+          <td><span class="roi-badge roi-high">零设备成本</span></td>
+        </tr>
+        <tr>
+          <td>9</td><td><span class="cat-tag cat-drug">用药医保</span></td><td>AI病案编码/DRG辅助</td>
+          <td>基层编码准确率<70%，直接影响医保结算和绩效评价</td>
+          <td><span class="priority pri-p1">P1</span></td>
+          <td><span class="roi-badge roi-high">直接增收</span></td>
+        </tr>
+        <tr>
+          <td>10</td><td><span class="cat-tag cat-chronic">慢病管理</span></td><td>AI多重慢病共病管理</td>
+          <td>老年患者合并3-5种慢病，单病种指南矛盾，用药冲突多</td>
+          <td><span class="priority pri-p1">P1</span></td>
+          <td><span class="roi-badge roi-mid">中</span></td>
+        </tr>
+        <tr>
+          <td>11</td><td><span class="cat-tag cat-chronic">慢病管理</span></td><td>AI语音随访机器人</td>
+          <td>公卫随访量大、人员不足，电话随访流于形式，覆盖率低</td>
+          <td><span class="priority pri-p2">P2</span></td>
+          <td><span class="roi-badge roi-high">覆盖率提至90%+</span></td>
+        </tr>
+        <tr>
+          <td>12</td><td><span class="cat-tag cat-public">妇幼公卫</span></td><td>AI孕产妇与儿童保健</td>
+          <td>基层妇幼保健人力不足，高危孕产妇和儿童发育迟缓漏管率高</td>
+          <td><span class="priority pri-p1">P1</span></td>
+          <td><span class="roi-badge roi-social">公卫指标直接关联</span></td>
+        </tr>
+        <tr>
+          <td>13</td><td><span class="cat-tag cat-public">妇幼公卫</span></td><td>传染病AI预警</td>
+          <td>传染病暴发/食源性疾病发现滞后，依赖被动报告</td>
+          <td><span class="priority pri-p2">P2</span></td>
+          <td><span class="roi-badge roi-social">公共卫生价值</span></td>
+        </tr>
+        <tr>
+          <td>14</td><td><span class="cat-tag cat-public">妇幼公卫</span></td><td>AI心理健康筛查与干预</td>
+          <td>基层精神卫生资源极度匮乏，抑郁/焦虑识别率<10%</td>
+          <td><span class="priority pri-p2">P2</span></td>
+          <td><span class="roi-badge roi-mid">填补空白</span></td>
+        </tr>
+        <tr>
+          <td>15</td><td><span class="cat-tag cat-emerg">急救协同</span></td><td>AI院前急救指导</td>
+          <td>农村急救响应>30分钟，救护车到达前无专业指导</td>
+          <td><span class="priority pri-p2">P2</span></td>
+          <td><span class="roi-badge roi-high">存活率提升</span></td>
+        </tr>
+        <tr>
+          <td>16</td><td><span class="cat-tag cat-emerg">急救协同</span></td><td>AI智能分诊与双向转诊</td>
+          <td>转诊凭经验，该转不转、不该转往上推，资源错配</td>
+          <td><span class="priority pri-p2">P2</span></td>
+          <td><span class="roi-badge roi-mid">减少无效转诊</span></td>
+        </tr>
+        <tr>
+          <td>17</td><td><span class="cat-tag cat-ops">运营管理</span></td><td>AI药品库存与供应链</td>
+          <td>基层药品短缺与过期浪费并存，采购靠经验</td>
+          <td><span class="priority pri-p3">P3</span></td>
+          <td><span class="roi-badge roi-mid">过期损耗减少</span></td>
+        </tr>
+        <tr>
+          <td>18</td><td><span class="cat-tag cat-train">能力建设</span></td><td>AI基层医生培训模拟</td>
+          <td>基层培训机会少、知识老化，缺乏实操训练</td>
+          <td><span class="priority pri-p3">P3</span></td>
+          <td><span class="roi-badge roi-mid">长期回报</span></td>
+        </tr>
+        <tr>
+          <td>19</td><td><span class="cat-tag cat-patient">患者触达</span></td><td>数字医生分身</td>
+          <td>居民健康咨询无门，小病也要跑医院，门诊压力大</td>
+          <td><span class="priority pri-p2">P2</span></td>
+          <td><span class="roi-badge roi-mid">减门诊量</span></td>
+        </tr>
+        <tr>
+          <td>20</td><td><span class="cat-tag cat-patient">患者触达</span></td><td>AI个性化健康教育</td>
+          <td>基层健教内容枯燥、千篇一律，居民不感兴趣</td>
+          <td><span class="priority pri-p3">P3</span></td>
+          <td><span class="roi-badge roi-mid">依从性提升</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ═══ 底部：路径 + 核心逻辑 ═══ -->
+  <div class="footer-grid">
+    <div class="footer-box rec">
+      <h4>实施路径建议（三阶段推进）</h4>
+      <div class="roadmap">
+        <div class="roadmap-stage">
+          <h5>Phase 1 — 安全兜底（0-12月）</h5>
+          <ul>
+            <li>影像AI辅助诊断</li>
+            <li>AI处方前置审核</li>
+            <li>AI辅助诊断(CDSS)</li>
+            <li>AI心电/超声实时辅助</li>
+          </ul>
+        </div>
+        <div class="roadmap-stage ph2">
+          <h5>Phase 2 — 提质增效（12-24月）</h5>
+          <ul>
+            <li>AI慢病主动管理</li>
+            <li>AI语音电子病历</li>
+            <li>医保AI智能审核</li>
+            <li>AI病案编码/DRG</li>
+            <li>AI妇幼保健管理</li>
+          </ul>
+        </div>
+        <div class="roadmap-stage ph3">
+          <h5>Phase 3 — 生态闭环（24-36月）</h5>
+          <ul>
+            <li>AI多重共病管理</li>
+            <li>AI语音随访</li>
+            <li>AI分诊转诊</li>
+            <li>传染病AI预警</li>
+            <li>数字医生分身</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer-box">
+      <h4>核心成功要素</h4>
+      <ul>
+        <li><b>数据基础</b>：统一区域健康档案、电子病历、检查检验数据标准</li>
+        <li><b>网络支撑</b>：村-乡-县三级网络互联互通（区域PACS、区域心电、远程会诊平台）</li>
+        <li><b>制度配套</b>：AI辅助诊断纳入医保报销、基层绩效考核权重调整</li>
+        <li><b>医生赋能</b>：AI培训 + 人机协作流程设计，避免技术冰冷落地</li>
+      </ul>
+    </div>
+
+    <div class="footer-box">
+      <h4>关键风险与应对</h4>
+      <ul>
+        <li><b>算法准确性</b>：建立本地化验证机制，持续监测敏感度/特异度</li>
+        <li><b>法律主体责任</b>：明确AI辅助≠替代，最终决策权在医生</li>
+        <li><b>数据隐私</b>：患者数据不出县域，边缘计算+联邦学习降低泄露风险</li>
+        <li><b>基层接受度</b>：从"减负"场景切入（语音病历），让医生先感受到价值</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- ── 底部签名行 ── -->
+  <div style="display:flex;justify-content:space-between;font-size:10px;color:#999;border-top:1px solid #ddd;padding-top:10px;">
+    <span>编制: 医共体AI规划组</span>
+    <span>核心定位: 兜底安全 + 拉升下限 | 让同质化医疗服务触达每一个村卫生室</span>
+    <span>P0=立即启动 P1=重点推进 P2=规划布局 P3=择机启动</span>
+  </div>
+
+</div>
+</body>
+</html>

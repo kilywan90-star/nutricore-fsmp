@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>阿坝州医共体信息化建设 — 核心架构图集</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Microsoft YaHei','宋体',sans-serif;background:#f0f2f5;padding:40px}
+.chart{background:#fff;margin:0 auto 40px;padding:30px;border-radius:8px;box-shadow:0 2px 12px rgba(0,0,0,.08);width:900px}
+.chart h2{font-size:18px;color:#1a3c6e;border-bottom:2px solid #1a3c6e;padding-bottom:8px;margin-bottom:20px}
+/* 架构图通用 */
+.arch-layer{border:1.5px solid #8ca3c2;border-radius:4px;padding:12px;margin:6px 0;text-align:center;font-size:13px}
+.arch-layer.top{background:#e8eff5}
+.arch-layer.mid{background:#f2f6fa}
+.arch-layer.bot{background:#fafbfc}
+.arch-label{font-weight:bold;color:#1a3c6e;margin-bottom:6px}
+.arch-items{display:flex;flex-wrap:wrap;gap:8px;justify-content:center}
+.arch-item{background:#fff;border:1px solid #8ca3c2;border-radius:3px;padding:5px 10px;font-size:11px;white-space:nowrap}
+.arch-item.ai{background:#1a3c6e;color:#fff;border-color:#1a3c6e}
+.arch-item.core{background:#2b579a;color:#fff;border-color:#2b579a}
+.arch-item.exist{background:#e8f5e9;border-color:#4caf50}
+/* 流程图 */
+.flow-row{display:flex;align-items:center;justify-content:center;gap:0;margin:8px 0}
+.flow-box{border:1.5px solid #1a3c6e;border-radius:4px;padding:10px 16px;font-size:12px;text-align:center;background:#f2f6fa;min-width:100px}
+.flow-box.start{background:#1a3c6e;color:#fff;border-radius:20px}
+.flow-box.decision{background:#fff3e0;border-color:#ff9800;transform:rotate(0)}
+.flow-box.ai-box{background:#e8eff5;border-color:#2b579a;border-style:dashed}
+.flow-arrow{font-size:20px;color:#1a3c6e;margin:0 4px}
+.flow-arrow.down{display:block;text-align:center;font-size:22px}
+/* 逻辑图 */
+.logic-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px}
+.logic-card{border:1.5px solid #8ca3c2;border-radius:6px;padding:14px;text-align:center}
+.logic-card h4{color:#1a3c6e;font-size:13px;margin-bottom:6px}
+.logic-card p{font-size:10px;color:#666;line-height:1.5}
+.logic-card.p0{border-left:4px solid #f44336}
+.logic-card.p1{border-left:4px solid #ff9800}
+.logic-card.p2{border-left:4px solid #2196f3}
+.logic-card.p3{border-left:4px solid #9e9e9e}
+/* 表格图 */
+.matrix-table{width:100%;border-collapse:collapse;font-size:11px}
+.matrix-table th{background:#1a3c6e;color:#fff;padding:6px 8px;text-align:center}
+.matrix-table td{border:1px solid #8ca3c2;padding:5px 8px;text-align:center}
+.matrix-table tr:nth-child(even){background:#f2f6fa}
+.p0-tag{background:#f44336;color:#fff;padding:1px 6px;border-radius:2px;font-size:10px}
+.p1-tag{background:#ff9800;color:#fff;padding:1px 6px;border-radius:2px;font-size:10px}
+.p2-tag{background:#2196f3;color:#fff;padding:1px 6px;border-radius:2px;font-size:10px}
+.p3-tag{background:#9e9e9e;color:#fff;padding:1px 6px;border-radius:2px;font-size:10px}
+.tag-new{background:#f44336;color:#fff;padding:1px 6px;border-radius:2px;font-size:9px}
+.tag-reform{background:#ff9800;color:#fff;padding:1px 6px;border-radius:2px;font-size:9px}
+.tag-keep{background:#4caf50;color:#fff;padding:1px 6px;border-radius:2px;font-size:9px}
+</style>
+</head>
+<body>
+
+<!-- 图1: 总体架构图 (1+13+N) -->
+<div class="chart">
+<h2>图1: 总体架构图 — "1+13+N"三层架构</h2>
+<div class="arch-layer top">
+<div class="arch-label">省级平台</div>
+<div class="arch-items">
+<span class="arch-item">四川省全民健康信息平台</span><span class="arch-item">省医保平台</span><span class="arch-item">国家CDC系统</span>
+</div>
+</div>
+<div style="text-align:center;font-size:22px;color:#1a3c6e;margin:4px 0">▲ 数据上报 / 业务协同 ▼</div>
+<div class="arch-layer" style="background:#e8eff5;border:2.5px solid #1a3c6e;">
+<div class="arch-label" style="font-size:16px">★ 1个州级AI医共体智慧大脑</div>
+<div class="arch-items">
+<span class="arch-item core">全民健康信息平台</span><span class="arch-item core">AI中台(MLOps)</span><span class="arch-item core">数据中台(EMPI+ESB)</span>
+<span class="arch-item ai">影像AI引擎</span><span class="arch-item ai">医保AI引擎</span><span class="arch-item ai">慢病AI引擎</span>
+</div>
+</div>
+<div style="text-align:center;font-size:22px;color:#1a3c6e;margin:4px 0">▲ 13个县域医共体平台节点 ▼</div>
+<div style="display:flex;flex-wrap:wrap;gap:6px;justify-content:center">
+<div class="arch-layer mid" style="flex:1;min-width:120px"><div class="arch-label">马尔康</div><span class="arch-item exist">存:中联HIS</span></div>
+<div class="arch-layer mid" style="flex:1;min-width:120px"><div class="arch-label">汶川</div><span class="arch-item exist">存:智慧医疗3包</span></div>
+<div class="arch-layer mid" style="flex:1;min-width:120px"><div class="arch-label">茂县</div><span class="arch-item">新:4900万项目</span></div>
+<div class="arch-layer mid" style="flex:1;min-width:120px"><div class="arch-label">松潘</div><span class="arch-item exist">存:663万中移</span></div>
+<div class="arch-layer mid" style="flex:1;min-width:120px"><div class="arch-label">阿坝县</div><span class="arch-item exist">存:390万中移</span></div>
+<div class="arch-layer mid" style="flex:1;min-width:120px"><div class="arch-label">...共13县</div></div>
+</div>
+<div style="text-align:center;font-size:22px;color:#1a3c6e;margin:4px 0">▲ N个AI应用 + 村卫生室全覆盖 ▼</div>
+<div class="arch-layer bot">
+<div class="arch-items">
+<span class="arch-item">171乡镇卫生院</span><span class="arch-item">1,168村卫生室</span>
+<span class="arch-item ai">5G+AI边缘节点</span><span class="arch-item ai">自助终端</span>
+</div>
+</div>
+</div>
+
+<!-- 图2: 技术架构图 -->
+<div class="chart">
+<h2>图2: 技术架构图 — 六层技术栈</h2>
+<div class="arch-layer" style="background:#e8eff5"><div class="arch-label">接入层</div><div class="arch-items"><span class="arch-item">Web管理端(Vue3)</span><span class="arch-item">移动医护端</span><span class="arch-item">居民小程序</span><span class="arch-item">自助终端</span><span class="arch-item">OpenAPI</span></div></div>
+<div class="arch-layer" style="background:#f2f6fa"><div class="arch-label">网关层</div><div class="arch-items"><span class="arch-item">Kong/APISIX</span><span class="arch-item">OAuth2.0+JWT</span><span class="arch-item">限流</span><span class="arch-item">路由</span><span class="arch-item">日志</span></div></div>
+<div class="arch-layer" style="background:#e8eff5"><div class="arch-label">应用层(微服务)</div><div class="arch-items"><span class="arch-item core">内容服务</span><span class="arch-item core">审核服务</span><span class="arch-item core">分发服务</span><span class="arch-item core">分析服务</span><span class="arch-item core">管理服务</span><span class="arch-item ai">AI推理服务</span></div></div>
+<div class="arch-layer" style="background:#f2f6fa"><div class="arch-label">平台层</div><div class="arch-items"><span class="arch-item">ESB数据总线</span><span class="arch-item">RabbitMQ</span><span class="arch-item">Kafka</span><span class="arch-item">Triton推理</span><span class="arch-item">MLflow</span></div></div>
+<div class="arch-layer" style="background:#e8eff5"><div class="arch-label">数据层</div><div class="arch-items"><span class="arch-item">PostgreSQL 15</span><span class="arch-item">MinIO对象存储</span><span class="arch-item">Redis 7</span><span class="arch-item">Elasticsearch 8</span><span class="arch-item">Milvus向量库</span></div></div>
+<div class="arch-layer" style="background:#f2f6fa"><div class="arch-label">基础设施层</div><div class="arch-items"><span class="arch-item">K8s+Docker</span><span class="arch-item">鲲鹏ARM服务器</span><span class="arch-item">GPU(T4×4+A100×2)</span><span class="arch-item">银河麒麟OS</span><span class="arch-item">Prometheus+Grafana</span></div></div>
+</div>
+
+<!-- 图3: 数据架构图 -->
+<div class="chart">
+<h2>图3: 数据架构图 — 数据全生命周期</h2>
+<div class="flow-row">
+<div class="flow-box start">数据源</div>
+<div class="flow-arrow">→</div>
+<div class="flow-box">CDC实时采集<br><small>Debezium+Kafka</small></div>
+<div class="flow-arrow">→</div>
+<div class="flow-box">ESB总线<br><small>FHIR/HL7转换</small></div>
+<div class="flow-arrow">→</div>
+<div class="flow-box">数据中台<br><small>EMPI+质控+治理</small></div>
+<div class="flow-arrow">→</div>
+<div class="flow-box">数据服务<br><small>API/BI/AI</small></div>
+</div>
+<div style="display:flex;gap:12px;margin-top:12px">
+<div class="arch-layer mid" style="flex:1"><div class="arch-label">ODS层</div><div style="font-size:10px">原始数据<br>HIS/EMR/LIS/PACS/公卫/医保</div></div>
+<div class="arch-layer mid" style="flex:1"><div class="arch-label">DW层</div><div style="font-size:10px">标准化数据仓库<br>患者/就诊/诊断/费用/影像</div></div>
+<div class="arch-layer mid" style="flex:1"><div class="arch-label">DM层</div><div style="font-size:10px">数据集市<br>运营/临床/公卫/医保/患者</div></div>
+<div class="arch-layer mid" style="flex:1"><div class="arch-label">AI层</div><div style="font-size:10px">AI特征库+训练集<br>影像/NLP/结构化特征</div></div>
+</div>
+</div>
+
+<!-- 图8: 医保AI三级漏斗审核流程图 -->
+<div class="chart">
+<h2>图8: 医保AI三级漏斗审核流程</h2>
+<div class="flow-row">
+<div class="flow-box start">100%病历</div>
+<div class="flow-arrow">→</div>
+<div class="flow-box ai-box"><b>L1: 规则引擎</b><br>Drools >500条规则<br>&lt;1ms/条 零成本<br><br>筛出~15%</div>
+<div class="flow-arrow">→</div>
+<div class="flow-box ai-box"><b>L2: BERT分类器</b><br>Qwen3-8B本地微调<br>&lt;100ms/条 极低成本<br><br>筛出~5%</div>
+<div class="flow-arrow">→</div>
+<div class="flow-box ai-box"><b>L3: LLM深度推理</b><br>DeepSeek-V3 API<br>附引用原文证据<br><br>确认~2%违规</div>
+</div>
+<div style="display:flex;gap:12px;margin-top:16px">
+<div style="flex:1;text-align:center;font-size:11px;color:#4caf50">≈85%正常自动放行</div>
+<div style="flex:1;text-align:center;font-size:11px;color:#ff9800">≈10%标记观察</div>
+<div style="flex:1;text-align:center;font-size:11px;color:#f44336">≈3%需人工复核</div>
+<div style="flex:1;text-align:center;font-size:11px;color:#d32f2f">≈2%确认违规→追回</div>
+</div>
+<div style="text-align:center;margin-top:10px;font-size:10px;color:#666">
+年API调用: 仅2%×年病历总量×1元/次≈10万元（全量调用需200万+）| 参考: 梧州34万份追回1,477万 | 湘潭16万条问题病历≈5%
+</div>
+</div>
+
+<!-- 图7: 远程影像诊断业务流程 -->
+<div class="chart">
+<h2>图7: 远程影像AI辅助诊断业务流程</h2>
+<div class="flow-row">
+<div class="flow-box start">基层/乡镇<br>CT/DR拍片</div>
+<div class="flow-arrow">→</div>
+<div class="flow-box ai-box"><b>AI秒级初筛</b><br>病灶检测+分级<br>报告草稿<br>危急值标记</div>
+<div class="flow-arrow">→</div>
+<div class="flow-box decision"><b>AI判定</b><br>阴性?阳性?疑难?</div>
+</div>
+<div class="flow-arrow down">▼</div>
+<div style="display:flex;gap:8px">
+<div style="flex:1;text-align:center"><div class="flow-box" style="background:#e8f5e9;display:inline-block">阴性<br>AI生成正常报告<br>医生一键确认<br><small>省80%工作量</small></div></div>
+<div style="flex:1;text-align:center"><div class="flow-box" style="background:#fff3e0;display:inline-block">阳性<br>AI标注病灶区域<br>→推送县级复核<br>→医生修正发出</div></div>
+<div style="flex:1;text-align:center"><div class="flow-box" style="background:#fce4ec;display:inline-block">疑难/危急值<br>AI预分析摘要<br>→推送州级专家<br>→实时响应</div></div>
+</div>
+<div style="text-align:center;margin-top:10px;font-size:10px;color:#666">全流程&lt;30分钟(常规) | &lt;10分钟(急诊) | 危急值AI识别→医生确认&lt;5分钟</div>
+</div>
+
+<!-- 图13: 八统一管理逻辑图 -->
+<div class="chart">
+<h2>图13: 八统一管理逻辑图 — 信息化是底座</h2>
+<div style="text-align:center;margin-bottom:12px;font-size:12px;color:#666">医共体"八统一"管理 ── 信息化平台是其他七统的技术底座</div>
+<div class="logic-grid">
+<div class="logic-card" style="border:2px solid #1a3c6e;grid-column:1/-1;background:#e8eff5"><h4>⑧ 信息统一 ★核心底座★</h4><p>全民健康信息平台 + 13县平台 + AI中台<br>→ 其他七个统一的数据支撑和技术抓手</p></div>
+<div class="logic-card"><h4>① 编制统一</h4><p>人事系统→编制池管理<br>编制总量控制/动态调配<br>全州编制数据可视化</p></div>
+<div class="logic-card"><h4>② 岗位统一</h4><p>岗位管理→按需设岗<br>竞聘上岗/以岗定薪<br>全州岗位动态监测</p></div>
+<div class="logic-card"><h4>③ 人员统一</h4><p>统一招聘/管理/调剂/培养<br>县聘乡用/乡聘村用<br>下沉派驻天数自动统计</p></div>
+<div class="logic-card"><h4>④ 经费统一</h4><p>公卫资金/基药补助<br>统一打包→总院分配<br>绩效考核数据自动对接</p></div>
+<div class="logic-card"><h4>⑤ 管理统一</h4><p>一体化管理平台<br>行政/业务/绩效统一<br>总院负责制数字抓手</p></div>
+<div class="logic-card"><h4>⑥ 财务统一</h4><p>统一核算/预算/成本<br>成员单位单独设账<br>财务数据实时汇聚</p></div>
+<div class="logic-card"><h4>⑦ 药物统一</h4><p>中心药房→统一目录<br>集体议价/处方流转<br>药品追溯码全流程</p></div>
+</div>
+</div>
+
+<!-- 图16: 投资结构分解图 -->
+<div class="chart">
+<h2>图16: 投资结构分解与优先级矩阵</h2>
+<h4 style="font-size:13px;color:#1a3c6e;margin-bottom:10px">9,600万按投资类别分解</h4>
+<table class="matrix-table">
+<tr><th>投资类别</th><th>金额(万)</th><th>占比</th><th>主要构成</th></tr>
+<tr><td>基础平台</td><td>3,350</td><td>34.9%</td><td>州平台800+13县平台1,950+基础设施600</td></tr>
+<tr><td>业务应用</td><td>2,995</td><td>31.2%</td><td>PACS 1,300+体检690+导诊345+院感660</td></tr>
+<tr><td>三医联动</td><td>1,300</td><td>13.5%</td><td>医保650+药品500+绩效150</td></tr>
+<tr><td>AI赋能</td><td>770</td><td>8.0%</td><td>影像AI 300+慢病AI 250+传染病AI 100+处方AI 120</td></tr>
+<tr><td>配套</td><td>1,185</td><td>12.3%</td><td>培训400+运维300+集成400+预备85</td></tr>
+</table>
+<h4 style="font-size:13px;color:#1a3c6e;margin:16px 0 10px">投资优先级矩阵 (投入 vs ROI)</h4>
+<table class="matrix-table">
+<tr><th>优先级</th><th>典型模块</th><th>投入(万)</th><th>年回报(万)</th><th>回报周期</th><th>决策</th></tr>
+<tr><td><span class="p0-tag">P0</span> 刚性合规</td><td>全民健康平台/五大中心</td><td>3,800</td><td>合规必须</td><td>—</td><td>一期全部启动</td></tr>
+<tr><td><span class="p1-tag">P1</span> 高回报</td><td>云胶片/影像AI/DRG审核/AI审方</td><td>2,270</td><td>1,250-2,100</td><td>10-26月</td><td>一期快赢+二期推广</td></tr>
+<tr><td><span class="p2-tag">P2</span> 中回报</td><td>智能导诊/院感/药品/绩效/AI慢病</td><td>2,275</td><td>500-1,000</td><td>18-36月</td><td>二期为主+三期深化</td></tr>
+<tr><td><span class="p3-tag">P3</span> 长期创新</td><td>藏医药AI/高原病特色模型</td><td>200</td><td>长期价值</td><td>36月+</td><td>三期启动</td></tr>
+</table>
+</div>
+
+<!-- 图14: 三医联动逻辑图 -->
+<div class="chart">
+<h2>图14: 三医联动逻辑图</h2>
+<div style="display:flex;gap:16px;justify-content:center">
+<div class="logic-card" style="flex:1;border-top:4px solid #f44336">
+<h4>🏥 医疗</h4>
+<p>医共体平台+远程诊断+AI辅诊<br>→ 提升县域服务能力<br>→ 减少外转<br>→ 基层首诊率↑</p>
+</div>
+<div class="logic-card" style="flex:1;border-top:4px solid #2196f3">
+<h4>💰 医保</h4>
+<p>总额付费+DRG智能审核+AI反欺诈<br>→ 打包支付激励控费<br>→ 结余留用激励防病<br>→ 基金县域内循环</p>
+</div>
+<div class="logic-card" style="flex:1;border-top:4px solid #4caf50">
+<h4>💊 医药</h4>
+<p>中心药房+AI审方+处方流转<br>→ 统一目录降低采购成本<br>→ 合理用药减少浪费<br>→ 基层用药可及性↑</p>
+</div>
+</div>
+<div style="text-align:center;margin-top:14px;font-size:11px;color:#666">
+三医联动数据闭环: 医疗产生数据 → 医保利用数据控费 → 节余反哺医疗 → 医药保障供应<br>
+参考: 三明市人均医疗费2,336元(全国2,958元) | 人均预期寿命80.19岁(全国78.6岁)
+</div>
+</div>
+
+<!-- 图19: ROI热力图 -->
+<div class="chart">
+<h2>图19: 各建设模块投入产出对比</h2>
+<table class="matrix-table">
+<tr><th>建设模块</th><th>投入(万)</th><th>年回报(万)</th><th>ROI</th><th>回报周期</th><th>利旧策略</th><th>优先级</th></tr>
+<tr><td>云胶片</td><td>150</td><td>200-300</td><td>133-200%</td><td>6-9月</td><td><span class="tag-new">新建</span></td><td><span class="p1-tag">P1</span></td></tr>
+<tr><td>DRG智能审核</td><td>650</td><td>500-800</td><td>77-123%</td><td>10-16月</td><td><span class="tag-reform">改造+新建</span></td><td><span class="p1-tag">P1</span></td></tr>
+<tr><td>AI处方审核</td><td>120</td><td>250-500</td><td>208-417%</td><td>3-6月</td><td><span class="tag-new">新建</span></td><td><span class="p1-tag">P1</span></td></tr>
+<tr><td>AI肺结核筛查</td><td>100</td><td>隐性(早发现)</td><td>—</td><td>—</td><td><span class="tag-new">新建</span></td><td><span class="p1-tag">P1</span></td></tr>
+<tr><td>智慧体检</td><td>690</td><td>1,500-2,500</td><td>217-362%</td><td>4-6月</td><td><span class="tag-new">新建</span></td><td><span class="p1-tag">P1</span></td></tr>
+<tr><td>区域PACS升级</td><td>1,300</td><td>600-900</td><td>46-69%</td><td>18-26月</td><td><span class="tag-reform">改造为主</span></td><td><span class="p1-tag">P1</span></td></tr>
+<tr><td>AI慢病管理</td><td>250</td><td>数百(并发症↓)</td><td>—</td><td>12-24月</td><td><span class="tag-new">新建</span></td><td><span class="p1-tag">P1</span></td></tr>
+<tr><td>全民健康平台</td><td>3,350</td><td>合规必须</td><td>—</td><td>—</td><td><span class="tag-new">新建</span></td><td><span class="p0-tag">P0</span></td></tr>
+<tr><td>五大资源共享中心</td><td>450</td><td>间接</td><td>—</td><td>—</td><td><span class="tag-reform">改造+新建</span></td><td><span class="p0-tag">P0</span></td></tr>
+</table>
+<div style="text-align:center;margin-top:10px;font-size:10px;color:#666">
+★ 快赢场景(回报周期&lt;12月)集中在: 云胶片 | AI审方 | DRG审核 | 智慧体检 | AI结核筛查<br>
+一期3,000万中建议≥800万用于快赢场景，确保首年产生可量化回报
+</div>
+</div>
+
+</body>
+</html>
