@@ -42,6 +42,10 @@ Thumbs.db
 logs/
 *.log
 
+# Node
+node_modules/
+dist/
+
 # Config
 *.local.yaml
 *.local.yml
