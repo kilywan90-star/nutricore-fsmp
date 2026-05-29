@@ -1,0 +1,46 @@
+[project]
+name = "agent-security-detector"
+version = "0.1.0"
+description = "Comprehensive security detection tool for AI agents"
+authors = [
+  { name = "Security Team", email = "security@example.com" }
+]
+requires-python = ">=3.10"
+dependencies = [
+  "pydantic>=2.0.0",
+  "pluggy>=1.0.0",
+  "aiohttp>=3.8.0",
+  "click>=8.0.0",
+  "pyyaml>=6.0",
+  "apprise>=1.0.0",
+]
+
+[project.optional-dependencies]
+dev = [
+  "pytest>=7.0.0",
+  "pytest-asyncio>=0.21.0",
+  "pytest-cov>=4.0.0",
+  "black>=23.0.0",
+  "flake8>=6.0.0",
+  "mypy>=1.0.0",
+]
+web = [
+  "fastapi>=0.100.0",
+  "uvicorn>=0.23.0",
+  "jinja2>=3.0.0",
+]
+async = [
+  "celery>=5.3.0",
+  "redis>=5.0.0",
+]
+
+[project.scripts]
+asd = "agent_security_detector.adapters.cli.main:cli"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+asyncio_mode = "auto"
+
+[tool.mypy]
+python_version = "3.10"
+strict = true
