@@ -52,3 +52,7 @@ dist/
 *.local.yaml
 *.local.yml
 .env
+
+# Admin config (runtime-generated)
+digital-doctor/backend/src/engine/rules/admin_config.json
+digital-doctor/backend/src/engine/rules/admin_config_versions/
