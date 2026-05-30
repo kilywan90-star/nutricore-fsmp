@@ -3,7 +3,7 @@ from pydantic import BaseModel, Field
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.db.session import get_db
-from src.services.auth_service import register_patient, login, refresh_access_token
+from src.services.auth_service import register_patient, login, refresh_access_token, wechat_code_login
 from src.api.auth_deps import get_current_user
 from src.models.user import User
 
@@ -50,6 +50,35 @@ class UserProfileResponse(BaseModel):
     id: str
     role: str
     is_active: bool
+
+
+class WechatLoginRequest(BaseModel):
+    code: str = Field(min_length=1, max_length=256)
+    name_hash: str = Field(default="", max_length=128)
+    gender: str = Field(default="", max_length=1)
+    birth_year: int = Field(default=0, ge=1900, le=2026)
+    diabetes_type: str = Field(default="type2", max_length=20)
+
+
+@router.post("/wechat-login", response_model=LoginResponse)
+async def wechat_login_endpoint(req: WechatLoginRequest, db: AsyncSession = Depends(get_db)):
+    """Login or register via WeChat mini-program code.
+
+    Exchanges the temporary `code` from wx.login() for an openid (mocked in dev),
+    creates a User if not already registered, and returns JWT tokens.
+    """
+    try:
+        result = await wechat_code_login(
+            code=req.code,
+            db=db,
+            name_hash=req.name_hash,
+            gender=req.gender,
+            birth_year=req.birth_year,
+            diabetes_type=req.diabetes_type,
+        )
+        return LoginResponse(**result)
+    except ValueError as e:
+        raise HTTPException(status_code=401, detail=str(e))
 
 
 @router.post("/register", response_model=RegisterResponse)

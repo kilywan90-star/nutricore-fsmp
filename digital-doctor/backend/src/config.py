@@ -24,6 +24,9 @@ class Settings(BaseSettings):
 
     PHI_ENCRYPTION_KEY: str = ""
 
+    WECHAT_APPID: str = ""
+    WECHAT_SECRET: str = ""
+
     model_config = {"env_prefix": "", "case_sensitive": True}
 
 

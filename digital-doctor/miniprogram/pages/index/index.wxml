@@ -1,0 +1,8 @@
+<!-- pages/index/index.wxml -->
+<view class="page-container">
+  <web-view wx:if="{{webviewUrl}}" src="{{webviewUrl}}" bindmessage="onWebViewMessage">
+  </web-view>
+  <view wx:else class="loading-wrap">
+    <view class="loading-text">登录中...</view>
+  </view>
+</view>

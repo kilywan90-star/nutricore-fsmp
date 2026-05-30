@@ -1,0 +1,11 @@
+/* pages/health/health.wxss */
+.loading-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+}
+.loading-text {
+  font-size: 32rpx;
+  color: var(--text-secondary);
+}

@@ -23,5 +23,7 @@ class User(Base):
     role: Mapped[UserRole] = mapped_column(SAEnum(UserRole), default=UserRole.PATIENT)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)
     refresh_token_hash: Mapped[str | None] = mapped_column(String(128), nullable=True)
+    wechat_openid: Mapped[str | None] = mapped_column(String(128), unique=True, nullable=True)
+    wechat_unionid: Mapped[str | None] = mapped_column(String(128), nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
     last_login_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)

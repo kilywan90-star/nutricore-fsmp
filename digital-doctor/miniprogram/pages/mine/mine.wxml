@@ -1,0 +1,75 @@
+<!-- pages/mine/mine.wxml — Native "我的" profile page -->
+<view class="page-container">
+
+  <!-- Not logged in -->
+  <view wx:if="{{!isLoggedIn}}" class="login-section">
+    <view class="avatar-placeholder"></view>
+    <view class="login-hint">登录后查看健康数据</view>
+    <button class="btn-primary login-btn" bindtap="handleLogin">
+      微信登录
+    </button>
+  </view>
+
+  <!-- Logged in -->
+  <view wx:else>
+    <!-- Profile Card -->
+    <view class="profile-card">
+      <view class="avatar-wrap">
+        <open-data type="userAvatarUrl"></open-data>
+      </view>
+      <view class="profile-info">
+        <open-data type="userNickName" class="nickname"></open-data>
+        <view class="profile-role">患者</view>
+      </view>
+    </view>
+
+    <!-- Health Metrics -->
+    <view class="metrics-section">
+      <view class="section-title">健康概览</view>
+      <view class="metrics-grid">
+        <view class="metric-card">
+          <view class="metric-label">近期糖化</view>
+          <view class="metric-value">
+            {{metrics.hba1c ? metrics.hba1c + '%' : '暂无'}}
+          </view>
+        </view>
+        <view class="metric-card">
+          <view class="metric-label">平均血糖</view>
+          <view class="metric-value">
+            {{metrics.avgGlucose ? metrics.avgGlucose + ' mmol/L' : '暂无'}}
+          </view>
+        </view>
+        <view class="metric-card">
+          <view class="metric-label">控制目标</view>
+          <view class="metric-value">HbA1c &lt; 7.0%</view>
+        </view>
+        <view class="metric-card">
+          <view class="metric-label">血糖记录</view>
+          <view class="metric-value">查看详情</view>
+        </view>
+      </view>
+    </view>
+
+    <!-- Actions -->
+    <view class="actions-section">
+      <view class="action-item">
+        <text>用药提醒设置</text>
+        <text class="arrow">></text>
+      </view>
+      <view class="action-item">
+        <text>健康报告</text>
+        <text class="arrow">></text>
+      </view>
+      <view class="action-item">
+        <text>关于数字医生</text>
+        <text class="arrow">></text>
+      </view>
+    </view>
+
+    <!-- Logout -->
+    <view class="logout-section">
+      <button class="logout-btn" bindtap="handleLogout">退出登录</button>
+    </view>
+  </view>
+
+</view>
