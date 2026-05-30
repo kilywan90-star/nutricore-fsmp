@@ -20,6 +20,8 @@ from src.security.authorization import (
     _get_department_patient_ids,
 )
 from src.security.operation_audit import log_operation
+from src.services.drug_checker import get_drug_checker
+from src.services.prescription_review import PrescriptionReviewer
 
 router = APIRouter()
 
@@ -45,6 +47,25 @@ class DoctorProfileResponse(BaseModel):
 class UpdateProfileRequest(BaseModel):
     title: Optional[str] = Field(default=None, max_length=50)
     license_number: Optional[str] = Field(default=None, max_length=50)
+
+
+# ── Medication / Prescription Review models ────────────────────────────────────
+
+class MedicationItem(BaseModel):
+    name: str = Field(..., description="药品通用名/英文名/商品名")
+    dose: str = Field(..., description="单次剂量，如 500mg")
+    frequency: str = Field(..., description="给药频率，如 bid")
+
+
+class ReviewPrescriptionRequest(BaseModel):
+    diagnosis: str = Field(..., description="诊断，如 type2_diabetes, type2_diabetes_newly_diagnosed")
+    medications: list[MedicationItem] = Field(default_factory=list)
+    patient_data: dict = Field(default_factory=dict)
+    lab_results: dict = Field(default_factory=dict)
+
+
+class CheckInteractionsRequest(BaseModel):
+    medications: list[dict] = Field(default_factory=list)
 
 
 # ── Patient listing (scoped to accessible patients) ────────────────────────────
@@ -328,115 +349,82 @@ async def update_doctor_profile(
     }
 
 
-# ── Diagnosis Requests/Response models ───────────────────────────────────────────
+# ── Prescription Review ─────────────────────────────────────────────────────
 
-class DiagnoseRequest(BaseModel):
-    patient_data: dict = Field(..., description="Clinical data dict: fpg, hba1c, bmi, age, egfr, etc.")
-    pre_consult_summary: Optional[dict] = Field(default=None, description="Pre-consultation summary")
-    lab_results: Optional[dict] = Field(default=None, description="Additional lab results")
-
-
-class HomaRequest(BaseModel):
-    fasting_insulin: float = Field(..., gt=0, description="Fasting insulin (μIU/mL)")
-    fasting_glucose: float = Field(..., gt=0, description="Fasting glucose (mmol/L)")
-
-
-# ── Assisted Diagnosis ──────────────────────────────────────────────────────────
-
-@router.post(
-    "/patients/{patient_id}/diagnose",
-    dependencies=[Depends(require_role("doctor", "department_head", "admin")),
-                  Depends(require_patient_access())],
-)
-async def diagnose_patient(
-    patient_id: str,
-    req: DiagnoseRequest,
+@router.post("/prescriptions/review", dependencies=[Depends(require_role("doctor", "department_head", "admin"))])
+async def review_prescription(
+    req: ReviewPrescriptionRequest,
     db: AsyncSession = Depends(get_db),
     user: User = Depends(get_current_user),
 ):
-    """Run differential diagnosis for a patient.
+    """Comprehensive prescription review: guideline concordance, interactions,
+    renal/hepatic dosing, and contraindications."""
+    checker = get_drug_checker()
+    reviewer = PrescriptionReviewer(checker)
 
-    Combines rule-engine classification with optional LLM second-pass
-    analysis for complex cases.
-    """
-    # Verify patient exists
-    try:
-        pid = uuid.UUID(patient_id)
-    except (ValueError, AttributeError):
-        raise HTTPException(status_code=400, detail="Invalid patient_id")
+    meds = [{"name": m.name, "dose": m.dose, "frequency": m.frequency} for m in req.medications]
 
-    patient_stmt = select(Patient).where(Patient.id == pid)
-    patient_result = await db.execute(patient_stmt)
-    if not patient_result.scalar_one_or_none():
-        raise HTTPException(status_code=404, detail="Patient not found")
-
-    from src.services.diagnosis_engine import differential_diagnosis
-
-    result = await differential_diagnosis(
+    result = reviewer.review_prescription(
+        diagnosis=req.diagnosis,
+        medications=meds,
         patient_data=req.patient_data,
-        pre_consult_summary=req.pre_consult_summary,
         lab_results=req.lab_results,
     )
 
     await log_operation(
         user_id=user.id,
-        action="DIAGNOSE",
-        resource_type="patient",
-        resource_id=patient_id,
-        details={"method": result.get("method"), "confidence": result.get("overall_confidence")},
-        db=db,
-    )
-
-    return {
-        "patient_id": patient_id,
-        "doctor_id": str(user.id),
-        "diagnosis": result,
-    }
-
-
-# ── HOMA Calculator ─────────────────────────────────────────────────────────────
-
-@router.post(
-    "/patients/{patient_id}/homa",
-    dependencies=[Depends(require_role("doctor", "department_head", "admin")),
-                  Depends(require_patient_access())],
-)
-async def calculate_homa(
-    patient_id: str,
-    req: HomaRequest,
-    db: AsyncSession = Depends(get_db),
-    user: User = Depends(get_current_user),
-):
-    """Calculate HOMA-IR and HOMA-beta for a patient."""
-    try:
-        pid = uuid.UUID(patient_id)
-    except (ValueError, AttributeError):
-        raise HTTPException(status_code=400, detail="Invalid patient_id")
-
-    patient_stmt = select(Patient).where(Patient.id == pid)
-    patient_result = await db.execute(patient_stmt)
-    if not patient_result.scalar_one_or_none():
-        raise HTTPException(status_code=404, detail="Patient not found")
-
-    from src.services.homa_calculator import calculate_homa_ir, calculate_homa_beta
-
-    homa_ir = calculate_homa_ir(req.fasting_insulin, req.fasting_glucose)
-    homa_beta = calculate_homa_beta(req.fasting_insulin, req.fasting_glucose)
-
-    await log_operation(
-        user_id=user.id,
-        action="HOMA_CALC",
-        resource_type="patient",
-        resource_id=patient_id,
+        action="REVIEW",
+        resource_type="prescription",
+        resource_id=str(uuid.uuid4()),
         details={
-            "fasting_insulin": req.fasting_insulin,
-            "fasting_glucose": req.fasting_glucose,
+            "diagnosis": req.diagnosis,
+            "medication_count": len(meds),
+            "overall_rating": result["overall_rating"],
+            "issue_count": result["issue_count"],
         },
         db=db,
     )
 
-    return {
-        "patient_id": patient_id,
-        "homa_ir": homa_ir,
-        "homa_beta": homa_beta,
-    }
+    return result
+
+
+# ── Drug Search ──────────────────────────────────────────────────────────────
+
+@router.get("/drugs", dependencies=[Depends(require_role("doctor", "department_head", "admin"))])
+async def search_drugs(
+    q: str = Query(default="", description="搜索关键词"),
+    user: User = Depends(get_current_user),
+):
+    """Search drug database by name or drug class."""
+    checker = get_drug_checker()
+    if not q.strip():
+        return {"items": checker.search_drugs("")[:50]}
+    results = checker.search_drugs(q)
+    return {"items": results}
+
+
+# ── Drug Interaction Check ──────────────────────────────────────────────────
+
+@router.post("/drugs/check-interactions", dependencies=[Depends(require_role("doctor", "department_head", "admin"))])
+async def check_drug_interactions(
+    req: CheckInteractionsRequest,
+    db: AsyncSession = Depends(get_db),
+    user: User = Depends(get_current_user),
+):
+    """Check interactions for a list of drug names."""
+    checker = get_drug_checker()
+    drug_names = [m.get("drug_name", m.get("name", "")) for m in req.medications]
+    drug_names = [dn for dn in drug_names if dn]
+
+    interactions = checker.check_interactions(drug_names)
+
+    await log_operation(
+        user_id=user.id,
+        action="CHECK_INTERACTIONS",
+        resource_type="drugs",
+        resource_id="batch",
+        details={"drug_count": len(drug_names), "interaction_count": len(interactions)},
+        db=db,
+    )
+
+    return {"medications": drug_names, "interactions": interactions}

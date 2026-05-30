@@ -157,22 +157,6 @@ export async function getPatientAlerts(id: string) {
   return data;
 }
 
-export async function diagnosePatient(
-  id: string,
-  input: { patient_data: Record<string, unknown>; pre_consult_summary?: Record<string, unknown> | null; lab_results?: Record<string, unknown> | null },
-) {
-  const { data } = await api.post(`/doctor/patients/${id}/diagnose`, input);
-  return data;
-}
-
-export async function calculateHoma(
-  id: string,
-  input: { fasting_insulin: number; fasting_glucose: number },
-) {
-  const { data } = await api.post(`/doctor/patients/${id}/homa`, input);
-  return data;
-}
-
 export async function acknowledgeAlert(alertId: string) {
   const { data } = await api.post(`/doctor/alerts/${alertId}/acknowledge`);
   return data;
@@ -291,58 +275,76 @@ export async function listTransfers(params?: {
   return data;
 }
 
-// ── Pre-consultation API ────────────────────────────────────────────────
+// ── Prescription Review API ────────────────────────────────────────────
 
-export interface QuestionItem {
-  question_id: string;
-  question_text: string;
-  answer_type: 'text' | 'select' | 'number' | 'boolean';
-  options: string[] | null;
-  required: boolean;
-  depends_on: { question_id: string; matches_any?: string[] } | null;
+export interface DrugInfo {
+  generic_name: string;
+  generic_name_en: string;
+  drug_class: string;
+  brand_names: string[];
+  dosage_range: {
+    starting: string;
+    usual: string;
+    max: string;
+    frequency: string;
+    timing: string;
+  };
+  renal_adjustment: Array<{ egfr_min: number; egfr_max: number | null; dose: string }>;
+  hepatic_warning: string;
+  common_side_effects: string[];
+  contraindications: string[];
+  pregnancy_category: string;
 }
 
-export interface QuestionnaireResponse {
-  questions: QuestionItem[];
+export interface MedicationInput {
+  name: string;
+  dose: string;
+  frequency: string;
 }
 
-export interface PreConsultSummary {
-  chief_complaint: string;
-  present_illness: string;
-  past_history: string;
-  family_history: string;
-  social_history: string;
-  medication_review: string;
-  review_of_systems: string;
+export interface PrescriptionReviewIssue {
+  severity: 'minor' | 'moderate' | 'major' | 'contraindicated';
+  category: 'guideline_concordance' | 'drug_interaction' | 'renal_dosing' | 'hepatic_dosing' | 'contraindication';
+  description: string;
+  recommendation: string;
+  guideline_ref: string;
 }
 
-export interface SubmitAnswersResponse {
-  summary: PreConsultSummary;
-  doctor_summary: string;
+export interface PrescriptionReviewResult {
+  overall_rating: 'safe' | 'caution' | 'unsafe';
+  issues: PrescriptionReviewIssue[];
+  summary: string;
+  diagnosis: string;
+  medication_count: number;
+  issue_count: number;
 }
 
-export interface AnswerItem {
-  question_id: string;
-  answer_value: string;
+export interface DrugInteractionResult {
+  drug_a: string;
+  drug_b: string;
+  severity: string;
+  mechanism: string;
+  recommendation: string;
 }
 
-export async function getQuestionnaire(patientData: Record<string, unknown>): Promise<QuestionnaireResponse> {
-  const { data } = await api.post('/patient/pre-consultation/questionnaire', { patient_data: patientData });
+export async function reviewPrescription(input: {
+  diagnosis: string;
+  medications: MedicationInput[];
+  patient_data: Record<string, unknown>;
+  lab_results: Record<string, unknown>;
+}): Promise<PrescriptionReviewResult> {
+  const { data } = await api.post('/doctor/prescriptions/review', input);
   return data;
 }
 
-export async function submitAnswers(
-  answers: AnswerItem[],
-  patientData: Record<string, unknown>,
-): Promise<SubmitAnswersResponse> {
-  const { data } = await api.post('/patient/pre-consultation/submit', {
-    answers,
-    patient_data: patientData,
-  });
+export async function searchDrugs(query: string): Promise<{ items: DrugInfo[] }> {
+  const { data } = await api.get('/doctor/drugs', { params: { q: query } });
   return data;
 }
 
-export async function getDoctorPreConsultation(patientId: string) {
-  const { data } = await api.get(`/doctor/patients/${patientId}/pre-consultation`);
+export async function checkDrugInteractions(
+  medications: Array<{ drug_name: string }>,
+): Promise<{ medications: string[]; interactions: DrugInteractionResult[] }> {
+  const { data } = await api.post('/doctor/drugs/check-interactions', { medications });
   return data;
 }

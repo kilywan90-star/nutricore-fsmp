@@ -1,0 +1,1075 @@
+{
+  "version": "1.0.0",
+  "source": "中国2型糖尿病防治指南(2024版), UpToDate 2024, 药品说明书",
+  "drug_classes": {
+    "biguanide": {
+      "name": "双胍类",
+      "name_en": "Biguanides",
+      "mechanism": "减少肝糖输出，增加外周组织葡萄糖摄取和利用"
+    },
+    "sulfonylurea": {
+      "name": "磺脲类",
+      "name_en": "Sulfonylureas",
+      "mechanism": "刺激胰岛β细胞分泌胰岛素"
+    },
+    "dpp4i": {
+      "name": "DPP-4抑制剂",
+      "name_en": "DPP-4 Inhibitors",
+      "mechanism": "抑制DPP-4酶，增加内源性GLP-1水平"
+    },
+    "sglt2i": {
+      "name": "SGLT-2抑制剂",
+      "name_en": "SGLT-2 Inhibitors",
+      "mechanism": "抑制肾脏SGLT-2，增加尿糖排泄"
+    },
+    "glp1ra": {
+      "name": "GLP-1受体激动剂",
+      "name_en": "GLP-1 Receptor Agonists",
+      "mechanism": "激活GLP-1受体，促进胰岛素分泌，抑制胰高血糖素"
+    },
+    "insulin": {
+      "name": "胰岛素",
+      "name_en": "Insulin",
+      "mechanism": "补充外源性胰岛素，促进葡萄糖利用"
+    },
+    "tzd": {
+      "name": "噻唑烷二酮类",
+      "name_en": "Thiazolidinediones",
+      "mechanism": "激活PPAR-γ，增加胰岛素敏感性"
+    },
+    "agi": {
+      "name": "α-糖苷酶抑制剂",
+      "name_en": "Alpha-Glucosidase Inhibitors",
+      "mechanism": "抑制肠道α-糖苷酶，延缓碳水化合物吸收"
+    },
+    "glinide": {
+      "name": "格列奈类",
+      "name_en": "Glinides",
+      "mechanism": "刺激胰岛β细胞快速分泌胰岛素"
+    }
+  },
+  "drugs": [
+    {
+      "generic_name": "二甲双胍",
+      "generic_name_en": "Metformin",
+      "drug_class": "biguanide",
+      "brand_names": ["格华止", "Glucophage", "Metformin HCl"],
+      "dosage_range": {
+        "starting": "500mg bid",
+        "usual": "1000-2000mg/day",
+        "max": "2550mg/day",
+        "frequency": "bid-tid",
+        "timing": "餐中或餐后服用"
+      },
+      "renal_adjustment": [
+        {"egfr_min": 60, "egfr_max": null, "dose": "标准剂量，定期监测肾功能"},
+        {"egfr_min": 45, "egfr_max": 59, "dose": "标准剂量，每3-6个月复查肾功能"},
+        {"egfr_min": 30, "egfr_max": 44, "dose": "减量至1000mg/日，不建议起始治疗"},
+        {"egfr_min": 0, "egfr_max": 29, "dose": "禁用"}
+      ],
+      "hepatic_warning": "肝功能不全者慎用，ALT>3倍正常上限建议停用",
+      "common_side_effects": ["胃肠道不适", "恶心", "腹泻", "食欲减退", "口中金属味", "维生素B12缺乏"],
+      "contraindications": [
+        "eGFR<30ml/min/1.73m²",
+        "严重肝功能不全",
+        "急性心衰",
+        "严重感染",
+        "碘造影剂检查前48h至后48h"
+      ],
+      "drug_interactions": [
+        {"drug": "碘造影剂", "severity": "contraindicated", "mechanism": "增加乳酸酸中毒风险", "recommendation": "检查前后各停用48h"},
+        {"drug": "西咪替丁", "severity": "moderate", "mechanism": "竞争肾小管分泌，升高二甲双胍血药浓度", "recommendation": "监测血糖，必要时减量"}
+      ],
+      "pregnancy_category": "B",
+      "lactation": "慎用，少量经乳汁分泌",
+      "guideline_ref": "中国2型糖尿病防治指南(2024版) §6.3"
+    },
+    {
+      "generic_name": "格列美脲",
+      "generic_name_en": "Glimepiride",
+      "drug_class": "sulfonylurea",
+      "brand_names": ["亚莫利", "Amaryl"],
+      "dosage_range": {
+        "starting": "1-2mg qd",
+        "usual": "1-4mg/day",
+        "max": "8mg/day",
+        "frequency": "qd",
+        "timing": "早餐前或第一餐前服用"
+      },
+      "renal_adjustment": [
+        {"egfr_min": 60, "egfr_max": null, "dose": "标准剂量"},
+        {"egfr_min": 30, "egfr_max": 59, "dose": "起始1mg qd，缓慢滴定"},
+        {"egfr_min": 0, "egfr_max": 29, "dose": "不推荐使用"}
+      ],
+      "hepatic_warning": "严重肝功能不全者禁用",
+      "common_side_effects": ["低血糖", "体重增加", "胃肠道不适", "皮肤过敏"],
+      "contraindications": [
+        "1型糖尿病",
+        "糖尿病酮症酸中毒",
+        "严重肝肾功能不全",
+        "磺胺类药物过敏"
+      ],
+      "drug_interactions": [
+        {"drug": "胰岛素", "severity": "major", "mechanism": "协同降糖，低血糖风险增加", "recommendation": "联合使用时减少磺脲类剂量，密切监测血糖"},
+        {"drug": "β受体阻滞剂", "severity": "moderate", "mechanism": "掩盖低血糖症状", "recommendation": "使用心脏选择性β受体阻滞剂，加强血糖监测"},
+        {"drug": "氟康唑", "severity": "moderate", "mechanism": "抑制CYP2C9，升高格列美脲血药浓度", "recommendation": "监测血糖，必要时减量"}
+      ],
+      "pregnancy_category": "C",
+      "lactation": "不推荐哺乳期使用",
+      "guideline_ref": "中国2型糖尿病防治指南(2024版) §6.4"
+    },
+    {
+      "generic_name": "格列吡嗪",
+      "generic_name_en": "Glipizide",
+      "drug_class": "sulfonylurea",
+      "brand_names": ["瑞易宁", "Glucotrol"],
+      "dosage_range": {
+        "starting": "5mg qd",
+        "usual": "5-20mg/day",
+        "max": "40mg/day",
+        "frequency": "qd-bid",
+        "timing": "餐前30分钟服用"
+      },
+      "renal_adjustment": [
+        {"egfr_min": 50, "egfr_max": null, "dose": "标准剂量"},
+        {"egfr_min": 30, "egfr_max": 49, "dose": "起始2.5mg qd，谨慎滴定"},
+        {"egfr_min": 0, "egfr_max": 29, "dose": "不推荐使用"}
+      ],
+      "hepatic_warning": "肝功能不全者慎用，严重者禁用",
+      "common_side_effects": ["低血糖", "体重增加", "胃肠道反应", "皮疹"],
+      "contraindications": [
+        "1型糖尿病",
+        "糖尿病酮症酸中毒",
+        "严重肝肾功能不全"
+      ],
+      "drug_interactions": [
+        {"drug": "胰岛素", "severity": "major", "mechanism": "增加低血糖风险", "recommendation": "减量并密切监测"},
+        {"drug": "NSAIDs", "severity": "moderate", "mechanism": "增强磺脲类降糖作用", "recommendation": "监测血糖"}
+      ],
+      "pregnancy_category": "C",
+      "lactation": "不推荐哺乳期使用",
+      "guideline_ref": "中国2型糖尿病防治指南(2024版) §6.4"
+    },
+    {
+      "generic_name": "格列本脲",
+      "generic_name_en": "Glyburide",
+      "drug_class": "sulfonylurea",
+      "brand_names": ["优降糖"],
+      "dosage_range": {
+        "starting": "2.5mg qd",
+        "usual": "2.5-15mg/day",
+        "max": "20mg/day",
+        "frequency": "qd-bid",
+        "timing": "餐前服用"
+      },
+      "renal_adjustment": [
+        {"egfr_min": 50, "egfr_max": null, "dose": "标准剂量"},
+        {"egfr_min": 0, "egfr_max": 49, "dose": "不推荐使用（老年人用其他磺脲类）"}
+      ],
+      "hepatic_warning": "肝功能不全者禁用",
+      "common_side_effects": ["低血糖（发生率较高）", "体重增加", "胃肠道反应"],
+      "contraindications": [
+        "1型糖尿病",
+        "老年人（低血糖风险高）",
+        "肝肾功能不全",
+        "糖尿病酮症酸中毒"
+      ],
+      "drug_interactions": [
+        {"drug": "胰岛素", "severity": "major", "mechanism": "重度低血糖风险", "recommendation": "避免联合使用"},
+        {"drug": "磺胺类抗生素", "severity": "major", "mechanism": "竞争蛋白结合，增强降糖作用", "recommendation": "避免联合使用或严密监测血糖"}
+      ],
+      "pregnancy_category": "C",
+      "lactation": "禁用",
+      "guideline_ref": "中国2型糖尿病防治指南(2024版) §6.4"
+    },
+    {
+      "generic_name": "格列齐特",
+      "generic_name_en": "Gliclazide",
+      "drug_class": "sulfonylurea",
+      "brand_names": ["达美康", "Diamicron"],
+      "dosage_range": {
+        "starting": "30-80mg qd",
+        "usual": "30-120mg/day",
+        "max": "320mg/day",
+        "frequency": "qd-bid",
+        "timing": "早餐前服用"
+      },
+      "renal_adjustment": [
+        {"egfr_min": 60, "egfr_max": null, "dose": "标准剂量"},
+        {"egfr_min": 30, "egfr_max": 59, "dose": "起始最低剂量，缓慢滴定"},
+        {"egfr_min": 0, "egfr_max": 29, "dose": "不推荐"}
+      ],
+      "hepatic_warning": "严重肝功能不全禁用",
+      "common_side_effects": ["低血糖", "体重增加", "消化不良"],
+      "contraindications": [
+        "1型糖尿病",
+        "糖尿病酮症酸中毒",
+        "严重肝肾衰竭",
+        "咪康唑合用"
+      ],
+      "drug_interactions": [
+        {"drug": "咪康唑", "severity": "contraindicated", "mechanism": "增加低血糖风险", "recommendation": "禁止合用"},
+        {"drug": "胰岛素", "severity": "major", "mechanism": "低血糖风险增加", "recommendation": "减量并监测血糖"}
+      ],
+      "pregnancy_category": "C",
+      "lactation": "不推荐",
+      "guideline_ref": "中国2型糖尿病防治指南(2024版) §6.4"
+    },
+    {
+      "generic_name": "西格列汀",
+      "generic_name_en": "Sitagliptin",
+      "drug_class": "dpp4i",
+      "brand_names": ["捷诺维", "Januvia"],
+      "dosage_range": {
+        "starting": "100mg qd",
+        "usual": "100mg/day",
+        "max": "100mg/day",
+        "frequency": "qd",
+        "timing": "任意时间，不受进餐影响"
+      },
+      "renal_adjustment": [
+        {"egfr_min": 50, "egfr_max": null, "dose": "100mg qd 标准剂量"},
+        {"egfr_min": 30, "egfr_max": 49, "dose": "50mg qd"},
+        {"egfr_min": 0, "egfr_max": 29, "dose": "25mg qd"}
+      ],
+      "hepatic_warning": "轻中度肝功能不全无需调整；重度肝功能不全无数据",
+      "common_side_effects": ["上呼吸道感染", "鼻咽炎", "头痛", "关节痛", "急性胰腺炎（罕见）"],
+      "contraindications": [
+        "过敏史（严重超敏反应、Stevens-Johnson综合征）"
+      ],
+      "drug_interactions": [
+        {"drug": "胰岛素促泌剂", "severity": "minor", "mechanism": "协同降糖", "recommendation": "监测血糖，注意低血糖"},
+        {"drug": "ACEI", "severity": "minor", "mechanism": "可能增加血管性水肿风险（数据有限）", "recommendation": "注意观察"}
+      ],
+      "pregnancy_category": "B",
+      "lactation": "无人类数据，不推荐",
+      "guideline_ref": "中国2型糖尿病防治指南(2024版) §6.5"
+    },
+    {
+      "generic_name": "沙格列汀",
+      "generic_name_en": "Saxagliptin",
+      "drug_class": "dpp4i",
+      "brand_names": ["安立泽", "Onglyza"],
+      "dosage_range": {
+        "starting": "5mg qd",
+        "usual": "5mg/day",
+        "max": "5mg/day",
+        "frequency": "qd",
+        "timing": "任意时间"
+      },
+      "renal_adjustment": [
+        {"egfr_min": 50, "egfr_max": null, "dose": "5mg qd"},
+        {"egfr_min": 0, "egfr_max": 49, "dose": "2.5mg qd"}
+      ],
+      "hepatic_warning": "轻中度肝功能不全无需调整；重度肝功能不全无数据",
+      "common_side_effects": ["上呼吸道感染", "泌尿道感染", "头痛", "心力衰竭加重（心衰患者慎用）"],
+      "contraindications": [
+        "严重超敏反应史"
+      ],
+      "drug_interactions": [
+        {"drug": "CYP3A4强抑制剂（酮康唑）", "severity": "moderate", "mechanism": "升高沙格列汀血药浓度", "recommendation": "沙格列汀减量至2.5mg qd"},
+        {"drug": "胰岛素促泌剂", "severity": "minor", "mechanism": "协同降糖", "recommendation": "监测血糖"}
+      ],
+      "pregnancy_category": "B",
+      "lactation": "无人类数据，不推荐",
+      "guideline_ref": "中国2型糖尿病防治指南(2024版) §6.5"
+    },
+    {
+      "generic_name": "利格列汀",
+      "generic_name_en": "Linagliptin",
+      "drug_class": "dpp4i",
+      "brand_names": ["欧唐宁", "Trajenta"],
+      "dosage_range": {
+        "starting": "5mg qd",
+        "usual": "5mg/day",
+        "max": "5mg/day",
+        "frequency": "qd",
+        "timing": "任意时间"
+      },
+      "renal_adjustment": [
+        {"egfr_min": 0, "egfr_max": null, "dose": "无需调整（主要经胆汁排泄）"}
+      ],
+      "hepatic_warning": "轻中度肝功能不全无需调整；重度肝功能不全无数据",
+      "common_side_effects": ["关节痛", "胰腺炎（罕见）", "类天疱疮（罕见）"],
+      "contraindications": [
+        "过敏史"
+      ],
+      "drug_interactions": [
+        {"drug": "CYP3A4/P-gp诱导剂（利福平）", "severity": "moderate", "mechanism": "降低利格列汀疗效", "recommendation": "考虑换用其他DPP-4i或监测血糖"},
+        {"drug": "胰岛素促泌剂", "severity": "minor", "mechanism": "协同降糖", "recommendation": "监测血糖"}
+      ],
+      "pregnancy_category": "B",
+      "lactation": "无人类数据，不推荐",
+      "guideline_ref": "中国2型糖尿病防治指南(2024版) §6.5"
+    },
+    {
+      "generic_name": "阿格列汀",
+      "generic_name_en": "Alogliptin",
+      "drug_class": "dpp4i",
+      "brand_names": ["尼欣那", "Nesina"],
+      "dosage_range": {
+        "starting": "25mg qd",
+        "usual": "25mg/day",
+        "max": "25mg/day",
+        "frequency": "qd",
+        "timing": "任意时间"
+      },
+      "renal_adjustment": [
+        {"egfr_min": 60, "egfr_max": null, "dose": "25mg qd"},
+        {"egfr_min": 30, "egfr_max": 59, "dose": "12.5mg qd"},
+        {"egfr_min": 0, "egfr_max": 29, "dose": "6.25mg qd"}
+      ],
+      "hepatic_warning": "轻中度肝功能不全无需调整；重度肝功能不全无数据",
+      "common_side_effects": ["鼻咽炎", "头痛", "上呼吸道感染", "肝酶升高（罕见）"],
+      "contraindications": [
+        "心衰病史（增加心衰住院风险）",
+        "严重超敏反应史"
+      ],
+      "drug_interactions": [
+        {"drug": "胰岛素促泌剂", "severity": "minor", "mechanism": "协同降糖", "recommendation": "监测血糖"}
+      ],
+      "pregnancy_category": "B",
+      "lactation": "无人类数据",
+      "guideline_ref": "中国2型糖尿病防治指南(2024版) §6.5"
+    },
+    {
+      "generic_name": "维格列汀",
+      "generic_name_en": "Vildagliptin",
+      "drug_class": "dpp4i",
+      "brand_names": ["佳维乐", "Galvus"],
+      "dosage_range": {
+        "starting": "50mg bid",
+        "usual": "50-100mg/day",
+        "max": "100mg/day",
+        "frequency": "bid",
+        "timing": "早晚各一次"
+      },
+      "renal_adjustment": [
+        {"egfr_min": 50, "egfr_max": null, "dose": "50mg bid"},
+        {"egfr_min": 0, "egfr_max": 49, "dose": "50mg qd"}
+      ],
+      "hepatic_warning": "ALT>3倍正常上限禁用；治疗前和治疗中监测肝功能",
+      "common_side_effects": ["头晕", "关节痛", "便秘", "肝酶升高"],
+      "contraindications": [
+        "肝功能不全（ALT/AST>3倍正常上限）",
+        "NYHA III-IV级心衰"
+      ],
+      "drug_interactions": [
+        {"drug": "ACEI", "severity": "moderate", "mechanism": "增加血管性水肿风险", "recommendation": "注意观察，有血管性水肿史者避免"},
+        {"drug": "胰岛素促泌剂", "severity": "minor", "mechanism": "协同降糖", "recommendation": "监测血糖"}
+      ],
+      "pregnancy_category": "C",
+      "lactation": "禁用",
+      "guideline_ref": "中国2型糖尿病防治指南(2024版) §6.5"
+    },
+    {
+      "generic_name": "达格列净",
+      "generic_name_en": "Dapagliflozin",
+      "drug_class": "sglt2i",
+      "brand_names": ["安达唐", "Farxiga"],
+      "dosage_range": {
+        "starting": "5-10mg qd",
+        "usual": "10mg/day",
+        "max": "10mg/day",
+        "frequency": "qd",
+        "timing": "早晨服用"
+      },
+      "renal_adjustment": [
+        {"egfr_min": 45, "egfr_max": null, "dose": "10mg qd"},
+        {"egfr_min": 25, "egfr_max": 44, "dose": "不推荐起始治疗，已使用者可继续（降糖效果减弱，仍有心肾保护）"},
+        {"egfr_min": 0, "egfr_max": 24, "dose": "不建议起始治疗"}
+      ],
+      "hepatic_warning": "轻中度肝功能不全无需调整；重度肝功能不全从5mg起始",
+      "common_side_effects": ["泌尿系感染", "生殖器真菌感染", "口渴", "容量不足", "酮症酸中毒（正常血糖型，罕见）"],
+      "contraindications": [
+        "eGFR<25ml/min/1.73m²（起始治疗）",
+        "反复泌尿系感染",
+        "糖尿病酮症酸中毒"
+      ],
+      "drug_interactions": [
+        {"drug": "利尿剂", "severity": "moderate", "mechanism": "叠加利尿效应，增加容量不足和低血压风险", "recommendation": "监测血压和体液状态"},
+        {"drug": "胰岛素/胰岛素促泌剂", "severity": "moderate", "mechanism": "联合使用时低血糖风险增加", "recommendation": "减少胰岛素/促泌剂剂量"}
+      ],
+      "pregnancy_category": "C",
+      "lactation": "不推荐",
+      "guideline_ref": "中国2型糖尿病防治指南(2024版) §6.6"
+    },
+    {
+      "generic_name": "恩格列净",
+      "generic_name_en": "Empagliflozin",
+      "drug_class": "sglt2i",
+      "brand_names": ["欧唐静", "Jardiance"],
+      "dosage_range": {
+        "starting": "10mg qd",
+        "usual": "10-25mg/day",
+        "max": "25mg/day",
+        "frequency": "qd",
+        "timing": "早晨服用"
+      },
+      "renal_adjustment": [
+        {"egfr_min": 45, "egfr_max": null, "dose": "10-25mg qd"},
+        {"egfr_min": 30, "egfr_max": 44, "dose": "最大10mg qd（降糖效果减弱）"},
+        {"egfr_min": 0, "egfr_max": 29, "dose": "不建议起始治疗"}
+      ],
+      "hepatic_warning": "轻中度肝功能不全无需调整；重度肝功能不全无数据",
+      "common_side_effects": ["泌尿系感染", "生殖器真菌感染", "胆固醇升高（LDL-C）", "容量不足"],
+      "contraindications": [
+        "eGFR<30ml/min/1.73m²（起始治疗）",
+        "糖尿病酮症酸中毒",
+        "反复泌尿系感染"
+      ],
+      "drug_interactions": [
+        {"drug": "利尿剂", "severity": "moderate", "mechanism": "增加低血压和容量不足风险", "recommendation": "监测血压及体液状态"},
+        {"drug": "胰岛素/胰岛素促泌剂", "severity": "moderate", "mechanism": "低血糖风险增加", "recommendation": "减少胰岛素/促泌剂剂量"}
+      ],
+      "pregnancy_category": "C",
+      "lactation": "不推荐",
+      "guideline_ref": "中国2型糖尿病防治指南(2024版) §6.6"
+    },
+    {
+      "generic_name": "卡格列净",
+      "generic_name_en": "Canagliflozin",
+      "drug_class": "sglt2i",
+      "brand_names": ["怡可安", "Invokana"],
+      "dosage_range": {
+        "starting": "100mg qd",
+        "usual": "100-300mg/day",
+        "max": "300mg/day",
+        "frequency": "qd",
+        "timing": "第一餐前服用"
+      },
+      "renal_adjustment": [
+        {"egfr_min": 60, "egfr_max": null, "dose": "100-300mg qd"},
+        {"egfr_min": 45, "egfr_max": 59, "dose": "最大100mg qd"},
+        {"egfr_min": 0, "egfr_max": 44, "dose": "不推荐起始治疗"}
+      ],
+      "hepatic_warning": "轻中度肝功能不全无需调整；重度无数据",
+      "common_side_effects": ["泌尿系感染", "生殖器真菌感染", "口渴", "截肢风险增加（足趾/足）", "骨折风险增加"],
+      "contraindications": [
+        "eGFR<45ml/min/1.73m²（起始治疗）",
+        "糖尿病酮症酸中毒",
+        "有截肢史"
+      ],
+      "drug_interactions": [
+        {"drug": "利尿剂", "severity": "moderate", "mechanism": "增加低血压风险", "recommendation": "监测血压"},
+        {"drug": "利福平", "severity": "moderate", "mechanism": "UGT酶诱导，降低卡格列净疗效", "recommendation": "如HbA1c未达标，考虑增加剂量"}
+      ],
+      "pregnancy_category": "C",
+      "lactation": "不推荐",
+      "guideline_ref": "中国2型糖尿病防治指南(2024版) §6.6"
+    },
+    {
+      "generic_name": "艾托格列净",
+      "generic_name_en": "Ertugliflozin",
+      "drug_class": "sglt2i",
+      "brand_names": ["Steglatro"],
+      "dosage_range": {
+        "starting": "5mg qd",
+        "usual": "5-15mg/day",
+        "max": "15mg/day",
+        "frequency": "qd",
+        "timing": "早晨服用"
+      },
+      "renal_adjustment": [
+        {"egfr_min": 45, "egfr_max": null, "dose": "5-15mg qd"},
+        {"egfr_min": 0, "egfr_max": 44, "dose": "不建议起始治疗"}
+      ],
+      "hepatic_warning": "轻中度肝功能不全无需调整；重度无数据",
+      "common_side_effects": ["泌尿系感染", "生殖器真菌感染", "口渴", "体重减轻"],
+      "contraindications": [
+        "eGFR<45ml/min/1.73m²（起始治疗）",
+        "糖尿病酮症酸中毒"
+      ],
+      "drug_interactions": [
+        {"drug": "利尿剂", "severity": "moderate", "mechanism": "增加容量不足风险", "recommendation": "监测血压"},
+        {"drug": "胰岛素/胰岛素促泌剂", "severity": "moderate", "mechanism": "低血糖风险", "recommendation": "减少相关药物剂量"}
+      ],
+      "pregnancy_category": "C",
+      "lactation": "不推荐",
+      "guideline_ref": "中国2型糖尿病防治指南(2024版) §6.6"
+    },
+    {
+      "generic_name": "利拉鲁肽",
+      "generic_name_en": "Liraglutide",
+      "drug_class": "glp1ra",
+      "brand_names": ["诺和力", "Victoza"],
+      "dosage_range": {
+        "starting": "0.6mg qd sc",
+        "usual": "1.2-1.8mg/day",
+        "max": "1.8mg/day",
+        "frequency": "qd",
+        "timing": "任意时间，每日固定时间皮下注射"
+      },
+      "renal_adjustment": [
+        {"egfr_min": 0, "egfr_max": null, "dose": "无需调整（但终末期肾病经验有限）"}
+      ],
+      "hepatic_warning": "轻中度肝功能不全无需调整；重度肝功能不全慎用",
+      "common_side_effects": ["恶心", "呕吐", "腹泻", "食欲减退", "体重减轻", "甲状腺C细胞肿瘤（动物实验）"],
+      "contraindications": [
+        "甲状腺髓样癌个人/家族史",
+        "MEN2综合征",
+        "急性胰腺炎"
+      ],
+      "drug_interactions": [
+        {"drug": "胰岛素/磺脲类", "severity": "major", "mechanism": "联合使用增加低血糖风险", "recommendation": "起始利拉鲁肽时减少胰岛素/磺脲类剂量"},
+        {"drug": "华法林", "severity": "minor", "mechanism": "延迟胃排空可能影响吸收", "recommendation": "监测INR"}
+      ],
+      "pregnancy_category": "C",
+      "lactation": "无人类数据，不推荐",
+      "guideline_ref": "中国2型糖尿病防治指南(2024版) §6.7"
+    },
+    {
+      "generic_name": "司美格鲁肽",
+      "generic_name_en": "Semaglutide",
+      "drug_class": "glp1ra",
+      "brand_names": ["诺和泰", "Ozempic"],
+      "dosage_range": {
+        "starting": "0.25mg qw sc",
+        "usual": "0.5-1.0mg/week",
+        "max": "1.0mg/week（降糖）或2.0mg/week",
+        "frequency": "qw",
+        "timing": "每周同一天任意时间皮下注射"
+      },
+      "renal_adjustment": [
+        {"egfr_min": 0, "egfr_max": null, "dose": "无需调整（终末期肾病经验有限）"}
+      ],
+      "hepatic_warning": "轻中度肝功能不全无需调整；重度肝功能不全慎用",
+      "common_side_effects": ["恶心", "呕吐", "腹泻", "便秘", "体重减轻", "糖尿病视网膜病变恶化"],
+      "contraindications": [
+        "甲状腺髓样癌个人/家族史",
+        "MEN2综合征"
+      ],
+      "drug_interactions": [
+        {"drug": "胰岛素/磺脲类", "severity": "major", "mechanism": "低血糖风险增加", "recommendation": "起始时减少胰岛素/磺脲类剂量"},
+        {"drug": "口服药物吸收", "severity": "minor", "mechanism": "延迟胃排空影响吸收速度", "recommendation": "一般不影响总体吸收量，可监测疗效"}
+      ],
+      "pregnancy_category": "C",
+      "lactation": "无人类数据，不推荐",
+      "guideline_ref": "中国2型糖尿病防治指南(2024版) §6.7"
+    },
+    {
+      "generic_name": "度拉糖肽",
+      "generic_name_en": "Dulaglutide",
+      "drug_class": "glp1ra",
+      "brand_names": ["度易达", "Trulicity"],
+      "dosage_range": {
+        "starting": "0.75mg qw sc",
+        "usual": "0.75-1.5mg/week",
+        "max": "4.5mg/week",
+        "frequency": "qw",
+        "timing": "每周同一天任意时间皮下注射"
+      },
+      "renal_adjustment": [
+        {"egfr_min": 0, "egfr_max": null, "dose": "无需调整（终末期肾病经验有限）"}
+      ],
+      "hepatic_warning": "轻中度肝功能不全无需调整；重度无数据",
+      "common_side_effects": ["恶心", "呕吐", "腹泻", "腹痛", "体重减轻"],
+      "contraindications": [
+        "甲状腺髓样癌个人/家族史",
+        "MEN2综合征",
+        "对本品成分过敏"
+      ],
+      "drug_interactions": [
+        {"drug": "胰岛素/磺脲类", "severity": "major", "mechanism": "低血糖风险增加", "recommendation": "减少胰岛素或磺脲类剂量"},
+        {"drug": "口服药物吸收", "severity": "minor", "mechanism": "延迟胃排空", "recommendation": "监测疗效"}
+      ],
+      "pregnancy_category": "C",
+      "lactation": "无人类数据",
+      "guideline_ref": "中国2型糖尿病防治指南(2024版) §6.7"
+    },
+    {
+      "generic_name": "艾塞那肽",
+      "generic_name_en": "Exenatide",
+      "drug_class": "glp1ra",
+      "brand_names": ["百泌达", "Byetta"],
+      "dosage_range": {
+        "starting": "5mcg bid sc",
+        "usual": "5-10mcg bid",
+        "max": "20mcg/day",
+        "frequency": "bid",
+        "timing": "早晚餐前60分钟内皮下注射"
+      },
+      "renal_adjustment": [
+        {"egfr_min": 50, "egfr_max": null, "dose": "5-10mcg bid"},
+        {"egfr_min": 30, "egfr_max": 49, "dose": "从5mcg bid起始，谨慎滴定"},
+        {"egfr_min": 0, "egfr_max": 29, "dose": "不推荐"}
+      ],
+      "hepatic_warning": "轻中度肝功能不全无需调整",
+      "common_side_effects": ["恶心(高频)", "呕吐", "腹泻", "胆石症", "急性胰腺炎（罕见）"],
+      "contraindications": [
+        "eGFR<30ml/min/1.73m²",
+        "严重胃肠道疾病",
+        "甲状腺髓样癌个人/家族史",
+        "MEN2综合征"
+      ],
+      "drug_interactions": [
+        {"drug": "胰岛素/磺脲类", "severity": "major", "mechanism": "低血糖风险增加", "recommendation": "减少相关药物剂量"},
+        {"drug": "口服抗生素", "severity": "minor", "mechanism": "延迟胃排空影响吸收", "recommendation": "抗生素餐前至少1小时服用"}
+      ],
+      "pregnancy_category": "C",
+      "lactation": "不推荐",
+      "guideline_ref": "中国2型糖尿病防治指南(2024版) §6.7"
+    },
+    {
+      "generic_name": "利司那肽",
+      "generic_name_en": "Lixisenatide",
+      "drug_class": "glp1ra",
+      "brand_names": ["利时敏", "Lyxumia"],
+      "dosage_range": {
+        "starting": "10mcg qd sc",
+        "usual": "20mcg/day",
+        "max": "20mcg/day",
+        "frequency": "qd",
+        "timing": "每天同一餐前1小时注射"
+      },
+      "renal_adjustment": [
+        {"egfr_min": 60, "egfr_max": null, "dose": "20mcg qd"},
+        {"egfr_min": 30, "egfr_max": 59, "dose": "从10mcg起始，谨慎滴定"},
+        {"egfr_min": 0, "egfr_max": 29, "dose": "不推荐"}
+      ],
+      "hepatic_warning": "轻中度肝功能不全无需调整；重度无数据",
+      "common_side_effects": ["恶心", "呕吐", "腹泻", "头痛"],
+      "contraindications": [
+        "eGFR<30ml/min/1.73m²",
+        "严重胃肠道疾病"
+      ],
+      "drug_interactions": [
+        {"drug": "胰岛素/磺脲类", "severity": "major", "mechanism": "低血糖风险增加", "recommendation": "减少相关药物剂量"}
+      ],
+      "pregnancy_category": "C",
+      "lactation": "不推荐",
+      "guideline_ref": "中国2型糖尿病防治指南(2024版) §6.7"
+    },
+    {
+      "generic_name": "甘精胰岛素",
+      "generic_name_en": "Insulin Glargine",
+      "drug_class": "insulin",
+      "brand_names": ["来得时", "Lantus", "Toujeo"],
+      "dosage_range": {
+        "starting": "0.1-0.2U/kg qd",
+        "usual": "个体化",
+        "max": "个体化（无明确上限）",
+        "frequency": "qd",
+        "timing": "每日固定时间皮下注射"
+      },
+      "renal_adjustment": [
+        {"egfr_min": 15, "egfr_max": null, "dose": "通常需减量20-30%（肾功能下降时胰岛素清除减少）"},
+        {"egfr_min": 0, "egfr_max": 14, "dose": "需进一步减量，密切监测血糖"}
+      ],
+      "hepatic_warning": "肝功能不全时胰岛素需要量可能减少，需个体化调整",
+      "common_side_effects": ["低血糖", "体重增加", "注射部位脂肪萎缩/增生", "过敏反应"],
+      "contraindications": [
+        "低血糖",
+        "对胰岛素成分过敏"
+      ],
+      "drug_interactions": [
+        {"drug": "β受体阻滞剂", "severity": "moderate", "mechanism": "掩盖低血糖交感神经兴奋症状", "recommendation": "使用心脏选择性β受体阻滞剂，加强血糖监测"},
+        {"drug": "糖皮质激素", "severity": "major", "mechanism": "升高血糖，拮抗胰岛素作用", "recommendation": "增加胰岛素剂量，并监测血糖"},
+        {"drug": "噻嗪类利尿剂", "severity": "moderate", "mechanism": "升高血糖", "recommendation": "可能需要增加胰岛素剂量"}
+      ],
+      "pregnancy_category": "C",
+      "lactation": "可安全使用",
+      "guideline_ref": "中国2型糖尿病防治指南(2024版) §6.8"
+    },
+    {
+      "generic_name": "地特胰岛素",
+      "generic_name_en": "Insulin Detemir",
+      "drug_class": "insulin",
+      "brand_names": ["诺和平", "Levemir"],
+      "dosage_range": {
+        "starting": "0.1-0.2U/kg qd",
+        "usual": "个体化",
+        "max": "个体化",
+        "frequency": "qd-bid",
+        "timing": "晚餐前或睡前"
+      },
+      "renal_adjustment": [
+        {"egfr_min": 15, "egfr_max": null, "dose": "通常需减量20-30%"},
+        {"egfr_min": 0, "egfr_max": 14, "dose": "进一步减量，密切监测"}
+      ],
+      "hepatic_warning": "肝功能不全时需个体化减量",
+      "common_side_effects": ["低血糖", "体重增加(低于甘精)", "注射部位反应"],
+      "contraindications": [
+        "低血糖",
+        "过敏"
+      ],
+      "drug_interactions": [
+        {"drug": "β受体阻滞剂", "severity": "moderate", "mechanism": "掩盖低血糖症状", "recommendation": "加强血糖监测"},
+        {"drug": "糖皮质激素", "severity": "major", "mechanism": "拮抗胰岛素作用", "recommendation": "可能需要增加胰岛素剂量"}
+      ],
+      "pregnancy_category": "B",
+      "lactation": "可安全使用",
+      "guideline_ref": "中国2型糖尿病防治指南(2024版) §6.8"
+    },
+    {
+      "generic_name": "德谷胰岛素",
+      "generic_name_en": "Insulin Degludec",
+      "drug_class": "insulin",
+      "brand_names": ["诺和达", "Tresiba"],
+      "dosage_range": {
+        "starting": "10U qd",
+        "usual": "个体化",
+        "max": "个体化",
+        "frequency": "qd",
+        "timing": "每日固定时间"
+      },
+      "renal_adjustment": [
+        {"egfr_min": 15, "egfr_max": null, "dose": "通常需减量20-30%"},
+        {"egfr_min": 0, "egfr_max": 14, "dose": "进一步减量，密切监测"}
+      ],
+      "hepatic_warning": "肝功能不全时需个体化减量",
+      "common_side_effects": ["低血糖", "体重增加", "注射部位反应"],
+      "contraindications": [
+        "低血糖",
+        "过敏"
+      ],
+      "drug_interactions": [
+        {"drug": "β受体阻滞剂", "severity": "moderate", "mechanism": "掩盖低血糖症状", "recommendation": "加强监测"},
+        {"drug": "糖皮质激素", "severity": "major", "mechanism": "拮抗胰岛素作用", "recommendation": "可能需要增加胰岛素剂量"}
+      ],
+      "pregnancy_category": "C",
+      "lactation": "可安全使用",
+      "guideline_ref": "中国2型糖尿病防治指南(2024版) §6.8"
+    },
+    {
+      "generic_name": "门冬胰岛素",
+      "generic_name_en": "Insulin Aspart",
+      "drug_class": "insulin",
+      "brand_names": ["诺和锐", "NovoRapid"],
+      "dosage_range": {
+        "starting": "4-6U 餐前",
+        "usual": "个体化，根据餐前血糖和碳水化合物量调整",
+        "max": "个体化",
+        "frequency": "tid（三餐前）",
+        "timing": "餐前5-15分钟皮下注射"
+      },
+      "renal_adjustment": [
+        {"egfr_min": 15, "egfr_max": null, "dose": "减量20-30%"},
+        {"egfr_min": 0, "egfr_max": 14, "dose": "进一步减量，密切监测"}
+      ],
+      "hepatic_warning": "肝功能不全时需个体化减量",
+      "common_side_effects": ["低血糖", "体重增加", "注射部位反应"],
+      "contraindications": ["低血糖"],
+      "drug_interactions": [
+        {"drug": "β受体阻滞剂", "severity": "moderate", "mechanism": "掩盖低血糖症状", "recommendation": "加强血糖监测"},
+        {"drug": "酒精", "severity": "moderate", "mechanism": "抑制糖异生，延长低血糖", "recommendation": "避免大量饮酒"}
+      ],
+      "pregnancy_category": "B",
+      "lactation": "可安全使用",
+      "guideline_ref": "中国2型糖尿病防治指南(2024版) §6.8"
+    },
+    {
+      "generic_name": "赖脯胰岛素",
+      "generic_name_en": "Insulin Lispro",
+      "drug_class": "insulin",
+      "brand_names": ["优泌乐", "Humalog"],
+      "dosage_range": {
+        "starting": "4-6U 餐前",
+        "usual": "个体化",
+        "max": "个体化",
+        "frequency": "tid（三餐前）",
+        "timing": "餐前15分钟或餐后即刻注射"
+      },
+      "renal_adjustment": [
+        {"egfr_min": 15, "egfr_max": null, "dose": "减量20-30%"},
+        {"egfr_min": 0, "egfr_max": 14, "dose": "进一步减量，密切监测"}
+      ],
+      "hepatic_warning": "肝功能不全时需个体化减量",
+      "common_side_effects": ["低血糖", "体重增加", "注射部位反应"],
+      "contraindications": ["低血糖"],
+      "drug_interactions": [
+        {"drug": "β受体阻滞剂", "severity": "moderate", "mechanism": "掩盖低血糖症状", "recommendation": "加强监测"}
+      ],
+      "pregnancy_category": "B",
+      "lactation": "可安全使用",
+      "guideline_ref": "中国2型糖尿病防治指南(2024版) §6.8"
+    },
+    {
+      "generic_name": "普通胰岛素",
+      "generic_name_en": "Regular Insulin",
+      "drug_class": "insulin",
+      "brand_names": ["普通胰岛素"],
+      "dosage_range": {
+        "starting": "4-6U 餐前",
+        "usual": "个体化",
+        "max": "个体化",
+        "frequency": "tid（三餐前30分钟）",
+        "timing": "餐前30分钟皮下注射"
+      },
+      "renal_adjustment": [
+        {"egfr_min": 15, "egfr_max": null, "dose": "减量20-30%"},
+        {"egfr_min": 0, "egfr_max": 14, "dose": "进一步减量"}
+      ],
+      "hepatic_warning": "肝功能不全时需个体化减量",
+      "common_side_effects": ["低血糖", "体重增加", "注射部位反应"],
+      "contraindications": ["低血糖"],
+      "drug_interactions": [
+        {"drug": "β受体阻滞剂", "severity": "moderate", "mechanism": "掩盖低血糖症状", "recommendation": "加强监测"}
+      ],
+      "pregnancy_category": "B",
+      "lactation": "可安全使用",
+      "guideline_ref": "中国2型糖尿病防治指南(2024版) §6.8"
+    },
+    {
+      "generic_name": "NPH胰岛素",
+      "generic_name_en": "NPH Insulin",
+      "drug_class": "insulin",
+      "brand_names": ["中效胰岛素"],
+      "dosage_range": {
+        "starting": "0.1-0.2U/kg qd",
+        "usual": "个体化",
+        "max": "个体化",
+        "frequency": "qd-bid",
+        "timing": "睡前或早晚餐前30分钟"
+      },
+      "renal_adjustment": [
+        {"egfr_min": 15, "egfr_max": null, "dose": "减量20-30%"},
+        {"egfr_min": 0, "egfr_max": 14, "dose": "进一步减量"}
+      ],
+      "hepatic_warning": "肝功能不全时需个体化",
+      "common_side_effects": ["低血糖(峰值6-8h)", "体重增加", "注射部位反应"],
+      "contraindications": ["低血糖"],
+      "drug_interactions": [
+        {"drug": "β受体阻滞剂", "severity": "moderate", "mechanism": "掩盖低血糖症状", "recommendation": "加强监测"}
+      ],
+      "pregnancy_category": "B",
+      "lactation": "可安全使用",
+      "guideline_ref": "中国2型糖尿病防治指南(2024版) §6.8"
+    },
+    {
+      "generic_name": "吡格列酮",
+      "generic_name_en": "Pioglitazone",
+      "drug_class": "tzd",
+      "brand_names": ["艾可拓", "Actos"],
+      "dosage_range": {
+        "starting": "15-30mg qd",
+        "usual": "15-45mg/day",
+        "max": "45mg/day",
+        "frequency": "qd",
+        "timing": "任意时间"
+      },
+      "renal_adjustment": [
+        {"egfr_min": 0, "egfr_max": null, "dose": "无需调整"}
+      ],
+      "hepatic_warning": "ALT>3倍正常上限不推荐使用；活动性肝病禁用",
+      "common_side_effects": ["体重增加", "水肿", "心衰加重", "骨折风险增加（女性）", "膀胱癌风险增加（长期）"],
+      "contraindications": [
+        "NYHA III-IV级心力衰竭",
+        "ALT>3倍正常上限",
+        "膀胱癌",
+        "肉眼血尿未查清"
+      ],
+      "drug_interactions": [
+        {"drug": "胰岛素", "severity": "major", "mechanism": "增加心衰和水肿风险", "recommendation": "密切监测心衰体征，如出现水肿及时减量"},
+        {"drug": "吉非罗齐", "severity": "moderate", "mechanism": "抑制CYP2C8，升高吡格列酮浓度", "recommendation": "吡格列酮最大剂量不超过15mg qd"}
+      ],
+      "pregnancy_category": "C",
+      "lactation": "无人类数据",
+      "guideline_ref": "中国2型糖尿病防治指南(2024版) §6.9"
+    },
+    {
+      "generic_name": "罗格列酮",
+      "generic_name_en": "Rosiglitazone",
+      "drug_class": "tzd",
+      "brand_names": ["文迪雅", "Avandia"],
+      "dosage_range": {
+        "starting": "4mg qd",
+        "usual": "4-8mg/day",
+        "max": "8mg/day",
+        "frequency": "qd-bid",
+        "timing": "任意时间"
+      },
+      "renal_adjustment": [
+        {"egfr_min": 0, "egfr_max": null, "dose": "无需调整"}
+      ],
+      "hepatic_warning": "ALT>3倍正常上限不推荐使用；活动性肝病禁用",
+      "common_side_effects": ["体重增加", "水肿", "心衰", "心肌缺血风险增加(争议)", "骨折风险增加"],
+      "contraindications": [
+        "NYHA I-IV级心力衰竭",
+        "冠心病/MI史",
+        "ALT>3倍正常上限",
+        "骨质疏松"
+      ],
+      "drug_interactions": [
+        {"drug": "胰岛素", "severity": "contraindicated", "mechanism": "显著增加心衰和MI风险", "recommendation": "禁止联合使用"},
+        {"drug": "吉非罗齐", "severity": "moderate", "mechanism": "升高罗格列酮浓度", "recommendation": "低剂量开始，监测不良反应"}
+      ],
+      "pregnancy_category": "C",
+      "lactation": "无人类数据",
+      "guideline_ref": "中国2型糖尿病防治指南(2024版) §6.9"
+    },
+    {
+      "generic_name": "阿卡波糖",
+      "generic_name_en": "Acarbose",
+      "drug_class": "agi",
+      "brand_names": ["拜唐苹", "Glucobay"],
+      "dosage_range": {
+        "starting": "50mg tid",
+        "usual": "50-100mg tid",
+        "max": "300mg/day",
+        "frequency": "tid",
+        "timing": "与第一口饭同服/嚼服"
+      },
+      "renal_adjustment": [
+        {"egfr_min": 30, "egfr_max": null, "dose": "标准剂量"},
+        {"egfr_min": 0, "egfr_max": 29, "dose": "不推荐（代谢产物蓄积）"}
+      ],
+      "hepatic_warning": "ALT持续升高者慎用；肝硬化禁用",
+      "common_side_effects": ["腹胀", "排气增多", "腹泻", "腹痛", "肝酶升高（罕见）"],
+      "contraindications": [
+        "eGFR<30ml/min/1.73m²",
+        "严重肝硬化",
+        "慢性胃肠功能紊乱",
+        "肠梗阻"
+      ],
+      "drug_interactions": [
+        {"drug": "地高辛", "severity": "moderate", "mechanism": "减少地高辛吸收", "recommendation": "间隔2小时服用，监测地高辛血药浓度"},
+        {"drug": "活性炭", "severity": "minor", "mechanism": "吸附阿卡波糖", "recommendation": "避免同时服用"}
+      ],
+      "pregnancy_category": "B",
+      "lactation": "不推荐（可经乳汁排泄）",
+      "guideline_ref": "中国2型糖尿病防治指南(2024版) §6.10"
+    },
+    {
+      "generic_name": "伏格列波糖",
+      "generic_name_en": "Voglibose",
+      "drug_class": "agi",
+      "brand_names": ["倍欣"],
+      "dosage_range": {
+        "starting": "0.2mg tid",
+        "usual": "0.2-0.3mg tid",
+        "max": "0.9mg/day",
+        "frequency": "tid",
+        "timing": "与第一口饭同服"
+      },
+      "renal_adjustment": [
+        {"egfr_min": 30, "egfr_max": null, "dose": "标准剂量"},
+        {"egfr_min": 0, "egfr_max": 29, "dose": "不推荐"}
+      ],
+      "hepatic_warning": "严重肝功能不全禁用",
+      "common_side_effects": ["腹胀", "排气", "腹泻", "肝酶升高"],
+      "contraindications": [
+        "eGFR<30ml/min/1.73m²",
+        "严重肝硬化",
+        "腹部手术史",
+        "肠梗阻"
+      ],
+      "drug_interactions": [
+        {"drug": "其他α-糖苷酶抑制剂", "severity": "moderate", "mechanism": "叠加胃肠道副作用", "recommendation": "避免联用"}
+      ],
+      "pregnancy_category": "B",
+      "lactation": "不推荐",
+      "guideline_ref": "中国2型糖尿病防治指南(2024版) §6.10"
+    },
+    {
+      "generic_name": "米格列醇",
+      "generic_name_en": "Miglitol",
+      "drug_class": "agi",
+      "brand_names": ["Glyset"],
+      "dosage_range": {
+        "starting": "25mg tid",
+        "usual": "25-100mg tid",
+        "max": "300mg/day",
+        "frequency": "tid",
+        "timing": "与第一口饭同服"
+      },
+      "renal_adjustment": [
+        {"egfr_min": 30, "egfr_max": null, "dose": "标准剂量"},
+        {"egfr_min": 0, "egfr_max": 29, "dose": "不推荐（主要经肾排泄）"}
+      ],
+      "hepatic_warning": "严重肝功能不全禁用",
+      "common_side_effects": ["腹胀", "腹泻", "排气"],
+      "contraindications": [
+        "eGFR<30ml/min/1.73m²",
+        "炎性肠病",
+        "肠梗阻",
+        "结肠溃疡"
+      ],
+      "drug_interactions": [
+        {"drug": "活性炭/消化酶制剂", "severity": "minor", "mechanism": "降低米格列醇疗效", "recommendation": "避免同时服用"}
+      ],
+      "pregnancy_category": "B",
+      "lactation": "可经乳汁排泄，不推荐",
+      "guideline_ref": "中国2型糖尿病防治指南(2024版) §6.10"
+    },
+    {
+      "generic_name": "瑞格列奈",
+      "generic_name_en": "Repaglinide",
+      "drug_class": "glinide",
+      "brand_names": ["诺和龙", "Prandin"],
+      "dosage_range": {
+        "starting": "0.5mg 餐前",
+        "usual": "0.5-4mg/餐",
+        "max": "16mg/day",
+        "frequency": "tid(进餐时服用)",
+        "timing": "餐前15-30分钟，不吃饭不吃药"
+      },
+      "renal_adjustment": [
+        {"egfr_min": 40, "egfr_max": null, "dose": "标准剂量"},
+        {"egfr_min": 0, "egfr_max": 39, "dose": "从0.5mg餐前起始，谨慎滴定"}
+      ],
+      "hepatic_warning": "中重度肝功能不全者应延长给药间隔（主要经肝脏代谢）",
+      "common_side_effects": ["低血糖", "体重增加（低于磺脲类）", "上呼吸道感染"],
+      "contraindications": [
+        "1型糖尿病",
+        "糖尿病酮症酸中毒",
+        "严重肝功能不全",
+        "吉非罗齐合用"
+      ],
+      "drug_interactions": [
+        {"drug": "吉非罗齐", "severity": "contraindicated", "mechanism": "显著升高瑞格列奈血药浓度（CYP2C8抑制）", "recommendation": "禁止合用，可能引发严重低血糖"},
+        {"drug": "氯吡格雷", "severity": "moderate", "mechanism": "降低瑞格列奈代谢", "recommendation": "瑞格列奈日剂量不超过4mg"},
+        {"drug": "环孢素", "severity": "moderate", "mechanism": "升高瑞格列奈浓度", "recommendation": "监测血糖，从低剂量开始"}
+      ],
+      "pregnancy_category": "C",
+      "lactation": "不推荐",
+      "guideline_ref": "中国2型糖尿病防治指南(2024版) §6.11"
+    },
+    {
+      "generic_name": "那格列奈",
+      "generic_name_en": "Nateglinide",
+      "drug_class": "glinide",
+      "brand_names": ["唐力", "Starlix"],
+      "dosage_range": {
+        "starting": "60-120mg 餐前",
+        "usual": "120mg tid",
+        "max": "360mg/day",
+        "frequency": "tid（进餐时服用）",
+        "timing": "餐前15-30分钟"
+      },
+      "renal_adjustment": [
+        {"egfr_min": 30, "egfr_max": null, "dose": "标准剂量"},
+        {"egfr_min": 0, "egfr_max": 29, "dose": "从60mg餐前起始，谨慎使用"}
+      ],
+      "hepatic_warning": "轻中度肝功能不全无需调整；重度肝功能不全慎用",
+      "common_side_effects": ["低血糖（低于瑞格列奈）", "体重增加"],
+      "contraindications": [
+        "1型糖尿病",
+        "糖尿病酮症酸中毒"
+      ],
+      "drug_interactions": [
+        {"drug": "NSAIDs", "severity": "moderate", "mechanism": "增强降糖作用", "recommendation": "监测血糖"},
+        {"drug": "噻嗪类利尿剂", "severity": "minor", "mechanism": "减弱降糖作用", "recommendation": "监测血糖"}
+      ],
+      "pregnancy_category": "C",
+      "lactation": "不推荐",
+      "guideline_ref": "中国2型糖尿病防治指南(2024版) §6.11"
+    }
+  ],
+  "drug_interactions_matrix": [
+    {"drug_a": "二甲双胍", "drug_b": "磺脲类", "severity": "minor", "mechanism": "协同降糖，一线+二线标准联合", "recommendation": "常用联合方案，注意磺脲类低血糖风险"},
+    {"drug_a": "二甲双胍", "drug_b": "DPP-4i", "severity": "minor", "mechanism": "互补机制联合", "recommendation": "常用联合方案，安全性和耐受性好"},
+    {"drug_a": "二甲双胍", "drug_b": "SGLT-2i", "severity": "minor", "mechanism": "互补机制联合", "recommendation": "优先推荐联合（尤其合并心肾疾病）"},
+    {"drug_a": "二甲双胍", "drug_b": "GLP-1RA", "severity": "minor", "mechanism": "互补机制联合，协同减重", "recommendation": "优先推荐联合（尤其合并ASCVD或肥胖）"},
+    {"drug_a": "二甲双胍", "drug_b": "胰岛素", "severity": "moderate", "mechanism": "减少胰岛素用量和体重增加", "recommendation": "推荐联合，监测血糖调整胰岛素剂量"},
+    {"drug_a": "磺脲类", "drug_b": "胰岛素", "severity": "major", "mechanism": "协同降糖，低血糖风险显著增加", "recommendation": "联合使用时减少磺脲类50%或停用，加强血糖监测"},
+    {"drug_a": "磺脲类", "drug_b": "GLP-1RA", "severity": "moderate", "mechanism": "低血糖风险增加", "recommendation": "起始GLP-1RA时减少磺脲类剂量"},
+    {"drug_a": "SGLT-2i", "drug_b": "胰岛素", "severity": "moderate", "mechanism": "低血糖风险增加", "recommendation": "减少胰岛素剂量10-20%"},
+    {"drug_a": "SGLT-2i", "drug_b": "利尿剂", "severity": "moderate", "mechanism": "叠加利尿效应，容量不足风险", "recommendation": "监测血压和体液状态，调整利尿剂剂量"},
+    {"drug_a": "GLP-1RA", "drug_b": "胰岛素", "severity": "major", "mechanism": "低血糖风险增加", "recommendation": "起始GLP-1RA时减少胰岛素20-30%，密切监测"},
+    {"drug_a": "TZD", "drug_b": "胰岛素", "severity": "major", "mechanism": "增加心衰和水肿风险", "recommendation": "密切监测心衰体征，出现水肿及时停用TZD"},
+    {"drug_a": "罗格列酮", "drug_b": "胰岛素", "severity": "contraindicated", "mechanism": "显著增加心衰和心肌缺血风险", "recommendation": "禁止联合使用"},
+    {"drug_a": "AGI", "drug_b": "胰岛素/磺脲类", "severity": "moderate", "mechanism": "联合使用低血糖时需口服葡萄糖（非蔗糖）纠正", "recommendation": "教育患者低血糖时应服用葡萄糖而非蔗糖"},
+    {"drug_a": "格列奈类", "drug_b": "吉非罗齐", "severity": "contraindicated", "mechanism": "严重低血糖风险", "recommendation": "禁止联合使用（尤其瑞格列奈）"}
+  ]
+}

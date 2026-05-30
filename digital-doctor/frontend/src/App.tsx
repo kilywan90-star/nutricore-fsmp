@@ -20,6 +20,7 @@ const DiagnosisPanel = lazy(() => import('./pages/doctor/DiagnosisPanel'));
 
 // Admin pages (least visited — deepest split)
 const AlertPanel = lazy(() => import('./pages/doctor/AlertPanel'));
+const PrescriptionReview = lazy(() => import('./pages/doctor/PrescriptionReview'));
 
 // ── Fallback ───────────────────────────────────────────────────────────
 const PageFallback = (
@@ -49,6 +50,9 @@ export default function App() {
 
         {/* Alerts (admin/deep split) */}
         <Route path="/doctor/alerts" element={<AlertPanel />} />
+
+        {/* Prescription Review */}
+        <Route path="/doctor/prescriptions/review" element={<PrescriptionReview />} />
 
         {/* Catch-all */}
         <Route path="*" element={<Navigate to="/patient" replace />} />
