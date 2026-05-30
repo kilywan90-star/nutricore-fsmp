@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import {
-  Card, Row, Col, Descriptions, Table, List, Typography, Button, Spin, Empty, Tag,
+  Card, Row, Col, Descriptions, Table, List, Typography, Button, Spin, Empty, Tag, Tabs,
 } from 'antd';
 import { ArrowLeftOutlined } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
@@ -14,6 +14,7 @@ import {
 } from '../../lib/api';
 import GlucoseChart from '../../components/GlucoseChart';
 import AlertBadge from '../../components/AlertBadge';
+import CGMDashboard from '../../components/CGMDashboard';
 
 const { Title } = Typography;
 
@@ -143,78 +144,103 @@ export default function PatientDetail() {
         </Descriptions>
       </Card>
 
-      {/* Glucose Trend Chart */}
-      <Card title="血糖趋势" style={{ marginBottom: 24 }}>
-        <div style={{ overflowX: 'auto' }}>
-          <GlucoseChart
-            data={(patient.glucose_records || []).map((g) => ({
-              value_mmol_l: g.value_mmol_l,
-              recorded_at: g.recorded_at,
-              measure_type: g.measure_type,
-            }))}
-          />
-        </div>
-        {patient.glucose_records && patient.glucose_records.length > 0 && (
-          <div style={{ marginTop: 8, display: 'flex', gap: 24, color: '#666', fontSize: 13 }}>
-            <span>记录数: {patient.glucose_records.length}</span>
-            <span>
-              平均值:{' '}
-              {(patient.glucose_records.reduce((s, g) => s + g.value_mmol_l, 0) / patient.glucose_records.length).toFixed(1)}{' '}
-              mmol/L
-            </span>
-          </div>
-        )}
-      </Card>
-
-      {/* Lab Reports Table */}
-      <Card title="化验报告" style={{ marginBottom: 24 }}>
-        <Table<LabReportItem>
-          columns={labColumns}
-          dataSource={patient.lab_reports || []}
-          rowKey="id"
-          pagination={{ pageSize: 5, showTotal: (t) => `共 ${t} 份报告` }}
-          locale={{ emptyText: '暂无化验报告' }}
-        />
-      </Card>
-
-      {/* Alerts List */}
-      <Card title="预警记录">
-        {!patient.alerts || patient.alerts.length === 0 ? (
-          <Empty description="暂无预警" />
-        ) : (
-          <List
-            dataSource={patient.alerts}
-            renderItem={(item: AlertItem) => (
-              <List.Item
-                key={item.id}
-                extra={
-                  <AlertBadge severity={item.severity as 'info' | 'warning' | 'critical'}>
-                    {item.severity === 'critical' ? '危急' : item.severity === 'warning' ? '预警' : '信息'}
-                  </AlertBadge>
-                }
-              >
-                <List.Item.Meta
-                  title={
-                    <span>
-                      {item.title}
-                      {item.acknowledged ? (
-                        <Tag color="green" style={{ marginLeft: 8 }}>已确认</Tag>
-                      ) : (
-                        <Tag color="red" style={{ marginLeft: 8 }}>未确认</Tag>
-                      )}
-                    </span>
-                  }
-                  description={
-                    <span>
-                      {dayjs(item.created_at).format('YYYY-MM-DD HH:mm')} | {item.detail}
-                    </span>
-                  }
+      <Tabs
+        defaultActiveKey="glucose"
+        items={[
+          {
+            key: 'glucose',
+            label: '血糖记录',
+            children: (
+              <div>
+                <Card title="血糖趋势" style={{ marginBottom: 24 }}>
+                  <div style={{ overflowX: 'auto' }}>
+                    <GlucoseChart
+                      data={(patient.glucose_records || []).map((g) => ({
+                        value_mmol_l: g.value_mmol_l,
+                        recorded_at: g.recorded_at,
+                        measure_type: g.measure_type,
+                      }))}
+                    />
+                  </div>
+                  {patient.glucose_records && patient.glucose_records.length > 0 && (
+                    <div style={{ marginTop: 8, display: 'flex', gap: 24, color: '#666', fontSize: 13 }}>
+                      <span>记录数: {patient.glucose_records.length}</span>
+                      <span>
+                        平均值:{' '}
+                        {(patient.glucose_records.reduce((s, g) => s + g.value_mmol_l, 0) / patient.glucose_records.length).toFixed(1)}{' '}
+                        mmol/L
+                      </span>
+                    </div>
+                  )}
+                </Card>
+              </div>
+            ),
+          },
+          {
+            key: 'cgm',
+            label: '动态血糖 (CGM)',
+            children: <CGMDashboard patientId={patient.id} />,
+          },
+          {
+            key: 'lab',
+            label: '化验报告',
+            children: (
+              <Card title="化验报告">
+                <Table<LabReportItem>
+                  columns={labColumns}
+                  dataSource={patient.lab_reports || []}
+                  rowKey="id"
+                  pagination={{ pageSize: 5, showTotal: (t) => `共 ${t} 份报告` }}
+                  locale={{ emptyText: '暂无化验报告' }}
                 />
-              </List.Item>
-            )}
-          />
-        )}
-      </Card>
+              </Card>
+            ),
+          },
+          {
+            key: 'alerts',
+            label: '预警记录',
+            children: (
+              <Card title="预警记录">
+                {!patient.alerts || patient.alerts.length === 0 ? (
+                  <Empty description="暂无预警" />
+                ) : (
+                  <List
+                    dataSource={patient.alerts}
+                    renderItem={(item: AlertItem) => (
+                      <List.Item
+                        key={item.id}
+                        extra={
+                          <AlertBadge severity={item.severity as 'info' | 'warning' | 'critical'}>
+                            {item.severity === 'critical' ? '危急' : item.severity === 'warning' ? '预警' : '信息'}
+                          </AlertBadge>
+                        }
+                      >
+                        <List.Item.Meta
+                          title={
+                            <span>
+                              {item.title}
+                              {item.acknowledged ? (
+                                <Tag color="green" style={{ marginLeft: 8 }}>已确认</Tag>
+                              ) : (
+                                <Tag color="red" style={{ marginLeft: 8 }}>未确认</Tag>
+                              )}
+                            </span>
+                          }
+                          description={
+                            <span>
+                              {dayjs(item.created_at).format('YYYY-MM-DD HH:mm')} | {item.detail}
+                            </span>
+                          }
+                        />
+                      </List.Item>
+                    )}
+                  />
+                )}
+              </Card>
+            ),
+          },
+        ]}
+      />
     </div>
   );
 }
