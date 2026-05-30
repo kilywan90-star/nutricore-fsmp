@@ -5,6 +5,8 @@ import {
 import {
   WarningFilled, ClockCircleFilled, CheckCircleFilled, PhoneFilled, AlertFilled,
 } from '@ant-design/icons';
+import SignatureConfirmModal from './SignatureConfirmModal';
+import type { SignatureResponse } from '../lib/api';
 
 const { Title, Text } = Typography;
 const { TextArea } = Input;
@@ -45,6 +47,29 @@ export default function CriticalAlertModal({ alert, onAcknowledge, onClose }: Pr
   const [timeLeft, setTimeLeft] = useState<number>(ACK_TIMEOUT_SECONDS);
   const [countdownStarted, setCountdownStarted] = useState(false);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  // Signature
+  const [signModalOpen, setSignModalOpen] = useState(false);
+  const [pendingAck, setPendingAck] = useState(false);
+
+  const handleSignSuccess = async (_sig: SignatureResponse) => {
+    setSignModalOpen(false);
+    if (pendingAck && alert) {
+      // Proceed with the actual acknowledgment after signature is created
+      setSubmitting(true);
+      try {
+        await onAcknowledge(alert.id, resolution, notes);
+        message.success('预警已签署处理，签名记录已入链');
+        setCountdownStarted(false);
+        onClose();
+      } catch (err: any) {
+        message.error(err?.message || '处理失败');
+      } finally {
+        setSubmitting(false);
+      }
+    }
+    setPendingAck(false);
+  };
 
   // Start countdown when alert appears
   useEffect(() => {
@@ -97,17 +122,9 @@ export default function CriticalAlertModal({ alert, onAcknowledge, onClose }: Pr
 
   const handleConfirm = async () => {
     if (!alert) return;
-    setSubmitting(true);
-    try {
-      await onAcknowledge(alert.id, resolution, notes);
-      message.success('预警已处理');
-      setCountdownStarted(false);
-      onClose();
-    } catch (err: any) {
-      message.error(err?.message || '处理失败');
-    } finally {
-      setSubmitting(false);
-    }
+    // Open signature modal first before acknowledging
+    setPendingAck(true);
+    setSignModalOpen(true);
   };
 
   if (!alert) return null;
@@ -282,6 +299,30 @@ export default function CriticalAlertModal({ alert, onAcknowledge, onClose }: Pr
           50% { opacity: 0.4; }
         }
       `}</style>
+
+      {/* Signature Modal */}
+      <SignatureConfirmModal
+        open={signModalOpen}
+        resource={alert ? {
+          type: 'alert_ack',
+          typeLabel: '预警确认',
+          id: alert.id,
+          summary: `${ALERT_TYPE_LABELS[alert.alert_type] || alert.alert_type} — ${alert.value} mmol/L`,
+        } : null}
+        action="acknowledged"
+        actionLabel="确认处理"
+        content={{
+          alert_type: alert?.alert_type,
+          severity: alert?.severity,
+          title: alert?.title,
+          detail: alert?.detail,
+          value: alert?.value,
+          resolution,
+          notes,
+        }}
+        onSuccess={handleSignSuccess}
+        onCancel={() => { setSignModalOpen(false); setPendingAck(false); }}
+      />
     </Modal>
   );
 }

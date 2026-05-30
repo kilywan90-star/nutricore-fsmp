@@ -7,6 +7,7 @@ from src.api.backup import router as backup_router
 from src.api.notification import router as notification_router
 from src.api.hospital import router as hospital_router
 from src.api.grassroots import router as grassroots_router
+from src.api.signature import router as signature_router
 
 api_router = APIRouter(prefix="/api/v1")
 api_router.include_router(patient_router, prefix="/patient", tags=["patient"])
@@ -17,3 +18,4 @@ api_router.include_router(backup_router, prefix="/admin/backups", tags=["backups
 api_router.include_router(hospital_router, prefix="/admin", tags=["hospitals"])
 api_router.include_router(notification_router, prefix="", tags=["notifications"])
 api_router.include_router(grassroots_router, prefix="/grassroots", tags=["grassroots"])
+api_router.include_router(signature_router, prefix="", tags=["signatures"])

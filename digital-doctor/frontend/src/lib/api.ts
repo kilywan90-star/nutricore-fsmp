@@ -1039,66 +1039,80 @@ export async function resetAdminConfig() {
   return data;
 }
 
-// ── CGM API ────────────────────────────────────────────────────────
+// ── Signature API ─────────────────────────────────────────────────────────
 
-export interface CGMSessionResponse {
+export interface SignatureResponse {
   id: string;
-  device_type: string;
-  sensor_start: string;
-  sensor_end: string | null;
-  total_readings: number;
-  avg_glucose: number | null;
-  estimated_hba1c: number | null;
-  cv_percent: number | null;
-  time_in_range_pct: number | null;
-  time_above_range_pct: number | null;
-  time_below_range_pct: number | null;
+  user_id: string;
+  resource_type: string;
+  resource_id: string;
+  action: string;
+  signature_data: Record<string, unknown>;
+  content_hash: string;
+  previous_signature_id: string | null;
+  created_at: string;
 }
 
-export interface CGMImportResponse {
-  session_id: string;
-  total_readings: number;
-  avg_glucose: number | null;
-  estimated_hba1c: number | null;
-  cv_percent: number | null;
-  time_in_range_pct: number | null;
-  time_above_range_pct: number | null;
-  time_below_range_pct: number | null;
-  sensor_start: string;
-  sensor_end: string | null;
+export interface AuditTrailItem {
+  id: string;
+  user_id: string;
+  resource_type: string;
+  resource_id: string;
+  action: string;
+  signature_data: Record<string, unknown>;
+  content_hash: string;
+  previous_signature_id: string | null;
+  created_at: string;
 }
 
-export async function importCGMFile(file: File, fileFormat: string = 'auto'): Promise<CGMImportResponse> {
-  const form = new FormData();
-  form.append('file', file);
-  form.append('file_format', fileFormat);
-  const { data } = await api.post('/patient/cgm/import', form, {
-    headers: { 'Content-Type': 'multipart/form-data' },
-  });
-  return data;
+export interface AuditTrailResponse {
+  resource_type: string;
+  resource_id: string;
+  signatures: AuditTrailItem[];
 }
 
-export async function getCGMSessions(): Promise<{ sessions: CGMSessionResponse[]; total: number }> {
-  const { data } = await api.get('/patient/cgm/sessions');
-  return data;
-}
-
-export async function getCGMSessionDetail(sessionId: string) {
-  const { data } = await api.get(`/patient/cgm/sessions/${sessionId}`);
-  return data;
-}
-
-export async function getCGMSummary(days: number = 14) {
-  const { data } = await api.get('/patient/cgm/summary', { params: { days } });
-  return data;
-}
-
-export async function recordManualCGM(body: {
-  value_mmol_l: number;
+export interface ChainVerificationItemResponse {
+  signature_id: string;
+  user_id: string;
+  action: string;
   timestamp: string;
-  device_type?: string;
-  trend_direction?: string;
-}) {
-  const { data } = await api.post('/patient/cgm/manual', body);
+  verified: boolean;
+  content_hash: string;
+}
+
+export interface ChainVerificationResponse {
+  valid: boolean;
+  signatures: ChainVerificationItemResponse[];
+  broken_links: string[];
+}
+
+export interface CreateSignatureRequest {
+  resource_type: string;
+  resource_id: string;
+  action: string;
+  content: Record<string, unknown>;
+  confirmation_token?: string;
+}
+
+export async function createSignature(
+  input: CreateSignatureRequest,
+): Promise<SignatureResponse> {
+  const { data } = await api.post('/signatures', input);
+  return data;
+}
+
+export async function getAuditTrail(
+  resourceType: string,
+  resourceId: string,
+): Promise<AuditTrailResponse> {
+  const { data } = await api.get(`/signatures/${resourceType}/${resourceId}`);
+  return data;
+}
+
+export async function verifySignatureChain(
+  resourceType: string,
+  resourceId: string,
+): Promise<ChainVerificationResponse> {
+  const { data } = await api.post(`/signatures/verify/${resourceType}/${resourceId}`);
   return data;
 }

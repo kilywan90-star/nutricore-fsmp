@@ -7,4 +7,4 @@ from src.models.records import MedicalRecord, RecordType, RecordStatus
 from src.models.backup import BackupRecord, BackupStatus, BackupType
 from src.models.org import Hospital, HospitalLevel, Department, DoctorProfile, PatientAssignment, TransferRecord, TransferStatus
 from src.models.grassroots import GrassrootsPatient, GrassrootsScreening, GrassrootsFollowUp, RiskLevel, ReferralStatus
-from src.models.cgm import CGMRecord, CGMSession, CGMDevice
+from src.models.signature import SignatureRecord

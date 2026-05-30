@@ -7,7 +7,7 @@ import {
 import {
   PlusOutlined, DeleteOutlined, SearchOutlined, SafetyCertificateOutlined,
   WarningOutlined, CloseCircleOutlined, CheckCircleOutlined, ArrowLeftOutlined,
-  ExperimentOutlined, ThunderboltOutlined, BulbOutlined,
+  ExperimentOutlined, ThunderboltOutlined, LockOutlined,
 } from '@ant-design/icons';
 import {
   searchDrugs,
@@ -17,7 +17,8 @@ import {
   type PrescriptionReviewIssue,
   type DrugInteractionResult,
 } from '../../lib/api';
-import ExplainabilityPanel from '../../components/ExplainabilityPanel';
+import SignatureConfirmModal from '../../components/SignatureConfirmModal';
+import type { SignatureResponse } from '../../lib/api';
 
 const { Title, Text, Paragraph } = Typography;
 const { Panel } = Collapse;
@@ -96,10 +97,13 @@ export default function PrescriptionReview() {
   // Interaction preview
   const [interactions, setInteractions] = useState<DrugInteractionResult[]>([]);
 
-  // Explainability panel
-  const [showExplainability, setShowExplainability] = useState(false);
-  const [explanationLoading, setExplanationLoading] = useState(false);
-  const [explanationData, setExplanationData] = useState<Record<string, unknown> | null>(null);
+  // Signature
+  const [signModalOpen, setSignModalOpen] = useState(false);
+
+  const handleSignSuccess = (_sig: SignatureResponse) => {
+    setSignModalOpen(false);
+    message.success('用药建议已签署采纳，签名记录已入链');
+  };
 
   // ── Drug search with debounce ──────────────────────────────────────────
   const searchTimer = useRef<ReturnType<typeof setTimeout>>();
@@ -188,33 +192,6 @@ export default function PrescriptionReview() {
       message.error(err?.response?.data?.detail || err?.message || '处方合理性检查失败');
     } finally {
       setReviewing(false);
-    }
-  };
-
-  // ── Fetch explainability ──────────────────────────────────────────────
-  const fetchExplainability = async () => {
-    if (!reviewResult) return;
-    setShowExplainability(true);
-    setExplanationLoading(true);
-    try {
-      const patientConditionsList = patientConditions.split(',').map(s => s.trim()).filter(Boolean);
-      const patientData = { conditions: patientConditionsList };
-      const resp = await fetch('/api/v1/doctor/prescriptions/review/explain', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          review_result: reviewResult,
-          patient_data: patientData,
-        }),
-      });
-      if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
-      const data = await resp.json();
-      setExplanationData(data as Record<string, unknown>);
-    } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : '未知错误';
-      message.error(`获取审核依据失败: ${msg}`);
-    } finally {
-      setExplanationLoading(false);
     }
   };
 
@@ -412,6 +389,36 @@ export default function PrescriptionReview() {
             合理性提醒
           </Button>
 
+          {/* Adopt Prescription Button */}
+          {reviewResult && (
+            <Button
+              type="default"
+              size="large"
+              block
+              icon={<LockOutlined />}
+              onClick={() => setSignModalOpen(true)}
+              style={{ marginTop: 8 }}
+            >
+              采纳用药建议
+            </Button>
+          )}
+
+          {/* Signature Modal */}
+          <SignatureConfirmModal
+            open={signModalOpen}
+            resource={reviewResult ? {
+              type: 'prescription',
+              typeLabel: '用药建议',
+              id: prescription[0]?.key || 'prescription',
+              summary: `${prescription.length} 种药品 — 评分: ${reviewResult?.overall_rating}`,
+            } : null}
+            action="confirmed"
+            actionLabel="确认采纳"
+            content={(reviewResult || {}) as Record<string, unknown>}
+            onSuccess={handleSignSuccess}
+            onCancel={() => setSignModalOpen(false)}
+          />
+
           {/* Live Interaction Preview */}
           {interactions.length > 0 && (
             <Card title="即时相互作用提示" size="small" style={{ marginTop: 12 }}>
@@ -461,27 +468,8 @@ export default function PrescriptionReview() {
                       * 本内容由AI生成，仅供临床参考，最终决策权归医生所有
                     </Text>
                   </div>
-                  <Button
-                    type="default"
-                    icon={<BulbOutlined />}
-                    onClick={fetchExplainability}
-                    style={{ marginTop: 8 }}
-                  >
-                    查看审核依据
-                  </Button>
                 </Space>
               </Card>
-
-              {/* Explainability Panel */}
-              {showExplainability && (
-                <Card title="处方审核依据" style={{ marginBottom: 16 }}>
-                  <ExplainabilityPanel
-                    type="prescription"
-                    loading={explanationLoading}
-                    prescriptionData={explanationData as Record<string, unknown>}
-                  />
-                </Card>
-              )}
 
               {/* Issues by Category */}
               {Object.keys(groupedIssues).length === 0 ? (

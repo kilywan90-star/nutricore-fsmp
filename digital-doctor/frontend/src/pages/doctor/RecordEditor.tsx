@@ -10,6 +10,8 @@ import {
 } from '@ant-design/icons';
 import { getPatientDetail, type PatientDetailData } from '../../lib/api';
 import ReactMarkdown from 'react-markdown';
+import SignatureConfirmModal from '../../components/SignatureConfirmModal';
+import type { SignatureResponse } from '../../lib/api';
 
 const { Title, Text, Paragraph } = Typography;
 const { TextArea } = Input;
@@ -93,6 +95,36 @@ export default function RecordEditor() {
   const [editText, setEditText] = useState('');
   const [viewVersion, setViewVersion] = useState<number | null>(null);
   const [saving, setSaving] = useState(false);
+
+  // Signature
+  const [signModalOpen, setSignModalOpen] = useState(false);
+  const [pendingFinalize, setPendingFinalize] = useState(false);
+
+  const handleSignSuccess = async (_sig: SignatureResponse) => {
+    setSignModalOpen(false);
+    if (pendingFinalize && activeRecord) {
+      // Proceed with actual finalize
+      try {
+        const resp = await fetch(`/api/v1/doctor/records/${activeRecord.id}/finalize`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            signed_by: _sig.user_id,
+            content_hash: _sig.content_hash,
+          }),
+        });
+        if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+        const result = await resp.json();
+        setActiveRecord({ ...activeRecord, status: result.status, updated_at: result.updated_at });
+        message.success('病历已签署定稿，签名记录已入链');
+        fetchRecords();
+      } catch (err: unknown) {
+        const msg = err instanceof Error ? err.message : '未知错误';
+        message.error(`定稿失败: ${msg}`);
+      }
+    }
+    setPendingFinalize(false);
+  };
 
   // ── Fetch patient data ──────────────────────────────────────────────
   useEffect(() => {
@@ -222,29 +254,10 @@ export default function RecordEditor() {
   };
 
   // ── Finalize ────────────────────────────────────────────────────────
-  const finalize = async () => {
+  const finalize = () => {
     if (!activeRecord) return;
-    Modal.confirm({
-      title: '确认定稿',
-      content: '定稿后病历不可再编辑。确定要定稿吗？',
-      okText: '确定定稿',
-      cancelText: '取消',
-      onOk: async () => {
-        try {
-          const resp = await fetch(`/api/v1/doctor/records/${activeRecord.id}/finalize`, {
-            method: 'POST',
-          });
-          if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
-          const result = await resp.json();
-          setActiveRecord({ ...activeRecord, status: result.status, updated_at: result.updated_at });
-          message.success('病历已定稿');
-          fetchRecords();
-        } catch (err: unknown) {
-          const msg = err instanceof Error ? err.message : '未知错误';
-          message.error(`定稿失败: ${msg}`);
-        }
-      },
-    });
+    setPendingFinalize(true);
+    setSignModalOpen(true);
   };
 
   // ── Determine sections based on record type ─────────────────────────
@@ -450,6 +463,22 @@ export default function RecordEditor() {
               <Spin tip="加载中..." />
             </div>
           )}
+
+          {/* Signature Modal */}
+          <SignatureConfirmModal
+            open={signModalOpen}
+            resource={activeRecord ? {
+              type: 'medical_record',
+              typeLabel: '病历',
+              id: activeRecord.id,
+              summary: `${activeRecord.record_type.toUpperCase()} — v${activeRecord.version}`,
+            } : null}
+            action="approved"
+            actionLabel="定稿签署"
+            content={(activeRecord?.content || {}) as Record<string, unknown>}
+            onSuccess={handleSignSuccess}
+            onCancel={() => { setSignModalOpen(false); setPendingFinalize(false); }}
+          />
         </Col>
 
         {/* Right column: Markdown preview */}

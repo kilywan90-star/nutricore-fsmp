@@ -135,6 +135,8 @@ async def finalize_record(
     record_id: uuid.UUID,
     doctor_id: uuid.UUID,
     db: AsyncSession,
+    signed_by: uuid.UUID | None = None,
+    content_hash: str | None = None,
 ) -> MedicalRecord | None:
     """Finalize a medical record — status -> FINALIZED.
 
@@ -144,6 +146,8 @@ async def finalize_record(
         record_id: Record UUID
         doctor_id: Doctor UUID performing finalize
         db: Database session
+        signed_by: Optional signature user ID
+        content_hash: Optional SHA-256 content hash from digital signature
 
     Returns:
         Updated MedicalRecord, or None if not found.
@@ -153,6 +157,9 @@ async def finalize_record(
         return None
 
     record.status = RecordStatus.FINALIZED
+    record.signed_by = signed_by or doctor_id
+    record.signed_at = datetime.utcnow()
+    record.content_hash = content_hash
     record.updated_at = datetime.utcnow()
 
     await db.commit()
