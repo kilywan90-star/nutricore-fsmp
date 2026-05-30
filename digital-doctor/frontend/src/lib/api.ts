@@ -1038,3 +1038,81 @@ export async function resetAdminConfig() {
   const { data } = await api.post('/admin/config/reset');
   return data;
 }
+
+// ── Signature API ─────────────────────────────────────────────────────────
+
+export interface SignatureResponse {
+  id: string;
+  user_id: string;
+  resource_type: string;
+  resource_id: string;
+  action: string;
+  signature_data: Record<string, unknown>;
+  content_hash: string;
+  previous_signature_id: string | null;
+  created_at: string;
+}
+
+export interface AuditTrailItem {
+  id: string;
+  user_id: string;
+  resource_type: string;
+  resource_id: string;
+  action: string;
+  signature_data: Record<string, unknown>;
+  content_hash: string;
+  previous_signature_id: string | null;
+  created_at: string;
+}
+
+export interface AuditTrailResponse {
+  resource_type: string;
+  resource_id: string;
+  signatures: AuditTrailItem[];
+}
+
+export interface ChainVerificationItemResponse {
+  signature_id: string;
+  user_id: string;
+  action: string;
+  timestamp: string;
+  verified: boolean;
+  content_hash: string;
+}
+
+export interface ChainVerificationResponse {
+  valid: boolean;
+  signatures: ChainVerificationItemResponse[];
+  broken_links: string[];
+}
+
+export interface CreateSignatureRequest {
+  resource_type: string;
+  resource_id: string;
+  action: string;
+  content: Record<string, unknown>;
+  confirmation_token?: string;
+}
+
+export async function createSignature(
+  input: CreateSignatureRequest,
+): Promise<SignatureResponse> {
+  const { data } = await api.post('/signatures', input);
+  return data;
+}
+
+export async function getAuditTrail(
+  resourceType: string,
+  resourceId: string,
+): Promise<AuditTrailResponse> {
+  const { data } = await api.get(`/signatures/${resourceType}/${resourceId}`);
+  return data;
+}
+
+export async function verifySignatureChain(
+  resourceType: string,
+  resourceId: string,
+): Promise<ChainVerificationResponse> {
+  const { data } = await api.post(`/signatures/verify/${resourceType}/${resourceId}`);
+  return data;
+}

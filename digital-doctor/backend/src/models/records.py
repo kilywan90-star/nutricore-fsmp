@@ -33,6 +33,9 @@ class MedicalRecord(Base):
     status: Mapped[RecordStatus] = mapped_column(SAEnum(RecordStatus), default=RecordStatus.DRAFT)
     version: Mapped[int] = mapped_column(Integer, default=1)
     versions: Mapped[list] = mapped_column(JSON, default=list)
+    signed_by: Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=True)
+    signed_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+    content_hash: Mapped[str | None] = mapped_column(String(128), nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
     updated_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 

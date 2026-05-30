@@ -7,7 +7,7 @@ import {
 import {
   PlusOutlined, DeleteOutlined, SearchOutlined, SafetyCertificateOutlined,
   WarningOutlined, CloseCircleOutlined, CheckCircleOutlined, ArrowLeftOutlined,
-  ExperimentOutlined, ThunderboltOutlined,
+  ExperimentOutlined, ThunderboltOutlined, LockOutlined,
 } from '@ant-design/icons';
 import {
   searchDrugs,
@@ -17,6 +17,8 @@ import {
   type PrescriptionReviewIssue,
   type DrugInteractionResult,
 } from '../../lib/api';
+import SignatureConfirmModal from '../../components/SignatureConfirmModal';
+import type { SignatureResponse } from '../../lib/api';
 
 const { Title, Text, Paragraph } = Typography;
 const { Panel } = Collapse;
@@ -94,6 +96,14 @@ export default function PrescriptionReview() {
 
   // Interaction preview
   const [interactions, setInteractions] = useState<DrugInteractionResult[]>([]);
+
+  // Signature
+  const [signModalOpen, setSignModalOpen] = useState(false);
+
+  const handleSignSuccess = (_sig: SignatureResponse) => {
+    setSignModalOpen(false);
+    message.success('用药建议已签署采纳，签名记录已入链');
+  };
 
   // ── Drug search with debounce ──────────────────────────────────────────
   const searchTimer = useRef<ReturnType<typeof setTimeout>>();
@@ -378,6 +388,36 @@ export default function PrescriptionReview() {
           >
             合理性提醒
           </Button>
+
+          {/* Adopt Prescription Button */}
+          {reviewResult && (
+            <Button
+              type="default"
+              size="large"
+              block
+              icon={<LockOutlined />}
+              onClick={() => setSignModalOpen(true)}
+              style={{ marginTop: 8 }}
+            >
+              采纳用药建议
+            </Button>
+          )}
+
+          {/* Signature Modal */}
+          <SignatureConfirmModal
+            open={signModalOpen}
+            resource={reviewResult ? {
+              type: 'prescription',
+              typeLabel: '用药建议',
+              id: prescription[0]?.key || 'prescription',
+              summary: `${prescription.length} 种药品 — 评分: ${reviewResult?.overall_rating}`,
+            } : null}
+            action="confirmed"
+            actionLabel="确认采纳"
+            content={(reviewResult || {}) as Record<string, unknown>}
+            onSuccess={handleSignSuccess}
+            onCancel={() => setSignModalOpen(false)}
+          />
 
           {/* Live Interaction Preview */}
           {interactions.length > 0 && (

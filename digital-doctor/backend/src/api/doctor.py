@@ -687,17 +687,27 @@ async def edit_record(
 )
 async def finalize_record_endpoint(
     record_id: str,
+    body: dict = {},
     db: AsyncSession = Depends(get_db),
     user: User = Depends(get_current_user),
 ):
-    """Finalize a medical record — status changes to FINALIZED."""
+    """Finalize a medical record — status changes to FINALIZED.
+
+    Accepts optional signature data:
+    - signed_by: str (UUID of signing user)
+    - content_hash: str (SHA-256 content hash from digital signature)
+    """
     try:
         rid = uuid.UUID(record_id)
         uid = uuid.UUID(str(user.id))
     except (ValueError, AttributeError):
         raise HTTPException(status_code=400, detail="Invalid record_id or user_id")
 
-    record = await finalize_record(rid, uid, db)
+    signed_by_str = body.get("signed_by") if isinstance(body, dict) else None
+    content_hash_val = body.get("content_hash") if isinstance(body, dict) else None
+    signed_by = uuid.UUID(signed_by_str) if signed_by_str else None
+
+    record = await finalize_record(rid, uid, db, signed_by=signed_by, content_hash=content_hash_val)
     if not record:
         raise HTTPException(status_code=404, detail="Record not found")
 
@@ -706,7 +716,7 @@ async def finalize_record_endpoint(
         action="FINALIZE",
         resource_type="medical_record",
         resource_id=record_id,
-        details={},
+        details={"signed": bool(content_hash_val)},
         db=db,
     )
 
@@ -714,6 +724,8 @@ async def finalize_record_endpoint(
         "id": str(record.id),
         "status": record.status.value,
         "updated_at": record.updated_at.isoformat(),
+        "signed_by": str(record.signed_by) if record.signed_by else None,
+        "content_hash": record.content_hash,
     }
 
 

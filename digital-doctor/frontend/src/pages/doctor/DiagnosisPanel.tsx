@@ -7,8 +7,11 @@ import {
 import type { ColumnsType } from 'antd/es/table';
 import {
   SendOutlined, CalculatorOutlined, MedicineBoxOutlined, ArrowLeftOutlined,
+  SafetyCertificateFilled,
 } from '@ant-design/icons';
 import { getPatientDetail, type PatientDetailData } from '../../lib/api';
+import SignatureConfirmModal from '../../components/SignatureConfirmModal';
+import type { SignatureResponse } from '../../lib/api';
 
 const { Title, Text, Paragraph } = Typography;
 
@@ -121,6 +124,14 @@ export default function DiagnosisPanel({ patientId: propPatientId, patientData: 
   const [homaResult, setHomaResult] = useState<HomaResult | null>(null);
   const [homaLoading, setHomaLoading] = useState(false);
   const [homaForm] = Form.useForm();
+
+  // Signature
+  const [signModalOpen, setSignModalOpen] = useState(false);
+
+  const handleSignSuccess = (_sig: SignatureResponse) => {
+    setSignModalOpen(false);
+    message.success('诊断建议已签署采纳，签名记录已入链');
+  };
 
   // Fetch patient data from API if not provided as prop
   useEffect(() => {
@@ -538,22 +549,38 @@ export default function DiagnosisPanel({ patientId: propPatientId, patientData: 
         )}
       </Card>
 
-      {/* Send to Medical Record button (placeholder for P3-4) */}
+      {/* Sign Diagnosis button */}
       {diagResult && (
-        <Card style={{ textAlign: 'center' }}>
+        <Card style={{ textAlign: 'center', marginBottom: 24 }}>
           <Button
-            type="default"
-            icon={<SendOutlined />}
+            type="primary"
+            icon={<SafetyCertificateFilled />}
             size="large"
-            onClick={() => message.info('病历发送功能将在P3-4中实现')}
+            onClick={() => setSignModalOpen(true)}
           >
-            发送至病历
+            采纳诊断建议
           </Button>
           <div style={{ marginTop: 8 }}>
-            <Text type="secondary">此功能将在后续版本中开放</Text>
+            <Text type="secondary">采纳后将生成数字签名并入链</Text>
           </div>
         </Card>
       )}
+
+      {/* Signature Modal */}
+      <SignatureConfirmModal
+        open={signModalOpen}
+        resource={diagResult ? {
+          type: 'diagnosis',
+          typeLabel: '诊断建议',
+          id: diagResult?.patient_id || patientId,
+          summary: diagResult?.diagnosis?.primary_diagnosis?.type || '诊断结果',
+        } : null}
+        action="confirmed"
+        actionLabel="确认采纳"
+        content={(diagResult?.diagnosis || {}) as Record<string, unknown>}
+        onSuccess={handleSignSuccess}
+        onCancel={() => setSignModalOpen(false)}
+      />
     </div>
   );
 }
