@@ -24,6 +24,7 @@ from src.security.authorization import (
 from src.security.operation_audit import log_operation
 from src.services.drug_checker import get_drug_checker
 from src.services.prescription_review import PrescriptionReviewer
+from src.services.explainability import explainability_engine, generate_explanation_summary
 from src.services.record_generator import generate_soap_note, generate_discharge_summary
 from src.services.record_service import (
     create_record,
@@ -454,6 +455,172 @@ async def check_drug_interactions(
     )
 
     return {"medications": drug_names, "interactions": interactions}
+
+
+# ── Explainability Endpoints ──────────────────────────────────────────────
+
+
+class ExplainPrescriptionRequest(BaseModel):
+    review_result: dict = Field(..., description="Full review result from POST /prescriptions/review")
+    patient_data: dict = Field(default_factory=dict, description="Patient clinical data")
+
+
+@router.get(
+    "/patients/{patient_id}/diagnosis/{diagnosis_id}/explain",
+    dependencies=[Depends(require_role("doctor", "department_head", "admin")),
+                  Depends(require_patient_access())],
+)
+async def explain_diagnosis(
+    patient_id: str,
+    diagnosis_id: str,
+    db: AsyncSession = Depends(get_db),
+    user: User = Depends(get_current_user),
+):
+    """Get feature attribution for a specific diagnosis result."""
+    detail = await get_patient_detail(db, patient_id)
+    if not detail:
+        raise HTTPException(status_code=404, detail="Patient not found")
+
+    # Extract patient clinical data from detail
+    latest_glucose = None
+    for g in detail.get("glucose_records", []):
+        latest_glucose = g
+        if g.get("measure_type") == "fasting":
+            break
+    if not latest_glucose and detail.get("glucose_records"):
+        latest_glucose = detail["glucose_records"][0]
+
+    latest_report = detail.get("lab_reports", [None])[0] if detail.get("lab_reports") else None
+    age = 2026 - detail.get("birth_year", 1970) if detail.get("birth_year") else None
+
+    patient_data: dict = {
+        "fpg": latest_glucose.get("value_mmol_l") if latest_glucose else None,
+        "hba1c": latest_report.get("results", {}).get("hba1c") if latest_report else None,
+        "bmi": detail.get("bmi"),
+        "age": age,
+        "birth_year": detail.get("birth_year"),
+        "gender": detail.get("gender"),
+        "egfr": latest_report.get("results", {}).get("egfr") if latest_report else None,
+        "tc": latest_report.get("results", {}).get("tc") if latest_report else None,
+        "tg": latest_report.get("results", {}).get("tg") if latest_report else None,
+        "ldl": latest_report.get("results", {}).get("ldl") if latest_report else None,
+        "hdl": latest_report.get("results", {}).get("hdl") if latest_report else None,
+        "diabetes_type": detail.get("diabetes_type"),
+        "family_history": detail.get("family_history"),
+        "has_hypertension": detail.get("has_hypertension"),
+        "waist_circumference": detail.get("waist_circumference"),
+        "physical_activity": detail.get("physical_activity"),
+    }
+
+    from src.services.diagnosis_engine import differential_diagnosis
+    from src.engine.rule_loader import RuleLoader
+    from src.engine.rule_engine import RuleEngine
+
+    diagnosis_result = await differential_diagnosis(patient_data)
+    loader = RuleLoader()
+    rules = loader.load("t2dm_guidelines_v1")
+    engine = RuleEngine(rules)
+    rule_matches = engine.evaluate(patient_data, category="diagnosis")
+
+    explanation = explainability_engine.explain_diagnosis(
+        diagnosis_result, patient_data, rule_matches
+    )
+
+    await log_operation(
+        user_id=user.id,
+        action="VIEW",
+        resource_type="explanation",
+        resource_id=patient_id,
+        details={"type": "diagnosis", "confidence": explanation.confidence},
+        db=db,
+    )
+
+    return explanation.to_dict()
+
+
+@router.post(
+    "/prescriptions/review/explain",
+    dependencies=[Depends(require_role("doctor", "department_head", "admin"))],
+)
+async def explain_prescription(
+    req: ExplainPrescriptionRequest,
+    db: AsyncSession = Depends(get_db),
+    user: User = Depends(get_current_user),
+):
+    """Get detailed feature attribution for a prescription review result."""
+    explanation = explainability_engine.explain_prescription_review(
+        req.review_result, req.patient_data
+    )
+
+    await log_operation(
+        user_id=user.id,
+        action="VIEW",
+        resource_type="explanation",
+        resource_id="prescription_review",
+        details={"overall_rating": explanation.overall_rating},
+        db=db,
+    )
+
+    return explanation.to_dict()
+
+
+@router.get(
+    "/patients/{patient_id}/risk-explanation",
+    dependencies=[Depends(require_role("doctor", "department_head", "admin")),
+                  Depends(require_patient_access())],
+)
+async def explain_risk_endpoint(
+    patient_id: str,
+    db: AsyncSession = Depends(get_db),
+    user: User = Depends(get_current_user),
+):
+    """Get risk factor breakdown with actionable interpretation."""
+    detail = await get_patient_detail(db, patient_id)
+    if not detail:
+        raise HTTPException(status_code=404, detail="Patient not found")
+
+    age = 2026 - detail.get("birth_year", 1970) if detail.get("birth_year") else 35
+    bmi = detail.get("bmi", 24.0)
+    waist = detail.get("waist_circumference", 85.0)
+    family_history = bool(detail.get("family_history"))
+    physical_activity = detail.get("physical_activity", "moderate")
+
+    latest_glucose = None
+    for g in detail.get("glucose_records", []):
+        if g.get("measure_type") == "fasting":
+            latest_glucose = g
+            break
+    if not latest_glucose and detail.get("glucose_records"):
+        latest_glucose = detail["glucose_records"][0]
+
+    fpg = latest_glucose.get("value_mmol_l", 5.5) if latest_glucose else 5.5
+    has_htn = bool(detail.get("has_hypertension"))
+
+    from src.services.risk_assessment import calculate_diabetes_risk
+    risk_result = calculate_diabetes_risk(
+        age=age,
+        bmi=float(bmi),
+        waist_circumference=float(waist),
+        family_history=family_history,
+        physical_activity=str(physical_activity),
+        fasting_glucose=float(fpg),
+        has_hypertension=has_htn,
+    )
+
+    explanation = explainability_engine.explain_risk_assessment(
+        risk_result, risk_result.get("factor_scores", {})
+    )
+
+    await log_operation(
+        user_id=user.id,
+        action="VIEW",
+        resource_type="explanation",
+        resource_id=patient_id,
+        details={"type": "risk_assessment", "risk_level": explanation.risk_level},
+        db=db,
+    )
+
+    return explanation.to_dict()
 
 
 # ── Medical Record Generation ─────────────────────────────────────────────
