@@ -4,8 +4,76 @@ Loads drug data from `engine/rules/drug_database.json` and provides three
 inspection functions used by the prescription review pipeline.
 """
 
+from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Optional
+
+from src.services.pregnancy_checker import check_pregnancy_safety, PregnancyStatus
+from src.services.organ_assessment import (
+    OrganAssessment, LiverFunction, RenalFunction,
+    OrganIssue as OrganDosingIssue,
+)
+
+
+# ── Result dataclasses ─────────────────────────────────────────────────────
+
+@dataclass
+class AllergyIssue:
+    drug: str
+    allergy_substance: str
+    severity: str
+    message: str
+    recommendation: str
+
+
+@dataclass
+class PregnancyIssueResult:
+    drug: str
+    category: str
+    severity: str
+    message: str
+    recommendation: str
+
+
+@dataclass
+class ComprehensiveCheckResult:
+    overall_rating: str
+    drug_interactions: list[dict] = field(default_factory=list)
+    allergy_issues: list[dict] = field(default_factory=list)
+    pregnancy_issues: list[dict] = field(default_factory=list)
+    organ_issues: list[dict] = field(default_factory=list)
+    contraindications: list[dict] = field(default_factory=list)
+    summary: str = ""
+
+
+# ── Allergy cross-reference table ──────────────────────────────────────────
+
+_ALLERGY_DRUG_MAP: dict[str, list[str]] = {
+    "青霉素": ["Penicillin", "Amoxicillin", "Amoxicillin-Clavulanate",
+                "Ampicillin", "Piperacillin", "Ticarcillin"],
+    "penicillin": ["Penicillin", "Amoxicillin", "Amoxicillin-Clavulanate",
+                   "Ampicillin", "Piperacillin", "Ticarcillin"],
+    "头孢菌素": ["Cephalexin", "Cefazolin", "Ceftriaxone", "Cefuroxime",
+                 "Cefotaxime", "Cefepime"],
+    "cephalosporin": ["Cephalexin", "Cefazolin", "Ceftriaxone", "Cefuroxime"],
+    "磺胺": ["Sulfamethoxazole", "Trimethoprim-Sulfamethoxazole",
+             "Sulfadiazine", "Sulfasalazine", "Cotrimoxazole"],
+    "sulfa": ["Sulfamethoxazole", "Trimethoprim-Sulfamethoxazole",
+              "Sulfadiazine", "Sulfasalazine", "Cotrimoxazole"],
+    "磺胺类": ["Sulfamethoxazole", "Trimethoprim-Sulfamethoxazole",
+               "Sulfadiazine", "Sulfasalazine"],
+    "阿司匹林": ["Aspirin", "Ibuprofen", "Naproxen", "Diclofenac", "Celecoxib"],
+    "aspirin": ["Aspirin", "Ibuprofen", "Naproxen", "Diclofenac"],
+    "NSAID": ["Aspirin", "Ibuprofen", "Naproxen", "Diclofenac", "Celecoxib"],
+    "nsaid": ["Aspirin", "Ibuprofen", "Naproxen", "Diclofenac", "Celecoxib"],
+    "二甲双胍": ["Metformin"],
+    "metformin": ["Metformin"],
+    "胰岛素": ["Insulin Glargine", "Insulin Aspart", "Insulin Lispro",
+               "Insulin Detemir", "NPH Insulin", "Regular Insulin"],
+    "insulin": ["Insulin Glargine", "Insulin Aspart", "Insulin Lispro",
+                "Insulin Detemir", "NPH Insulin", "Regular Insulin"],
+    "碘": ["Iodinated contrast"],
+}
 
 
 class DrugChecker:
@@ -144,6 +212,263 @@ class DrugChecker:
         if drug is None:
             return None
         return self._summarise_drug(drug)
+
+    # ── New: allergy / pregnancy / organ-dosing / comprehensive ───────────────
+
+    def check_allergy_cross_reference(
+        self, medications: list[str], patient_allergies: list[str]
+    ) -> list[dict]:
+        """Check whether any prescribed medication cross-reacts with patient allergies.
+
+        Returns list of dicts: drug, allergy_substance, severity, message, recommendation
+        """
+        results: list[dict] = []
+
+        for med in medications:
+            med_lower = med.lower()
+            for allergy in patient_allergies:
+                allergy_lower = allergy.lower()
+
+                # Check direct name match (patient allergic to the exact drug)
+                if allergy_lower in med_lower or med_lower in allergy_lower:
+                    results.append({
+                        "drug": med,
+                        "allergy_substance": allergy,
+                        "severity": "blocked",
+                        "message": f"患者对 {allergy} 过敏，{med} 属于同类别药物",
+                        "recommendation": f"禁止使用 {med}，选择非交叉过敏替代药物",
+                    })
+                    continue
+
+                # Check cross-reactivity map
+                crossed_drugs = _ALLERGY_DRUG_MAP.get(allergy_lower, [])
+                for crossed in crossed_drugs:
+                    if crossed.lower() in med_lower or med_lower in crossed.lower():
+                        results.append({
+                            "drug": med,
+                            "allergy_substance": allergy,
+                            "severity": "blocked",
+                            "message": f"患者对 {allergy} 过敏，{med} 与 {crossed} 存在交叉过敏风险",
+                            "recommendation": f"禁止使用 {med}，选择其他类别替代药物",
+                        })
+                        break
+
+        return results
+
+    def check_pregnancy(
+        self,
+        medications: list[str],
+        pregnancy_status: str = "unknown",
+        patient_age: int = 0,
+        patient_gender: str = "",
+    ) -> list[dict]:
+        """Check pregnancy safety for all medications.
+
+        Delegates to pregnancy_checker module.
+        """
+        try:
+            status = PregnancyStatus(pregnancy_status)
+        except ValueError:
+            status = PregnancyStatus.UNKNOWN
+
+        issues = check_pregnancy_safety(medications, status, patient_age, patient_gender)
+        return [
+            {
+                "drug": iss.drug,
+                "category": iss.category,
+                "severity": iss.severity,
+                "message": iss.message,
+                "recommendation": iss.recommendation,
+            }
+            for iss in issues
+        ]
+
+    def check_organ_dosing(
+        self,
+        medications: list[str],
+        liver_func: dict | None = None,
+        renal_func: dict | None = None,
+    ) -> list[dict]:
+        """Combined liver-kidney dose adjustment check for all medications.
+
+        Parameters
+        ----------
+        liver_func : dict | None
+            Keys: alt, ast, tbil, albumin, inr, has_ascites, has_encephalopathy
+        renal_func : dict | None
+            Keys: egfr, creatinine
+        """
+        lf = None
+        rf = None
+
+        if liver_func:
+            lf = LiverFunction(
+                alt=liver_func.get("alt", 0),
+                ast=liver_func.get("ast", 0),
+                tbil=liver_func.get("tbil", 0.5),
+                albumin=liver_func.get("albumin", 4.0),
+                inr=liver_func.get("inr", 1.0),
+                has_ascites=liver_func.get("has_ascites", False),
+                has_encephalopathy=liver_func.get("has_encephalopathy", False),
+            )
+
+        if renal_func:
+            rf = RenalFunction(
+                egfr=renal_func.get("egfr", 90),
+                creatinine=renal_func.get("creatinine"),
+            )
+
+        assessment = OrganAssessment(lf, rf)
+        organ_issues = assessment.assess_medications(medications)
+
+        return [
+            {
+                "drug": iss.drug,
+                "severity": iss.severity,
+                "category": iss.category,
+                "message": iss.message,
+                "recommendation": iss.recommendation,
+                "guideline_ref": iss.guideline_ref,
+            }
+            for iss in organ_issues
+        ]
+
+    def comprehensive_safety_check(
+        self,
+        medications: list[str],
+        patient_data: dict,
+        lab_results: dict | None = None,
+    ) -> ComprehensiveCheckResult:
+        """Run all safety checks and return a single aggregated result.
+
+        Parameters
+        ----------
+        medications : list[str]
+            Drug names.
+        patient_data : dict
+            Keys: conditions (list[str]), allergies (list[str]),
+            pregnancy_status (str), age (int), gender (str).
+        lab_results : dict | None
+            Keys: egfr, alt, ast, tbil, albumin, hba1c, inr,
+            has_ascites, has_encephalopathy.
+
+        Returns
+        -------
+        ComprehensiveCheckResult
+        """
+        lab = lab_results or {}
+        conditions = patient_data.get("conditions", [])
+        allergies_list = patient_data.get("allergies", [])
+        pregnancy_status = patient_data.get("pregnancy_status", "not_pregnant")
+        patient_age = patient_data.get("age", 0)
+        patient_gender = patient_data.get("gender", "")
+
+        all_interactions: list[dict] = []
+        all_allergy: list[dict] = []
+        all_pregnancy: list[dict] = []
+        all_organ: list[dict] = []
+        all_contra: list[dict] = []
+
+        # 1. Drug-drug interactions
+        all_interactions = self.check_interactions(medications)
+
+        # 2. Allergy cross-reference
+        if allergies_list:
+            all_allergy = self.check_allergy_cross_reference(medications, allergies_list)
+
+        # 3. Pregnancy safety
+        all_pregnancy = self.check_pregnancy(
+            medications, pregnancy_status, patient_age, patient_gender
+        )
+
+        # 4. Organ dosing (kidney + liver)
+        liver_input = None
+        if any(k in lab for k in ("alt", "ast", "tbil", "albumin")):
+            liver_input = {
+                "alt": lab.get("alt", 25),
+                "ast": lab.get("ast", 25),
+                "tbil": lab.get("tbil", 0.5),
+                "albumin": lab.get("albumin", 4.0),
+                "inr": lab.get("inr", 1.0),
+                "has_ascites": lab.get("has_ascites", False),
+                "has_encephalopathy": lab.get("has_encephalopathy", False),
+            }
+
+        renal_input = None
+        if "egfr" in lab:
+            renal_input = {"egfr": lab["egfr"], "creatinine": lab.get("creatinine")}
+
+        if liver_input or renal_input:
+            all_organ = self.check_organ_dosing(medications, liver_input, renal_input)
+
+        # 5. Contraindications
+        all_contra = self.check_contraindications(medications, conditions)
+
+        # Aggregate severity
+        has_blocked = False
+        has_major = False
+        has_moderate = False
+
+        for ix in all_interactions:
+            sev = ix.get("severity", "")
+            if sev in ("contraindicated", "major"):
+                has_blocked = True
+            elif sev == "moderate":
+                has_major = True
+            elif sev == "minor":
+                has_moderate = True
+
+        for ax in all_allergy:
+            if ax.get("severity") == "blocked":
+                has_blocked = True
+
+        for px in all_pregnancy:
+            if px.get("severity") == "blocked":
+                has_blocked = True
+            elif px.get("severity") == "warning":
+                has_major = True
+
+        for ox in all_organ:
+            if ox.get("severity") == "blocked":
+                has_blocked = True
+            elif ox.get("severity") == "major":
+                has_major = True
+            elif ox.get("severity") == "moderate":
+                has_moderate = True
+
+        for cx in all_contra:
+            has_blocked = True
+
+        if has_blocked:
+            rating = "unsafe"
+        elif has_major:
+            rating = "caution"
+        elif has_moderate:
+            rating = "caution"
+        else:
+            rating = "safe"
+
+        total_issues = (
+            len(all_interactions) + len(all_allergy) + len(all_pregnancy)
+            + len(all_organ) + len(all_contra)
+        )
+
+        if rating == "safe":
+            summary = f"综合安全评估通过：未发现严重用药问题。共{total_issues}条提示。"
+        elif rating == "caution":
+            summary = f"综合安全评估需关注：共发现{total_issues}条问题，建议调整后再确认。"
+        else:
+            summary = f"综合安全评估禁忌！共{total_issues}条问题，含禁忌或严重风险项，必须修改处方。"
+
+        return ComprehensiveCheckResult(
+            overall_rating=rating,
+            drug_interactions=all_interactions,
+            allergy_issues=all_allergy,
+            pregnancy_issues=all_pregnancy,
+            organ_issues=all_organ,
+            contraindications=all_contra,
+            summary=summary,
+        )
 
     # ── helpers ─────────────────────────────────────────────────────────────────
 

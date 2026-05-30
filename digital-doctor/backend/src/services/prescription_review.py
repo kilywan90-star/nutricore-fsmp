@@ -1,5 +1,6 @@
 """Comprehensive prescription review combining guideline concordance,
-drug interaction checks, renal/hepatic dosing, and contraindication screening.
+drug interaction checks, renal/hepatic dosing, contraindication screening,
+allergy cross-reference, pregnancy safety, and organ-dosing assessment.
 """
 
 from src.services.drug_checker import DrugChecker
@@ -27,7 +28,8 @@ class PrescriptionReviewer:
         medications : list[dict]
             Each entry: {"name": str, "dose": str, "frequency": str}
         patient_data : dict
-            Keys: age, gender, conditions (list[str]), allergies (list[str])
+            Keys: age, gender, conditions (list[str]), allergies (list[str]),
+            pregnancy_status (str)
         lab_results : dict
             Keys: egfr (float), alt (float), ast (float), hba1c (float)
 
@@ -43,9 +45,15 @@ class PrescriptionReviewer:
         # 1. Guideline concordance
         issues.extend(self._check_guideline_concordance(diagnosis, medications, lab_results))
 
-        # 2. Drug-drug interactions
-        interactions = self.checker.check_interactions(drug_names)
-        for ix in interactions:
+        # 2. Run comprehensive safety check (interactions + allergy + pregnancy + organ + contra)
+        comprehensive = self.checker.comprehensive_safety_check(
+            medications=drug_names,
+            patient_data=patient_data,
+            lab_results=lab_results,
+        )
+
+        # 2a. Drug-drug interactions
+        for ix in comprehensive.drug_interactions:
             issues.append({
                 "severity": ix["severity"],
                 "category": "drug_interaction",
@@ -54,44 +62,44 @@ class PrescriptionReviewer:
                 "guideline_ref": "中国2型糖尿病防治指南(2024版) §6",
             })
 
-        # 3. Renal/Hepatic dosing
-        egfr = lab_results.get("egfr")
-        if egfr is not None:
-            renals = self.checker.check_renal_dosing(drug_names, egfr)
-            for rn in renals:
-                if rn.get("adjustment_needed"):
-                    issues.append({
-                        "severity": "major" if "禁用" in rn.get("rationale", "") else "moderate",
-                        "category": "renal_dosing",
-                        "description": f"{rn['drug']}: eGFR={egfr} — {rn['rationale']}",
-                        "recommendation": f"推荐方案: {rn['recommended_dose']}",
-                        "guideline_ref": "中国2型糖尿病防治指南(2024版) §6.3",
-                    })
+        # 2b. Allergy cross-reference
+        for ax in comprehensive.allergy_issues:
+            issues.append({
+                "severity": ax["severity"],
+                "category": "allergy",
+                "description": ax["message"],
+                "recommendation": ax["recommendation"],
+                "guideline_ref": "药品说明书; 过敏史交叉参考",
+            })
 
-        alt_val = lab_results.get("alt")
-        if alt_val is not None and alt_val > 120:
-            for idx, drug_entry in enumerate(
-                self.checker._resolve_list(drug_names)
-            ):
-                hw = drug_entry.get("hepatic_warning", "")
-                if "禁用" in hw or "停用" in hw:
-                    issues.append({
-                        "severity": "major",
-                        "category": "hepatic_dosing",
-                        "description": f"{drug_names[idx]}: ALT={alt_val} U/L — {hw}",
-                        "recommendation": f"ALT显著升高，评估{drug_names[idx]}是否继续使用",
-                        "guideline_ref": "中国2型糖尿病防治指南(2024版) §6",
-                    })
+        # 2c. Pregnancy safety
+        for px in comprehensive.pregnancy_issues:
+            issues.append({
+                "severity": px["severity"],
+                "category": "pregnancy_safety",
+                "description": px["message"],
+                "recommendation": px["recommendation"],
+                "guideline_ref": "FDA妊娠用药分类; UpToDate 2024",
+            })
 
-        # 4. Contraindication check
-        contras = self.checker.check_contraindications(drug_names, conditions)
-        for c in contras:
+        # 2d. Organ dosing (renal/hepatic)
+        for ox in comprehensive.organ_issues:
+            issues.append({
+                "severity": ox["severity"],
+                "category": ox["category"],
+                "description": ox["message"],
+                "recommendation": ox["recommendation"],
+                "guideline_ref": ox.get("guideline_ref", "中国2型糖尿病防治指南(2024版)"),
+            })
+
+        # 2e. Contraindications
+        for cx in comprehensive.contraindications:
             issues.append({
                 "severity": "contraindicated",
                 "category": "contraindication",
-                "description": f"{c['drug']}: {c['contraindication_detail']} (患者存在 {c['condition']})",
-                "recommendation": c["recommendation"],
-                "guideline_ref": c.get("guideline_ref", "中国2型糖尿病防治指南(2024版)"),
+                "description": f"{cx['drug']}: {cx['contraindication_detail']} (患者存在 {cx['condition']})",
+                "recommendation": cx["recommendation"],
+                "guideline_ref": cx.get("guideline_ref", "中国2型糖尿病防治指南(2024版)"),
             })
 
         overall = self._calc_rating(issues)
