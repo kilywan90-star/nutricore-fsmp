@@ -15,6 +15,7 @@ const HealthCoach = lazy(() => import('./pages/patient/HealthCoach'));
 const DoctorDashboard = lazy(() => import('./pages/doctor/Dashboard'));
 const PatientList = lazy(() => import('./pages/doctor/PatientList'));
 const PatientDetail = lazy(() => import('./pages/doctor/PatientDetail'));
+const DiagnosisPanel = lazy(() => import('./pages/doctor/DiagnosisPanel'));
 
 // Admin pages (least visited — deepest split)
 const AlertPanel = lazy(() => import('./pages/doctor/AlertPanel'));
@@ -42,6 +43,7 @@ export default function App() {
         <Route path="/doctor" element={<DoctorDashboard />} />
         <Route path="/doctor/patients" element={<PatientList />} />
         <Route path="/doctor/patients/:id" element={<PatientDetail />} />
+        <Route path="/doctor/patients/:id/diagnosis" element={<DiagnosisPanel />} />
 
         {/* Alerts (admin/deep split) */}
         <Route path="/doctor/alerts" element={<AlertPanel />} />
