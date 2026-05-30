@@ -24,6 +24,44 @@ services:
     environment:
       DATABASE_URL: postgresql+asyncpg://ddd:ddd_secret_dev@db:5432/digital_doctor
       REDIS_URL: redis://redis:6379/0
+      CELERY_BROKER_URL: redis://redis:6379/0
+      CELERY_RESULT_BACKEND: redis://redis:6379/0
+      LLM_API_KEY: ${LLM_API_KEY:-}
+      LLM_BASE_URL: ${LLM_BASE_URL:-https://api.openai.com/v1}
+      SECRET_KEY: dev-secret-change-in-production
+      PHI_ENCRYPTION_KEY: ${PHI_ENCRYPTION_KEY:-}
+    depends_on:
+      - db
+      - redis
+    volumes:
+      - ./backend:/app
+
+  celery_worker:
+    build: ./backend
+    command: celery -A src.tasks.celery_app worker --loglevel=info --concurrency=2
+    environment:
+      DATABASE_URL: postgresql+asyncpg://ddd:ddd_secret_dev@db:5432/digital_doctor
+      REDIS_URL: redis://redis:6379/0
+      CELERY_BROKER_URL: redis://redis:6379/0
+      CELERY_RESULT_BACKEND: redis://redis:6379/0
+      LLM_API_KEY: ${LLM_API_KEY:-}
+      LLM_BASE_URL: ${LLM_BASE_URL:-https://api.openai.com/v1}
+      SECRET_KEY: dev-secret-change-in-production
+      PHI_ENCRYPTION_KEY: ${PHI_ENCRYPTION_KEY:-}
+    depends_on:
+      - db
+      - redis
+    volumes:
+      - ./backend:/app
+
+  celery_beat:
+    build: ./backend
+    command: celery -A src.tasks.celery_app beat --loglevel=info
+    environment:
+      DATABASE_URL: postgresql+asyncpg://ddd:ddd_secret_dev@db:5432/digital_doctor
+      REDIS_URL: redis://redis:6379/0
+      CELERY_BROKER_URL: redis://redis:6379/0
+      CELERY_RESULT_BACKEND: redis://redis:6379/0
       LLM_API_KEY: ${LLM_API_KEY:-}
       LLM_BASE_URL: ${LLM_BASE_URL:-https://api.openai.com/v1}
       SECRET_KEY: dev-secret-change-in-production
