@@ -3,6 +3,9 @@
  * Navigation, assessment workflow, rendering, product search
  */
 
+// Alias for HTML oninput handler
+function filterProducts() { renderProductTable(); }
+
 let currentStep = 1;
 let sidebarOpen = false;
 
