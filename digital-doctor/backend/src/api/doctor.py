@@ -20,6 +20,8 @@ from src.security.authorization import (
     _get_department_patient_ids,
 )
 from src.security.operation_audit import log_operation
+from src.services.drug_checker import get_drug_checker
+from src.services.prescription_review import PrescriptionReviewer
 
 router = APIRouter()
 
@@ -45,6 +47,25 @@ class DoctorProfileResponse(BaseModel):
 class UpdateProfileRequest(BaseModel):
     title: Optional[str] = Field(default=None, max_length=50)
     license_number: Optional[str] = Field(default=None, max_length=50)
+
+
+# ── Medication / Prescription Review models ────────────────────────────────────
+
+class MedicationItem(BaseModel):
+    name: str = Field(..., description="药品通用名/英文名/商品名")
+    dose: str = Field(..., description="单次剂量，如 500mg")
+    frequency: str = Field(..., description="给药频率，如 bid")
+
+
+class ReviewPrescriptionRequest(BaseModel):
+    diagnosis: str = Field(..., description="诊断，如 type2_diabetes, type2_diabetes_newly_diagnosed")
+    medications: list[MedicationItem] = Field(default_factory=list)
+    patient_data: dict = Field(default_factory=dict)
+    lab_results: dict = Field(default_factory=dict)
+
+
+class CheckInteractionsRequest(BaseModel):
+    medications: list[dict] = Field(default_factory=list)
 
 
 # ── Patient listing (scoped to accessible patients) ────────────────────────────
@@ -326,3 +347,84 @@ async def update_doctor_profile(
         "title": profile.title,
         "license_number": profile.license_number,
     }
+
+
+# ── Prescription Review ─────────────────────────────────────────────────────
+
+@router.post("/prescriptions/review", dependencies=[Depends(require_role("doctor", "department_head", "admin"))])
+async def review_prescription(
+    req: ReviewPrescriptionRequest,
+    db: AsyncSession = Depends(get_db),
+    user: User = Depends(get_current_user),
+):
+    """Comprehensive prescription review: guideline concordance, interactions,
+    renal/hepatic dosing, and contraindications."""
+    checker = get_drug_checker()
+    reviewer = PrescriptionReviewer(checker)
+
+    meds = [{"name": m.name, "dose": m.dose, "frequency": m.frequency} for m in req.medications]
+
+    result = reviewer.review_prescription(
+        diagnosis=req.diagnosis,
+        medications=meds,
+        patient_data=req.patient_data,
+        lab_results=req.lab_results,
+    )
+
+    await log_operation(
+        user_id=user.id,
+        action="REVIEW",
+        resource_type="prescription",
+        resource_id=str(uuid.uuid4()),
+        details={
+            "diagnosis": req.diagnosis,
+            "medication_count": len(meds),
+            "overall_rating": result["overall_rating"],
+            "issue_count": result["issue_count"],
+        },
+        db=db,
+    )
+
+    return result
+
+
+# ── Drug Search ──────────────────────────────────────────────────────────────
+
+@router.get("/drugs", dependencies=[Depends(require_role("doctor", "department_head", "admin"))])
+async def search_drugs(
+    q: str = Query(default="", description="搜索关键词"),
+    user: User = Depends(get_current_user),
+):
+    """Search drug database by name or drug class."""
+    checker = get_drug_checker()
+    if not q.strip():
+        return {"items": checker.search_drugs("")[:50]}
+    results = checker.search_drugs(q)
+    return {"items": results}
+
+
+# ── Drug Interaction Check ──────────────────────────────────────────────────
+
+@router.post("/drugs/check-interactions", dependencies=[Depends(require_role("doctor", "department_head", "admin"))])
+async def check_drug_interactions(
+    req: CheckInteractionsRequest,
+    db: AsyncSession = Depends(get_db),
+    user: User = Depends(get_current_user),
+):
+    """Check interactions for a list of drug names."""
+    checker = get_drug_checker()
+    drug_names = [m.get("drug_name", m.get("name", "")) for m in req.medications]
+    drug_names = [dn for dn in drug_names if dn]
+
+    interactions = checker.check_interactions(drug_names)
+
+    await log_operation(
+        user_id=user.id,
+        action="CHECK_INTERACTIONS",
+        resource_type="drugs",
+        resource_id="batch",
+        details={"drug_count": len(drug_names), "interaction_count": len(interactions)},
+        db=db,
+    )
+
+    return {"medications": drug_names, "interactions": interactions}

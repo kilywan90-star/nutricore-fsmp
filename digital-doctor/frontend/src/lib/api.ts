@@ -274,3 +274,77 @@ export async function listTransfers(params?: {
   const { data } = await api.get('/admin/transfers', { params });
   return data;
 }
+
+// ── Prescription Review API ────────────────────────────────────────────
+
+export interface DrugInfo {
+  generic_name: string;
+  generic_name_en: string;
+  drug_class: string;
+  brand_names: string[];
+  dosage_range: {
+    starting: string;
+    usual: string;
+    max: string;
+    frequency: string;
+    timing: string;
+  };
+  renal_adjustment: Array<{ egfr_min: number; egfr_max: number | null; dose: string }>;
+  hepatic_warning: string;
+  common_side_effects: string[];
+  contraindications: string[];
+  pregnancy_category: string;
+}
+
+export interface MedicationInput {
+  name: string;
+  dose: string;
+  frequency: string;
+}
+
+export interface PrescriptionReviewIssue {
+  severity: 'minor' | 'moderate' | 'major' | 'contraindicated';
+  category: 'guideline_concordance' | 'drug_interaction' | 'renal_dosing' | 'hepatic_dosing' | 'contraindication';
+  description: string;
+  recommendation: string;
+  guideline_ref: string;
+}
+
+export interface PrescriptionReviewResult {
+  overall_rating: 'safe' | 'caution' | 'unsafe';
+  issues: PrescriptionReviewIssue[];
+  summary: string;
+  diagnosis: string;
+  medication_count: number;
+  issue_count: number;
+}
+
+export interface DrugInteractionResult {
+  drug_a: string;
+  drug_b: string;
+  severity: string;
+  mechanism: string;
+  recommendation: string;
+}
+
+export async function reviewPrescription(input: {
+  diagnosis: string;
+  medications: MedicationInput[];
+  patient_data: Record<string, unknown>;
+  lab_results: Record<string, unknown>;
+}): Promise<PrescriptionReviewResult> {
+  const { data } = await api.post('/doctor/prescriptions/review', input);
+  return data;
+}
+
+export async function searchDrugs(query: string): Promise<{ items: DrugInfo[] }> {
+  const { data } = await api.get('/doctor/drugs', { params: { q: query } });
+  return data;
+}
+
+export async function checkDrugInteractions(
+  medications: Array<{ drug_name: string }>,
+): Promise<{ medications: string[]; interactions: DrugInteractionResult[] }> {
+  const { data } = await api.post('/doctor/drugs/check-interactions', { medications });
+  return data;
+}
