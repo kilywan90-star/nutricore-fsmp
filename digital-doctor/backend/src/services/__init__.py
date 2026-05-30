@@ -6,6 +6,7 @@ from src.services.medication_reminder import generate_daily_schedule, check_miss
 from src.services.health_coach import HealthCoach, CoachContext
 from src.services.alert_engine import check_glucose_alerts, check_compliance_alerts
 from src.services.patient_manager import get_patient_list, get_patient_detail
+from src.services.backup_service import create_backup, list_backups, verify_backup, get_backup_stats
 from src.services import prompts
 from src.services.notification_service import (
     schedule_medication_reminders,

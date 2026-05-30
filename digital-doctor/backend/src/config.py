@@ -24,12 +24,11 @@ class Settings(BaseSettings):
 
     PHI_ENCRYPTION_KEY: str = ""
 
-    CELERY_BROKER_URL: str = "redis://localhost:6379/0"
-    CELERY_RESULT_BACKEND: str = "redis://localhost:6379/0"
-    SMS_PROVIDER: str = "mock"
-    SMS_API_KEY: str = ""
-    NOTIFICATION_CLEANUP_DAYS: int = 90
-    HEALTH_TIP_ENABLED: bool = True
+    BACKUP_RETENTION_DAYS: int = 30
+    BACKUP_STORAGE_TYPE: str = "local"
+    BACKUP_S3_BUCKET: str = ""
+    BACKUP_S3_ENDPOINT: str = ""
+    BACKUP_ENCRYPTION_ENABLED: bool = True
 
     model_config = {"env_prefix": "", "case_sensitive": True}
 
