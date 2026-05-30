@@ -1,3 +1,6 @@
+# Production deployment — run with: docker compose -f docker-compose.prod.yml up -d
+# Optionally include monitoring: docker compose -f docker-compose.prod.yml -f docker-compose.monitoring.yml up -d
+
 version: "3.9"
 
 services:
@@ -5,12 +8,13 @@ services:
     image: postgres:15-alpine
     environment:
       POSTGRES_USER: ddd
-      POSTGRES_PASSWORD: ddd_secret_dev
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
       POSTGRES_DB: digital_doctor
     ports:
       - "5432:5432"
     volumes:
-      - pgdata:/var/lib/postgresql/data
+      - pgdata_prod:/var/lib/postgresql/data
+    restart: unless-stopped
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ddd"]
       interval: 10s
@@ -21,6 +25,7 @@ services:
     image: redis:7-alpine
     ports:
       - "6379:6379"
+    restart: unless-stopped
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 10s
@@ -28,35 +33,42 @@ services:
       retries: 5
 
   backend:
-    build: ./backend
+    build:
+      context: ./backend
+      target: production
     ports:
       - "8000:8000"
     environment:
-      DATABASE_URL: postgresql+asyncpg://ddd:ddd_secret_dev@db:5432/digital_doctor
-      REDIS_URL: redis://redis:6379/0
-      LLM_API_KEY: ${LLM_API_KEY:-}
+      DATABASE_URL: ${DATABASE_URL}
+      REDIS_URL: ${REDIS_URL}
+      LLM_API_KEY: ${LLM_API_KEY}
       LLM_BASE_URL: ${LLM_BASE_URL:-https://api.openai.com/v1}
-      SECRET_KEY: dev-secret-change-in-production
-      PHI_ENCRYPTION_KEY: ${PHI_ENCRYPTION_KEY:-}
+      LLM_MODEL: ${LLM_MODEL:-gpt-4o}
+      SECRET_KEY: ${SECRET_KEY}
+      PHI_ENCRYPTION_KEY: ${PHI_ENCRYPTION_KEY}
+      DEBUG: "false"
     depends_on:
       db:
         condition: service_healthy
       redis:
         condition: service_healthy
-    volumes:
-      - ./backend:/app
+    restart: unless-stopped
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/health/live"]
       interval: 15s
       timeout: 5s
       retries: 3
+      start_period: 10s
 
   frontend:
-    build: ./frontend
+    build:
+      context: ./frontend
+      target: production
     ports:
       - "3000:3000"
     depends_on:
       - backend
+    restart: unless-stopped
 
 volumes:
-  pgdata:
+  pgdata_prod:
