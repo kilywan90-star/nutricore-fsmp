@@ -171,204 +171,106 @@ export async function getAllAlerts(params?: {
   return data;
 }
 
-// ---- Admin API ----
+// ── Hospital & Admin API ─────────────────────────────────────────────
 
-export interface DashboardStats {
-  total_patients: number;
-  active_patients: number;
-  total_doctors: number;
-  total_departments: number;
-  alerts_by_severity: Record<string, number>;
-  glucose_control_rate: number;
-  patient_registration_trend: Array<{ date: string; count: number }>;
-}
-
-export interface DepartmentItem {
+export interface HospitalItem {
   id: string;
   name: string;
   code: string;
-  hospital_id: string | null;
+  address: string | null;
+  level: string | null;
   is_active: boolean;
+  department_count: number;
   doctor_count: number;
+}
+
+export interface HospitalListResponse {
+  items: HospitalItem[];
+  total: number;
+}
+
+export interface HospitalStats {
+  hospital_id: string;
+  hospital_name: string;
+  hospital_code: string;
+  level: string | null;
+  doctor_count: number;
+  department_count: number;
   patient_count: number;
+  pending_transfer_count: number;
 }
 
-export interface DepartmentListResponse {
-  items: DepartmentItem[];
-  total: number;
-}
-
-export interface AdminDoctorItem {
+export interface TransferItem {
   id: string;
-  user_id: string;
-  department_id: string;
-  department_name: string;
-  department_code: string;
-  title: string;
-  license_number: string | null;
-  is_department_head: boolean;
-  is_active: boolean;
-  patient_count: number;
-  last_login_at: string | null;
+  patient_id: string;
+  from_hospital_id: string;
+  from_hospital_name: string;
+  to_hospital_id: string;
+  to_hospital_name: string;
+  requested_by: string;
+  approved_by: string | null;
+  status: string;
+  reason: string | null;
+  created_at: string;
+  updated_at: string | null;
 }
 
-export interface AdminDoctorListResponse {
+export interface TransferListResponse {
   total: number;
   page: number;
   page_size: number;
-  items: AdminDoctorItem[];
+  items: TransferItem[];
 }
 
-export interface AdminPatientItem {
-  id: string;
-  gender: string;
-  birth_year: number;
-  diabetes_type: string;
-  hba1c_target: number;
-  latest_glucose: number | null;
-  alert_count: number;
-  glucose_control_status: string;
-}
-
-export interface AdminPatientListResponse {
-  total: number;
-  page: number;
-  page_size: number;
-  items: AdminPatientItem[];
-}
-
-export interface AuditLogItem {
-  id: string;
-  user_id: string | null;
-  action: string;
-  resource_type: string;
-  resource_id: string | null;
-  details: Record<string, unknown> | null;
-  ip_address: string | null;
-  timestamp: string;
-}
-
-export interface AuditLogListResponse {
-  total: number;
-  page: number;
-  page_size: number;
-  items: AuditLogItem[];
-}
-
-export interface AdminConfigParams {
-  fpg_diagnostic_threshold: number;
-  hba1c_diagnostic_threshold: number;
-  hba1c_treatment_target: number;
-  elderly_hba1c_target: number;
-  egfr_metformin_contraindication: number;
-  severe_hyperglycemia_threshold: number;
-  hypoglycemia_threshold: number;
-}
-
-export interface AdminConfigResponse {
-  params: AdminConfigParams;
-  config_version: number;
-  versions: Array<{ version: number; updated_at: string }>;
-}
-
-export interface UpdateConfigRequest {
-  fpg_diagnostic_threshold?: number;
-  hba1c_diagnostic_threshold?: number;
-  hba1c_treatment_target?: number;
-  elderly_hba1c_target?: number;
-  egfr_metformin_contraindication?: number;
-  severe_hyperglycemia_threshold?: number;
-  hypoglycemia_threshold?: number;
-}
-
-export async function getDashboardStats(): Promise<DashboardStats> {
-  const { data } = await api.get('/admin/dashboard');
+export async function getHospitals(): Promise<HospitalListResponse> {
+  const { data } = await api.get('/admin/hospitals');
   return data;
 }
 
-export async function getAdminDepartments(): Promise<DepartmentListResponse> {
-  const { data } = await api.get('/admin/departments');
-  return data;
-}
-
-export async function createAdminDepartment(body: {
+export async function createHospital(input: {
   name: string;
   code: string;
+  address?: string;
+  level?: string;
+}): Promise<HospitalItem> {
+  const { data } = await api.post('/admin/hospitals', input);
+  return data;
+}
+
+export async function updateHospital(
+  id: string,
+  input: { name?: string; address?: string; level?: string; is_active?: boolean },
+): Promise<HospitalItem> {
+  const { data } = await api.put(`/admin/hospitals/${id}`, input);
+  return data;
+}
+
+export async function getHospitalStats(id: string): Promise<HospitalStats> {
+  const { data } = await api.get(`/admin/hospitals/${id}/stats`);
+  return data;
+}
+
+export async function createTransfer(input: {
+  patient_id: string;
+  from_hospital_id: string;
+  to_hospital_id: string;
+  reason?: string;
+}): Promise<TransferItem> {
+  const { data } = await api.post('/admin/transfers', input);
+  return data;
+}
+
+export async function approveTransfer(transferId: string, approved: boolean = true) {
+  const { data } = await api.post(`/admin/transfers/${transferId}/approve`, { approved });
+  return data;
+}
+
+export async function listTransfers(params?: {
   hospital_id?: string;
-}) {
-  const { data } = await api.post('/admin/departments', body);
-  return data;
-}
-
-export async function updateAdminDepartment(id: string, body: {
-  name?: string;
-  code?: string;
-  is_active?: boolean;
-}) {
-  const { data } = await api.put(`/admin/departments/${id}`, body);
-  return data;
-}
-
-export async function deleteAdminDepartment(id: string) {
-  const { data } = await api.delete(`/admin/departments/${id}`);
-  return data;
-}
-
-export async function getAdminDoctors(params?: {
+  status?: string;
   page?: number;
   page_size?: number;
-  department_id?: string;
-}): Promise<AdminDoctorListResponse> {
-  const { data } = await api.get('/admin/doctors', { params });
-  return data;
-}
-
-export async function assignDoctorDepartment(doctorId: string, departmentId: string) {
-  const { data } = await api.post(`/admin/doctors/${doctorId}/assign-department`, {
-    department_id: departmentId,
-  });
-  return data;
-}
-
-export async function toggleDoctorActive(doctorId: string) {
-  const { data } = await api.put(`/admin/doctors/${doctorId}/toggle-active`);
-  return data;
-}
-
-export async function getAdminPatients(params?: {
-  page?: number;
-  page_size?: number;
-  search?: string;
-  department_id?: string;
-  risk_level?: string;
-  glucose_control?: string;
-}): Promise<AdminPatientListResponse> {
-  const { data } = await api.get('/admin/patients', { params });
-  return data;
-}
-
-export async function getAuditLogs(params?: {
-  page?: number;
-  page_size?: number;
-  user_id?: string;
-  action?: string;
-  resource_type?: string;
-}): Promise<AuditLogListResponse> {
-  const { data } = await api.get('/admin/audit-logs', { params });
-  return data;
-}
-
-export async function getAdminConfig(): Promise<AdminConfigResponse> {
-  const { data } = await api.get('/admin/config');
-  return data;
-}
-
-export async function updateAdminConfig(body: UpdateConfigRequest) {
-  const { data } = await api.post('/admin/config', body);
-  return data;
-}
-
-export async function resetAdminConfig() {
-  const { data } = await api.post('/admin/config/reset');
+}): Promise<TransferListResponse> {
+  const { data } = await api.get('/admin/transfers', { params });
   return data;
 }
