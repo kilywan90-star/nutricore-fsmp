@@ -11,6 +11,7 @@ from src.models.org import DoctorProfile, PatientAssignment, Department, Assignm
 from src.models.patient import Patient
 from src.services.patient_manager import get_patient_list, get_patient_detail
 from src.services.alert_engine import check_glucose_alerts
+from src.services.pre_consultation import generate_questionnaire, analyze_answers, generate_doctor_summary
 from src.api.auth_deps import require_role, get_current_user
 from src.security.authorization import (
     require_patient_access,
@@ -325,4 +326,63 @@ async def update_doctor_profile(
         "id": str(profile.id),
         "title": profile.title,
         "license_number": profile.license_number,
+    }
+
+
+# ── Pre-consultation summary (doctor view) ────────────────────────────────────
+
+@router.get(
+    "/patients/{patient_id}/pre-consultation",
+    dependencies=[Depends(require_role("doctor", "department_head", "admin")),
+                  Depends(require_patient_access())],
+)
+async def patient_pre_consultation(
+    patient_id: str,
+    db: AsyncSession = Depends(get_db),
+    user: User = Depends(get_current_user),
+):
+    """Return the AI-generated pre-consultation summary for a patient.
+
+    In a production system this would be fetched from a database record.
+    For now it generates a fresh summary from latest patient data.
+    """
+    detail = await get_patient_detail(db, patient_id)
+    if not detail:
+        raise HTTPException(status_code=404, detail="Patient not found")
+
+    # Build patient_data from detail
+    patient_data = {
+        "chief_complaint": "",
+        "diabetes_type": detail.get("diabetes_type", ""),
+        "treatment_stage": "常规复诊",
+        "last_visit_findings": "",
+        "hba1c": detail.get("hba1c_target"),
+    }
+
+    # Include latest glucose context
+    records = detail.get("glucose_records", [])
+    if records:
+        latest = records[0]
+        patient_data["last_glucose"] = latest.get("value_mmol_l")
+
+    # Include lab results as findings
+    lab_reports = detail.get("lab_reports", [])
+    if lab_reports:
+        findings = "; ".join(
+            f"{l.get('report_type', '')}: {str(l.get('results', ''))}"
+            for l in lab_reports[:3]
+        )
+        patient_data["last_visit_findings"] = findings
+
+    # Check for high-risk alerts to flag in summary
+    alerts = detail.get("alerts", [])
+    if alerts:
+        unack = [a for a in alerts if not a.get("acknowledged")]
+        patient_data["alert_count"] = len(unack)
+
+    questions = generate_questionnaire(patient_data)
+    return {
+        "patient_id": patient_id,
+        "questions": questions,
+        "patient_context": patient_data,
     }

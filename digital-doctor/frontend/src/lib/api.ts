@@ -274,3 +274,59 @@ export async function listTransfers(params?: {
   const { data } = await api.get('/admin/transfers', { params });
   return data;
 }
+
+// ── Pre-consultation API ────────────────────────────────────────────────
+
+export interface QuestionItem {
+  question_id: string;
+  question_text: string;
+  answer_type: 'text' | 'select' | 'number' | 'boolean';
+  options: string[] | null;
+  required: boolean;
+  depends_on: { question_id: string; matches_any?: string[] } | null;
+}
+
+export interface QuestionnaireResponse {
+  questions: QuestionItem[];
+}
+
+export interface PreConsultSummary {
+  chief_complaint: string;
+  present_illness: string;
+  past_history: string;
+  family_history: string;
+  social_history: string;
+  medication_review: string;
+  review_of_systems: string;
+}
+
+export interface SubmitAnswersResponse {
+  summary: PreConsultSummary;
+  doctor_summary: string;
+}
+
+export interface AnswerItem {
+  question_id: string;
+  answer_value: string;
+}
+
+export async function getQuestionnaire(patientData: Record<string, unknown>): Promise<QuestionnaireResponse> {
+  const { data } = await api.post('/patient/pre-consultation/questionnaire', { patient_data: patientData });
+  return data;
+}
+
+export async function submitAnswers(
+  answers: AnswerItem[],
+  patientData: Record<string, unknown>,
+): Promise<SubmitAnswersResponse> {
+  const { data } = await api.post('/patient/pre-consultation/submit', {
+    answers,
+    patient_data: patientData,
+  });
+  return data;
+}
+
+export async function getDoctorPreConsultation(patientId: string) {
+  const { data } = await api.get(`/doctor/patients/${patientId}/pre-consultation`);
+  return data;
+}

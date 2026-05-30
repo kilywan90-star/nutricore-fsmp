@@ -10,6 +10,7 @@ const ReportView = lazy(() => import('./pages/patient/ReportView'));
 const MedicationPage = lazy(() => import('./pages/patient/MedicationPage'));
 const GlucoseLog = lazy(() => import('./pages/patient/GlucoseLog'));
 const HealthCoach = lazy(() => import('./pages/patient/HealthCoach'));
+const PreConsultation = lazy(() => import('./pages/patient/PreConsultation'));
 
 // Doctor pages
 const DoctorDashboard = lazy(() => import('./pages/doctor/Dashboard'));
@@ -37,6 +38,7 @@ export default function App() {
         <Route path="/patient/medication" element={<MedicationPage />} />
         <Route path="/patient/glucose" element={<GlucoseLog />} />
         <Route path="/patient/coach" element={<HealthCoach />} />
+        <Route path="/patient/pre-consultation" element={<PreConsultation />} />
 
         {/* Doctor routes */}
         <Route path="/doctor" element={<DoctorDashboard />} />

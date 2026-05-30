@@ -11,6 +11,11 @@ from src.api.deps import (
     check_glucose_alerts,
     CoachContext,
 )
+from src.services.pre_consultation import (
+    generate_questionnaire,
+    analyze_answers,
+    generate_doctor_summary,
+)
 from src.api.auth_deps import require_role
 
 router = APIRouter()
@@ -117,3 +122,47 @@ async def health_coach_chat(req: HealthCoachRequest):
     is_urgent = coach._has_urgent_keywords(req.message)
     reply = await coach.get_reply(ctx, req.message)
     return HealthCoachResponse(reply=reply, is_urgent=is_urgent)
+
+
+# ── Pre-consultation endpoints ────────────────────────────────────────────────
+
+
+class QuestionnaireRequest(BaseModel):
+    patient_data: dict
+
+
+class QuestionnaireResponse(BaseModel):
+    questions: list[dict]
+
+
+@router.post("/pre-consultation/questionnaire", response_model=QuestionnaireResponse,
+             dependencies=[Depends(require_role("patient"))])
+async def get_questionnaire(req: QuestionnaireRequest):
+    """Generate a personalized pre-consultation questionnaire."""
+    questions = generate_questionnaire(req.patient_data)
+    return QuestionnaireResponse(questions=questions)
+
+
+class AnswerItem(BaseModel):
+    question_id: str
+    answer_value: str
+
+
+class SubmitAnswersRequest(BaseModel):
+    answers: list[AnswerItem]
+    patient_data: dict
+
+
+class SubmitAnswersResponse(BaseModel):
+    summary: dict
+    doctor_summary: str
+
+
+@router.post("/pre-consultation/submit", response_model=SubmitAnswersResponse,
+             dependencies=[Depends(require_role("patient"))])
+async def submit_answers(req: SubmitAnswersRequest):
+    """Submit questionnaire answers and receive an AI summary."""
+    answers_dicts = [{"question_id": a.question_id, "answer_value": a.answer_value} for a in req.answers]
+    summary = analyze_answers(answers_dicts, req.patient_data)
+    doctor_summary = generate_doctor_summary(summary)
+    return SubmitAnswersResponse(summary=summary, doctor_summary=doctor_summary)
