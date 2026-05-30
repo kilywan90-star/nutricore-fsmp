@@ -11,7 +11,13 @@ from src.db.base import Base
 class UserRole(str, enum.Enum):
     PATIENT = "patient"
     DOCTOR = "doctor"
+    DEPARTMENT_HEAD = "department_head"
     ADMIN = "admin"
+
+    @property
+    def hierarchy_level(self) -> int:
+        _order = {self.ADMIN: 100, self.DEPARTMENT_HEAD: 80, self.DOCTOR: 60, self.PATIENT: 40}
+        return _order.get(self, 0)
 
 
 class User(Base):

@@ -13,10 +13,16 @@ async def get_patient_list(
     page_size: int = 20,
     search: str | None = None,
     risk_filter: str | None = None,
+    patient_ids: set[uuid.UUID] | None = None,
 ) -> dict[str, Any]:
     query = select(Patient)
     if search:
         query = query.where(Patient.name_hash.ilike(f"%{search}%"))
+    if patient_ids is not None:
+        if not patient_ids:
+            # No accessible patients — return empty results
+            return {"total": 0, "page": page, "page_size": page_size, "items": []}
+        query = query.where(Patient.id.in_(patient_ids))
     count_query = select(func.count()).select_from(query.subquery())
     total = (await db.execute(count_query)).scalar() or 0
     query = query.offset((page - 1) * page_size).limit(page_size).order_by(desc(Patient.created_at))
