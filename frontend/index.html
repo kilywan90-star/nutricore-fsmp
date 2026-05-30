@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NutriCore FSMP — 临床营养智能决策系统</title>
+<link rel="stylesheet" href="css/app.css">
+</head>
+<body>
+
+<!-- ===== App Shell ===== -->
+<div class="app" id="app">
+  <!-- Sidebar -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand">
+      <div class="brand-icon">⚕</div>
+      <div class="brand-text">
+        <span class="brand-name">NutriCore</span>
+        <span class="brand-sub">FSMP 临床营养决策</span>
+      </div>
+    </div>
+    <nav class="sidebar-nav">
+      <a class="nav-item active" data-page="dashboard" onclick="navigateTo('dashboard')">
+        <span class="nav-icon">◫</span>
+        <span class="nav-label">工作台</span>
+      </a>
+      <a class="nav-item" data-page="assessment" onclick="navigateTo('assessment')">
+        <span class="nav-icon">⊞</span>
+        <span class="nav-label">营养评估</span>
+      </a>
+      <a class="nav-item" data-page="products" onclick="navigateTo('products')">
+        <span class="nav-icon">☷</span>
+        <span class="nav-label">产品目录</span>
+      </a>
+      <a class="nav-item" data-page="drugs" onclick="navigateTo('drugs')">
+        <span class="nav-icon">⚕</span>
+        <span class="nav-label">药物互作</span>
+      </a>
+      <a class="nav-item" data-page="guidelines" onclick="navigateTo('guidelines')">
+        <span class="nav-icon">⏏</span>
+        <span class="nav-label">临床指南</span>
+      </a>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="version-badge">v2.0 · ESPEN 2025</div>
+    </div>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="main">
+    <!-- Mobile Header -->
+    <header class="mobile-header" id="mobileHeader">
+      <button class="menu-toggle" onclick="toggleSidebar()">☰</button>
+      <span class="mobile-title">NutriCore FSMP</span>
+      <span class="mobile-badge">v2.0</span>
+    </header>
+
+    <!-- Page: Dashboard -->
+    <section class="page active" id="page-dashboard">
+      <div class="page-header">
+        <h1>临床营养工作台</h1>
+        <p>ESPEN 2025 / CSPEN 2025 / ERAS 2025 循证驱动</p>
+      </div>
+
+      <div class="stats-row">
+        <div class="stat-card">
+          <div class="stat-icon" style="background:linear-gradient(135deg,#d1fae5,#a7f3d0)">⊞</div>
+          <div class="stat-info">
+            <div class="stat-value">311</div>
+            <div class="stat-label">FSMP 注册产品</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon" style="background:linear-gradient(135deg,#dbeafe,#bfdbfe)">⚕</div>
+          <div class="stat-info">
+            <div class="stat-value">11</div>
+            <div class="stat-label">药物互作类别</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon" style="background:linear-gradient(135deg,#fef3c7,#fde68a)">⏏</div>
+          <div class="stat-info">
+            <div class="stat-value">44</div>
+            <div class="stat-label">ESPEN 2025 推荐</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon" style="background:linear-gradient(135deg,#ede9fe,#c4b5fd)">◎</div>
+          <div class="stat-info">
+            <div class="stat-value">264</div>
+            <div class="stat-label">NMPA 注册数据</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card-row">
+        <div class="card" style="flex:2">
+          <div class="card-header">
+            <h3>快速营养评估</h3>
+            <span class="badge badge-green">NRS 2002</span>
+          </div>
+          <div class="card-body">
+            <p class="card-desc">基于 ESPEN 2025 / CSPEN 2025 指南，入院24小时内完成营养风险筛查。输入患者基本信息，自动计算 NRS2002 评分并推荐营养支持路径。</p>
+            <div class="quick-assess">
+              <div class="qa-field">
+                <label>疾病</label>
+                <select id="quickDisease" onchange="updateQuickDemo()">
+                  <option value="2B92.0">结直肠癌</option>
+                  <option value="2B72.0">胃癌</option>
+                  <option value="2C13.0">胰腺癌</option>
+                  <option value="2C22.0">食管癌</option>
+                  <option value="2C17.0">肝癌</option>
+                  <option value="5A11">2型糖尿病</option>
+                  <option value="1C00">脓毒症</option>
+                  <option value="5C50">肝硬化</option>
+                </select>
+              </div>
+              <div class="qa-field">
+                <label>手术</label>
+                <select id="quickSurgery" onchange="updateQuickDemo()">
+                  <option value="colorectal_resection">结直肠癌根治术</option>
+                  <option value="total_gastrectomy">全胃切除术</option>
+                  <option value="pancreaticoduodenectomy">胰十二指肠切除术</option>
+                  <option value="esophagectomy">食管癌根治术</option>
+                  <option value="">无手术</option>
+                </select>
+              </div>
+              <div class="qa-field">
+                <label>进食减少</label>
+                <select id="quickIntake" onchange="updateQuickDemo()">
+                  <option value="25">25%</option>
+                  <option value="50" selected>50%</option>
+                  <option value="75">75%</option>
+                  <option value="90">>90%</option>
+                </select>
+              </div>
+            </div>
+            <div class="quick-result" id="quickResult">
+              <div class="qr-score">
+                <div class="score-badge medium" id="quickScore">4</div>
+                <span>NRS2002 评分</span>
+              </div>
+              <div class="qr-detail">
+                <span id="quickRisk">中等风险 — 需营养干预</span>
+                <span id="quickRoute" style="color:var(--text-secondary);font-size:0.85rem">推荐通路: ONS</span>
+              </div>
+            </div>
+            <button class="btn btn-primary" onclick="navigateTo('assessment')" style="width:100%;margin-top:12px">
+              完整评估 →
+            </button>
+          </div>
+        </div>
+
+        <div class="card" style="flex:1">
+          <div class="card-header">
+            <h3>最新指南更新</h3>
+            <span class="badge badge-blue">2025</span>
+          </div>
+          <div class="card-body">
+            <ul class="update-list">
+              <li><strong>ESPEN 2025</strong> — 44条手术营养推荐更新</li>
+              <li><strong>ERAS CR 2025</strong> — 结直肠免疫营养新适应症</li>
+              <li><strong>CSPEN 2025</strong> — GLIM标准营养不良诊断</li>
+              <li><strong>CSPEN 胰腺 2025</strong> — 18问23推全程化营养</li>
+              <li><strong>NMPA 2026Q1</strong> — FSMP注册突破310款</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Page: Assessment -->
+    <section class="page" id="page-assessment">
+      <div class="page-header">
+        <h1>营养风险筛查与方案推荐</h1>
+        <p>NRS2002 → 营养通路 → 能量蛋白目标 → FSMP产品匹配 → 药物互作</p>
+      </div>
+
+      <!-- Step Indicator -->
+      <div class="steps" id="stepsIndicator">
+        <div class="step active" data-step="1"><div class="step-num">1</div><span>患者信息</span></div>
+        <div class="step-connector"></div>
+        <div class="step" data-step="2"><div class="step-num">2</div><span>临床参数</span></div>
+        <div class="step-connector"></div>
+        <div class="step" data-step="3"><div class="step-num">3</div><span>评估结果</span></div>
+      </div>
+
+      <!-- Step 1: Patient Info -->
+      <div class="card" id="step1">
+        <div class="card-header"><h3>Step 1 · 患者基本信息</h3></div>
+        <div class="card-body">
+          <div class="form-grid">
+            <div class="form-group">
+              <label>年龄 (岁)</label>
+              <input type="number" id="age" value="65" min="0" max="120" class="form-input">
+            </div>
+            <div class="form-group">
+              <label>性别</label>
+              <select id="gender" class="form-input"><option value="male">男</option><option value="female">女</option></select>
+            </div>
+            <div class="form-group">
+              <label>身高 (cm)</label>
+              <input type="number" id="height" value="170" min="0" max="250" step="0.1" class="form-input">
+            </div>
+            <div class="form-group">
+              <label>体重 (kg)</label>
+              <input type="number" id="weight" value="58" min="0" max="300" step="0.1" class="form-input">
+            </div>
+          </div>
+          <button class="btn btn-primary" onclick="goToStep(2)">下一步 →</button>
+        </div>
+      </div>
+
+      <!-- Step 2: Clinical Parameters -->
+      <div class="card hidden" id="step2">
+        <div class="card-header"><h3>Step 2 · 临床参数</h3></div>
+        <div class="card-body">
+          <div class="form-grid form-grid-3">
+            <div class="form-group">
+              <label>疾病诊断</label>
+              <select id="disease" class="form-input">
+                <option value="2B92.0">结直肠癌</option>
+                <option value="2B72.0">胃癌</option>
+                <option value="2C13.0">胰腺癌</option>
+                <option value="2C22.0">食管癌</option>
+                <option value="2C17.0">原发性肝癌</option>
+                <option value="5A11">2型糖尿病</option>
+                <option value="CB01">COPD</option>
+                <option value="1C00">脓毒症</option>
+                <option value="8B20">脑卒中</option>
+                <option value="5C50">肝硬化</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>手术类型</label>
+              <select id="surgery" class="form-input">
+                <option value="">— 无 —</option>
+                <option value="colorectal_resection">结直肠癌根治术</option>
+                <option value="gastrectomy_subtotal">胃大部切除术</option>
+                <option value="total_gastrectomy" selected>全胃切除术</option>
+                <option value="pancreaticoduodenectomy">胰十二指肠切除术</option>
+                <option value="esophagectomy">食管癌根治术</option>
+                <option value="liver_resection_major">大范围肝切除术</option>
+                <option value="cytoreductive_surgery">肿瘤细胞减灭术</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>术后天数</label>
+              <input type="number" id="postOpDay" value="3" min="0" max="90" class="form-input">
+            </div>
+            <div class="form-group">
+              <label>3月内体重下降 (kg)</label>
+              <input type="number" id="weightLoss" value="6" min="0" max="100" step="0.1" class="form-input">
+            </div>
+            <div class="form-group">
+              <label>近一周进食减少 (%)</label>
+              <select id="foodIntake" class="form-input">
+                <option value="0">正常</option><option value="25">25%</option>
+                <option value="50" selected>50%</option><option value="75">75%</option><option value="90">>90%</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>消化道功能</label>
+              <select id="giFunction" class="form-input">
+                <option value="normal">正常</option><option value="impaired">受损</option><option value="non_functional">无功能</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>吞咽功能</label>
+              <select id="swallow" class="form-input">
+                <option value="normal">正常</option><option value="impaired">受损</option><option value="unsafe">不安全</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>肾功能</label>
+              <select id="renal" class="form-input">
+                <option value="normal">正常</option><option value="impaired">不全</option><option value="dialysis">透析</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>肝功能</label>
+              <select id="liver" class="form-input">
+                <option value="normal">正常</option><option value="impaired">不全</option><option value="failure">衰竭</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>合并症</label>
+              <select id="comorbidities" class="form-input" multiple style="height:72px">
+                <option value="diabetes">糖尿病</option><option value="hypertension">高血压</option>
+                <option value="copd">COPD</option><option value="ckd">慢性肾病</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>血清白蛋白 g/L (可选)</label>
+              <input type="number" id="alb" value="30" min="0" max="60" step="0.1" class="form-input">
+            </div>
+            <div class="form-group">
+              <label>当前用药 (ATC编码)</label>
+              <input type="text" id="medications" value="A02BC01,A10BA02" class="form-input" placeholder="逗号分隔">
+            </div>
+          </div>
+          <div style="display:flex;gap:10px">
+            <button class="btn btn-secondary" onclick="goToStep(1)">← 上一步</button>
+            <button class="btn btn-primary" onclick="runAssessment()">⚡ 运行评估</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 3: Results -->
+      <div class="hidden" id="step3">
+        <div id="resultsContainer"></div>
+      </div>
+    </section>
+
+    <!-- Page: Products -->
+    <section class="page" id="page-products">
+      <div class="page-header">
+        <h1>FSMP 产品目录</h1>
+        <p>NMPA 注册数据库 · 311款特医食品</p>
+      </div>
+      <div class="card">
+        <div class="card-header">
+          <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+            <input type="text" id="productSearch" class="form-input" placeholder="搜索产品名称/企业..." style="max-width:300px" oninput="filterProducts()">
+            <select id="productCategory" class="form-input" style="max-width:180px" onchange="filterProducts()">
+              <option value="">全部分类</option>
+              <option value="全营养">全营养配方</option>
+              <option value="组件">组件制剂</option>
+              <option value="婴儿">婴儿配方</option>
+              <option value="电解质">电解质配方</option>
+              <option value="流质">流质配方</option>
+            </select>
+            <span id="productCount" style="color:var(--text-secondary);font-size:0.85rem"></span>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="product-table-wrap">
+            <table class="product-table" id="productTable">
+              <thead>
+                <tr>
+                  <th>注册号</th><th>产品名称</th><th>企业</th><th>分类</th><th>剂型</th>
+                </tr>
+              </thead>
+              <tbody id="productTableBody"></tbody>
+            </table>
+          </div>
+          <div class="pagination" id="productPagination"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Page: Drugs -->
+    <section class="page" id="page-drugs">
+      <div class="page-header">
+        <h1>药物 - 营养素相互作用</h1>
+        <p>PubMed 循证依据 · 11类药物 · 37条互作关系</p>
+      </div>
+      <div id="drugInteractionsContainer"></div>
+    </section>
+
+    <!-- Page: Guidelines -->
+    <section class="page" id="page-guidelines">
+      <div class="page-header">
+        <h1>临床指南参考</h1>
+        <p>ESPEN 2025 · ERAS 2025 · CSPEN 2025 · ASPEN 2024</p>
+      </div>
+      <div id="guidelinesContainer"></div>
+    </section>
+  </main>
+</div>
+
+<!-- Mobile Tab Bar -->
+<nav class="mobile-tabs" id="mobileTabs">
+  <button class="tab-item active" data-page="dashboard" onclick="navigateTo('dashboard')">
+    <span class="tab-icon">◫</span><span class="tab-label">工作台</span>
+  </button>
+  <button class="tab-item" data-page="assessment" onclick="navigateTo('assessment')">
+    <span class="tab-icon">⊞</span><span class="tab-label">评估</span>
+  </button>
+  <button class="tab-item" data-page="products" onclick="navigateTo('products')">
+    <span class="tab-icon">☷</span><span class="tab-label">产品</span>
+  </button>
+  <button class="tab-item" data-page="drugs" onclick="navigateTo('drugs')">
+    <span class="tab-icon">⚕</span><span class="tab-label">药物</span>
+  </button>
+  <button class="tab-item" data-page="guidelines" onclick="navigateTo('guidelines')">
+    <span class="tab-icon">⏏</span><span class="tab-label">指南</span>
+  </button>
+</nav>
+
+<script src="js/data.js"></script>
+<script src="js/engine.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>

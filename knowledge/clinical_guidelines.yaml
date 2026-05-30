@@ -1,0 +1,262 @@
+# FSMP Clinical Nutrition Knowledge Base — Authoritative Guidelines Reference
+# Compiled from: ESPEN 2025, CSPEN 2025, ASPEN 2024, ERAS Society 2025
+
+## ============================================================================
+## ESPEN Guideline on Clinical Nutrition in Surgery — Update 2025
+## Weimann A, et al. Clinical Nutrition, 2025;53:222-261. 44 recommendations.
+## ============================================================================
+
+guidelines:
+  espen_surgery_2025:
+    title: "ESPEN guideline on clinical nutrition in surgery – Update 2025"
+    authors: "Weimann A, Braga M, Carli F, et al."
+    journal: "Clinical Nutrition"
+    year: 2025
+    volume: 53
+    pages: "222-261"
+    recommendations: 44
+
+    key_rules:
+      - id: ESPEN_SURG_2025_REC1
+        rule: "Standard operating procedures (SOPs) for quality management of clinical nutrition shall be established"
+        grade: GPP
+        agreement: 96%
+
+      - id: ESPEN_SURG_2025_REC20
+        rule: "Patients with severe malnutrition and/or high metabolic risk shall receive preoperative nutritional therapy, even if it postpones surgery"
+        grade: A
+        detail: "A period of 10–14 days should be considered"
+        sub_grade: B
+        agreement: 93%
+
+      - id: ESPEN_SURG_2025_REC4
+        rule: "Oral or tube feeding should begin as early as possible (within hours) postoperatively if patient is alert and hemodynamically stable"
+        grade: A
+
+      - id: ESPEN_SURG_2025_REC28
+        rule: "Enteral nutrition shall be started within 24h if oral intake <50% expected for 7 days, especially after upper GI resection for tumor"
+        grade: "A/B"
+
+      - id: ESPEN_SURG_2025_REC30
+        rule: "Consider nasojejunal tube or jejunostomy placement intraoperatively for patients with malnutrition and/or high metabolic risk"
+        detail: "Specifically for esophagectomy, total gastrectomy, and pancreatoduodenectomy"
+        grade: B
+        agreement: 89%
+
+      - id: ESPEN_SURG_2025_REC31
+        rule: "Prevent refeeding syndrome: start EN at low rate (10–30 mL/h), advance cautiously after electrolyte stabilization; may take up to 5 days to reach target"
+        grade: GPP
+        agreement: 95%
+
+      - id: ESPEN_SURG_2025_REC5
+        rule: "Oral diet should be adjusted according to surgery type and individual tolerance; carefully assess tolerance in patients at high risk for delayed gastric emptying or postoperative ileus"
+        grade: GPP
+        agreement: 93%
+
+    preoperative_nutrition:
+      - Preoperative carbohydrate loading: clear liquid 10 mL/kg (up to 350 mL) up to 2h before anesthesia
+      - Avoid long preoperative fasting: clear fluids up to 2h, solids up to 6h
+      - Frailty assessment and sarcopenia diagnosis are now formally included
+      - Prehabilitation with nutrition optimization is a formal guideline component
+
+    postoperative_nutrition:
+      - Early oral feeding within hours of surgery
+      - Oral nutritional supplements (ONS) when oral intake inadequate
+      - Metabolic control: strict blood glucose management
+      - Early mobilization to facilitate protein synthesis and muscle function
+
+  ## ============================================================================
+  ## ERAS Society Colorectal Surgery Guidelines 2025
+  ## Gustafsson UO, et al. Surgery, 2025;184:109397.
+  ## ============================================================================
+
+  eras_colorectal_2025:
+    title: "Guidelines for perioperative care in elective colorectal surgery: ERAS Society recommendations 2025"
+    authors: "Gustafsson UO, Rockall TA, Wexner S, et al."
+    journal: "Surgery"
+    year: 2025
+    volume: 184
+    article: 109397
+
+    key_rules:
+      - id: ERAS_CR_2025_NUT1
+        rule: "Routine nutritional screening is MANDATORY for all patients"
+
+      - id: ERAS_CR_2025_IMM1
+        rule: "Immunonutrition is recommended for malnourished patients"
+        detail: "New in 2025: targeted to malnourished patients only, not universal"
+
+      - id: ERAS_CR_2025_CHO1
+        rule: "Carbohydrate loading evidence strength has been weakened compared to prior guidelines"
+
+      - id: ERAS_CR_2025_POD0
+        rule: "Early oral feeding remains a core component, supported by oral nutritional supplements"
+
+      - id: ERAS_CR_2025_MOB
+        rule: "Mobilization ≥3 hours/day from POD1 to discharge"
+
+      - id: ERAS_CR_2025_FLUID
+        rule: "Maintain slightly positive fluid balance (≤2.5 kg weight gain)"
+
+  ## ============================================================================
+  ## CSPEN 成人患者营养不良诊断与应用指南 (2025版)
+  ## 中华医学杂志, 2025;105(13)
+  ## ============================================================================
+
+  cspen_malnutrition_2025:
+    title: "成人患者营养不良诊断与应用指南（2025版）"
+    journal: "中华医学杂志"
+    year: 2025
+    volume: 105
+    issue: 13
+    questions: 27
+    recommendations: 38
+
+    key_rules:
+      - id: CSPEN_2025_DIAG1
+        rule: "采用GLIM（全球营养不良诊断倡议）标准进行营养不良诊断"
+        detail: "结合中国人群数据"
+
+      - id: CSPEN_2025_SCREEN1
+        rule: "入院24小时内完成营养风险筛查"
+        tool: "NRS 2002"
+
+      - id: CSPEN_2025_SCREEN2
+        rule: "NRS 2002评分≥3分提示存在营养风险，需营养支持"
+
+      - id: CSPEN_2025_FLOW
+        rule: "营养筛查→评估及诊断→干预及监测 全程化管理"
+
+      - id: CSPEN_2025_RECORD
+        rule: "营养风险应作为诊断写入病历首页"
+
+  ## ============================================================================
+  ## CSPEN 胰腺外科围手术期全程化营养管理指南 (2025版)
+  ## ============================================================================
+
+  cspen_pancreatic_2025:
+    title: "胰腺外科围手术期全程化营养管理指南（2025版）"
+    questions: 18
+    recommendations: 23
+
+    key_rules:
+      - id: CSPEN_PANC_2025_NRS
+        rule: "入院24小时内使用NRS 2002进行营养筛查"
+
+      - id: CSPEN_PANC_2025_ASSESS
+        rule: "有营养风险患者需进一步行营养评估"
+        detail: "病史、膳食调查、体格检查、实验室检查"
+
+      - id: CSPEN_PANC_2025_STRATEGY
+        rule: "术前7天营养打底 + 术后早期肠内营养 + 出院后30天延续管理"
+
+      - id: CSPEN_PANC_2025_ROUTE
+        rule: "首选肠内营养（鼻胃管/鼻肠管/胃造瘘/空肠造瘘）"
+
+      - id: CSPEN_PANC_2025_PN_INDICATION
+        rule: "肠外营养适应证：胃肠道功能障碍、高分解代谢状态、肿瘤放化疗严重胃肠道反应"
+
+## ============================================================================
+## NRS 2002 Reference & Validation
+## ============================================================================
+
+nrs2002_reference:
+  original_validation:
+    citation: "Kondrup J, et al. Clin Nutr, 2003;22(3):321-336"
+    method: "Analysis of 128 RCTs, 8,944 hospitalized patients"
+    conclusion: "Score ≥3 predicts benefit from nutrition support"
+    esp_endorsed: true
+
+  scoring_components:
+    impaired_nutritional_status:
+      - score: 0
+        criteria: "Normal nutritional status"
+      - score: 1
+        criteria: "Weight loss >5% in 3 months OR food intake 50-75% of normal in preceding week"
+        category: mild
+      - score: 2
+        criteria: "Weight loss >5% in 2 months OR BMI 18.5-20.5 + impaired general condition OR food intake 25-50%"
+        category: moderate
+      - score: 3
+        criteria: "Weight loss >5% in 1 month OR BMI <18.5 + impaired general condition OR food intake 0-25%"
+        category: severe
+
+    disease_severity:
+      - score: 0
+        criteria: "Normal nutritional requirements"
+      - score: 1
+        criteria: "Hip fracture, chronic disease with acute complications (COPD, cirrhosis, chronic dialysis, diabetes, oncology)"
+      - score: 2
+        criteria: "Major abdominal surgery, stroke, severe pneumonia, hematologic malignancy"
+      - score: 3
+        criteria: "Head injury, bone marrow transplant, ICU patients (APACHE >10)"
+
+    age_adjustment:
+      - score: 1
+        criteria: "Age ≥ 70 years"
+
+  interpretation:
+    score_0_2: "Low risk — re-screen weekly; no routine nutrition intervention"
+    score_3_4: "Medium risk — nutrition intervention indicated; start within 24-48h"
+    score_5_7: "High risk — urgent nutrition intervention; start immediately"
+
+  validation_studies:
+    - citation: "Sun et al. (2015)"
+      n: 3527
+      population: "Abdominal surgery patients"
+      finding: "NRS≥3 predicts higher post-op complications, mortality, longer LOS"
+
+    - citation: "Gong J et al. Frontiers in Nutrition, 2023"
+      n: 270
+      population: "Elderly orthopedic + neurosurgical patients"
+      finding: "NRS2002 detects 8.4-14.6% malnutrition risk; may underestimate in elderly vs MNA-SF"
+      limitation: "Lower sensitivity in elderly"
+
+    - citation: "Cheung HHT et al. Int J Surgery, 2023"
+      n: 5695
+      type: "Systematic review & network meta-analysis"
+      finding: "MUST has highest diagnostic accuracy (sensitivity 86%, specificity 89%) for adult surgical patients"
+
+  limitation_note: "NRS2002 may underestimate risk in elderly patients (>70). Consider supplemental MNA-SF or GNRI in geriatric populations."
+
+## ============================================================================
+## Refeeding Syndrome Risk Criteria (ESPEN 2025 Rec.31 + NICE CG32)
+## ============================================================================
+
+refeeding_syndrome:
+  major_risk_criteria:
+    - "BMI < 16 kg/m²"
+    - "Unintentional weight loss >15% in 3-6 months"
+    - "Little or no nutritional intake >10 days"
+    - "Low serum potassium, phosphate, or magnesium before feeding"
+
+  minor_risk_criteria:
+    - "BMI < 18.5 kg/m²"
+    - "Unintentional weight loss 10-15% in 3-6 months"
+    - "Little or no nutritional intake >5 days"
+    - "History of alcohol abuse or drugs (insulin, chemotherapy, antacids, diuretics)"
+
+  management:
+    - "Start EN at 10-15 kcal/kg/day (max 50% of target)"
+    - "Increase slowly over 4-7 days to reach target"
+    - "Monitor K+, PO4, Mg2+ daily for first 3 days, then every other day"
+    - "Supplement thiamine 200-300mg IV before feeding starts"
+    - "Supplement electrolytes to maintain normal serum levels"
+
+## ============================================================================
+## GLIM Diagnostic Criteria for Malnutrition (ESPEN 2019, endorsed by CSPEN 2025)
+## ============================================================================
+
+glim_criteria:
+  phenotypic:
+    - "Involuntary weight loss >5% in 6 months"
+    - "Low BMI: <18.5 (age <70), <20 (age >70) — Asian criteria may differ"
+    - "Reduced muscle mass (via DXA, BIA, CT, or calf circumference)"
+
+  etiologic:
+    - "Reduced food intake or assimilation (<50% requirements for >1 week)"
+    - "Disease burden / inflammatory condition (acute injury, chronic disease)"
+
+  diagnosis: "At least 1 phenotypic + 1 etiologic criterion required"
+  severity_stage_1: "Moderate: weight loss 5-10% in 6 months, BMI <20 (<22 age>70)"
+  severity_stage_2: "Severe: weight loss >10% in 6 months, BMI <18.5 (<20 age>70)"
