@@ -274,3 +274,128 @@ export async function listTransfers(params?: {
   const { data } = await api.get('/admin/transfers', { params });
   return data;
 }
+
+// ── Grassroots API ─────────────────────────────────────────────────
+
+export interface ScreeningInput {
+  name: string;
+  village: string;
+  age: number;
+  gender: string;
+  waist_circumference: number;
+  fasting_glucose: number;
+  systolic_bp?: number;
+  diastolic_bp?: number;
+  family_history?: boolean;
+  hospital_id?: string;
+}
+
+export interface ScreeningResult {
+  id: string;
+  patient_id: string;
+  name: string;
+  age: number;
+  gender: string;
+  risk_level: string;
+  risk_score: number;
+  max_score: number;
+  factor_scores: Record<string, number>;
+  referral_needed: boolean;
+  recommendation: string;
+}
+
+export interface GrassrootsPatientItem {
+  id: string;
+  name: string;
+  age: number;
+  gender: string;
+  village: string;
+  diabetes_type: string | null;
+  latest_fpg: number | null;
+  risk_status: string | null;
+  last_follow_up: string | null;
+}
+
+export interface FollowUpInput {
+  glucose_value?: number;
+  medication_adherent?: boolean;
+  new_symptoms?: string;
+  referral_needed?: boolean;
+  referral_reason?: string;
+  notes?: string;
+  next_follow_up?: string;
+}
+
+export interface FollowUpResult {
+  id: string;
+  patient_id: string;
+  glucose_value: number | null;
+  medication_adherent: boolean | null;
+  new_symptoms: string | null;
+  referral_needed: boolean;
+  followed_up_at: string;
+  next_follow_up: string | null;
+}
+
+export interface GrassrootsDashboardData {
+  total_managed: number;
+  high_risk_count: number;
+  overdue_follow_ups: number;
+  pending_referrals: number;
+  screenings_this_month: number;
+  today_screenings: number;
+}
+
+export interface SyncResult {
+  status: string;
+  synced: number;
+  failed: number;
+  errors: Array<{ id: string; action: string; error: string }>;
+}
+
+export interface SyncStatus {
+  pending_count: number;
+  failed_count: number;
+  last_sync_time: string | null;
+  recent_errors: Array<{ id: string; action: string; error: string }>;
+}
+
+export async function submitScreening(input: ScreeningInput): Promise<ScreeningResult> {
+  const { data } = await api.post('/grassroots/screening', input);
+  return data;
+}
+
+export async function getGrassrootsPatients(params?: {
+  village?: string;
+  risk_filter?: string;
+  page?: number;
+  page_size?: number;
+}): Promise<GrassrootsPatientItem[]> {
+  const { data } = await api.get('/grassroots/patients', { params });
+  return data;
+}
+
+export async function recordFollowUp(
+  patientId: string,
+  input: FollowUpInput,
+): Promise<FollowUpResult> {
+  const { data } = await api.post(`/grassroots/patients/${patientId}/follow-up`, input);
+  return data;
+}
+
+export async function getGrassrootsDashboard(
+  hospitalId?: string,
+): Promise<GrassrootsDashboardData> {
+  const { data } = await api.get('/grassroots/dashboard', { params: { hospital_id: hospitalId } });
+  return data;
+}
+
+export async function syncGrassrootsData(): Promise<SyncResult> {
+  const { data } = await api.post('/grassroots/sync');
+  return data;
+}
+
+export async function getSyncStatus(): Promise<SyncStatus> {
+  const { data } = await api.get('/grassroots/sync/status');
+  return data;
+}
