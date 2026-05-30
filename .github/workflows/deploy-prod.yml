@@ -1,0 +1,165 @@
+name: Deploy to Production
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Image version to deploy (git sha or tag, must be explicit)"
+        required: true
+        default: ""
+
+concurrency:
+  group: deploy-prod
+  cancel-in-progress: false
+
+env:
+  REGISTRY: ghcr.io
+  BACKEND_IMAGE: ghcr.io/${{ github.repository_owner }}/digital-doctor-backend
+  FRONTEND_IMAGE: ghcr.io/${{ github.repository_owner }}/digital-doctor-frontend
+
+jobs:
+  # ── Database backup before deploy ─────────────────────────────
+  backup-db:
+    runs-on: ubuntu-latest
+    environment: production
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run pre-deploy database backup
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.PROD_HOST }}
+          username: ${{ secrets.PROD_USER }}
+          key: ${{ secrets.PROD_SSH_KEY }}
+          script: |
+            set -e
+            cd /opt/digital-doctor
+            bash scripts/backup-db.sh --s3
+            echo "Pre-deploy backup completed."
+
+  # ── Deploy ────────────────────────────────────────────────────
+  deploy:
+    needs: backup-db
+    runs-on: ubuntu-latest
+    environment: production
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set version
+        id: vars
+        run: |
+          VERSION="${{ inputs.version }}"
+          echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
+          echo "sha_short=${VERSION::7}" >> "$GITHUB_OUTPUT"
+
+      - name: Deploy to production via SSH (blue-green)
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.PROD_HOST }}
+          username: ${{ secrets.PROD_USER }}
+          key: ${{ secrets.PROD_SSH_KEY }}
+          script: |
+            set -e
+            cd /opt/digital-doctor
+
+            # Pull images
+            docker pull ${{ env.BACKEND_IMAGE }}:${{ steps.vars.outputs.version }}
+            docker pull ${{ env.FRONTEND_IMAGE }}:${{ steps.vars.outputs.version }}
+
+            # Record previous tag for rollback
+            PREV_TAG=$(docker inspect ${{ env.BACKEND_IMAGE }}:current \
+              --format '{{index .RepoTags 0}}' 2>/dev/null | cut -d: -f2 || echo "")
+            echo "PREV_TAG=${PREV_TAG}" > /tmp/rollback.env
+
+            # Tag new images as current
+            docker tag ${{ env.BACKEND_IMAGE }}:${{ steps.vars.outputs.version }} ${{ env.BACKEND_IMAGE }}:current
+            docker tag ${{ env.FRONTEND_IMAGE }}:${{ steps.vars.outputs.version }} ${{ env.FRONTEND_IMAGE }}:current
+
+            export BACKEND_TAG=${{ steps.vars.outputs.version }}
+            export FRONTEND_TAG=${{ steps.vars.outputs.version }}
+
+            # Rolling update — stop old, start new
+            docker compose -f docker-compose.prod.yml up -d --wait --wait-timeout 120
+
+            echo "Deploy completed. Proceeding to health check..."
+
+      - name: Post-deploy health checks (5-min monitoring window)
+        run: |
+          set -e
+
+          echo "=== Post-deploy health check ==="
+
+          PASS=0
+          FAIL=0
+          MAX_CHECKS=5
+          INTERVAL=60
+
+          for i in $(seq 1 ${MAX_CHECKS}); do
+            echo "[check ${i}/${MAX_CHECKS}] $(date -u +%H:%M:%SZ)"
+
+            if bash digital-doctor/scripts/smoke-test.sh \
+              "${{ secrets.PROD_URL }}" \
+              "${{ secrets.PROD_ADMIN_TOKEN }}"; then
+              PASS=$((PASS + 1))
+              echo "  => PASS"
+            else
+              FAIL=$((FAIL + 1))
+              echo "  => FAIL"
+            fi
+
+            if [ ${i} -lt ${MAX_CHECKS} ]; then
+              sleep ${INTERVAL}
+            fi
+          done
+
+          echo ""
+          echo "=== Health check summary: ${PASS} pass, ${FAIL} fail ==="
+
+          # At least 80% of checks must pass
+          REQUIRED_PASS=$(( (MAX_CHECKS * 8 + 9) / 10 ))
+          if [ ${PASS} -lt ${REQUIRED_PASS} ]; then
+            echo "FAILED: ${PASS}/${MAX_CHECKS} checks passed (need ${REQUIRED_PASS})"
+            exit 1
+          fi
+
+          echo "SUCCESS: Health check passed."
+        env:
+          SMOKE_BASE_URL: ${{ secrets.PROD_URL }}
+          ADMIN_TOKEN: ${{ secrets.PROD_ADMIN_TOKEN }}
+
+      - name: Rollback on failure
+        if: failure()
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.PROD_HOST }}
+          username: ${{ secrets.PROD_USER }}
+          key: ${{ secrets.PROD_SSH_KEY }}
+          script: |
+            set -e
+            cd /opt/digital-doctor
+
+            source /tmp/rollback.env 2>/dev/null || true
+            ROLLBACK_TAG="${PREV_TAG}"
+
+            if [ -n "${ROLLBACK_TAG}" ] && [ "${ROLLBACK_TAG}" != "${{ steps.vars.outputs.version }}" ]; then
+              echo "Rolling back to previous version: ${ROLLBACK_TAG}"
+              export BACKEND_TAG="${ROLLBACK_TAG}"
+              export FRONTEND_TAG="${ROLLBACK_TAG}"
+              docker compose -f docker-compose.prod.yml up -d --wait --wait-timeout 120
+              echo "Rollback complete."
+            else
+              echo "No previous version available for rollback."
+            fi
+
+      - name: Notify deployment result
+        if: always()
+        uses: slackapi/slack-github-action@v1.26.0
+        with:
+          payload: |
+            {
+              "text": "Deployment to *production* ${{ job.status == 'success' && 'succeeded :white_check_mark:' || 'failed :x:' }}\nVersion: `${{ steps.vars.outputs.version }}`\nWorkflow: <${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|View run>"
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}

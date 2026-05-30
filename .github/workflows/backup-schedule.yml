@@ -1,0 +1,94 @@
+name: Scheduled Backup
+
+on:
+  schedule:
+    - cron: "0 2 * * *"  # Daily at 2:00 AM UTC
+  workflow_dispatch:
+    inputs:
+      backup_type:
+        description: "Backup type"
+        required: true
+        type: choice
+        options:
+          - full
+          - incremental
+          - verify
+          - cleanup
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    environment: production
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run backup
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.PROD_HOST }}
+          username: ${{ secrets.PROD_USER }}
+          key: ${{ secrets.PROD_SSH_KEY }}
+          script: |
+            set -e
+            cd /opt/digital-doctor
+
+            BACKUP_TYPE="${{ inputs.backup_type || 'full' }}"
+
+            echo "[$(date -u +%Y-%m-%dT%H:%M:%SZ)] Starting ${BACKUP_TYPE} backup..."
+
+            bash scripts/backup-cron.sh "${BACKUP_TYPE}"
+
+            echo "[$(date -u +%Y-%m-%dT%H:%M:%SZ)] ${BACKUP_TYPE} backup finished."
+
+      - name: Verify backup integrity
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.PROD_HOST }}
+          username: ${{ secrets.PROD_USER }}
+          key: ${{ secrets.PROD_SSH_KEY }}
+          script: |
+            set -e
+            cd /opt/digital-doctor
+
+            LATEST_BACKUP=$(ls -t backups/backup_full_*.sql.gz 2>/dev/null | head -1 || echo "")
+            if [ -n "${LATEST_BACKUP}" ]; then
+              echo "Verifying backup: ${LATEST_BACKUP}"
+              bash scripts/restore-db.sh "$(basename ${LATEST_BACKUP})" --dry-run
+              echo "Verification passed."
+            else
+              echo "WARNING: No backup files found to verify."
+              exit 1
+            fi
+
+      - name: Upload to offsite storage (S3/MinIO)
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.PROD_HOST }}
+          username: ${{ secrets.PROD_USER }}
+          key: ${{ secrets.PROD_SSH_KEY }}
+          script: |
+            set -e
+            cd /opt/digital-doctor
+
+            LATEST_BACKUP=$(ls -t backups/backup_full_*.sql.gz 2>/dev/null | head -1 || echo "")
+            if [ -n "${LATEST_BACKUP}" ] && [ -n "${BACKUP_S3_BUCKET}" ]; then
+              echo "Uploading ${LATEST_BACKUP} to S3..."
+              aws s3 cp "backups/${LATEST_BACKUP}" \
+                "s3://${BACKUP_S3_BUCKET}/$(basename ${LATEST_BACKUP})" \
+                ${BACKUP_S3_ENDPOINT:+--endpoint-url ${BACKUP_S3_ENDPOINT}}
+              echo "Upload complete."
+            else
+              echo "Skipping S3 upload (no backup file or S3 bucket not configured)."
+            fi
+
+      - name: Notify on failure
+        if: failure()
+        uses: slackapi/slack-github-action@v1.26.0
+        with:
+          payload: |
+            {
+              "text": ":x: *Backup job failed*\nServer: production\nWorkflow: <${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|View run>"
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}

@@ -1,5 +1,10 @@
-# Production deployment — run with: docker compose -f docker-compose.prod.yml up -d
-# Optionally include monitoring: docker compose -f docker-compose.prod.yml -f docker-compose.monitoring.yml up -d
+# Production deployment — run with:
+#   docker compose -f docker-compose.prod.yml up -d
+# Optionally include monitoring:
+#   docker compose -f docker-compose.prod.yml -f docker-compose.monitoring.yml up -d
+#
+# Image tags are controlled via BACKEND_TAG and FRONTEND_TAG env vars
+# (defaults to "latest" for local builds).
 
 version: "3.9"
 
@@ -20,6 +25,7 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+      start_period: 15s
 
   redis:
     image: redis:7-alpine
@@ -31,8 +37,10 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+      start_period: 10s
 
   backend:
+    image: ghcr.io/${GITHUB_REPOSITORY_OWNER:-org}/digital-doctor-backend:${BACKEND_TAG:-latest}
     build:
       context: ./backend
       target: production
@@ -41,12 +49,19 @@ services:
     environment:
       DATABASE_URL: ${DATABASE_URL}
       REDIS_URL: ${REDIS_URL}
+      CELERY_BROKER_URL: ${REDIS_URL:-redis://redis:6379}/1
+      CELERY_RESULT_BACKEND: ${REDIS_URL:-redis://redis:6379}/2
       LLM_API_KEY: ${LLM_API_KEY}
       LLM_BASE_URL: ${LLM_BASE_URL:-https://api.openai.com/v1}
       LLM_MODEL: ${LLM_MODEL:-gpt-4o}
       SECRET_KEY: ${SECRET_KEY}
       PHI_ENCRYPTION_KEY: ${PHI_ENCRYPTION_KEY}
       DEBUG: "false"
+      ENVIRONMENT: production
+      CORS_ORIGINS: '["${FRONTEND_URL:-http://localhost:3000}"]'
+      LOG_LEVEL: ${LOG_LEVEL:-INFO}
+      DB_POOL_SIZE: "20"
+      DB_MAX_OVERFLOW: "40"
     depends_on:
       db:
         condition: service_healthy
@@ -58,17 +73,78 @@ services:
       interval: 15s
       timeout: 5s
       retries: 3
-      start_period: 10s
+      start_period: 15s
+
+  celery-worker:
+    image: ghcr.io/${GITHUB_REPOSITORY_OWNER:-org}/digital-doctor-backend:${BACKEND_TAG:-latest}
+    build:
+      context: ./backend
+      target: production
+    command: celery -A src.tasks.celery_app worker --loglevel=info --concurrency=4
+    environment:
+      DATABASE_URL: ${DATABASE_URL}
+      REDIS_URL: ${REDIS_URL}
+      CELERY_BROKER_URL: ${REDIS_URL:-redis://redis:6379}/1
+      CELERY_RESULT_BACKEND: ${REDIS_URL:-redis://redis:6379}/2
+      LLM_API_KEY: ${LLM_API_KEY}
+      LLM_BASE_URL: ${LLM_BASE_URL:-https://api.openai.com/v1}
+      LLM_MODEL: ${LLM_MODEL:-gpt-4o}
+      SECRET_KEY: ${SECRET_KEY}
+      PHI_ENCRYPTION_KEY: ${PHI_ENCRYPTION_KEY}
+      DEBUG: "false"
+      ENVIRONMENT: production
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+    volumes:
+      - backups:/app/backups
+
+  celery-beat:
+    image: ghcr.io/${GITHUB_REPOSITORY_OWNER:-org}/digital-doctor-backend:${BACKEND_TAG:-latest}
+    build:
+      context: ./backend
+      target: production
+    command: celery -A src.tasks.celery_app beat --loglevel=info
+    environment:
+      DATABASE_URL: ${DATABASE_URL}
+      REDIS_URL: ${REDIS_URL}
+      CELERY_BROKER_URL: ${REDIS_URL:-redis://redis:6379}/1
+      CELERY_RESULT_BACKEND: ${REDIS_URL:-redis://redis:6379}/2
+      LLM_API_KEY: ${LLM_API_KEY}
+      LLM_BASE_URL: ${LLM_BASE_URL:-https://api.openai.com/v1}
+      LLM_MODEL: ${LLM_MODEL:-gpt-4o}
+      SECRET_KEY: ${SECRET_KEY}
+      PHI_ENCRYPTION_KEY: ${PHI_ENCRYPTION_KEY}
+      DEBUG: "false"
+      ENVIRONMENT: production
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
 
   frontend:
+    image: ghcr.io/${GITHUB_REPOSITORY_OWNER:-org}/digital-doctor-frontend:${FRONTEND_TAG:-latest}
     build:
       context: ./frontend
       target: production
     ports:
       - "3000:3000"
     depends_on:
-      - backend
+      backend:
+        condition: service_healthy
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:3000/"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
 
 volumes:
   pgdata_prod:
+  backups:
