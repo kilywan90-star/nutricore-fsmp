@@ -24,6 +24,12 @@ class Settings(BaseSettings):
 
     PHI_ENCRYPTION_KEY: str = ""
 
+    BACKUP_RETENTION_DAYS: int = 30
+    BACKUP_STORAGE_TYPE: str = "local"
+    BACKUP_S3_BUCKET: str = ""
+    BACKUP_S3_ENDPOINT: str = ""
+    BACKUP_ENCRYPTION_ENABLED: bool = True
+
     model_config = {"env_prefix": "", "case_sensitive": True}
 
 
