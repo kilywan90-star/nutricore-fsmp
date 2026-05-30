@@ -8,6 +8,8 @@ function filterProducts() { renderProductTable(); }
 
 let currentStep = 1;
 let sidebarOpen = false;
+let aiModeEnabled = false;
+let aiParsedData = null;
 
 // ===== NAVIGATION =====
 function navigateTo(page) {
@@ -93,6 +95,13 @@ function runAssessment() {
   const products = matchProducts(data, pathway);
   const interactions = checkInteractions(data.medications);
 
+  // Store globally for AI explanation
+  window._lastNrs = nrs;
+  window._lastPathway = pathway;
+  window._lastProducts = products;
+  window._lastInteractions = interactions;
+  window._lastRefeeding = data.weight > 0 && (data.weightLoss / data.weight * 100) > 10;
+
   document.getElementById('step1').classList.add('hidden');
   document.getElementById('step2').classList.add('hidden');
   document.getElementById('step3').classList.remove('hidden');
@@ -102,6 +111,12 @@ function runAssessment() {
 
   renderResults(nrs, pathway, products, interactions, data);
   document.getElementById('step3').scrollIntoView({ behavior: 'smooth' });
+
+  // Auto-trigger AI explanation if AI mode is enabled
+  if (aiModeEnabled) {
+    setTimeout(() => generateAiExplanation(), 500);
+    setTimeout(() => generateAiPatientEdu(), 1500);
+  }
 }
 
 // ===== RENDER RESULTS =====
@@ -231,6 +246,17 @@ function renderResults(nrs, pathway, products, interactions, data) {
         </ul>
       </div>
     </div>
+
+    <!-- AI Actions -->
+    <div style="display:flex;gap:10px;margin-bottom:14px">
+      <button class="btn btn-primary" onclick="generateAiExplanation()" style="background:linear-gradient(135deg, var(--color-accent), #818cf8)">
+        🤖 AI 生成临床解读
+      </button>
+      <button class="btn btn-secondary" onclick="generateAiPatientEdu()">
+        📋 AI 生成患者教育
+      </button>
+    </div>
+    <div id="ai-append-here"></div>
   `;
 
   document.getElementById('resultsContainer').innerHTML = html;
@@ -410,3 +436,175 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 });
+
+// ===== AI MODE =====
+function toggleAIMode() {
+  aiModeEnabled = !aiModeEnabled;
+  const panel = document.getElementById('aiInputPanel');
+  const btn = document.getElementById('aiToggleBtn');
+  if (aiModeEnabled) {
+    panel.classList.remove('hidden');
+    btn.textContent = '关闭 AI 模式';
+    btn.style.background = 'var(--color-accent)';
+    btn.style.color = '#fff';
+  } else {
+    panel.classList.add('hidden');
+    btn.textContent = '开启 AI 模式';
+    btn.style.background = '';
+    btn.style.color = '';
+    aiParsedData = null;
+  }
+}
+
+async function aiParseNote() {
+  const noteText = document.getElementById('aiNoteInput').value.trim();
+  if (!noteText) {
+    document.getElementById('aiStatus').textContent = '请先输入病历文本';
+    return;
+  }
+
+  const statusEl = document.getElementById('aiStatus');
+  const btn = document.getElementById('aiParseBtn');
+  statusEl.textContent = 'AI 正在分析...请稍候 (约3-8秒)';
+  btn.disabled = true;
+  btn.textContent = '⏳ 解析中...';
+
+  const parsed = await parseClinicalNote(noteText);
+
+  btn.disabled = false;
+  btn.textContent = '🔍 AI 解析病历';
+
+  if (!parsed) {
+    statusEl.textContent = '解析失败，请检查API连接或稍后重试';
+    return;
+  }
+
+  aiParsedData = parsed;
+  statusEl.textContent = '解析完成！已自动填充表单。';
+
+  // Auto-fill form
+  const setVal = (id, val) => { if (val != null) document.getElementById(id).value = val; };
+  setVal('age', parsed.age);
+  setVal('gender', parsed.gender);
+  setVal('height', parsed.height);
+  setVal('weight', parsed.weight);
+  setVal('disease', parsed.diseaseCode);
+  setVal('surgery', parsed.surgeryCode || '');
+  setVal('postOpDay', parsed.postOpDay);
+  setVal('weightLoss', parsed.weightLoss);
+  setVal('foodIntake', parsed.foodIntake);
+  setVal('giFunction', parsed.giFunction);
+  setVal('swallow', parsed.swallow);
+  setVal('renal', parsed.renal);
+  setVal('liver', parsed.liver);
+  setVal('alb', parsed.alb);
+  if (parsed.medications?.length) setVal('medications', parsed.medications.join(','));
+
+  // Show parsed summary
+  const resultEl = document.getElementById('aiParseResult');
+  resultEl.classList.remove('hidden');
+  resultEl.innerHTML = `
+    <strong>AI 提取摘要：</strong>${parsed.narrative || ''}<br>
+    <span style="color:var(--color-text-secondary);font-size:0.78rem">
+    年龄:${parsed.age} | BMI:${parsed.weight && parsed.height ? calcBMI(parsed.weight, parsed.height).toFixed(1) : '?'} |
+    疾病:${parsed.diseaseCode} | 手术:${parsed.surgeryCode || '无'} | 术后:${parsed.postOpDay || 0}天 |
+    减重:${parsed.weightLoss || 0}kg | 进食:${parsed.foodIntake || 0}% |
+    GI:${parsed.giFunction} | 吞咽:${parsed.swallow} | 肾:${parsed.renal} | 肝:${parsed.liver} |
+    用药:${(parsed.medications || []).length}种
+    </span>
+  `;
+
+  // Auto-step to Step 2
+  goToStep(2);
+}
+
+// ===== AI CLINICAL EXPLANATION =====
+async function generateAiExplanation() {
+  const container = document.getElementById('ai-append-here') || document.getElementById('resultsContainer');
+  const assessData = {
+    patient: readFormData(),
+    nrs2002: window._lastNrs,
+    pathway: window._lastPathway,
+    products: window._lastProducts?.map(m => ({
+      name: m.product.name, score: Math.round(m.score),
+      manufacturer: m.product.mfr, reasons: m.reasons
+    })),
+    interactions: window._lastInteractions?.map(ix => ({
+      drug: ix.drug, nutrient: ix.nutrient, severity: ix.sev, recommendation: ix.rec
+    })),
+    refeeding: window._lastRefeeding,
+  };
+
+  const cardId = 'ai-explanation-card';
+  let explainCard = document.getElementById(cardId);
+  if (!explainCard) {
+    explainCard = document.createElement('div');
+    explainCard.id = cardId;
+    explainCard.className = 'card';
+    explainCard.style.borderLeft = '4px solid var(--color-accent)';
+    explainCard.innerHTML = `
+      <div class="card-header">
+        <h3>🤖 AI 临床方案解读</h3>
+        <span class="badge badge-blue">DeepSeek</span>
+      </div>
+      <div class="card-body">
+        <div id="aiExplainContent" style="font-size:0.88rem;line-height:1.8;white-space:pre-wrap">
+          <div class="spinner"></div><p style="margin-top:8px;color:var(--color-text-secondary)">AI 正在生成临床解读...</p>
+        </div>
+      </div>
+    `;
+    container.appendChild(explainCard);
+    explainCard.scrollIntoView({ behavior: 'smooth' });
+  }
+
+  const explanation = await generateExplanation(assessData);
+  const contentEl = document.getElementById('aiExplainContent');
+  if (explanation) {
+    contentEl.textContent = explanation;
+  } else {
+    contentEl.innerHTML = '<p style="color:var(--color-warning)">AI 生成失败，请检查 API 连接。</p>';
+  }
+}
+
+// ===== AI PATIENT EDUCATION =====
+async function generateAiPatientEdu() {
+  const assessData = {
+    patient: readFormData(),
+    pathway: window._lastPathway,
+    products: window._lastProducts?.map(m => ({
+      name: m.product.name, score: Math.round(m.score)
+    })),
+  };
+
+  const cardId = 'ai-patient-edu-card';
+  let eduCard = document.getElementById(cardId);
+  if (!eduCard) {
+    eduCard = document.createElement('div');
+    eduCard.id = cardId;
+    eduCard.className = 'card';
+    eduCard.style.borderLeft = '4px solid var(--color-success)';
+    eduCard.innerHTML = `
+      <div class="card-header">
+        <h3>📋 患者教育内容</h3>
+        <span class="badge badge-green">AI 生成</span>
+      </div>
+      <div class="card-body">
+        <div id="aiEduContent" style="font-size:0.88rem;line-height:1.8;white-space:pre-wrap">
+          <div class="spinner"></div><p style="margin-top:8px;color:var(--color-text-secondary)">AI 正在生成患者教育内容...</p>
+        </div>
+      </div>
+    `;
+    const container = document.getElementById('ai-append-here') || document.getElementById('resultsContainer');
+    container.appendChild(eduCard);
+    eduCard.scrollIntoView({ behavior: 'smooth' });
+  }
+
+  const edu = await generatePatientEducation(assessData);
+  const contentEl = document.getElementById('aiEduContent');
+  if (edu) {
+    contentEl.textContent = edu;
+  } else {
+    contentEl.innerHTML = '<p style="color:var(--color-warning)">AI 生成失败。</p>';
+  }
+}
+
