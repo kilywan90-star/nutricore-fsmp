@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form, Query
 from pydantic import BaseModel, Field
 from datetime import date, datetime
 from typing import Optional
@@ -17,7 +17,20 @@ from src.services.pre_consultation import (
     analyze_answers,
     generate_doctor_summary,
 )
-from src.api.auth_deps import require_role
+from src.services.cgm_service import (
+    import_cgm_data,
+    calculate_cgm_metrics,
+    get_cgm_summary,
+    detect_patterns,
+)
+from src.services.cgm_parser import parse_cgm_file
+from src.models.cgm import CGMDevice
+from src.db.session import get_db
+from sqlalchemy.ext.asyncio import AsyncSession
+from src.models.cgm import CGMRecord, CGMSession
+from sqlalchemy import select
+from src.api.auth_deps import require_role, get_current_user
+from src.models.user import User
 
 router = APIRouter()
 
@@ -232,3 +245,244 @@ async def add_allergy(req: AllergyAddRequest):
 async def remove_allergy(allergy_id: str):
     """Remove an allergy from the patient's allergy list."""
     return AllergyDeleteResponse(message=f"已删除过敏记录 {allergy_id}")
+
+
+# ── CGM endpoints ────────────────────────────────────────────────────────
+
+
+class CGMImportResponse(BaseModel):
+    session_id: str
+    total_readings: int
+    avg_glucose: float | None
+    estimated_hba1c: float | None
+    cv_percent: float | None
+    time_in_range_pct: float | None
+    time_above_range_pct: float | None
+    time_below_range_pct: float | None
+    sensor_start: str
+    sensor_end: str | None
+
+
+class CGMSessionItem(BaseModel):
+    id: str
+    device_type: str
+    sensor_start: str
+    sensor_end: str | None
+    total_readings: int
+    avg_glucose: float | None
+    estimated_hba1c: float | None
+    time_in_range_pct: float | None
+    source_file_name: str | None
+
+
+class CGMSessionDetailResponse(BaseModel):
+    id: str
+    device_type: str
+    sensor_start: str
+    sensor_end: str | None
+    total_readings: int
+    avg_glucose: float | None
+    estimated_hba1c: float | None
+    cv_percent: float | None
+    time_in_range_pct: float | None
+    time_above_range_pct: float | None
+    time_below_range_pct: float | None
+    time_in_tight_range_pct: float | None
+    mage: float | None
+    patterns: list[dict]
+    metrics: dict
+
+
+class ManualCGMRequest(BaseModel):
+    value_mmol_l: float = Field(ge=1.0, le=40.0)
+    timestamp: datetime
+    device_type: str = "unknown"
+    trend_direction: Optional[str] = None
+
+
+class ManualCGMResponse(BaseModel):
+    id: str
+    value_mmol_l: float
+    timestamp: str
+    device_type: str
+
+
+@router.post("/cgm/import", response_model=CGMImportResponse, dependencies=[Depends(require_role("patient"))])
+async def import_cgm_file(
+    file: UploadFile = File(...),
+    file_format: str = Form(default="auto"),
+    db: AsyncSession = Depends(get_db),
+    user: User = Depends(get_current_user),
+):
+    """Upload a CGM data file. Supports Freestyle Libre CSV, Dexcom CSV, and generic JSON."""
+    content = await file.read()
+    filename = file.filename or "unknown.csv"
+
+    from src.models.patient import Patient as PatientModel
+    patient_result = await db.execute(
+        select(PatientModel).where(PatientModel.user_id == user.id)
+    )
+    patient = patient_result.scalar_one_or_none()
+    if not patient:
+        raise HTTPException(status_code=404, detail="No patient profile found for current user")
+
+    session = await import_cgm_data(
+        patient_id=patient.id,
+        file_content=content,
+        file_format=file_format,
+        filename=filename,
+        db=db,
+    )
+
+    return CGMImportResponse(
+        session_id=str(session.id),
+        total_readings=session.total_readings,
+        avg_glucose=session.avg_glucose,
+        estimated_hba1c=session.estimated_hba1c,
+        cv_percent=session.cv_percent,
+        time_in_range_pct=session.time_in_range_pct,
+        time_above_range_pct=session.time_above_range_pct,
+        time_below_range_pct=session.time_below_range_pct,
+        sensor_start=session.sensor_start.isoformat(),
+        sensor_end=session.sensor_end.isoformat() if session.sensor_end else None,
+    )
+
+
+@router.get("/cgm/sessions", dependencies=[Depends(require_role("patient"))])
+async def list_cgm_sessions(
+    db: AsyncSession = Depends(get_db),
+    user: User = Depends(get_current_user),
+):
+    """List CGM sessions for current patient."""
+    from src.models.patient import Patient as PatientModel
+    patient_result = await db.execute(
+        select(PatientModel).where(PatientModel.user_id == user.id)
+    )
+    patient = patient_result.scalar_one_or_none()
+    if not patient:
+        return {"sessions": [], "total": 0}
+
+    stmt = (
+        select(CGMSession)
+        .where(CGMSession.patient_id == patient.id)
+        .order_by(CGMSession.sensor_start.desc())
+    )
+    result = await db.execute(stmt)
+    sessions = result.scalars().all()
+
+    return {
+        "sessions": [
+            {
+                "id": str(s.id),
+                "device_type": s.device_type.value,
+                "sensor_start": s.sensor_start.isoformat(),
+                "sensor_end": s.sensor_end.isoformat() if s.sensor_end else None,
+                "total_readings": s.total_readings,
+                "avg_glucose": s.avg_glucose,
+                "estimated_hba1c": s.estimated_hba1c,
+                "time_in_range_pct": s.time_in_range_pct,
+                "source_file_name": s.source_file_name,
+            }
+            for s in sessions
+        ],
+        "total": len(sessions),
+    }
+
+
+@router.get("/cgm/sessions/{session_id}", dependencies=[Depends(require_role("patient"))])
+async def get_cgm_session_detail(
+    session_id: str,
+    db: AsyncSession = Depends(get_db),
+    user: User = Depends(get_current_user),
+):
+    """Get CGM session detail with AGP metrics and detected patterns."""
+    try:
+        sid = uuid.UUID(session_id)
+    except (ValueError, AttributeError):
+        raise HTTPException(status_code=400, detail="Invalid session_id")
+
+    stmt = select(CGMSession).where(CGMSession.id == sid)
+    result = await db.execute(stmt)
+    session = result.scalar_one_or_none()
+    if not session:
+        raise HTTPException(status_code=404, detail="CGM session not found")
+
+    metrics = await calculate_cgm_metrics(sid, db)
+    patterns = await detect_patterns(sid, db)
+
+    return {
+        "id": str(session.id),
+        "device_type": session.device_type.value,
+        "sensor_start": session.sensor_start.isoformat(),
+        "sensor_end": session.sensor_end.isoformat() if session.sensor_end else None,
+        "total_readings": session.total_readings,
+        "avg_glucose": session.avg_glucose,
+        "estimated_hba1c": session.estimated_hba1c,
+        "cv_percent": session.cv_percent,
+        "time_in_range_pct": session.time_in_range_pct,
+        "time_above_range_pct": session.time_above_range_pct,
+        "time_below_range_pct": session.time_below_range_pct,
+        "time_in_tight_range_pct": session.time_in_tight_range_pct,
+        "mage": session.mage,
+        "patterns": patterns,
+        "metrics": metrics,
+    }
+
+
+@router.get("/cgm/summary", dependencies=[Depends(require_role("patient"))])
+async def get_cgm_dashboard_summary(
+    days: int = Query(default=14, ge=1, le=90),
+    db: AsyncSession = Depends(get_db),
+    user: User = Depends(get_current_user),
+):
+    """Get CGM summary for the patient dashboard (last N days)."""
+    from src.models.patient import Patient as PatientModel
+    patient_result = await db.execute(
+        select(PatientModel).where(PatientModel.user_id == user.id)
+    )
+    patient = patient_result.scalar_one_or_none()
+    if not patient:
+        return {"patient_id": None, "has_data": False, "total_readings": 0}
+
+    return await get_cgm_summary(patient.id, days=days, db=db)
+
+
+@router.post("/cgm/manual", response_model=ManualCGMResponse, dependencies=[Depends(require_role("patient"))])
+async def record_manual_cgm(
+    req: ManualCGMRequest,
+    db: AsyncSession = Depends(get_db),
+    user: User = Depends(get_current_user),
+):
+    """Manually record a single CGM reading."""
+    from src.models.patient import Patient as PatientModel
+    patient_result = await db.execute(
+        select(PatientModel).where(PatientModel.user_id == user.id)
+    )
+    patient = patient_result.scalar_one_or_none()
+    if not patient:
+        raise HTTPException(status_code=404, detail="No patient profile found")
+
+    try:
+        device_type = CGMDevice(req.device_type)
+    except ValueError:
+        device_type = CGMDevice.UNKNOWN
+
+    record = CGMRecord(
+        patient_id=patient.id,
+        session_id=uuid.UUID("00000000-0000-0000-0000-000000000000"),  # manual entry, no session
+        device_type=device_type,
+        timestamp=req.timestamp,
+        value_mmol_l=req.value_mmol_l,
+        trend_direction=req.trend_direction,
+        is_manual_calibration=False,
+    )
+    db.add(record)
+    await db.commit()
+    await db.refresh(record)
+
+    return ManualCGMResponse(
+        id=str(record.id),
+        value_mmol_l=record.value_mmol_l,
+        timestamp=record.timestamp.isoformat(),
+        device_type=record.device_type.value,
+    )

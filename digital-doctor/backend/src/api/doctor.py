@@ -22,7 +22,7 @@ from src.security.authorization import (
     _get_department_patient_ids,
 )
 from src.security.operation_audit import log_operation
-from src.services.drug_checker import get_drug_checker
+from src.services.cgm_service import get_cgm_summary, detect_patterns, calculate_cgm_metrics
 from src.services.prescription_review import PrescriptionReviewer
 from src.services.record_generator import generate_soap_note, generate_discharge_summary
 from src.services.record_service import (
@@ -33,6 +33,7 @@ from src.services.record_service import (
     finalize_record,
 )
 from src.models.records import RecordType, RecordStatus
+from src.models.cgm import CGMRecord, CGMSession
 
 router = APIRouter()
 
@@ -947,3 +948,143 @@ async def critical_alert_stats(
         escalated_count=escalated_count,
         expired_count=expired_count,
     )
+
+
+# ── CGM Doctor View endpoints ──────────────────────────────────────────
+
+
+@router.get(
+    "/patients/{patient_id}/cgm/sessions",
+    dependencies=[Depends(require_role("doctor", "department_head", "admin")),
+                  Depends(require_patient_access())],
+)
+async def view_patient_cgm_sessions(
+    patient_id: str,
+    db: AsyncSession = Depends(get_db),
+    user: User = Depends(get_current_user),
+):
+    """View a patient's CGM sessions (doctor view)."""
+    try:
+        pid = uuid.UUID(patient_id)
+    except (ValueError, AttributeError):
+        raise HTTPException(status_code=400, detail="Invalid patient_id")
+
+    stmt = (
+        select(CGMSession)
+        .where(CGMSession.patient_id == pid)
+        .order_by(CGMSession.sensor_start.desc())
+    )
+    result = await db.execute(stmt)
+    sessions = result.scalars().all()
+
+    await log_operation(
+        user_id=user.id,
+        action="VIEW",
+        resource_type="cgm_session",
+        resource_id=patient_id,
+        details={"session_count": len(sessions)},
+        db=db,
+    )
+
+    return {
+        "patient_id": patient_id,
+        "sessions": [
+            {
+                "id": str(s.id),
+                "device_type": s.device_type.value,
+                "sensor_start": s.sensor_start.isoformat(),
+                "sensor_end": s.sensor_end.isoformat() if s.sensor_end else None,
+                "total_readings": s.total_readings,
+                "avg_glucose": s.avg_glucose,
+                "estimated_hba1c": s.estimated_hba1c,
+                "cv_percent": s.cv_percent,
+                "time_in_range_pct": s.time_in_range_pct,
+                "time_above_range_pct": s.time_above_range_pct,
+                "time_below_range_pct": s.time_below_range_pct,
+                "mage": s.mage,
+                "source_file_name": s.source_file_name,
+            }
+            for s in sessions
+        ],
+        "total": len(sessions),
+    }
+
+
+@router.get(
+    "/patients/{patient_id}/cgm/summary",
+    dependencies=[Depends(require_role("doctor", "department_head", "admin")),
+                  Depends(require_patient_access())],
+)
+async def view_patient_cgm_summary(
+    patient_id: str,
+    days: int = Query(default=14, ge=1, le=90),
+    db: AsyncSession = Depends(get_db),
+    user: User = Depends(get_current_user),
+):
+    """View a patient's CGM AGP summary (doctor view)."""
+    try:
+        pid = uuid.UUID(patient_id)
+    except (ValueError, AttributeError):
+        raise HTTPException(status_code=400, detail="Invalid patient_id")
+
+    summary = await get_cgm_summary(pid, days=days, db=db)
+
+    await log_operation(
+        user_id=user.id,
+        action="VIEW",
+        resource_type="cgm_summary",
+        resource_id=patient_id,
+        details={"days": days},
+        db=db,
+    )
+
+    return summary
+
+
+@router.get(
+    "/patients/{patient_id}/cgm/patterns",
+    dependencies=[Depends(require_role("doctor", "department_head", "admin")),
+                  Depends(require_patient_access())],
+)
+async def view_patient_cgm_patterns(
+    patient_id: str,
+    session_id: str | None = Query(default=None),
+    db: AsyncSession = Depends(get_db),
+    user: User = Depends(get_current_user),
+):
+    """Detect glycemic patterns from a patient's latest CGM session."""
+    try:
+        pid = uuid.UUID(patient_id)
+    except (ValueError, AttributeError):
+        raise HTTPException(status_code=400, detail="Invalid patient_id")
+
+    if session_id:
+        try:
+            sid = uuid.UUID(session_id)
+        except (ValueError, AttributeError):
+            raise HTTPException(status_code=400, detail="Invalid session_id")
+        patterns = await detect_patterns(sid, db)
+    else:
+        # Use latest session
+        stmt = (
+            select(CGMSession)
+            .where(CGMSession.patient_id == pid)
+            .order_by(CGMSession.sensor_start.desc())
+            .limit(1)
+        )
+        result = await db.execute(stmt)
+        latest_session = result.scalar_one_or_none()
+        if not latest_session:
+            return {"patient_id": patient_id, "patterns": []}
+        patterns = await detect_patterns(latest_session.id, db)
+
+    await log_operation(
+        user_id=user.id,
+        action="VIEW",
+        resource_type="cgm_patterns",
+        resource_id=patient_id,
+        details={"pattern_count": len(patterns)},
+        db=db,
+    )
+
+    return {"patient_id": patient_id, "patterns": patterns}

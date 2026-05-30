@@ -1038,3 +1038,67 @@ export async function resetAdminConfig() {
   const { data } = await api.post('/admin/config/reset');
   return data;
 }
+
+// ── CGM API ────────────────────────────────────────────────────────
+
+export interface CGMSessionResponse {
+  id: string;
+  device_type: string;
+  sensor_start: string;
+  sensor_end: string | null;
+  total_readings: number;
+  avg_glucose: number | null;
+  estimated_hba1c: number | null;
+  cv_percent: number | null;
+  time_in_range_pct: number | null;
+  time_above_range_pct: number | null;
+  time_below_range_pct: number | null;
+}
+
+export interface CGMImportResponse {
+  session_id: string;
+  total_readings: number;
+  avg_glucose: number | null;
+  estimated_hba1c: number | null;
+  cv_percent: number | null;
+  time_in_range_pct: number | null;
+  time_above_range_pct: number | null;
+  time_below_range_pct: number | null;
+  sensor_start: string;
+  sensor_end: string | null;
+}
+
+export async function importCGMFile(file: File, fileFormat: string = 'auto'): Promise<CGMImportResponse> {
+  const form = new FormData();
+  form.append('file', file);
+  form.append('file_format', fileFormat);
+  const { data } = await api.post('/patient/cgm/import', form, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+  });
+  return data;
+}
+
+export async function getCGMSessions(): Promise<{ sessions: CGMSessionResponse[]; total: number }> {
+  const { data } = await api.get('/patient/cgm/sessions');
+  return data;
+}
+
+export async function getCGMSessionDetail(sessionId: string) {
+  const { data } = await api.get(`/patient/cgm/sessions/${sessionId}`);
+  return data;
+}
+
+export async function getCGMSummary(days: number = 14) {
+  const { data } = await api.get('/patient/cgm/summary', { params: { days } });
+  return data;
+}
+
+export async function recordManualCGM(body: {
+  value_mmol_l: number;
+  timestamp: string;
+  device_type?: string;
+  trend_direction?: string;
+}) {
+  const { data } = await api.post('/patient/cgm/manual', body);
+  return data;
+}

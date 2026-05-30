@@ -27,6 +27,8 @@ class Patient(Base):
     critical_alerts: Mapped[list["CriticalAlert"]] = relationship(back_populates="patient", cascade="all, delete-orphan")
     medical_records: Mapped[list["MedicalRecord"]] = relationship(back_populates="patient", cascade="all, delete-orphan")
     allergies: Mapped[list["Allergy"]] = relationship(back_populates="patient", cascade="all, delete-orphan")
+    cgm_records: Mapped[list["CGMRecord"]] = relationship(back_populates="patient", cascade="all, delete-orphan")
+    cgm_sessions: Mapped[list["CGMSession"]] = relationship(back_populates="patient", cascade="all, delete-orphan")
 
 
 class GlucoseRecord(Base):

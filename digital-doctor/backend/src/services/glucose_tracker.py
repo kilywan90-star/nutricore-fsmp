@@ -53,3 +53,53 @@ def analyze_glucose_trend(records: list[dict]) -> dict:
     change_rate = round((last_avg - first_avg) / first_avg * 100, 1) if first_avg else 0
 
     return {"direction": direction, "change_rate": change_rate, "recent_values": values}
+
+
+def merge_cgm_with_manual(
+    manual_records: list[dict],
+    cgm_records: list[dict],
+) -> list[dict]:
+    """Merge manual glucose records with CGM data into a unified glucose view.
+
+    Manual records take precedence for any timestamp within 5 minutes of a CGM reading.
+    Both are sorted chronologically.
+
+    Args:
+        manual_records: list of dicts with keys 'value_mmol_l', 'recorded_at', 'measure_type', 'notes'
+        cgm_records: list of dicts with keys 'value_mmol_l', 'timestamp', 'trend_direction', 'device_type'
+
+    Returns unified list sorted by timestamp, each with 'value_mmol_l', 'timestamp', 'source', and optional fields.
+    """
+    from datetime import datetime
+
+    merged: list[dict] = []
+
+    for mr in manual_records:
+        ts = mr.get("recorded_at")
+        if isinstance(ts, str):
+            ts = datetime.fromisoformat(ts.replace("Z", "+00:00"))
+        merged.append({
+            "value_mmol_l": mr["value_mmol_l"],
+            "timestamp": ts,
+            "source": "manual",
+            "measure_type": mr.get("measure_type", "random"),
+            "notes": mr.get("notes"),
+        })
+
+    manual_times = [m["timestamp"] for m in merged]
+    for cr in cgm_records:
+        ts = cr.get("timestamp")
+        if isinstance(ts, str):
+            ts = datetime.fromisoformat(ts.replace("Z", "+00:00"))
+        if any(abs((ts - mt).total_seconds()) < 300 for mt in manual_times):
+            continue
+        merged.append({
+            "value_mmol_l": cr["value_mmol_l"],
+            "timestamp": ts,
+            "source": "cgm",
+            "trend_direction": cr.get("trend_direction"),
+            "device_type": cr.get("device_type"),
+        })
+
+    merged.sort(key=lambda r: r["timestamp"])
+    return merged
