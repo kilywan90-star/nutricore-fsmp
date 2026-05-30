@@ -111,3 +111,69 @@ class OperationLog(Base):
     details: Mapped[dict | None] = mapped_column(JSON, nullable=True)
     ip_address: Mapped[str | None] = mapped_column(String(45), nullable=True)
     timestamp: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, index=True)
+
+
+class ReferralUrgency(str, enum.Enum):
+    ROUTINE = "routine"
+    URGENT = "urgent"
+    EMERGENCY = "emergency"
+
+
+class ReferralStatus(str, enum.Enum):
+    PENDING = "pending"
+    ACCEPTED = "accepted"
+    REJECTED = "rejected"
+    COMPLETED = "completed"
+
+
+class ReferralTargetLevel(str, enum.Enum):
+    COUNTY = "county"
+    MUNICIPAL = "municipal"
+    PROVINCIAL = "provincial"
+
+
+class ReferralRecord(Base):
+    """Medical consortium referral record with structured clinical summary."""
+
+    __tablename__ = "referral_records"
+
+    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    patient_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), ForeignKey("patients.id"), index=True)
+    from_hospital_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), ForeignKey("hospitals.id"))
+    from_doctor_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), ForeignKey("users.id"))
+    to_hospital_id: Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True), ForeignKey("hospitals.id"), nullable=True)
+    to_doctor_id: Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=True)
+    target_department: Mapped[str] = mapped_column(String(100))
+    urgency: Mapped[ReferralUrgency] = mapped_column(SAEnum(ReferralUrgency), default=ReferralUrgency.ROUTINE)
+    target_level: Mapped[ReferralTargetLevel] = mapped_column(SAEnum(ReferralTargetLevel), default=ReferralTargetLevel.COUNTY)
+    clinical_summary: Mapped[dict | None] = mapped_column(JSON, nullable=True)
+    reason: Mapped[str] = mapped_column(Text)
+    status: Mapped[ReferralStatus] = mapped_column(SAEnum(ReferralStatus), default=ReferralStatus.PENDING)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    updated_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True, onupdate=datetime.utcnow)
+
+
+class ConsultationStatus(str, enum.Enum):
+    REQUESTED = "requested"
+    ACCEPTED = "accepted"
+    IN_PROGRESS = "in_progress"
+    COMPLETED = "completed"
+
+
+class ConsultationSession(Base):
+    """Remote consultation session within the medical consortium."""
+
+    __tablename__ = "consultation_sessions"
+
+    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    patient_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), ForeignKey("patients.id"), index=True)
+    requesting_doctor_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), ForeignKey("users.id"))
+    consulting_doctor_id: Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=True)
+    consulting_hospital_id: Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True), ForeignKey("hospitals.id"), nullable=True)
+    status: Mapped[ConsultationStatus] = mapped_column(SAEnum(ConsultationStatus), default=ConsultationStatus.REQUESTED)
+    clinical_question: Mapped[str] = mapped_column(Text)
+    ai_prepared_summary: Mapped[dict | None] = mapped_column(JSON, nullable=True)
+    consultation_notes: Mapped[str | None] = mapped_column(Text, nullable=True)
+    outcome: Mapped[str | None] = mapped_column(Text, nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    completed_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)

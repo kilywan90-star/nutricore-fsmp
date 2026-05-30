@@ -15,6 +15,8 @@ const HealthCoach = lazy(() => import('./pages/patient/HealthCoach'));
 const DoctorDashboard = lazy(() => import('./pages/doctor/Dashboard'));
 const PatientList = lazy(() => import('./pages/doctor/PatientList'));
 const PatientDetail = lazy(() => import('./pages/doctor/PatientDetail'));
+const ReferralManager = lazy(() => import('./pages/doctor/ReferralManager'));
+const ConsultationRoom = lazy(() => import('./pages/doctor/ConsultationRoom'));
 
 // Admin pages (least visited — deepest split)
 const AlertPanel = lazy(() => import('./pages/doctor/AlertPanel'));
@@ -45,6 +47,10 @@ export default function App() {
 
         {/* Alerts (admin/deep split) */}
         <Route path="/doctor/alerts" element={<AlertPanel />} />
+
+        {/* Medical consortium — referrals & consultations */}
+        <Route path="/doctor/referrals" element={<ReferralManager />} />
+        <Route path="/doctor/consultations" element={<ConsultationRoom />} />
 
         {/* Catch-all */}
         <Route path="*" element={<Navigate to="/patient" replace />} />

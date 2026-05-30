@@ -274,3 +274,164 @@ export async function listTransfers(params?: {
   const { data } = await api.get('/admin/transfers', { params });
   return data;
 }
+
+// ── Consortium (Medical Alliance) API ─────────────────────────────────
+
+export interface ReferralEvaluation {
+  referral_needed: boolean;
+  urgency: 'routine' | 'urgent' | 'emergency';
+  target_department: string;
+  target_level: 'county' | 'municipal' | 'provincial';
+  reason: string;
+  criteria_met: number;
+}
+
+export interface ReferralTarget {
+  id: string;
+  name: string;
+  code: string;
+  address: string | null;
+  level: string | null;
+  department_id: string;
+  department_name: string;
+  doctor_count: number;
+}
+
+export interface ReferralItem {
+  id: string;
+  patient_id: string;
+  from_hospital_id: string;
+  from_hospital_name: string;
+  from_doctor_id: string;
+  to_hospital_id: string | null;
+  to_hospital_name: string | null;
+  to_doctor_id: string | null;
+  target_department: string;
+  urgency: string;
+  target_level: string;
+  reason: string;
+  status: string;
+  created_at: string;
+  updated_at: string | null;
+}
+
+export interface ReferralListResponse {
+  total: number;
+  page: number;
+  page_size: number;
+  items: ReferralItem[];
+}
+
+export interface ConsultationItem {
+  id: string;
+  patient_id: string;
+  requesting_doctor_id: string;
+  consulting_doctor_id: string | null;
+  consulting_hospital_id: string | null;
+  status: string;
+  clinical_question: string;
+  ai_prepared_summary: Record<string, unknown> | null;
+  consultation_notes: string | null;
+  outcome: string | null;
+  created_at: string;
+  completed_at: string | null;
+}
+
+export interface ConsultationListResponse {
+  total: number;
+  page: number;
+  page_size: number;
+  items: ConsultationItem[];
+}
+
+export async function evaluateReferral(input: {
+  hba1c?: number;
+  medication_count?: number;
+  egfr?: number;
+  has_active_foot_ulcer?: boolean;
+  recent_cvd_event?: boolean;
+  severe_hypoglycemia_episodes?: number;
+  is_pregnant?: boolean;
+  diabetes_type?: string;
+}): Promise<ReferralEvaluation> {
+  const { data } = await api.post('/doctor/referrals/evaluate', input);
+  return data;
+}
+
+export async function searchReferralTargets(input: {
+  location?: string;
+  department: string;
+  level: string;
+}): Promise<ReferralTarget[]> {
+  const { data } = await api.post('/doctor/referrals/search-targets', input);
+  return data;
+}
+
+export async function createReferral(input: {
+  patient_id: string;
+  from_hospital_id: string;
+  to_hospital_id?: string;
+  to_doctor_id?: string;
+  urgency: string;
+  target_department: string;
+  target_level: string;
+  reason: string;
+}): Promise<ReferralItem> {
+  const { data } = await api.post('/doctor/referrals/create', input);
+  return data;
+}
+
+export async function listReferrals(params?: {
+  hospital_id?: string;
+  status?: string;
+  page?: number;
+  page_size?: number;
+}): Promise<ReferralListResponse> {
+  const { data } = await api.get('/doctor/referrals', { params });
+  return data;
+}
+
+export async function acceptReferral(referralId: string): Promise<{ id: string; status: string }> {
+  const { data } = await api.put(`/doctor/referrals/${referralId}/accept`, { accepted: true });
+  return data;
+}
+
+export async function getReferralSummary(referralId: string): Promise<{
+  referral_id: string;
+  clinical_summary: Record<string, unknown>;
+}> {
+  const { data } = await api.get(`/doctor/referrals/${referralId}/summary`);
+  return data;
+}
+
+export async function createConsultation(input: {
+  patient_id: string;
+  clinical_question: string;
+  consulting_doctor_id?: string;
+  consulting_hospital_id?: string;
+}): Promise<ConsultationItem> {
+  const { data } = await api.post('/doctor/consultations', input);
+  return data;
+}
+
+export async function listConsultations(params?: {
+  status?: string;
+  page?: number;
+  page_size?: number;
+}): Promise<ConsultationListResponse> {
+  const { data } = await api.get('/doctor/consultations', { params });
+  return data;
+}
+
+export async function getConsultation(sessionId: string): Promise<ConsultationItem> {
+  const { data } = await api.get(`/doctor/consultations/${sessionId}`);
+  return data;
+}
+
+export async function completeConsultation(
+  sessionId: string,
+  input: { notes?: string; outcome?: string },
+): Promise<ConsultationItem> {
+  const { data } = await api.post(`/doctor/consultations/${sessionId}/complete`, input);
+  return data;
+}
