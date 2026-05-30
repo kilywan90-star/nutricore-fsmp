@@ -275,163 +275,127 @@ export async function listTransfers(params?: {
   return data;
 }
 
-// ── Consortium (Medical Alliance) API ─────────────────────────────────
+// ── Grassroots API ─────────────────────────────────────────────────
 
-export interface ReferralEvaluation {
-  referral_needed: boolean;
-  urgency: 'routine' | 'urgent' | 'emergency';
-  target_department: string;
-  target_level: 'county' | 'municipal' | 'provincial';
-  reason: string;
-  criteria_met: number;
+export interface ScreeningInput {
+  name: string;
+  village: string;
+  age: number;
+  gender: string;
+  waist_circumference: number;
+  fasting_glucose: number;
+  systolic_bp?: number;
+  diastolic_bp?: number;
+  family_history?: boolean;
+  hospital_id?: string;
 }
 
-export interface ReferralTarget {
+export interface ScreeningResult {
+  id: string;
+  patient_id: string;
+  name: string;
+  age: number;
+  gender: string;
+  risk_level: string;
+  risk_score: number;
+  max_score: number;
+  factor_scores: Record<string, number>;
+  referral_needed: boolean;
+  recommendation: string;
+}
+
+export interface GrassrootsPatientItem {
   id: string;
   name: string;
-  code: string;
-  address: string | null;
-  level: string | null;
-  department_id: string;
-  department_name: string;
-  doctor_count: number;
+  age: number;
+  gender: string;
+  village: string;
+  diabetes_type: string | null;
+  latest_fpg: number | null;
+  risk_status: string | null;
+  last_follow_up: string | null;
 }
 
-export interface ReferralItem {
+export interface FollowUpInput {
+  glucose_value?: number;
+  medication_adherent?: boolean;
+  new_symptoms?: string;
+  referral_needed?: boolean;
+  referral_reason?: string;
+  notes?: string;
+  next_follow_up?: string;
+}
+
+export interface FollowUpResult {
   id: string;
   patient_id: string;
-  from_hospital_id: string;
-  from_hospital_name: string;
-  from_doctor_id: string;
-  to_hospital_id: string | null;
-  to_hospital_name: string | null;
-  to_doctor_id: string | null;
-  target_department: string;
-  urgency: string;
-  target_level: string;
-  reason: string;
+  glucose_value: number | null;
+  medication_adherent: boolean | null;
+  new_symptoms: string | null;
+  referral_needed: boolean;
+  followed_up_at: string;
+  next_follow_up: string | null;
+}
+
+export interface GrassrootsDashboardData {
+  total_managed: number;
+  high_risk_count: number;
+  overdue_follow_ups: number;
+  pending_referrals: number;
+  screenings_this_month: number;
+  today_screenings: number;
+}
+
+export interface SyncResult {
   status: string;
-  created_at: string;
-  updated_at: string | null;
+  synced: number;
+  failed: number;
+  errors: Array<{ id: string; action: string; error: string }>;
 }
 
-export interface ReferralListResponse {
-  total: number;
-  page: number;
-  page_size: number;
-  items: ReferralItem[];
+export interface SyncStatus {
+  pending_count: number;
+  failed_count: number;
+  last_sync_time: string | null;
+  recent_errors: Array<{ id: string; action: string; error: string }>;
 }
 
-export interface ConsultationItem {
-  id: string;
-  patient_id: string;
-  requesting_doctor_id: string;
-  consulting_doctor_id: string | null;
-  consulting_hospital_id: string | null;
-  status: string;
-  clinical_question: string;
-  ai_prepared_summary: Record<string, unknown> | null;
-  consultation_notes: string | null;
-  outcome: string | null;
-  created_at: string;
-  completed_at: string | null;
-}
-
-export interface ConsultationListResponse {
-  total: number;
-  page: number;
-  page_size: number;
-  items: ConsultationItem[];
-}
-
-export async function evaluateReferral(input: {
-  hba1c?: number;
-  medication_count?: number;
-  egfr?: number;
-  has_active_foot_ulcer?: boolean;
-  recent_cvd_event?: boolean;
-  severe_hypoglycemia_episodes?: number;
-  is_pregnant?: boolean;
-  diabetes_type?: string;
-}): Promise<ReferralEvaluation> {
-  const { data } = await api.post('/doctor/referrals/evaluate', input);
+export async function submitScreening(input: ScreeningInput): Promise<ScreeningResult> {
+  const { data } = await api.post('/grassroots/screening', input);
   return data;
 }
 
-export async function searchReferralTargets(input: {
-  location?: string;
-  department: string;
-  level: string;
-}): Promise<ReferralTarget[]> {
-  const { data } = await api.post('/doctor/referrals/search-targets', input);
-  return data;
-}
-
-export async function createReferral(input: {
-  patient_id: string;
-  from_hospital_id: string;
-  to_hospital_id?: string;
-  to_doctor_id?: string;
-  urgency: string;
-  target_department: string;
-  target_level: string;
-  reason: string;
-}): Promise<ReferralItem> {
-  const { data } = await api.post('/doctor/referrals/create', input);
-  return data;
-}
-
-export async function listReferrals(params?: {
-  hospital_id?: string;
-  status?: string;
+export async function getGrassrootsPatients(params?: {
+  village?: string;
+  risk_filter?: string;
   page?: number;
   page_size?: number;
-}): Promise<ReferralListResponse> {
-  const { data } = await api.get('/doctor/referrals', { params });
+}): Promise<GrassrootsPatientItem[]> {
+  const { data } = await api.get('/grassroots/patients', { params });
   return data;
 }
 
-export async function acceptReferral(referralId: string): Promise<{ id: string; status: string }> {
-  const { data } = await api.put(`/doctor/referrals/${referralId}/accept`, { accepted: true });
+export async function recordFollowUp(
+  patientId: string,
+  input: FollowUpInput,
+): Promise<FollowUpResult> {
+  const { data } = await api.post(`/grassroots/patients/${patientId}/follow-up`, input);
   return data;
 }
 
-export async function getReferralSummary(referralId: string): Promise<{
-  referral_id: string;
-  clinical_summary: Record<string, unknown>;
-}> {
-  const { data } = await api.get(`/doctor/referrals/${referralId}/summary`);
+export async function getGrassrootsDashboard(
+  hospitalId?: string,
+): Promise<GrassrootsDashboardData> {
+  const { data } = await api.get('/grassroots/dashboard', { params: { hospital_id: hospitalId } });
   return data;
 }
 
-export async function createConsultation(input: {
-  patient_id: string;
-  clinical_question: string;
-  consulting_doctor_id?: string;
-  consulting_hospital_id?: string;
-}): Promise<ConsultationItem> {
-  const { data } = await api.post('/doctor/consultations', input);
+export async function syncGrassrootsData(): Promise<SyncResult> {
+  const { data } = await api.post('/grassroots/sync');
   return data;
 }
 
-export async function listConsultations(params?: {
-  status?: string;
-  page?: number;
-  page_size?: number;
-}): Promise<ConsultationListResponse> {
-  const { data } = await api.get('/doctor/consultations', { params });
-  return data;
-}
-
-export async function getConsultation(sessionId: string): Promise<ConsultationItem> {
-  const { data } = await api.get(`/doctor/consultations/${sessionId}`);
-  return data;
-}
-
-export async function completeConsultation(
-  sessionId: string,
-  input: { notes?: string; outcome?: string },
-): Promise<ConsultationItem> {
-  const { data } = await api.post(`/doctor/consultations/${sessionId}/complete`, input);
+export async function getSyncStatus(): Promise<SyncStatus> {
+  const { data } = await api.get('/grassroots/sync/status');
   return data;
 }

@@ -15,11 +15,17 @@ const HealthCoach = lazy(() => import('./pages/patient/HealthCoach'));
 const DoctorDashboard = lazy(() => import('./pages/doctor/Dashboard'));
 const PatientList = lazy(() => import('./pages/doctor/PatientList'));
 const PatientDetail = lazy(() => import('./pages/doctor/PatientDetail'));
-const ReferralManager = lazy(() => import('./pages/doctor/ReferralManager'));
-const ConsultationRoom = lazy(() => import('./pages/doctor/ConsultationRoom'));
 
 // Admin pages (least visited — deepest split)
 const AlertPanel = lazy(() => import('./pages/doctor/AlertPanel'));
+
+// Grassroots pages (community health worker)
+const GrassrootsLayout = lazy(() => import('./pages/grassroots/GrassrootsLayout'));
+const GrassrootsHome = lazy(() => import('./pages/grassroots/GrassrootsHome'));
+const ScreeningForm = lazy(() => import('./pages/grassroots/ScreeningForm'));
+const FollowUpList = lazy(() => import('./pages/grassroots/FollowUpList'));
+const FollowUpForm = lazy(() => import('./pages/grassroots/FollowUpForm'));
+const PatientCards = lazy(() => import('./pages/grassroots/PatientCards'));
 
 // ── Fallback ───────────────────────────────────────────────────────────
 const PageFallback = (
@@ -48,9 +54,14 @@ export default function App() {
         {/* Alerts (admin/deep split) */}
         <Route path="/doctor/alerts" element={<AlertPanel />} />
 
-        {/* Medical consortium — referrals & consultations */}
-        <Route path="/doctor/referrals" element={<ReferralManager />} />
-        <Route path="/doctor/consultations" element={<ConsultationRoom />} />
+        {/* Grassroots routes — community health worker, no auth required */}
+        <Route path="/grassroots" element={<GrassrootsLayout />}>
+          <Route index element={<GrassrootsHome />} />
+          <Route path="screening" element={<ScreeningForm />} />
+          <Route path="follow-up" element={<FollowUpList />} />
+          <Route path="follow-up/:id" element={<FollowUpForm />} />
+          <Route path="patients" element={<PatientCards />} />
+        </Route>
 
         {/* Catch-all */}
         <Route path="*" element={<Navigate to="/patient" replace />} />

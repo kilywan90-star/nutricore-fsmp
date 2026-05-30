@@ -47,6 +47,11 @@ class Settings(BaseSettings):
     SMS_PROVIDER: str = "mock"
     NOTIFICATION_CLEANUP_DAYS: int = 90
 
+    # Grassroots / offline deployment
+    DEPLOYMENT_MODE: str = "standard"  # standard | grassroots
+    OFFLINE_MODE_ENABLED: bool = False
+    SYNC_INTERVAL_MINUTES: int = 30
+
     model_config = {"env_prefix": "", "case_sensitive": True}
 
 
