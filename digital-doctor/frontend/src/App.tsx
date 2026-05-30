@@ -10,17 +10,16 @@ const ReportView = lazy(() => import('./pages/patient/ReportView'));
 const MedicationPage = lazy(() => import('./pages/patient/MedicationPage'));
 const GlucoseLog = lazy(() => import('./pages/patient/GlucoseLog'));
 const HealthCoach = lazy(() => import('./pages/patient/HealthCoach'));
-const PreConsultation = lazy(() => import('./pages/patient/PreConsultation'));
 
 // Doctor pages
 const DoctorDashboard = lazy(() => import('./pages/doctor/Dashboard'));
 const PatientList = lazy(() => import('./pages/doctor/PatientList'));
 const PatientDetail = lazy(() => import('./pages/doctor/PatientDetail'));
-const DiagnosisPanel = lazy(() => import('./pages/doctor/DiagnosisPanel'));
+const ReferralManager = lazy(() => import('./pages/doctor/ReferralManager'));
+const ConsultationRoom = lazy(() => import('./pages/doctor/ConsultationRoom'));
 
 // Admin pages (least visited — deepest split)
 const AlertPanel = lazy(() => import('./pages/doctor/AlertPanel'));
-const PrescriptionReview = lazy(() => import('./pages/doctor/PrescriptionReview'));
 
 // ── Fallback ───────────────────────────────────────────────────────────
 const PageFallback = (
@@ -40,19 +39,18 @@ export default function App() {
         <Route path="/patient/medication" element={<MedicationPage />} />
         <Route path="/patient/glucose" element={<GlucoseLog />} />
         <Route path="/patient/coach" element={<HealthCoach />} />
-        <Route path="/patient/pre-consultation" element={<PreConsultation />} />
 
         {/* Doctor routes */}
         <Route path="/doctor" element={<DoctorDashboard />} />
         <Route path="/doctor/patients" element={<PatientList />} />
         <Route path="/doctor/patients/:id" element={<PatientDetail />} />
-        <Route path="/doctor/patients/:id/diagnosis" element={<DiagnosisPanel />} />
 
         {/* Alerts (admin/deep split) */}
         <Route path="/doctor/alerts" element={<AlertPanel />} />
 
-        {/* Prescription Review */}
-        <Route path="/doctor/prescriptions/review" element={<PrescriptionReview />} />
+        {/* Medical consortium — referrals & consultations */}
+        <Route path="/doctor/referrals" element={<ReferralManager />} />
+        <Route path="/doctor/consultations" element={<ConsultationRoom />} />
 
         {/* Catch-all */}
         <Route path="*" element={<Navigate to="/patient" replace />} />
