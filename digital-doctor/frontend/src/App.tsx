@@ -16,8 +16,9 @@ const DoctorDashboard = lazy(() => import('./pages/doctor/Dashboard'));
 const PatientList = lazy(() => import('./pages/doctor/PatientList'));
 const PatientDetail = lazy(() => import('./pages/doctor/PatientDetail'));
 
-// Admin pages (least visited — deepest split)
+// Alert + record editor (deep split)
 const AlertPanel = lazy(() => import('./pages/doctor/AlertPanel'));
+const RecordEditor = lazy(() => import('./pages/doctor/RecordEditor'));
 
 // Grassroots pages (community health worker)
 const GrassrootsLayout = lazy(() => import('./pages/grassroots/GrassrootsLayout'));
@@ -50,6 +51,7 @@ export default function App() {
         <Route path="/doctor" element={<DoctorDashboard />} />
         <Route path="/doctor/patients" element={<PatientList />} />
         <Route path="/doctor/patients/:id" element={<PatientDetail />} />
+        <Route path="/doctor/patients/:id/records" element={<RecordEditor />} />
 
         {/* Alerts (admin/deep split) */}
         <Route path="/doctor/alerts" element={<AlertPanel />} />

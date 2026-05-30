@@ -399,3 +399,74 @@ export async function getSyncStatus(): Promise<SyncStatus> {
   const { data } = await api.get('/grassroots/sync/status');
   return data;
 }
+
+// ── Medical Record API ────────────────────────────────────────────────
+
+export interface RecordListItem {
+  id: string;
+  patient_id: string;
+  doctor_id: string;
+  record_type: string;
+  status: string;
+  version: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface RecordListResponse {
+  patient_id: string;
+  total: number;
+  items: RecordListItem[];
+}
+
+export interface RecordVersion {
+  version: number;
+  content: Record<string, string>;
+  markdown: string;
+  edited_by: string;
+  edited_at: string;
+}
+
+export interface MedicalRecordDetail {
+  id: string;
+  patient_id: string;
+  doctor_id: string;
+  record_type: string;
+  content: Record<string, string>;
+  markdown: string;
+  status: string;
+  version: number;
+  versions: RecordVersion[];
+  created_at: string;
+  updated_at: string;
+}
+
+export async function generateRecord(patientId: string, encounterData: Record<string, unknown>): Promise<MedicalRecordDetail> {
+  const { data } = await api.post(`/doctor/patients/${patientId}/records/generate`, { encounter_data: encounterData });
+  return data;
+}
+
+export async function generateDischargeRecord(patientId: string, admissionData: Record<string, unknown>): Promise<MedicalRecordDetail> {
+  const { data } = await api.post(`/doctor/patients/${patientId}/records/generate-discharge`, { admission_data: admissionData });
+  return data;
+}
+
+export async function listRecords(patientId: string, recordType?: string): Promise<RecordListResponse> {
+  const { data } = await api.get(`/doctor/patients/${patientId}/records`, { params: { record_type: recordType } });
+  return data;
+}
+
+export async function getRecordDetail(recordId: string): Promise<MedicalRecordDetail> {
+  const { data } = await api.get(`/doctor/records/${recordId}`);
+  return data;
+}
+
+export async function editRecord(recordId: string, content: Record<string, string>, markdown?: string): Promise<MedicalRecordDetail> {
+  const { data } = await api.put(`/doctor/records/${recordId}`, { content, markdown });
+  return data;
+}
+
+export async function finalizeRecord(recordId: string): Promise<{ id: string; status: string; updated_at: string }> {
+  const { data } = await api.post(`/doctor/records/${recordId}/finalize`);
+  return data;
+}

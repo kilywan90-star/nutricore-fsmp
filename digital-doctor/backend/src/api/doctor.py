@@ -22,6 +22,15 @@ from src.security.authorization import (
 from src.security.operation_audit import log_operation
 from src.services.drug_checker import get_drug_checker
 from src.services.prescription_review import PrescriptionReviewer
+from src.services.record_generator import generate_soap_note, generate_discharge_summary
+from src.services.record_service import (
+    create_record,
+    get_records,
+    get_record,
+    update_record,
+    finalize_record,
+)
+from src.models.records import RecordType, RecordStatus
 
 router = APIRouter()
 
@@ -66,6 +75,21 @@ class ReviewPrescriptionRequest(BaseModel):
 
 class CheckInteractionsRequest(BaseModel):
     medications: list[dict] = Field(default_factory=list)
+
+
+# ── Medical Record Generation / Management models ────────────────────────
+
+class GenerateRecordRequest(BaseModel):
+    encounter_data: dict = Field(default_factory=dict)
+
+
+class GenerateDischargeRequest(BaseModel):
+    admission_data: dict = Field(default_factory=dict)
+
+
+class EditRecordRequest(BaseModel):
+    content: dict = Field(default_factory=dict)
+    markdown: str | None = None
 
 
 # ── Patient listing (scoped to accessible patients) ────────────────────────────
@@ -428,3 +452,264 @@ async def check_drug_interactions(
     )
 
     return {"medications": drug_names, "interactions": interactions}
+
+
+# ── Medical Record Generation ─────────────────────────────────────────────
+
+@router.post(
+    "/patients/{patient_id}/records/generate",
+    dependencies=[Depends(require_role("doctor", "department_head", "admin")),
+                  Depends(require_patient_access())],
+)
+async def generate_record(
+    patient_id: str,
+    req: GenerateRecordRequest,
+    db: AsyncSession = Depends(get_db),
+    user: User = Depends(get_current_user),
+):
+    """Generate a SOAP medical record from current encounter data.
+
+    Calls the LLM-powered record generator with encounter_data (pre-consult
+    summary, lab results, glucose data, diagnosis, medications). Falls back
+    to template-based generation if LLM is unavailable.
+    """
+    try:
+        pid = uuid.UUID(patient_id)
+    except (ValueError, AttributeError):
+        raise HTTPException(status_code=400, detail="Invalid patient_id")
+
+    try:
+        uid = uuid.UUID(str(user.id))
+    except (ValueError, AttributeError):
+        raise HTTPException(status_code=400, detail="Invalid user_id")
+
+    content = await generate_soap_note(req.encounter_data)
+    record = await create_record(pid, uid, RecordType.SOAP, content, db)
+
+    await log_operation(
+        user_id=user.id,
+        action="CREATE",
+        resource_type="medical_record",
+        resource_id=str(record.id),
+        details={"record_type": "soap", "patient_id": patient_id},
+        db=db,
+    )
+
+    return {
+        "id": str(record.id),
+        "patient_id": str(record.patient_id),
+        "doctor_id": str(record.doctor_id),
+        "record_type": record.record_type.value,
+        "content": record.content,
+        "markdown": record.markdown,
+        "status": record.status.value,
+        "version": record.version,
+        "versions": record.versions,
+        "created_at": record.created_at.isoformat(),
+        "updated_at": record.updated_at.isoformat(),
+    }
+
+
+@router.post(
+    "/patients/{patient_id}/records/generate-discharge",
+    dependencies=[Depends(require_role("doctor", "department_head", "admin")),
+                  Depends(require_patient_access())],
+)
+async def generate_discharge_record(
+    patient_id: str,
+    req: GenerateDischargeRequest,
+    db: AsyncSession = Depends(get_db),
+    user: User = Depends(get_current_user),
+):
+    """Generate a discharge summary from admission data."""
+    try:
+        pid = uuid.UUID(patient_id)
+        uid = uuid.UUID(str(user.id))
+    except (ValueError, AttributeError):
+        raise HTTPException(status_code=400, detail="Invalid patient_id or user_id")
+
+    content = await generate_discharge_summary(req.admission_data)
+    record = await create_record(pid, uid, RecordType.DISCHARGE, content, db)
+
+    await log_operation(
+        user_id=user.id,
+        action="CREATE",
+        resource_type="medical_record",
+        resource_id=str(record.id),
+        details={"record_type": "discharge", "patient_id": patient_id},
+        db=db,
+    )
+
+    return {
+        "id": str(record.id),
+        "patient_id": str(record.patient_id),
+        "doctor_id": str(record.doctor_id),
+        "record_type": record.record_type.value,
+        "content": record.content,
+        "markdown": record.markdown,
+        "status": record.status.value,
+        "version": record.version,
+        "versions": record.versions,
+        "created_at": record.created_at.isoformat(),
+        "updated_at": record.updated_at.isoformat(),
+    }
+
+
+# ── Medical Record CRUD ───────────────────────────────────────────────────
+
+@router.get(
+    "/patients/{patient_id}/records",
+    dependencies=[Depends(require_role("doctor", "department_head", "admin")),
+                  Depends(require_patient_access())],
+)
+async def list_patient_records(
+    patient_id: str,
+    record_type: Optional[str] = None,
+    db: AsyncSession = Depends(get_db),
+    user: User = Depends(get_current_user),
+):
+    """List medical records for a patient, optionally filtered by type."""
+    try:
+        pid = uuid.UUID(patient_id)
+    except (ValueError, AttributeError):
+        raise HTTPException(status_code=400, detail="Invalid patient_id")
+
+    rt = RecordType(record_type) if record_type else None
+    records = await get_records(pid, db, rt)
+
+    return {
+        "patient_id": patient_id,
+        "total": len(records),
+        "items": [
+            {
+                "id": str(r.id),
+                "patient_id": str(r.patient_id),
+                "doctor_id": str(r.doctor_id),
+                "record_type": r.record_type.value,
+                "status": r.status.value,
+                "version": r.version,
+                "created_at": r.created_at.isoformat(),
+                "updated_at": r.updated_at.isoformat(),
+            }
+            for r in records
+        ],
+    }
+
+
+@router.get(
+    "/records/{record_id}",
+    dependencies=[Depends(require_role("doctor", "department_head", "admin"))],
+)
+async def get_record_detail(
+    record_id: str,
+    db: AsyncSession = Depends(get_db),
+    user: User = Depends(get_current_user),
+):
+    """Get a single medical record with full content."""
+    try:
+        rid = uuid.UUID(record_id)
+    except (ValueError, AttributeError):
+        raise HTTPException(status_code=400, detail="Invalid record_id")
+
+    record = await get_record(rid, db)
+    if not record:
+        raise HTTPException(status_code=404, detail="Record not found")
+
+    return {
+        "id": str(record.id),
+        "patient_id": str(record.patient_id),
+        "doctor_id": str(record.doctor_id),
+        "record_type": record.record_type.value,
+        "content": record.content,
+        "markdown": record.markdown,
+        "status": record.status.value,
+        "version": record.version,
+        "versions": record.versions,
+        "created_at": record.created_at.isoformat(),
+        "updated_at": record.updated_at.isoformat(),
+    }
+
+
+@router.put(
+    "/records/{record_id}",
+    dependencies=[Depends(require_role("doctor", "department_head", "admin"))],
+)
+async def edit_record(
+    record_id: str,
+    req: EditRecordRequest,
+    db: AsyncSession = Depends(get_db),
+    user: User = Depends(get_current_user),
+):
+    """Edit a medical record, saving current version to history."""
+    try:
+        rid = uuid.UUID(record_id)
+        uid = uuid.UUID(str(user.id))
+    except (ValueError, AttributeError):
+        raise HTTPException(status_code=400, detail="Invalid record_id or user_id")
+
+    edits = {"content": req.content}
+    if req.markdown is not None:
+        edits["markdown"] = req.markdown
+
+    record = await update_record(rid, edits, uid, db)
+    if not record:
+        raise HTTPException(status_code=404, detail="Record not found")
+
+    await log_operation(
+        user_id=user.id,
+        action="UPDATE",
+        resource_type="medical_record",
+        resource_id=record_id,
+        details={"new_version": record.version},
+        db=db,
+    )
+
+    return {
+        "id": str(record.id),
+        "patient_id": str(record.patient_id),
+        "doctor_id": str(record.doctor_id),
+        "record_type": record.record_type.value,
+        "content": record.content,
+        "markdown": record.markdown,
+        "status": record.status.value,
+        "version": record.version,
+        "versions": record.versions,
+        "created_at": record.created_at.isoformat(),
+        "updated_at": record.updated_at.isoformat(),
+    }
+
+
+@router.post(
+    "/records/{record_id}/finalize",
+    dependencies=[Depends(require_role("doctor", "department_head", "admin"))],
+)
+async def finalize_record_endpoint(
+    record_id: str,
+    db: AsyncSession = Depends(get_db),
+    user: User = Depends(get_current_user),
+):
+    """Finalize a medical record — status changes to FINALIZED."""
+    try:
+        rid = uuid.UUID(record_id)
+        uid = uuid.UUID(str(user.id))
+    except (ValueError, AttributeError):
+        raise HTTPException(status_code=400, detail="Invalid record_id or user_id")
+
+    record = await finalize_record(rid, uid, db)
+    if not record:
+        raise HTTPException(status_code=404, detail="Record not found")
+
+    await log_operation(
+        user_id=user.id,
+        action="FINALIZE",
+        resource_type="medical_record",
+        resource_id=record_id,
+        details={},
+        db=db,
+    )
+
+    return {
+        "id": str(record.id),
+        "status": record.status.value,
+        "updated_at": record.updated_at.isoformat(),
+    }
