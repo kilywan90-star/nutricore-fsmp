@@ -30,6 +30,23 @@ class Settings(BaseSettings):
     BACKUP_S3_ENDPOINT: str = ""
     BACKUP_ENCRYPTION_ENABLED: bool = True
 
+    # Production
+    ENVIRONMENT: str = "development"
+    CORS_ORIGINS: list[str] = ["http://localhost:3000", "http://localhost:5173"]
+    LOG_LEVEL: str = "INFO"
+    DB_POOL_SIZE: int = 10
+    DB_MAX_OVERFLOW: int = 20
+
+    # WeChat
+    WECHAT_APPID: str = ""
+    WECHAT_SECRET: str = ""
+
+    # Celery / Notifications
+    CELERY_BROKER_URL: str = "redis://localhost:6379/1"
+    CELERY_RESULT_BACKEND: str = "redis://localhost:6379/2"
+    SMS_PROVIDER: str = "mock"
+    NOTIFICATION_CLEANUP_DAYS: int = 90
+
     model_config = {"env_prefix": "", "case_sensitive": True}
 
 
