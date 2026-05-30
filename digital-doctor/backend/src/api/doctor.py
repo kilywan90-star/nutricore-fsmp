@@ -11,7 +11,6 @@ from src.models.org import DoctorProfile, PatientAssignment, Department, Assignm
 from src.models.patient import Patient
 from src.services.patient_manager import get_patient_list, get_patient_detail
 from src.services.alert_engine import check_glucose_alerts
-from src.services.pre_consultation import generate_questionnaire, analyze_answers, generate_doctor_summary
 from src.api.auth_deps import require_role, get_current_user
 from src.security.authorization import (
     require_patient_access,
@@ -329,60 +328,115 @@ async def update_doctor_profile(
     }
 
 
-# ── Pre-consultation summary (doctor view) ────────────────────────────────────
+# ── Diagnosis Requests/Response models ───────────────────────────────────────────
 
-@router.get(
-    "/patients/{patient_id}/pre-consultation",
+class DiagnoseRequest(BaseModel):
+    patient_data: dict = Field(..., description="Clinical data dict: fpg, hba1c, bmi, age, egfr, etc.")
+    pre_consult_summary: Optional[dict] = Field(default=None, description="Pre-consultation summary")
+    lab_results: Optional[dict] = Field(default=None, description="Additional lab results")
+
+
+class HomaRequest(BaseModel):
+    fasting_insulin: float = Field(..., gt=0, description="Fasting insulin (μIU/mL)")
+    fasting_glucose: float = Field(..., gt=0, description="Fasting glucose (mmol/L)")
+
+
+# ── Assisted Diagnosis ──────────────────────────────────────────────────────────
+
+@router.post(
+    "/patients/{patient_id}/diagnose",
     dependencies=[Depends(require_role("doctor", "department_head", "admin")),
                   Depends(require_patient_access())],
 )
-async def patient_pre_consultation(
+async def diagnose_patient(
     patient_id: str,
+    req: DiagnoseRequest,
     db: AsyncSession = Depends(get_db),
     user: User = Depends(get_current_user),
 ):
-    """Return the AI-generated pre-consultation summary for a patient.
+    """Run differential diagnosis for a patient.
 
-    In a production system this would be fetched from a database record.
-    For now it generates a fresh summary from latest patient data.
+    Combines rule-engine classification with optional LLM second-pass
+    analysis for complex cases.
     """
-    detail = await get_patient_detail(db, patient_id)
-    if not detail:
+    # Verify patient exists
+    try:
+        pid = uuid.UUID(patient_id)
+    except (ValueError, AttributeError):
+        raise HTTPException(status_code=400, detail="Invalid patient_id")
+
+    patient_stmt = select(Patient).where(Patient.id == pid)
+    patient_result = await db.execute(patient_stmt)
+    if not patient_result.scalar_one_or_none():
         raise HTTPException(status_code=404, detail="Patient not found")
 
-    # Build patient_data from detail
-    patient_data = {
-        "chief_complaint": "",
-        "diabetes_type": detail.get("diabetes_type", ""),
-        "treatment_stage": "常规复诊",
-        "last_visit_findings": "",
-        "hba1c": detail.get("hba1c_target"),
-    }
+    from src.services.diagnosis_engine import differential_diagnosis
 
-    # Include latest glucose context
-    records = detail.get("glucose_records", [])
-    if records:
-        latest = records[0]
-        patient_data["last_glucose"] = latest.get("value_mmol_l")
+    result = await differential_diagnosis(
+        patient_data=req.patient_data,
+        pre_consult_summary=req.pre_consult_summary,
+        lab_results=req.lab_results,
+    )
 
-    # Include lab results as findings
-    lab_reports = detail.get("lab_reports", [])
-    if lab_reports:
-        findings = "; ".join(
-            f"{l.get('report_type', '')}: {str(l.get('results', ''))}"
-            for l in lab_reports[:3]
-        )
-        patient_data["last_visit_findings"] = findings
+    await log_operation(
+        user_id=user.id,
+        action="DIAGNOSE",
+        resource_type="patient",
+        resource_id=patient_id,
+        details={"method": result.get("method"), "confidence": result.get("overall_confidence")},
+        db=db,
+    )
 
-    # Check for high-risk alerts to flag in summary
-    alerts = detail.get("alerts", [])
-    if alerts:
-        unack = [a for a in alerts if not a.get("acknowledged")]
-        patient_data["alert_count"] = len(unack)
-
-    questions = generate_questionnaire(patient_data)
     return {
         "patient_id": patient_id,
-        "questions": questions,
-        "patient_context": patient_data,
+        "doctor_id": str(user.id),
+        "diagnosis": result,
+    }
+
+
+# ── HOMA Calculator ─────────────────────────────────────────────────────────────
+
+@router.post(
+    "/patients/{patient_id}/homa",
+    dependencies=[Depends(require_role("doctor", "department_head", "admin")),
+                  Depends(require_patient_access())],
+)
+async def calculate_homa(
+    patient_id: str,
+    req: HomaRequest,
+    db: AsyncSession = Depends(get_db),
+    user: User = Depends(get_current_user),
+):
+    """Calculate HOMA-IR and HOMA-beta for a patient."""
+    try:
+        pid = uuid.UUID(patient_id)
+    except (ValueError, AttributeError):
+        raise HTTPException(status_code=400, detail="Invalid patient_id")
+
+    patient_stmt = select(Patient).where(Patient.id == pid)
+    patient_result = await db.execute(patient_stmt)
+    if not patient_result.scalar_one_or_none():
+        raise HTTPException(status_code=404, detail="Patient not found")
+
+    from src.services.homa_calculator import calculate_homa_ir, calculate_homa_beta
+
+    homa_ir = calculate_homa_ir(req.fasting_insulin, req.fasting_glucose)
+    homa_beta = calculate_homa_beta(req.fasting_insulin, req.fasting_glucose)
+
+    await log_operation(
+        user_id=user.id,
+        action="HOMA_CALC",
+        resource_type="patient",
+        resource_id=patient_id,
+        details={
+            "fasting_insulin": req.fasting_insulin,
+            "fasting_glucose": req.fasting_glucose,
+        },
+        db=db,
+    )
+
+    return {
+        "patient_id": patient_id,
+        "homa_ir": homa_ir,
+        "homa_beta": homa_beta,
     }

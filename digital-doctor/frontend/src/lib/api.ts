@@ -157,6 +157,22 @@ export async function getPatientAlerts(id: string) {
   return data;
 }
 
+export async function diagnosePatient(
+  id: string,
+  input: { patient_data: Record<string, unknown>; pre_consult_summary?: Record<string, unknown> | null; lab_results?: Record<string, unknown> | null },
+) {
+  const { data } = await api.post(`/doctor/patients/${id}/diagnose`, input);
+  return data;
+}
+
+export async function calculateHoma(
+  id: string,
+  input: { fasting_insulin: number; fasting_glucose: number },
+) {
+  const { data } = await api.post(`/doctor/patients/${id}/homa`, input);
+  return data;
+}
+
 export async function acknowledgeAlert(alertId: string) {
   const { data } = await api.post(`/doctor/alerts/${alertId}/acknowledge`);
   return data;
