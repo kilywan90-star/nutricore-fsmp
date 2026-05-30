@@ -52,6 +52,28 @@ class Settings(BaseSettings):
     OFFLINE_MODE_ENABLED: bool = False
     SYNC_INTERVAL_MINUTES: int = 30
 
+    # EMR Adapter
+    EMR_VENDOR: str = "noop"  # noop | neusoft | winning | bsoft | wonders | xintong | zuobiao | fhir
+    EMR_ENDPOINT: str = ""
+    EMR_AUTH_TYPE: str = "basic"  # basic | token | cert | none
+    EMR_AUTH_USERNAME: str = ""
+    EMR_AUTH_PASSWORD: str = ""
+    EMR_TIMEOUT_SECONDS: int = 30
+    EMR_RETRY_COUNT: int = 2
+
+    # Critical Alert Closed-Loop
+    CRITICAL_ALERT_ENABLED: bool = True
+    CLOSED_LOOP_MODE: str = "lightweight"  # lightweight | standard | complete
+    LIGHTWEIGHT_ACK_TIMEOUT_MINUTES: int = 30
+    LIGHTWEIGHT_ESCALATE_TO_ROLE: str = "department_head"
+    LIGHTWEIGHT_ESCALATE_AFTER_MINUTES: int = 60
+    STANDARD_LIS_ENDPOINT: str = ""
+    STANDARD_NURSE_STATION_NOTIFY: bool = True
+    STANDARD_DUAL_CONFIRM_REQUIRED: bool = True
+    COMPLETE_PATIENT_SMS_ENABLED: bool = True
+    COMPLETE_PATIENT_PHONE_ENABLED: bool = False
+    COMPLETE_EMERGENCY_NAVIGATION_ENABLED: bool = True
+
     # Critical alert closed-loop system
     CRITICAL_ALERT_ENABLED: bool = True
     CLOSED_LOOP_MODE: str = "lightweight"  # lightweight | standard | complete
