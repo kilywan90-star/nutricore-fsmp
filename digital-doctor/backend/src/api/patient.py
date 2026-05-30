@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, Field
 from datetime import date, datetime
 from typing import Optional
+import uuid
 
 from src.api.deps import (
     get_health_coach, get_rule_engine,
@@ -166,3 +167,68 @@ async def submit_answers(req: SubmitAnswersRequest):
     summary = analyze_answers(answers_dicts, req.patient_data)
     doctor_summary = generate_doctor_summary(summary)
     return SubmitAnswersResponse(summary=summary, doctor_summary=doctor_summary)
+
+
+# ── Allergy endpoints ──────────────────────────────────────────────────────
+
+
+class AllergyItem(BaseModel):
+    id: Optional[str] = None
+    substance: str = Field(..., min_length=1, max_length=200, description="过敏物质名称")
+    substance_code: Optional[str] = Field(None, max_length=100, description="SNOMED/RxNorm 编码")
+    reaction: Optional[str] = Field(None, max_length=500, description="过敏反应描述")
+    severity: str = Field(..., pattern="^(mild|moderate|severe)$", description="严重程度")
+    recorded_at: Optional[datetime] = None
+    is_active: bool = True
+
+
+class AllergyListResponse(BaseModel):
+    allergies: list[AllergyItem]
+    count: int
+
+
+class AllergyAddRequest(BaseModel):
+    substance: str = Field(..., min_length=1, max_length=200)
+    substance_code: Optional[str] = Field(None, max_length=100)
+    reaction: Optional[str] = Field(None, max_length=500)
+    severity: str = Field(..., pattern="^(mild|moderate|severe)$")
+
+
+class AllergyAddResponse(BaseModel):
+    id: str
+    substance: str
+    severity: str
+    message: str
+
+
+class AllergyDeleteResponse(BaseModel):
+    message: str
+
+
+@router.get("/allergies", response_model=AllergyListResponse,
+            dependencies=[Depends(require_role("patient"))])
+async def list_allergies():
+    """Get the current patient's allergy list. (Mock stub — returns empty)"""
+    # In production, this would query from DB using get_current_user().
+    # For now returns an empty list as stub.
+    return AllergyListResponse(allergies=[], count=0)
+
+
+@router.post("/allergies", response_model=AllergyAddResponse,
+             dependencies=[Depends(require_role("patient"))])
+async def add_allergy(req: AllergyAddRequest):
+    """Add an allergy for the current patient (patient self-report)."""
+    allergy_id = str(uuid.uuid4())
+    return AllergyAddResponse(
+        id=allergy_id,
+        substance=req.substance,
+        severity=req.severity,
+        message=f"已记录过敏: {req.substance}，请注意避免使用相关药物。",
+    )
+
+
+@router.delete("/allergies/{allergy_id}", response_model=AllergyDeleteResponse,
+               dependencies=[Depends(require_role("patient"))])
+async def remove_allergy(allergy_id: str):
+    """Remove an allergy from the patient's allergy list."""
+    return AllergyDeleteResponse(message=f"已删除过敏记录 {allergy_id}")

@@ -179,7 +179,7 @@ export default function PrescriptionReview() {
       setReviewResult(result);
       setInteractions([]);
     } catch (err: any) {
-      message.error(err?.response?.data?.detail || err?.message || '处方审核失败');
+      message.error(err?.response?.data?.detail || err?.message || '处方合理性检查失败');
     } finally {
       setReviewing(false);
     }
@@ -207,7 +207,7 @@ export default function PrescriptionReview() {
         >
           返回
         </Button>
-        <Title level={3} style={{ margin: 0 }}>处方审核</Title>
+        <Title level={3} style={{ margin: 0 }}>处方合理性提醒</Title>
       </Row>
 
       <Row gutter={[24, 24]}>
@@ -376,7 +376,7 @@ export default function PrescriptionReview() {
             onClick={handleReview}
             disabled={prescription.length === 0}
           >
-            审核处方
+            合理性提醒
           </Button>
 
           {/* Live Interaction Preview */}
@@ -400,7 +400,7 @@ export default function PrescriptionReview() {
         <Col xs={24} lg={12}>
           {reviewing ? (
             <div style={{ padding: 48, textAlign: 'center' }}>
-              <Spin size="large" tip="正在审核处方..." />
+              <Spin size="large" tip="正在进行处方合理性检查..." />
             </div>
           ) : reviewResult ? (
             <>
@@ -423,6 +423,11 @@ export default function PrescriptionReview() {
                   <Text type="secondary">
                     {reviewResult.medication_count} 种药品 | {reviewResult.issue_count} 条发现
                   </Text>
+                  <div style={{ marginTop: 8 }}>
+                    <Text type="secondary" style={{ fontSize: 11 }}>
+                      * 本内容由AI生成，仅供临床参考，最终决策权归医生所有
+                    </Text>
+                  </div>
                 </Space>
               </Card>
 
@@ -590,7 +595,7 @@ export default function PrescriptionReview() {
           ) : (
             <Card>
               <Empty
-                description="添加药品并点击「审核处方」查看结果"
+                description="添加药品并点击「合理性提醒」查看结果"
                 image={Empty.PRESENTED_IMAGE_SIMPLE}
               />
             </Card>

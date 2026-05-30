@@ -302,7 +302,7 @@ export default function DiagnosisPanel({ patientId: propPatientId, patientData: 
         >
           返回详情
         </Button>
-        <Title level={3} style={{ margin: 0 }}>辅助诊断</Title>
+        <Title level={3} style={{ margin: 0 }}>辅助决策建议</Title>
       </Row>
 
       {/* Primary Diagnosis Card */}
@@ -310,7 +310,7 @@ export default function DiagnosisPanel({ patientId: propPatientId, patientData: 
         title={
           <Space>
             <MedicineBoxOutlined />
-            <span>辅助诊断分析</span>
+            <span>AI辅助分析</span>
           </Space>
         }
         extra={
@@ -326,12 +326,12 @@ export default function DiagnosisPanel({ patientId: propPatientId, patientData: 
         style={{ marginBottom: 24 }}
       >
         {!diagResult && !loading && !fetchingPatient && (
-          <Empty description='点击"开始分析"启动辅助诊断' />
+          <Empty description='点击"开始分析"启动AI辅助分析' />
         )}
 
         {(loading || fetchingPatient) && (
           <div style={{ padding: 48, textAlign: 'center' }}>
-            <Spin tip="正在进行诊断分析..." />
+            <Spin tip="正在进行辅助分析..." />
           </div>
         )}
 
@@ -340,7 +340,7 @@ export default function DiagnosisPanel({ patientId: propPatientId, patientData: 
             <Row gutter={16} align="middle">
               <Col flex="auto">
                 <Descriptions bordered size="small" column={{ xs: 1, sm: 2 }}>
-                  <Descriptions.Item label="主诊断">
+                  <Descriptions.Item label="主分析结论">
                     <Text strong style={{ fontSize: 16 }}>
                       {diagResult.diagnosis.primary_diagnosis.type}
                     </Text>
@@ -377,17 +377,22 @@ export default function DiagnosisPanel({ patientId: propPatientId, patientData: 
             </Row>
 
             {diagResult.diagnosis.narrative && (
-              <Paragraph
-                style={{
-                  marginTop: 16,
-                  padding: '8px 12px',
-                  background: '#f6ffed',
-                  borderRadius: 6,
-                  border: '1px solid #b7eb8f',
-                }}
-              >
-                {diagResult.diagnosis.narrative}
-              </Paragraph>
+              <>
+                <Paragraph
+                  style={{
+                    marginTop: 16,
+                    padding: '8px 12px',
+                    background: '#f6ffed',
+                    borderRadius: 6,
+                    border: '1px solid #b7eb8f',
+                  }}
+                >
+                  {diagResult.diagnosis.narrative}
+                </Paragraph>
+                <Text type="secondary" style={{ fontSize: 11, marginTop: 4, display: 'block' }}>
+                  * 本内容由AI生成，仅供临床参考，最终决策权归医生所有
+                </Text>
+              </>
             )}
           </>
         )}
