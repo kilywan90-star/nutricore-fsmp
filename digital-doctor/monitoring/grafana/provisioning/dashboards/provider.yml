@@ -1,0 +1,11 @@
+apiVersion: 1
+
+providers:
+  - name: "digital-doctor"
+    orgId: 1
+    folder: "Digital Doctor"
+    type: file
+    disableDeletion: true
+    editable: false
+    options:
+      path: /var/lib/grafana/dashboards

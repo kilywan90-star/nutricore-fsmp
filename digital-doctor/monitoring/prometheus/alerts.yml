@@ -1,0 +1,80 @@
+# Prometheus alerting rules for digital-doctor
+
+groups:
+  - name: api_alerts
+    rules:
+      - alert: HighErrorRate
+        expr: |
+          (
+            sum(rate(http_requests_total{status_code=~"5.."}[5m]))
+            /
+            sum(rate(http_requests_total[5m]))
+          ) > 0.05
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High API error rate (>5%)"
+          description: "API error rate is {{ $value | humanizePercentage }} over the last 5 minutes."
+
+      - alert: HighLatency
+        expr: |
+          histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket[5m])) by (le)) > 5
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "API p95 latency > 5s"
+          description: "P95 latency is {{ $value }}s over the last 5 minutes."
+
+  - name: llm_alerts
+    rules:
+      - alert: LLMFallbackRateHigh
+        expr: |
+          (
+            sum(rate(llm_requests_total{status="fallback"}[10m]))
+            /
+            sum(rate(llm_requests_total[10m]))
+          ) > 0.10
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "LLM fallback rate > 10%"
+          description: "LLM fallback rate is {{ $value | humanizePercentage }} over the last 10 minutes."
+
+      - alert: LLMErrorRateCritical
+        expr: |
+          (
+            sum(rate(llm_requests_total{status="error"}[5m]))
+            /
+            sum(rate(llm_requests_total[5m]))
+          ) > 0.20
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "LLM error rate > 20%"
+          description: "LLM error rate is {{ $value | humanizePercentage }} over the last 5 minutes."
+
+  - name: infrastructure_alerts
+    rules:
+      - alert: DiskSpaceLow
+        expr: disk_free_pct < 20
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Disk space < 20% free"
+          description: "Disk free space is {{ $value }}% on the data volume."
+
+  - name: clinical_alerts
+    rules:
+      - alert: UnacknowledgedAlertsHigh
+        expr: alerts_unacknowledged > 10
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Unacknowledged critical alerts > 10"
+          description: "There are {{ $value }} unacknowledged alerts in the system."
