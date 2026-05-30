@@ -1,5 +1,33 @@
+"""FHIR R4 adapter — FHIR Patient / Observation conversion and Bundle building.
+
+This module provides the primary FHIR integration surface for the digital-doctor
+backend. It maintains backward compatibility with the minimal adapters while
+re-exporting the complete FHIR resource model classes from fhir_resources.
+
+For full FHIR R4 resource models (Condition, MedicationRequest, AllergyIntolerance,
+DiagnosticReport, CarePlan, Procedure, Immunization, DocumentReference), import
+from src.adapters.fhir_resources directly.
+"""
+
+from src.adapters.fhir_resources import (  # noqa: F401 — re-export for convenience
+    FHIRAllergyIntolerance,
+    FHIRCarePlan,
+    FHIRCondition,
+    FHIRDiagnosticReport,
+    FHIRDocumentReference,
+    FHIRImmunization,
+    FHIRMedicationRequest,
+    FHIRPatient,
+    FHIRProcedure,
+)
+
+
 class FHIRPatientAdapter:
-    """FHIR R4 Patient resource to internal Patient model fields"""
+    """FHIR R4 Patient resource to internal Patient model fields.
+
+    This adapter is the legacy interface; for new code prefer
+    FHIRPatient.from_fhir_resource() / .to_fhir_json() from fhir_resources.
+    """
 
     @staticmethod
     def from_fhir(fhir_resource: dict) -> dict:
@@ -21,7 +49,11 @@ class FHIRPatientAdapter:
 
 
 class FHIRObservationAdapter:
-    """FHIR Observation to lab test results"""
+    """FHIR Observation to lab test results.
+
+    This adapter is the legacy interface; for full Observation handling
+    use the resource model pattern from fhir_resources.
+    """
 
     @staticmethod
     def from_fhir(fhir_resource: dict) -> dict:
@@ -59,7 +91,10 @@ def _extract_identifier(resource: dict) -> str:
 
 
 class FHIRBundleBuilder:
-    """Build FHIR Bundle for batch import"""
+    """Build FHIR Bundle for batch import.
+
+    For full Bundle parsing/building, see src.adapters.fhir_bundle.
+    """
 
     @staticmethod
     def build_search_bundle(resources: list[dict], resource_type: str, total: int) -> dict:
