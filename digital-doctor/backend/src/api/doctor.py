@@ -11,6 +11,8 @@ from src.models.org import DoctorProfile, PatientAssignment, Department, Assignm
 from src.models.patient import Patient
 from src.services.patient_manager import get_patient_list, get_patient_detail
 from src.services.alert_engine import check_glucose_alerts
+from src.services.critical_alert_service import CriticalAlertService
+from src.models.critical_alert import CriticalAlert, CriticalAlertStatus
 from src.api.auth_deps import require_role, get_current_user
 from src.security.authorization import (
     require_patient_access,
@@ -713,3 +715,235 @@ async def finalize_record_endpoint(
         "status": record.status.value,
         "updated_at": record.updated_at.isoformat(),
     }
+
+
+# ── Critical Alert Endpoints ──────────────────────────────────────────────
+
+class CriticalAlertResponse(BaseModel):
+    id: str
+    patient_id: str
+    alert_type: str
+    severity: str
+    title: str
+    detail: str
+    value: float
+    detected_at: str
+    doctor_user_id: str | None
+    status: str
+    status_history: list | None = None
+    acknowledged_at: str | None = None
+    acknowledged_by: str | None = None
+    escalated_to: str | None = None
+    resolution: str | None = None
+    closed_at: str | None = None
+
+
+class TriggerCriticalAlertRequest(BaseModel):
+    patient_id: str
+    alert_type: str = Field(default="severe_hyperglycemia")
+    value: float = Field(default=18.0)
+
+
+class AcknowledgeCriticalAlertRequest(BaseModel):
+    resolution: str = Field(default="已处理", pattern="^(已处理|已联系患者|转急诊)$")
+
+
+class CriticalAlertStatsResponse(BaseModel):
+    open_count: int
+    acknowledged_count: int
+    resolved_count: int
+    escalated_count: int
+    expired_count: int
+
+
+def _critical_alert_to_response(alert: CriticalAlert) -> CriticalAlertResponse:
+    return CriticalAlertResponse(
+        id=str(alert.id),
+        patient_id=str(alert.patient_id),
+        alert_type=alert.alert_type,
+        severity=alert.severity,
+        title=alert.title,
+        detail=alert.detail,
+        value=alert.value,
+        detected_at=alert.detected_at.isoformat(),
+        doctor_user_id=str(alert.doctor_user_id) if alert.doctor_user_id else None,
+        status=alert.status.value,
+        status_history=alert.status_history,
+        acknowledged_at=alert.acknowledged_at.isoformat() if alert.acknowledged_at else None,
+        acknowledged_by=str(alert.acknowledged_by) if alert.acknowledged_by else None,
+        escalated_to=str(alert.escalated_to) if alert.escalated_to else None,
+        resolution=alert.resolution,
+        closed_at=alert.closed_at.isoformat() if alert.closed_at else None,
+    )
+
+
+@router.post("/critical-alerts", dependencies=[Depends(require_role("doctor", "department_head", "admin"))])
+async def trigger_critical_alert(
+    req: TriggerCriticalAlertRequest,
+    db: AsyncSession = Depends(get_db),
+    user: User = Depends(get_current_user),
+):
+    """Trigger a manual critical alert (dev/test)."""
+    try:
+        patient_id = uuid.UUID(req.patient_id)
+    except (ValueError, AttributeError):
+        raise HTTPException(status_code=400, detail="Invalid patient_id")
+
+    alert = await CriticalAlertService.trigger_critical_alert(
+        patient_id=patient_id,
+        alert_type=req.alert_type,
+        value=req.value,
+        db=db,
+    )
+    if not alert:
+        raise HTTPException(status_code=500, detail="Failed to create critical alert")
+
+    await log_operation(
+        user_id=user.id,
+        action="CREATE",
+        resource_type="critical_alert",
+        resource_id=str(alert.id),
+        details={"patient_id": req.patient_id, "alert_type": req.alert_type, "value": req.value},
+        db=db,
+    )
+    return _critical_alert_to_response(alert)
+
+
+@router.get("/critical-alerts", dependencies=[Depends(require_role("doctor", "department_head", "admin"))])
+async def list_critical_alerts(
+    page: int = Query(1, ge=1),
+    page_size: int = Query(20, ge=1, le=100),
+    status_filter: Optional[str] = Query(default=None, alias="status"),
+    db: AsyncSession = Depends(get_db),
+    user: User = Depends(get_current_user),
+):
+    """List critical alerts for the current doctor, paginated and filterable by status."""
+    query = select(CriticalAlert)
+
+    if user.role != UserRole.ADMIN:
+        query = query.where(CriticalAlert.doctor_user_id == user.id)
+
+    if status_filter:
+        try:
+            s = CriticalAlertStatus(status_filter)
+            query = query.where(CriticalAlert.status == s)
+        except ValueError:
+            valid = [v.value for v in CriticalAlertStatus]
+            raise HTTPException(status_code=400, detail=f"Invalid status. Valid: {valid}")
+
+    query = query.order_by(CriticalAlert.detected_at.desc())
+
+    # Count
+    count_stmt = select(func.count()).select_from(query.subquery())
+    count_result = await db.execute(count_stmt)
+    total = count_result.scalar() or 0
+
+    # Paginate
+    query = query.offset((page - 1) * page_size).limit(page_size)
+    result = await db.execute(query)
+    alerts = result.scalars().all()
+
+    return {
+        "total": total,
+        "page": page,
+        "page_size": page_size,
+        "items": [_critical_alert_to_response(a) for a in alerts],
+    }
+
+
+@router.post("/critical-alerts/{alert_id}/acknowledge", dependencies=[Depends(require_role("doctor", "department_head", "admin"))])
+async def acknowledge_critical_alert(
+    alert_id: str,
+    req: AcknowledgeCriticalAlertRequest,
+    db: AsyncSession = Depends(get_db),
+    user: User = Depends(get_current_user),
+):
+    """Doctor acknowledges a critical alert with resolution."""
+    try:
+        aid = uuid.UUID(alert_id)
+    except (ValueError, AttributeError):
+        raise HTTPException(status_code=400, detail="Invalid alert_id")
+
+    alert = await CriticalAlertService.doctor_acknowledge(
+        alert_id=aid,
+        doctor_id=user.id,
+        resolution=req.resolution,
+        db=db,
+    )
+    if not alert:
+        raise HTTPException(status_code=404, detail="Critical alert not found")
+
+    await log_operation(
+        user_id=user.id,
+        action="ACKNOWLEDGE",
+        resource_type="critical_alert",
+        resource_id=alert_id,
+        details={"resolution": req.resolution},
+        db=db,
+    )
+    return _critical_alert_to_response(alert)
+
+
+@router.post("/critical-alerts/{alert_id}/nurse-confirm", dependencies=[Depends(require_role("doctor", "department_head", "admin"))])
+async def nurse_confirm_critical_alert(
+    alert_id: str,
+    db: AsyncSession = Depends(get_db),
+    user: User = Depends(get_current_user),
+):
+    """Nurse confirms a critical alert (standard/complete mode)."""
+    try:
+        aid = uuid.UUID(alert_id)
+    except (ValueError, AttributeError):
+        raise HTTPException(status_code=400, detail="Invalid alert_id")
+
+    alert = await CriticalAlertService.nurse_confirm(
+        alert_id=aid,
+        nurse_id=user.id,
+        db=db,
+    )
+    if not alert:
+        raise HTTPException(status_code=404, detail="Critical alert not found")
+
+    await log_operation(
+        user_id=user.id,
+        action="CONFIRM",
+        resource_type="critical_alert",
+        resource_id=alert_id,
+        details={"role": "nurse"},
+        db=db,
+    )
+    return _critical_alert_to_response(alert)
+
+
+@router.get("/critical-alerts/stats", dependencies=[Depends(require_role("doctor", "department_head", "admin"))])
+async def critical_alert_stats(
+    db: AsyncSession = Depends(get_db),
+    user: User = Depends(get_current_user),
+):
+    """Summary statistics for critical alerts: open, acknowledged, resolved, escalated, expired counts."""
+    async def _count(status_filter: list[CriticalAlertStatus]) -> int:
+        stmt = select(func.count()).select_from(CriticalAlert).where(
+            CriticalAlert.status.in_(status_filter)
+        )
+        if user.role != UserRole.ADMIN:
+            stmt = stmt.where(CriticalAlert.doctor_user_id == user.id)
+        result = await db.execute(stmt)
+        return result.scalar() or 0
+
+    open_count = await _count([CriticalAlertStatus.DETECTED, CriticalAlertStatus.NOTIFIED_DOCTOR])
+    acknowledged_count = await _count([
+        CriticalAlertStatus.DOCTOR_ACKNOWLEDGED,
+        CriticalAlertStatus.NURSE_CONFIRMED,
+        CriticalAlertStatus.PATIENT_NOTIFIED,
+    ])
+    resolved_count = await _count([CriticalAlertStatus.RESOLVED])
+    escalated_count = await _count([CriticalAlertStatus.ESCALATED])
+    expired_count = await _count([CriticalAlertStatus.EXPIRED])
+
+    return CriticalAlertStatsResponse(
+        open_count=open_count,
+        acknowledged_count=acknowledged_count,
+        resolved_count=resolved_count,
+        escalated_count=escalated_count,
+        expired_count=expired_count,
+    )

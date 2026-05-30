@@ -16,12 +16,14 @@ def check_glucose_alerts(records: list[dict]) -> list[dict]:
             "id": "alert-001", "alert_type": "severe_hyperglycemia", "severity": "critical",
             "title": "严重高血糖预警", "detail": f"血糖{value}mmol/L>=16.7，需立即处理",
             "reference_guideline": "中国2型糖尿病防治指南(2024版) §12.1",
+            "value": value,
         })
     elif value <= 3.9:
         alerts.append({
             "id": "alert-002", "alert_type": "hypoglycemia", "severity": "warning",
             "title": "低血糖预警", "detail": f"血糖{value}mmol/L<=3.9，低血糖",
             "reference_guideline": "中国2型糖尿病防治指南(2024版) §12.2",
+            "value": value,
         })
 
     # Check consecutive 3-day high fasting glucose

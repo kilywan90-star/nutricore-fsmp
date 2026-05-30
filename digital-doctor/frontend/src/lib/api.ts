@@ -162,6 +162,81 @@ export async function acknowledgeAlert(alertId: string) {
   return data;
 }
 
+// ── Critical Alert API ────────────────────────────────────────────────
+
+export interface CriticalAlertItem {
+  id: string;
+  patient_id: string;
+  alert_type: string;
+  severity: string;
+  title: string;
+  detail: string;
+  value: number;
+  detected_at: string;
+  doctor_user_id: string | null;
+  status: string;
+  status_history: Array<{ status: string; timestamp: string; user_id: string | null; notes: string }> | null;
+  acknowledged_at: string | null;
+  acknowledged_by: string | null;
+  escalated_to: string | null;
+  resolution: string | null;
+  closed_at: string | null;
+}
+
+export interface CriticalAlertListResponse {
+  total: number;
+  page: number;
+  page_size: number;
+  items: CriticalAlertItem[];
+}
+
+export interface CriticalAlertStats {
+  open_count: number;
+  acknowledged_count: number;
+  resolved_count: number;
+  escalated_count: number;
+  expired_count: number;
+}
+
+export async function triggerCriticalAlert(patientId: string, params?: {
+  alert_type?: string;
+  value?: number;
+}): Promise<CriticalAlertItem> {
+  const { data } = await api.post('/doctor/critical-alerts', {
+    patient_id: patientId,
+    alert_type: params?.alert_type || 'severe_hyperglycemia',
+    value: params?.value || 18.0,
+  });
+  return data;
+}
+
+export async function listCriticalAlerts(params?: {
+  status?: string;
+  page?: number;
+  page_size?: number;
+}): Promise<CriticalAlertListResponse> {
+  const { data } = await api.get('/doctor/critical-alerts', { params });
+  return data;
+}
+
+export async function acknowledgeCriticalAlert(
+  alertId: string,
+  body: { resolution: string; notes?: string },
+): Promise<CriticalAlertItem> {
+  const { data } = await api.post(`/doctor/critical-alerts/${alertId}/acknowledge`, body);
+  return data;
+}
+
+export async function nurseConfirmCriticalAlert(alertId: string): Promise<CriticalAlertItem> {
+  const { data } = await api.post(`/doctor/critical-alerts/${alertId}/nurse-confirm`);
+  return data;
+}
+
+export async function getCriticalAlertStats(): Promise<CriticalAlertStats> {
+  const { data } = await api.get('/doctor/critical-alerts/stats');
+  return data;
+}
+
 export async function getAllAlerts(params?: {
   severity?: string;
   page?: number;
