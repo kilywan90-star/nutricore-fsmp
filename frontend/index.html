@@ -317,9 +317,10 @@
               <label>血清白蛋白 g/L (可选)</label>
               <input type="number" id="alb" value="30" min="0" max="60" step="0.1" class="form-input">
             </div>
-            <div class="form-group">
-              <label>当前用药 (ATC编码)</label>
-              <input type="text" id="medications" value="A02BC01,A10BA02" class="form-input" placeholder="逗号分隔">
+            <div class="form-group" style="grid-column:1/-1">
+              <label>当前用药 <span style="font-weight:400;color:var(--color-text-muted)">(点击选择，可多选)</span></label>
+              <input type="hidden" id="medications" value="A02BC01,A10BA02">
+              <div class="drug-picker" id="drugPicker"></div>
             </div>
           </div>
           <div style="display:flex;gap:10px">

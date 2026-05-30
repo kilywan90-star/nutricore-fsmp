@@ -423,9 +423,78 @@ function updateQuickDemo() {
   document.getElementById('quickRoute').textContent = `推荐通路: ${pathway.route} | 能量: ${pathway.energy}kcal | 蛋白: ${pathway.protein}g`;
 }
 
+// ===== DRUG PICKER =====
+const DRUG_CATALOG = [
+  { atc: "A02BC01", name: "奥美拉唑", class: "质子泵抑制剂(PPI)", generic: "Omeprazole" },
+  { atc: "A02BA02", name: "雷尼替丁", class: "H2受体拮抗剂", generic: "Ranitidine" },
+  { atc: "A10BA02", name: "二甲双胍", class: "双胍类降糖药", generic: "Metformin" },
+  { atc: "A10AD01", name: "胰岛素(常规)", class: "胰岛素", generic: "Insulin" },
+  { atc: "B01AA03", name: "华法林", class: "维生素K拮抗剂", generic: "Warfarin" },
+  { atc: "B01AF01", name: "利伐沙班", class: "Xa因子抑制剂", generic: "Rivaroxaban" },
+  { atc: "C03CA01", name: "呋塞米", class: "袢利尿剂", generic: "Furosemide" },
+  { atc: "C07AB02", name: "美托洛尔", class: "β受体阻滞剂", generic: "Metoprolol" },
+  { atc: "C08CA01", name: "氨氯地平", class: "钙通道阻滞剂", generic: "Amlodipine" },
+  { atc: "C09AA02", name: "依那普利", class: "ACEI", generic: "Enalapril" },
+  { atc: "C10AA01", name: "辛伐他汀", class: "他汀类降脂药", generic: "Simvastatin" },
+  { atc: "H02AB06", name: "泼尼松龙", class: "糖皮质激素", generic: "Prednisolone" },
+  { atc: "H03AA01", name: "左甲状腺素钠", class: "甲状腺激素", generic: "Levothyroxine" },
+  { atc: "J01GB03", name: "庆大霉素", class: "氨基糖苷类抗生素", generic: "Gentamicin" },
+  { atc: "J01MA02", name: "环丙沙星", class: "氟喹诺酮类", generic: "Ciprofloxacin" },
+  { atc: "J01DD04", name: "头孢曲松", class: "三代头孢菌素", generic: "Ceftriaxone" },
+  { atc: "J02AC01", name: "氟康唑", class: "三唑类抗真菌药", generic: "Fluconazole" },
+  { atc: "J04AC01", name: "异烟肼", class: "抗结核药", generic: "Isoniazid" },
+  { atc: "N02BE01", name: "对乙酰氨基酚", class: "解热镇痛药", generic: "Paracetamol" },
+  { atc: "N02AA01", name: "吗啡", class: "阿片类镇痛药", generic: "Morphine" },
+  { atc: "M01AB05", name: "双氯芬酸", class: "非甾体抗炎药", generic: "Diclofenac" },
+  { atc: "A04AA01", name: "昂丹司琼", class: "5-HT3受体拮抗剂", generic: "Ondansetron" },
+  { atc: "A03FA01", name: "甲氧氯普胺", class: "促胃动力药", generic: "Metoclopramide" },
+  { atc: "A06AD11", name: "乳果糖", class: "渗透性泻药", generic: "Lactulose" },
+  { atc: "A12AX01", name: "碳酸钙+维生素D3", class: "钙补充剂", generic: "Calcium+VitD" },
+  { atc: "C01CA24", name: "去甲肾上腺素", class: "儿茶酚胺类升压药", generic: "Norepinephrine" },
+  { atc: "N05CD08", name: "咪达唑仑", class: "苯二氮卓类镇静药", generic: "Midazolam" },
+  { atc: "N03AX09", name: "左乙拉西坦", class: "抗癫痫药", generic: "Levetiracetam" },
+  { atc: "A10BB01", name: "格列本脲", class: "磺脲类降糖药", generic: "Glibenclamide" },
+];
+
+function renderDrugPicker(selectedCodes) {
+  const container = document.getElementById('drugPicker');
+  if (!container) return;
+  const currentSelected = selectedCodes || getSelectedDrugCodes();
+  container.innerHTML = DRUG_CATALOG.map(d => {
+    const sel = currentSelected.includes(d.atc);
+    return `<div class="drug-pill ${sel ? 'selected' : ''}" data-atc="${d.atc}" onclick="toggleDrug('${d.atc}')" title="${d.generic} — ${d.class}">
+      <span class="drug-pill-name">${d.name}</span>
+      <span class="drug-pill-code">${d.atc}</span>
+      <span class="drug-pill-class">${d.class}</span>
+    </div>`;
+  }).join('') + '<span class="drug-picker-hint">共 ' + DRUG_CATALOG.length + ' 种常用药品 · 点击选中/取消 · 选中药品自动检测营养素互作</span>';
+}
+
+function toggleDrug(atc) {
+  const hidden = document.getElementById('medications');
+  const current = getSelectedDrugCodes();
+  const idx = current.indexOf(atc);
+  if (idx >= 0) { current.splice(idx, 1); }
+  else { current.push(atc); }
+  hidden.value = current.join(',');
+  renderDrugPicker(current);
+}
+
+function getSelectedDrugCodes() {
+  const val = document.getElementById('medications')?.value || '';
+  return val.split(',').map(s => s.trim()).filter(Boolean);
+}
+
+function selectDrugsByATC(atcList) {
+  if (!atcList || !atcList.length) return;
+  document.getElementById('medications').value = atcList.join(',');
+  renderDrugPicker(atcList);
+}
+
 // ===== INIT =====
 document.addEventListener('DOMContentLoaded', () => {
   updateQuickDemo();
+  renderDrugPicker();
 
   // Wire disease→surgery filter on assessment page
   const diseaseSelect = document.getElementById('disease');
@@ -519,7 +588,7 @@ async function aiParseNote() {
   setVal('renal', parsed.renal);
   setVal('liver', parsed.liver);
   setVal('alb', parsed.alb);
-  if (parsed.medications?.length) setVal('medications', parsed.medications.join(','));
+  if (parsed.medications?.length) selectDrugsByATC(parsed.medications);
 
   // Show parsed summary
   const resultEl = document.getElementById('aiParseResult');
