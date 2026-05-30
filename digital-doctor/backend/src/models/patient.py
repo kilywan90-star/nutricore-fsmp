@@ -24,6 +24,7 @@ class Patient(Base):
     medications: Mapped[list["MedicationReminder"]] = relationship(back_populates="patient", cascade="all, delete-orphan")
     lab_reports: Mapped[list["LabReport"]] = relationship(back_populates="patient", cascade="all, delete-orphan")
     alerts: Mapped[list["Alert"]] = relationship(back_populates="patient", cascade="all, delete-orphan")
+    critical_alerts: Mapped[list["CriticalAlert"]] = relationship(back_populates="patient", cascade="all, delete-orphan")
     medical_records: Mapped[list["MedicalRecord"]] = relationship(back_populates="patient", cascade="all, delete-orphan")
 
 

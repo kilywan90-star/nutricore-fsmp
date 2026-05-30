@@ -19,6 +19,7 @@ from src.models.notification import (
 )
 from src.models.patient import MedicationReminder, GlucoseRecord, Patient
 from src.models.clinical import Alert, AlertSeverity
+from src.services.critical_alert_service import CriticalAlertService
 
 logger = logging.getLogger(__name__)
 
@@ -278,6 +279,15 @@ async def check_glucose_alerts_for_all_patients(db: AsyncSession, alert_check_fn
             )
             db.add(notification)
             total += 1
+
+            # Trigger critical alert closed-loop for severe events
+            if alert_data["severity"] == "critical" and "value" in alert_data:
+                await CriticalAlertService.trigger_critical_alert(
+                    patient_id=patient_id,
+                    alert_type=alert_data["alert_type"],
+                    value=alert_data["value"],
+                    db=db,
+                )
 
     if total:
         await db.commit()

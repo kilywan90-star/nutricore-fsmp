@@ -8,7 +8,7 @@ celery_app = Celery(
     "digital_doctor",
     broker=settings.CELERY_BROKER_URL,
     backend=settings.CELERY_RESULT_BACKEND,
-    include=["src.tasks.notification_tasks"],
+    include=["src.tasks.notification_tasks", "src.tasks.critical_alert_tasks"],
 )
 
 celery_app.conf.update(
@@ -36,6 +36,10 @@ celery_app.conf.update(
         "cleanup-old-notifications": {
             "task": "src.tasks.notification_tasks.cleanup_old_notifications",
             "schedule": crontab(hour=3, minute=0),  # daily at 3am
+        },
+        "check-critical-alert-timeouts": {
+            "task": "src.tasks.critical_alert_tasks.check_critical_alert_timeouts",
+            "schedule": 300.0,  # every 5 minutes
         },
     },
 )
