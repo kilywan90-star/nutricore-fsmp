@@ -1,0 +1,102 @@
+name: Deploy to Staging
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Image version to deploy (git sha or tag, defaults to latest)"
+        required: false
+        default: "latest"
+
+concurrency:
+  group: deploy-staging
+  cancel-in-progress: false
+
+env:
+  REGISTRY: ghcr.io
+  BACKEND_IMAGE: ghcr.io/${{ github.repository_owner }}/digital-doctor-backend
+  FRONTEND_IMAGE: ghcr.io/${{ github.repository_owner }}/digital-doctor-frontend
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: staging
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set version
+        id: vars
+        run: |
+          VERSION="${{ inputs.version }}"
+          if [ "${VERSION}" = "latest" ]; then
+            VERSION="${GITHUB_SHA::7}"
+          fi
+          echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
+
+      - name: Record previous image tags (for rollback)
+        id: previous
+        run: |
+          echo "backend_prev_tag=previous-backend-$(date +%s)" >> "$GITHUB_OUTPUT"
+          echo "frontend_prev_tag=previous-frontend-$(date +%s)" >> "$GITHUB_OUTPUT"
+
+      - name: Deploy to staging via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.STAGING_HOST }}
+          username: ${{ secrets.STAGING_USER }}
+          key: ${{ secrets.STAGING_SSH_KEY }}
+          script: |
+            set -e
+
+            cd /opt/digital-doctor
+
+            # Pull target images
+            docker pull ${{ env.BACKEND_IMAGE }}:${{ steps.vars.outputs.version }}
+            docker pull ${{ env.FRONTEND_IMAGE }}:${{ steps.vars.outputs.version }}
+
+            # Tag previous images for rollback
+            docker tag ${{ env.BACKEND_IMAGE }}:current ${{ env.BACKEND_IMAGE }}:${{ steps.previous.outputs.backend_prev_tag }} 2>/dev/null || true
+            docker tag ${{ env.FRONTEND_IMAGE }}:current ${{ env.FRONTEND_IMAGE }}:${{ steps.previous.outputs.frontend_prev_tag }} 2>/dev/null || true
+
+            # Tag new images as current
+            docker tag ${{ env.BACKEND_IMAGE }}:${{ steps.vars.outputs.version }} ${{ env.BACKEND_IMAGE }}:current
+            docker tag ${{ env.FRONTEND_IMAGE }}:${{ steps.vars.outputs.version }} ${{ env.FRONTEND_IMAGE }}:current
+
+            # Export image tags for docker compose
+            export BACKEND_TAG=${{ steps.vars.outputs.version }}
+            export FRONTEND_TAG=${{ steps.vars.outputs.version }}
+
+            # Deploy
+            docker compose -f docker-compose.prod.yml up -d --wait --wait-timeout 120
+
+            echo "Deploy completed. Running smoke tests..."
+
+      - name: Smoke tests
+        run: |
+          bash digital-doctor/scripts/smoke-test.sh \
+            "${{ secrets.STAGING_URL }}" \
+            "${{ secrets.STAGING_ADMIN_TOKEN }}"
+        env:
+          SMOKE_BASE_URL: ${{ secrets.STAGING_URL }}
+          ADMIN_TOKEN: ${{ secrets.STAGING_ADMIN_TOKEN }}
+
+      - name: Rollback on smoke test failure
+        if: failure()
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.STAGING_HOST }}
+          username: ${{ secrets.STAGING_USER }}
+          key: ${{ secrets.STAGING_SSH_KEY }}
+          script: |
+            set -e
+            cd /opt/digital-doctor
+
+            echo "Smoke tests failed — rolling back to previous images..."
+
+            export BACKEND_TAG=${{ steps.previous.outputs.backend_prev_tag }}
+            export FRONTEND_TAG=${{ steps.previous.outputs.frontend_prev_tag }}
+
+            docker compose -f docker-compose.prod.yml up -d --wait --wait-timeout 120
+
+            echo "Rollback complete."

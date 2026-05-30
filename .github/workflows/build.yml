@@ -1,0 +1,75 @@
+name: Docker Build & Push
+
+on:
+  push:
+    branches: [main, master]
+  workflow_run:
+    workflows: ["CI"]
+    types: [completed]
+    branches: [main, master]
+
+concurrency:
+  group: build-${{ github.sha }}
+  cancel-in-progress: false
+
+env:
+  REGISTRY: ghcr.io
+  BACKEND_IMAGE: ghcr.io/${{ github.repository_owner }}/digital-doctor-backend
+  FRONTEND_IMAGE: ghcr.io/${{ github.repository_owner }}/digital-doctor-frontend
+
+jobs:
+  build-and-push:
+    # Only run if CI passed (when triggered via workflow_run)
+    # On direct push, still run to ensure images are built.
+    if: ${{ github.event_name == 'push' || github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Generate version
+        id: version
+        run: |
+          bash digital-doctor/scripts/version.sh
+          VERSION=$(cat digital-doctor/scripts/.version 2>/dev/null || echo "dev")
+          echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
+          echo "sha_short=${GITHUB_SHA::7}" >> "$GITHUB_OUTPUT"
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build and push backend
+        uses: docker/build-push-action@v6
+        with:
+          context: digital-doctor/backend
+          target: production
+          push: true
+          tags: |
+            ${{ env.BACKEND_IMAGE }}:latest
+            ${{ env.BACKEND_IMAGE }}:${{ steps.version.outputs.sha_short }}
+            ${{ env.BACKEND_IMAGE }}:${{ steps.version.outputs.version }}
+          cache-from: type=gha,scope=backend
+          cache-to: type=gha,mode=max,scope=backend
+
+      - name: Build and push frontend
+        uses: docker/build-push-action@v6
+        with:
+          context: digital-doctor/frontend
+          target: production
+          push: true
+          tags: |
+            ${{ env.FRONTEND_IMAGE }}:latest
+            ${{ env.FRONTEND_IMAGE }}:${{ steps.version.outputs.sha_short }}
+            ${{ env.FRONTEND_IMAGE }}:${{ steps.version.outputs.version }}
+          cache-from: type=gha,scope=frontend
+          cache-to: type=gha,mode=max,scope=frontend
