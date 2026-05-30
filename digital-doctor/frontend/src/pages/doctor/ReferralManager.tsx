@@ -369,28 +369,28 @@ export default function ReferralManager() {
       >
         {summaryData ? (
           <Descriptions column={1} bordered size="small">
-            {summaryData.patient_demographics && (
+            {!!summaryData.patient_demographics && (
               <Descriptions.Item label="患者信息">
                 <pre style={{ margin: 0, fontSize: 12 }}>
                   {JSON.stringify(summaryData.patient_demographics, null, 2)}
                 </pre>
               </Descriptions.Item>
             )}
-            {summaryData.glucose_control_summary && (
+            {!!summaryData.glucose_control_summary && (
               <Descriptions.Item label="血糖控制">
                 <pre style={{ margin: 0, fontSize: 12 }}>
                   {JSON.stringify(summaryData.glucose_control_summary, null, 2)}
                 </pre>
               </Descriptions.Item>
             )}
-            {summaryData.current_medications && (
+            {!!summaryData.current_medications && (
               <Descriptions.Item label="当前用药">
                 <pre style={{ margin: 0, fontSize: 12 }}>
                   {JSON.stringify(summaryData.current_medications, null, 2)}
                 </pre>
               </Descriptions.Item>
             )}
-            {summaryData.complication_status && (
+            {!!summaryData.complication_status && (
               <Descriptions.Item label="并发症状态">
                 <pre style={{ margin: 0, fontSize: 12 }}>
                   {JSON.stringify(summaryData.complication_status, null, 2)}

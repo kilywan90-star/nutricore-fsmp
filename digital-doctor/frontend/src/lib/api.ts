@@ -470,3 +470,496 @@ export async function finalizeRecord(recordId: string): Promise<{ id: string; st
   const { data } = await api.post(`/doctor/records/${recordId}/finalize`);
   return data;
 }
+
+// ── Pre-consultation API ────────────────────────────────────────────────
+
+export interface QuestionItem {
+  question_id: string;
+  question_text: string;
+  answer_type: 'text' | 'select' | 'number' | 'boolean';
+  options: string[] | null;
+  required: boolean;
+  depends_on: { question_id: string; matches_any?: string[] } | null;
+}
+
+export interface QuestionnaireResponse {
+  questions: QuestionItem[];
+}
+
+export interface PreConsultSummary {
+  chief_complaint: string;
+  present_illness: string;
+  past_history: string;
+  family_history: string;
+  social_history: string;
+  medication_review: string;
+  review_of_systems: string;
+}
+
+export interface SubmitAnswersResponse {
+  summary: PreConsultSummary;
+  doctor_summary: string;
+}
+
+export interface AnswerItem {
+  question_id: string;
+  answer_value: string;
+}
+
+export async function getQuestionnaire(patientData: Record<string, unknown>): Promise<QuestionnaireResponse> {
+  const { data } = await api.post('/patient/pre-consultation/questionnaire', { patient_data: patientData });
+  return data;
+}
+
+export async function submitAnswers(
+  answers: AnswerItem[],
+  patientData: Record<string, unknown>,
+): Promise<SubmitAnswersResponse> {
+  const { data } = await api.post('/patient/pre-consultation/submit', {
+    answers,
+    patient_data: patientData,
+  });
+  return data;
+}
+
+export async function getDoctorPreConsultation(patientId: string) {
+  const { data } = await api.get(`/doctor/patients/${patientId}/pre-consultation`);
+  return data;
+}
+
+// ── Prescription Review API ────────────────────────────────────────────
+
+export interface DrugInfo {
+  generic_name: string;
+  generic_name_en: string;
+  drug_class: string;
+  brand_names: string[];
+  dosage_range: {
+    starting: string;
+    usual: string;
+    max: string;
+    frequency: string;
+    timing: string;
+  };
+  renal_adjustment: Array<{ egfr_min: number; egfr_max: number | null; dose: string }>;
+  hepatic_warning: string;
+  common_side_effects: string[];
+  contraindications: string[];
+  pregnancy_category: string;
+}
+
+export interface MedicationInput {
+  name: string;
+  dose: string;
+  frequency: string;
+}
+
+export interface PrescriptionReviewIssue {
+  severity: 'minor' | 'moderate' | 'major' | 'contraindicated';
+  category: 'guideline_concordance' | 'drug_interaction' | 'renal_dosing' | 'hepatic_dosing' | 'contraindication';
+  description: string;
+  recommendation: string;
+  guideline_ref: string;
+}
+
+export interface PrescriptionReviewResult {
+  overall_rating: 'safe' | 'caution' | 'unsafe';
+  issues: PrescriptionReviewIssue[];
+  summary: string;
+  diagnosis: string;
+  medication_count: number;
+  issue_count: number;
+}
+
+export interface DrugInteractionResult {
+  drug_a: string;
+  drug_b: string;
+  severity: string;
+  mechanism: string;
+  recommendation: string;
+}
+
+export async function reviewPrescription(input: {
+  diagnosis: string;
+  medications: MedicationInput[];
+  patient_data: Record<string, unknown>;
+  lab_results: Record<string, unknown>;
+}): Promise<PrescriptionReviewResult> {
+  const { data } = await api.post('/doctor/prescriptions/review', input);
+  return data;
+}
+
+export async function searchDrugs(query: string): Promise<{ items: DrugInfo[] }> {
+  const { data } = await api.get('/doctor/drugs', { params: { q: query } });
+  return data;
+}
+
+export async function checkDrugInteractions(
+  medications: Array<{ drug_name: string }>,
+): Promise<{ medications: string[]; interactions: DrugInteractionResult[] }> {
+  const { data } = await api.post('/doctor/drugs/check-interactions', { medications });
+  return data;
+}
+
+// ── Consortium (Medical Alliance) API ─────────────────────────────────
+
+export interface ReferralEvaluation {
+  referral_needed: boolean;
+  urgency: 'routine' | 'urgent' | 'emergency';
+  target_department: string;
+  target_level: 'county' | 'municipal' | 'provincial';
+  reason: string;
+  criteria_met: number;
+}
+
+export interface ReferralTarget {
+  id: string;
+  name: string;
+  code: string;
+  address: string | null;
+  level: string | null;
+  department_id: string;
+  department_name: string;
+  doctor_count: number;
+}
+
+export interface ReferralItem {
+  id: string;
+  patient_id: string;
+  from_hospital_id: string;
+  from_hospital_name: string;
+  from_doctor_id: string;
+  to_hospital_id: string | null;
+  to_hospital_name: string | null;
+  to_doctor_id: string | null;
+  target_department: string;
+  urgency: string;
+  target_level: string;
+  reason: string;
+  status: string;
+  created_at: string;
+  updated_at: string | null;
+}
+
+export interface ReferralListResponse {
+  total: number;
+  page: number;
+  page_size: number;
+  items: ReferralItem[];
+}
+
+export interface ConsultationItem {
+  id: string;
+  patient_id: string;
+  requesting_doctor_id: string;
+  consulting_doctor_id: string | null;
+  consulting_hospital_id: string | null;
+  status: string;
+  clinical_question: string;
+  ai_prepared_summary: Record<string, unknown> | null;
+  consultation_notes: string | null;
+  outcome: string | null;
+  created_at: string;
+  completed_at: string | null;
+}
+
+export interface ConsultationListResponse {
+  total: number;
+  page: number;
+  page_size: number;
+  items: ConsultationItem[];
+}
+
+export async function evaluateReferral(input: {
+  hba1c?: number;
+  medication_count?: number;
+  egfr?: number;
+  has_active_foot_ulcer?: boolean;
+  recent_cvd_event?: boolean;
+  severe_hypoglycemia_episodes?: number;
+  is_pregnant?: boolean;
+  diabetes_type?: string;
+}): Promise<ReferralEvaluation> {
+  const { data } = await api.post('/doctor/referrals/evaluate', input);
+  return data;
+}
+
+export async function searchReferralTargets(input: {
+  location?: string;
+  department: string;
+  level: string;
+}): Promise<ReferralTarget[]> {
+  const { data } = await api.post('/doctor/referrals/search-targets', input);
+  return data;
+}
+
+export async function createReferral(input: {
+  patient_id: string;
+  from_hospital_id: string;
+  to_hospital_id?: string;
+  to_doctor_id?: string;
+  urgency: string;
+  target_department: string;
+  target_level: string;
+  reason: string;
+}): Promise<ReferralItem> {
+  const { data } = await api.post('/doctor/referrals/create', input);
+  return data;
+}
+
+export async function listReferrals(params?: {
+  hospital_id?: string;
+  status?: string;
+  page?: number;
+  page_size?: number;
+}): Promise<ReferralListResponse> {
+  const { data } = await api.get('/doctor/referrals', { params });
+  return data;
+}
+
+export async function acceptReferral(referralId: string): Promise<{ id: string; status: string }> {
+  const { data } = await api.put(`/doctor/referrals/${referralId}/accept`, { accepted: true });
+  return data;
+}
+
+export async function getReferralSummary(referralId: string): Promise<{
+  referral_id: string;
+  clinical_summary: Record<string, unknown>;
+}> {
+  const { data } = await api.get(`/doctor/referrals/${referralId}/summary`);
+  return data;
+}
+
+export async function createConsultation(input: {
+  patient_id: string;
+  clinical_question: string;
+  consulting_doctor_id?: string;
+  consulting_hospital_id?: string;
+}): Promise<ConsultationItem> {
+  const { data } = await api.post('/doctor/consultations', input);
+  return data;
+}
+
+export async function listConsultations(params?: {
+  status?: string;
+  page?: number;
+  page_size?: number;
+}): Promise<ConsultationListResponse> {
+  const { data } = await api.get('/doctor/consultations', { params });
+  return data;
+}
+
+export async function getConsultation(sessionId: string): Promise<ConsultationItem> {
+  const { data } = await api.get(`/doctor/consultations/${sessionId}`);
+  return data;
+}
+
+export async function completeConsultation(
+  sessionId: string,
+  input: { notes?: string; outcome?: string },
+): Promise<ConsultationItem> {
+  const { data } = await api.post(`/doctor/consultations/${sessionId}/complete`, input);
+  return data;
+}
+
+// ── Admin API ────────────────────────────────────────────────────────
+
+export interface DashboardStats {
+  total_patients: number;
+  active_patients: number;
+  total_doctors: number;
+  total_departments: number;
+  alerts_by_severity: Record<string, number>;
+  glucose_control_rate: number;
+  patient_registration_trend: Array<{ date: string; count: number }>;
+}
+
+export interface DepartmentItem {
+  id: string;
+  name: string;
+  code: string;
+  hospital_id: string | null;
+  is_active: boolean;
+  doctor_count: number;
+  patient_count: number;
+}
+
+export interface DepartmentListResponse {
+  items: DepartmentItem[];
+  total: number;
+}
+
+export interface AdminDoctorItem {
+  id: string;
+  user_id: string;
+  department_id: string;
+  department_name: string;
+  department_code: string;
+  title: string;
+  license_number: string | null;
+  is_department_head: boolean;
+  is_active: boolean;
+  patient_count: number;
+  last_login_at: string | null;
+}
+
+export interface AdminDoctorListResponse {
+  total: number;
+  page: number;
+  page_size: number;
+  items: AdminDoctorItem[];
+}
+
+export interface AdminPatientItem {
+  id: string;
+  gender: string;
+  birth_year: number;
+  diabetes_type: string;
+  hba1c_target: number;
+  latest_glucose: number | null;
+  alert_count: number;
+  glucose_control_status: string;
+}
+
+export interface AdminPatientListResponse {
+  total: number;
+  page: number;
+  page_size: number;
+  items: AdminPatientItem[];
+}
+
+export interface AuditLogItem {
+  id: string;
+  user_id: string | null;
+  action: string;
+  resource_type: string;
+  resource_id: string | null;
+  details: Record<string, unknown> | null;
+  ip_address: string | null;
+  timestamp: string;
+}
+
+export interface AuditLogListResponse {
+  total: number;
+  page: number;
+  page_size: number;
+  items: AuditLogItem[];
+}
+
+export interface AdminConfigParams {
+  fpg_diagnostic_threshold: number;
+  hba1c_diagnostic_threshold: number;
+  hba1c_treatment_target: number;
+  elderly_hba1c_target: number;
+  egfr_metformin_contraindication: number;
+  severe_hyperglycemia_threshold: number;
+  hypoglycemia_threshold: number;
+}
+
+export interface AdminConfigResponse {
+  params: AdminConfigParams;
+  config_version: number;
+  versions: Array<{ version: number; updated_at: string }>;
+}
+
+export interface UpdateConfigRequest {
+  fpg_diagnostic_threshold?: number;
+  hba1c_diagnostic_threshold?: number;
+  hba1c_treatment_target?: number;
+  elderly_hba1c_target?: number;
+  egfr_metformin_contraindication?: number;
+  severe_hyperglycemia_threshold?: number;
+  hypoglycemia_threshold?: number;
+}
+
+export async function getDashboardStats(): Promise<DashboardStats> {
+  const { data } = await api.get('/admin/dashboard');
+  return data;
+}
+
+export async function getAdminDepartments(): Promise<DepartmentListResponse> {
+  const { data } = await api.get('/admin/departments');
+  return data;
+}
+
+export async function createAdminDepartment(body: {
+  name: string;
+  code: string;
+  hospital_id?: string;
+}) {
+  const { data } = await api.post('/admin/departments', body);
+  return data;
+}
+
+export async function updateAdminDepartment(id: string, body: {
+  name?: string;
+  code?: string;
+  is_active?: boolean;
+}) {
+  const { data } = await api.put(`/admin/departments/${id}`, body);
+  return data;
+}
+
+export async function deleteAdminDepartment(id: string) {
+  const { data } = await api.delete(`/admin/departments/${id}`);
+  return data;
+}
+
+export async function getAdminDoctors(params?: {
+  page?: number;
+  page_size?: number;
+  department_id?: string;
+}): Promise<AdminDoctorListResponse> {
+  const { data } = await api.get('/admin/doctors', { params });
+  return data;
+}
+
+export async function assignDoctorDepartment(doctorId: string, departmentId: string) {
+  const { data } = await api.post(`/admin/doctors/${doctorId}/assign-department`, {
+    department_id: departmentId,
+  });
+  return data;
+}
+
+export async function toggleDoctorActive(doctorId: string) {
+  const { data } = await api.put(`/admin/doctors/${doctorId}/toggle-active`);
+  return data;
+}
+
+export async function getAdminPatients(params?: {
+  page?: number;
+  page_size?: number;
+  search?: string;
+  department_id?: string;
+  risk_level?: string;
+  glucose_control?: string;
+}): Promise<AdminPatientListResponse> {
+  const { data } = await api.get('/admin/patients', { params });
+  return data;
+}
+
+export async function getAuditLogs(params?: {
+  page?: number;
+  page_size?: number;
+  user_id?: string;
+  action?: string;
+  resource_type?: string;
+}): Promise<AuditLogListResponse> {
+  const { data } = await api.get('/admin/audit-logs', { params });
+  return data;
+}
+
+export async function getAdminConfig(): Promise<AdminConfigResponse> {
+  const { data } = await api.get('/admin/config');
+  return data;
+}
+
+export async function updateAdminConfig(body: UpdateConfigRequest) {
+  const { data } = await api.post('/admin/config', body);
+  return data;
+}
+
+export async function resetAdminConfig() {
+  const { data } = await api.post('/admin/config/reset');
+  return data;
+}

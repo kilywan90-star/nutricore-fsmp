@@ -221,7 +221,7 @@ export default function ConsultationRoom() {
             {/* AI-prepared summary */}
             {detail.ai_prepared_summary && (
               <Card title="AI 准备的病例摘要" size="small" style={{ marginBottom: 24 }}>
-                {(detail.ai_prepared_summary as Record<string, unknown>).suggested_differentials && (
+                {!!(detail.ai_prepared_summary as Record<string, unknown>).suggested_differentials && (
                   <>
                     <Title level={5}>鉴别诊断建议</Title>
                     <ul>
@@ -231,7 +231,7 @@ export default function ConsultationRoom() {
                     </ul>
                   </>
                 )}
-                {(detail.ai_prepared_summary as Record<string, unknown>).relevant_guidelines && (
+                {!!(detail.ai_prepared_summary as Record<string, unknown>).relevant_guidelines && (
                   <>
                     <Title level={5}>相关指南</Title>
                     <ul>
@@ -241,7 +241,7 @@ export default function ConsultationRoom() {
                     </ul>
                   </>
                 )}
-                {(detail.ai_prepared_summary as Record<string, unknown>).clinical_summary && (
+                {!!(detail.ai_prepared_summary as Record<string, unknown>).clinical_summary && (
                   <>
                     <Title level={5}>临床摘要</Title>
                     <pre style={{ fontSize: 11, maxHeight: 200, overflow: 'auto' }}>
