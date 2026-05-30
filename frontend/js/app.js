@@ -85,8 +85,9 @@ function readFormData() {
 
 function runAssessment() {
   const data = readFormData();
-  if (data.weight <= 0 || data.height <= 0) {
-    alert('请输入有效的体重和身高');
+  const errors = validateForm(data);
+  if (errors.length > 0) {
+    alert('请修正以下问题：\n' + errors.join('\n'));
     return;
   }
 
@@ -425,6 +426,26 @@ function updateQuickDemo() {
 // ===== INIT =====
 document.addEventListener('DOMContentLoaded', () => {
   updateQuickDemo();
+
+  // Wire disease→surgery filter on assessment page
+  const diseaseSelect = document.getElementById('disease');
+  if (diseaseSelect) {
+    diseaseSelect.addEventListener('change', function() {
+      updateSurgeryOptions(this.value, 'surgery');
+    });
+    // Initialize with default disease
+    updateSurgeryOptions(diseaseSelect.value, 'surgery');
+  }
+
+  // Wire quick assessment disease→surgery filter
+  const quickDisease = document.getElementById('quickDisease');
+  if (quickDisease) {
+    quickDisease.addEventListener('change', function() {
+      updateSurgeryOptions(this.value, 'quickSurgery');
+    });
+    // Initialize
+    updateSurgeryOptions(quickDisease.value, 'quickSurgery');
+  }
 
   // Close sidebar on desktop resize
   window.addEventListener('resize', () => {
