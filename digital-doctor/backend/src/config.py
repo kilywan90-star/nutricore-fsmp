@@ -52,6 +52,15 @@ class Settings(BaseSettings):
     OFFLINE_MODE_ENABLED: bool = False
     SYNC_INTERVAL_MINUTES: int = 30
 
+    # EMR / Hospital Integration
+    EMR_VENDOR: str = "noop"  # noop | neusoft | winning | bsoft | wonders | xintong | zuobiao | fhir
+    EMR_ENDPOINT: str = ""
+    EMR_AUTH_TYPE: str = "basic"  # basic | token | cert | none
+    EMR_AUTH_USERNAME: str = ""
+    EMR_AUTH_PASSWORD: str = ""
+    EMR_TIMEOUT_SECONDS: int = 30
+    EMR_RETRY_COUNT: int = 2
+
     model_config = {"env_prefix": "", "case_sensitive": True}
 
 
