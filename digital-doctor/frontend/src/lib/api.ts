@@ -170,3 +170,107 @@ export async function getAllAlerts(params?: {
   const { data } = await api.get('/doctor/alerts', { params });
   return data;
 }
+
+// ── Hospital & Admin API ─────────────────────────────────────────────
+
+export interface HospitalItem {
+  id: string;
+  name: string;
+  code: string;
+  address: string | null;
+  level: string | null;
+  is_active: boolean;
+  department_count: number;
+  doctor_count: number;
+}
+
+export interface HospitalListResponse {
+  items: HospitalItem[];
+  total: number;
+}
+
+export interface HospitalStats {
+  hospital_id: string;
+  hospital_name: string;
+  hospital_code: string;
+  level: string | null;
+  doctor_count: number;
+  department_count: number;
+  patient_count: number;
+  pending_transfer_count: number;
+}
+
+export interface TransferItem {
+  id: string;
+  patient_id: string;
+  from_hospital_id: string;
+  from_hospital_name: string;
+  to_hospital_id: string;
+  to_hospital_name: string;
+  requested_by: string;
+  approved_by: string | null;
+  status: string;
+  reason: string | null;
+  created_at: string;
+  updated_at: string | null;
+}
+
+export interface TransferListResponse {
+  total: number;
+  page: number;
+  page_size: number;
+  items: TransferItem[];
+}
+
+export async function getHospitals(): Promise<HospitalListResponse> {
+  const { data } = await api.get('/admin/hospitals');
+  return data;
+}
+
+export async function createHospital(input: {
+  name: string;
+  code: string;
+  address?: string;
+  level?: string;
+}): Promise<HospitalItem> {
+  const { data } = await api.post('/admin/hospitals', input);
+  return data;
+}
+
+export async function updateHospital(
+  id: string,
+  input: { name?: string; address?: string; level?: string; is_active?: boolean },
+): Promise<HospitalItem> {
+  const { data } = await api.put(`/admin/hospitals/${id}`, input);
+  return data;
+}
+
+export async function getHospitalStats(id: string): Promise<HospitalStats> {
+  const { data } = await api.get(`/admin/hospitals/${id}/stats`);
+  return data;
+}
+
+export async function createTransfer(input: {
+  patient_id: string;
+  from_hospital_id: string;
+  to_hospital_id: string;
+  reason?: string;
+}): Promise<TransferItem> {
+  const { data } = await api.post('/admin/transfers', input);
+  return data;
+}
+
+export async function approveTransfer(transferId: string, approved: boolean = true) {
+  const { data } = await api.post(`/admin/transfers/${transferId}/approve`, { approved });
+  return data;
+}
+
+export async function listTransfers(params?: {
+  hospital_id?: string;
+  status?: string;
+  page?: number;
+  page_size?: number;
+}): Promise<TransferListResponse> {
+  const { data } = await api.get('/admin/transfers', { params });
+  return data;
+}
