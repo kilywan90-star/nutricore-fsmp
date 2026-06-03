@@ -12,8 +12,6 @@ eggs/
 .eggs/
 lib/
 lib64/
-# Front-end lib directories are not Python libs
-!digital-doctor/frontend/src/lib/
 parts/
 sdist/
 var/
@@ -46,13 +44,31 @@ logs/
 
 # Node
 node_modules/
-dist/
 
 # Config
 *.local.yaml
 *.local.yml
 .env
 
-# Admin config (runtime-generated)
-digital-doctor/backend/src/engine/rules/admin_config.json
-digital-doctor/backend/src/engine/rules/admin_config_versions/
+# ---- Independent sub-projects (now have their own repos) ----
+h-discovery/
+digital-doctor/
+seedance-pipeline/
+aimedia-platform/
+ultrasound-report-mvp/
+
+# Large files
+*.tar.gz
+*.zip
+*.wav
+*.db
+*.sqlite3
+
+# Temp/cache
+.codegraph/daemon.pid
+.codewhale/
+test-file.txt
+test-folder/
+deploy_package.zip
+clash-config.yaml
+edgetunnel-main.zip
