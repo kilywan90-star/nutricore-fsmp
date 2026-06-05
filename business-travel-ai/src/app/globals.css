@@ -1,0 +1,677 @@
+@import "tailwindcss";
+
+:root {
+  --bg: #f8f9fa;
+  --surface: #ffffff;
+  --primary: #1a73e8;
+  --primary-light: #e8f0fe;
+  --text: #202124;
+  --text-secondary: #5f6368;
+  --border: #dadce0;
+  --success: #0d9488;
+  --warning: #f59e0b;
+  --danger: #ef4444;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    "Noto Sans SC", sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* 对话消息气泡 */
+.msg-user {
+  background: var(--primary);
+  color: white;
+  border-radius: 18px 18px 4px 18px;
+  padding: 10px 16px;
+  max-width: 75%;
+  margin-left: auto;
+}
+
+.msg-assistant {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 18px 18px 18px 4px;
+  padding: 10px 16px;
+  max-width: 95%;
+}
+
+/* 消息时间戳 */
+.msg-timestamp {
+  font-size: 11px;
+  color: var(--text-secondary);
+  opacity: 0.6;
+  margin-top: 4px;
+  text-align: left;
+}
+
+.msg-timestamp-right {
+  text-align: right;
+}
+
+.msg-user .msg-timestamp {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+/* 餐厅推荐卡片 */
+.restaurant-card {
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 0;
+  margin-top: 10px;
+  background: var(--surface);
+  overflow: hidden;
+  transition: box-shadow 0.2s;
+}
+
+.restaurant-card:hover {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+}
+
+.restaurant-card .card-rank {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--primary);
+  color: white;
+  font-weight: 700;
+  font-size: 14px;
+  flex-shrink: 0;
+}
+
+.restaurant-card .card-rank.rank-gold {
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+}
+
+.restaurant-card .card-rank.rank-silver {
+  background: linear-gradient(135deg, #94a3b8, #64748b);
+}
+
+.restaurant-card .card-rank.rank-bronze {
+  background: linear-gradient(135deg, #b45309, #92400e);
+}
+
+.restaurant-card .card-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 16px 12px;
+  border-bottom: 1px solid #f1f3f5;
+}
+
+.restaurant-card .card-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: #1a1a2e;
+  line-height: 1.3;
+}
+
+.restaurant-card .card-subtitle {
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin-top: 2px;
+}
+
+.restaurant-card .card-body {
+  padding: 12px 16px;
+}
+
+.restaurant-card .card-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.restaurant-card .meta-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.restaurant-card .meta-item .meta-label {
+  color: #9ca3af;
+  font-size: 11px;
+}
+
+.restaurant-card .dishes-section {
+  background: #f8fafc;
+  border-radius: 8px;
+  padding: 10px 12px;
+  margin-bottom: 10px;
+}
+
+.restaurant-card .dishes-title {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #6b7280;
+  margin-bottom: 4px;
+  font-weight: 600;
+}
+
+.restaurant-card .dishes-list {
+  font-size: 13px;
+  color: #374151;
+}
+
+/* LLM 推荐理由 */
+.card-llm-reason {
+  margin-top: 10px;
+  padding: 8px 12px;
+  background: #f0f9ff;
+  border-radius: 8px;
+  font-size: 13px;
+  color: #1e40af;
+  line-height: 1.6;
+}
+
+/* 标签 */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 500;
+  gap: 4px;
+}
+
+.badge-privacy {
+  background: #e0f2fe;
+  color: #0369a1;
+}
+
+.badge-price {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.badge-verified {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+.badge-unverified {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.badge-cuisine {
+  background: #f3e8ff;
+  color: #7c3aed;
+}
+
+.badge-rating {
+  background: #fef9c3;
+  color: #a16207;
+}
+
+/* 文化故事区域 */
+.cultural-stories-section {
+  border-top: 1px solid #f1f3f5;
+  padding: 0;
+}
+
+.cultural-stories-toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 10px 16px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 13px;
+  color: var(--primary);
+  font-weight: 600;
+  transition: background 0.15s;
+}
+
+.cultural-stories-toggle:hover {
+  background: #f8fafc;
+}
+
+.cultural-stories-toggle .toggle-icon {
+  transition: transform 0.2s;
+}
+
+.cultural-stories-toggle .toggle-icon.expanded {
+  transform: rotate(90deg);
+}
+
+.cultural-story {
+  margin: 0 12px 12px;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.cultural-story .story-type-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 6px;
+}
+
+.cultural-story .story-type-dish {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.cultural-story .story-type-history {
+  background: #ede9fe;
+  color: #5b21b6;
+}
+
+.cultural-story .story-type-culture {
+  background: #dbeafe;
+  color: #1e40af;
+}
+
+.cultural-story .story-type-architecture {
+  background: #fce7f3;
+  color: #9d174d;
+}
+
+.cultural-story .story-header {
+  padding: 12px 14px 8px;
+  background: linear-gradient(to right, #fffbeb, #ffffff);
+  border-left: 4px solid #f59e0b;
+  border-radius: 10px 10px 0 0;
+}
+
+.cultural-story .story-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: #78350f;
+  line-height: 1.4;
+}
+
+.cultural-story .story-content {
+  padding: 10px 14px;
+  background: #fffdf7;
+  font-size: 13px;
+  line-height: 1.8;
+  color: #44403c;
+  border-left: 4px solid #fde68a;
+}
+
+.cultural-story .talking-points {
+  padding: 10px 14px;
+  background: #f0fdf4;
+  border-left: 4px solid #22c55e;
+  border-radius: 0 0 10px 10px;
+}
+
+.cultural-story .talking-points-title {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #166534;
+  margin-bottom: 6px;
+}
+
+.cultural-story .talking-point {
+  display: flex;
+  gap: 8px;
+  font-size: 13px;
+  line-height: 1.6;
+  color: #15803d;
+  margin-bottom: 4px;
+}
+
+.cultural-story .talking-point .point-marker {
+  color: #22c55e;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+/* 餐厅操作区 */
+.restaurant-card .card-footer {
+  display: flex;
+  justify-content: flex-end;
+  padding: 8px 16px 14px;
+  border-top: 1px solid #f1f3f5;
+}
+
+/* 选中确认面板 */
+.card-selected-panel {
+  width: 100%;
+
+  .content-card .card-header {
+    padding: 12px 12px 10px;
+    gap: 8px;
+  }
+  .content-card .card-title {
+    font-size: 16px;
+  }
+  .content-card .card-subtitle {
+    font-size: 11px;
+  }
+  .content-card .card-body {
+    padding: 10px 12px;
+  }
+  .content-card .card-meta {
+    gap: 4px;
+  }
+  .badge {
+    font-size: 11px;
+    padding: 2px 8px;
+  }
+  .content-card .dishes-section {
+    padding: 8px 10px;
+  }
+  .cultural-story .story-content {
+    font-size: 12px;
+  }
+  .cultural-story .talking-point {
+    font-size: 12px;
+  }
+  .content-card .card-footer {
+    padding: 8px 12px 12px;
+  }
+  .scroll-to-bottom-btn {
+    width: 36px;
+    height: 36px;
+    bottom: 12px;
+    right: 12px;
+  }
+
+}
+
+.card-selected-summary {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+.card-selected-check {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: #d1fae5;
+  color: #065f46;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.card-selected-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.card-selected-details {
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin-bottom: 10px;
+  padding-left: 30px;
+}
+
+.card-selected-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.card-btn-reserve {
+  padding: 6px 16px;
+  font-size: 13px;
+  font-weight: 600;
+  border-radius: 8px;
+  background: var(--success);
+  color: white;
+  border: none;
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+
+.card-btn-reserve:hover {
+  opacity: 0.9;
+}
+
+.card-btn-cancel {
+  padding: 6px 12px;
+  font-size: 13px;
+  border-radius: 8px;
+  background: none;
+  color: var(--text-secondary);
+  border: 1px solid var(--border);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.card-btn-cancel:hover {
+  background: #f8fafc;
+  color: var(--text);
+}
+
+/* 加载骨架屏 */
+.skeleton-card {
+  border-radius: 14px;
+  overflow: hidden;
+}
+
+.skeleton-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #f1f3f5;
+}
+
+.skeleton-circle {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: #e5e7eb;
+  flex-shrink: 0;
+}
+
+.skeleton-body {
+  padding-top: 12px;
+}
+
+.skeleton-line {
+  border-radius: 4px;
+  background: #e5e7eb;
+}
+
+.skeleton-shimmer {
+  background: linear-gradient(90deg, #e5e7eb 25%, #f3f4f6 50%, #e5e7eb 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* 滚动条 */
+.chat-scroll::-webkit-scrollbar {
+  width: 6px;
+}
+
+.chat-scroll::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 3px;
+}
+
+/* 响应式布局 */
+
+/* 统一内容卡片 (差序 v2) */
+.content-card {
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 0;
+  margin-top: 10px;
+  background: var(--surface);
+  overflow: hidden;
+  transition: box-shadow 0.2s;
+}
+.content-card:hover {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+}
+.content-card .card-rank {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--primary);
+  color: white;
+  font-weight: 700;
+  font-size: 14px;
+  flex-shrink: 0;
+}
+.content-card .card-rank.rank-gold { background: linear-gradient(135deg, #f59e0b, #d97706); }
+.content-card .card-rank.rank-silver { background: linear-gradient(135deg, #94a3b8, #64748b); }
+.content-card .card-rank.rank-bronze { background: linear-gradient(135deg, #b45309, #92400e); }
+.content-card .card-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 16px 12px;
+  border-bottom: 1px solid #f1f3f5;
+}
+.content-card .card-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: #1a1a2e;
+  line-height: 1.3;
+}
+.content-card .card-subtitle {
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin-top: 2px;
+}
+.content-card .card-body { padding: 12px 16px; }
+.content-card .card-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+.badge-category {
+  background: var(--primary-light);
+  color: var(--primary);
+  font-size: 11px;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-weight: 600;
+}
+.select-btn {
+  padding: 8px 20px;
+  font-size: 13px;
+  font-weight: 600;
+  border-radius: 8px;
+  background: var(--primary);
+  color: white;
+  border: none;
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+.select-btn:hover { opacity: 0.9; }
+
+@media (max-width: 640px) {
+  .msg-user {
+    max-width: 85%;
+  }
+
+  .msg-assistant {
+    max-width: 100%;
+  }
+
+  .restaurant-card .card-header {
+    padding: 12px 12px 10px;
+    gap: 8px;
+  }
+
+  .restaurant-card .card-title {
+    font-size: 16px;
+  }
+
+  .restaurant-card .card-subtitle {
+    font-size: 11px;
+  }
+
+  .restaurant-card .card-body {
+    padding: 10px 12px;
+  }
+
+  .restaurant-card .card-meta {
+    gap: 4px;
+  }
+
+  .badge {
+    font-size: 11px;
+    padding: 2px 8px;
+  }
+
+  .restaurant-card .dishes-section {
+    padding: 8px 10px;
+  }
+
+  .cultural-story .story-content {
+    font-size: 12px;
+  }
+
+  .cultural-story .talking-point {
+    font-size: 12px;
+  }
+
+  .restaurant-card .card-footer {
+    padding: 8px 12px 12px;
+  }
+}
+
+/* 回到底部按钮 */
+.scroll-to-bottom-btn {
+  position: absolute;
+  bottom: 16px;
+  right: 16px;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+  transition: all 0.2s;
+  z-index: 10;
+}
+
+.scroll-to-bottom-btn:hover {
+  background: var(--primary-light);
+  color: var(--primary);
+  border-color: var(--primary);
+}
