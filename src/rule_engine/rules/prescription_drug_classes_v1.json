@@ -1,0 +1,162 @@
+{
+  "version": "1.0.0",
+  "source": "29,153条真实三甲医院HIS处方数据挖掘 + 药品说明书 + 国家处方集 + 抗菌药物分级管理目录",
+  "extends": "drug_database.json (T2DM用药)",
+  "description": "审方专用的广谱药品分类体系及DDI知识库，覆盖抗生素/心血管/消化/神经/激素等22个大类",
+  "drug_classes": {
+    "penicillin": {
+      "name": "青霉素类",
+      "name_en": "Penicillins",
+      "keywords": ["青霉素","阿莫西林","哌拉西林","氨苄西林","美洛西林","磺苄西林","羧苄西林","替卡西林","氟氯西林"],
+      "antibiotic_tier": "限制使用级"
+    },
+    "cephalosporin": {
+      "name": "头孢类",
+      "name_en": "Cephalosporins",
+      "keywords": ["头孢","西丁","曲松","他啶","吡肟","克肟","地尼","唑肟","头孢哌酮","头孢美唑","头孢替安","头孢唑林","头孢呋辛","头孢丙烯","头孢地嗪"],
+      "antibiotic_tier": "限制使用级"
+    },
+    "quinolone": {
+      "name": "喹诺酮类",
+      "name_en": "Quinolones",
+      "keywords": ["沙星","左氧氟","莫西沙","环丙沙星","诺氟沙星","帕珠沙星","依诺沙星","氧氟沙星"],
+      "antibiotic_tier": "限制使用级"
+    },
+    "macrolide": {
+      "name": "大环内酯类",
+      "name_en": "Macrolides",
+      "keywords": ["阿奇霉素","红霉素","克拉霉素","罗红霉素","琥乙红霉素","地红霉素"],
+      "antibiotic_tier": "非限制使用级"
+    },
+    "aminoglycoside": {
+      "name": "氨基糖苷类",
+      "name_en": "Aminoglycosides",
+      "keywords": ["庆大霉素","阿米卡星","妥布霉素","奈替米星","链霉素","依替米星","异帕米星"],
+      "antibiotic_tier": "限制使用级"
+    },
+    "nitroimidazole": {
+      "name": "硝基咪唑类",
+      "name_en": "Nitroimidazoles",
+      "keywords": ["甲硝唑","替硝唑","奥硝唑","塞克硝唑"],
+      "antibiotic_tier": "非限制使用级"
+    },
+    "glycopeptide": {
+      "name": "糖肽类",
+      "name_en": "Glycopeptides",
+      "keywords": ["万古霉素","替考拉宁","去甲万古"],
+      "antibiotic_tier": "特殊使用级"
+    },
+    "antifungal": {
+      "name": "抗真菌类",
+      "name_en": "Antifungals",
+      "keywords": ["氟康唑","伏立康唑","伊曲康唑","卡泊芬净","米卡芬净","两性霉素","制霉菌素"]
+    },
+    "carbapenem": {
+      "name": "碳青霉烯类",
+      "name_en": "Carbapenems",
+      "keywords": ["亚胺培南","美罗培南","比阿培南","厄他培南","帕尼培南"],
+      "antibiotic_tier": "特殊使用级"
+    },
+    "nsaid": {
+      "name": "NSAIDs",
+      "name_en": "NSAIDs",
+      "keywords": ["布洛芬","双氯芬酸","塞来昔布","氟比洛芬","帕瑞昔布","萘普生","洛索洛芬","美洛昔康","吲哚美辛","依托考昔","艾瑞昔布"]
+    },
+    "ppi": {
+      "name": "PPI",
+      "name_en": "Proton Pump Inhibitors",
+      "keywords": ["奥美拉唑","泮托拉唑","兰索拉唑","雷贝拉唑","埃索美拉唑","艾普拉唑"]
+    },
+    "statin": {
+      "name": "他汀类",
+      "name_en": "Statins",
+      "keywords": ["阿托伐他汀","瑞舒伐他汀","辛伐他汀","匹伐他汀","普伐他汀","氟伐他汀"]
+    },
+    "corticosteroid": {
+      "name": "糖皮质激素",
+      "name_en": "Corticosteroids",
+      "keywords": ["甲泼尼龙","地塞米松","泼尼松","氢化可的松","倍他米松","曲安奈德","布地奈德"]
+    },
+    "anticoagulant": {
+      "name": "抗凝类",
+      "name_en": "Anticoagulants",
+      "keywords": ["华法林","肝素","依诺肝素","利伐沙班","达比加群","阿哌沙班","磺达肝癸钠"]
+    },
+    "antiplatelet": {
+      "name": "抗血小板",
+      "name_en": "Antiplatelets",
+      "keywords": ["氯吡格雷","替格瑞洛","阿司匹林","双嘧达莫","西洛他唑"]
+    },
+    "insulin": {
+      "name": "胰岛素",
+      "name_en": "Insulin",
+      "keywords": ["胰岛素","甘精","门冬","赖脯","地特","德谷","重组人"]
+    },
+    "oral_hypoglycemic": {
+      "name": "口服降糖药",
+      "name_en": "Oral Hypoglycemics",
+      "keywords": ["二甲双胍","格列齐特","格列美脲","阿卡波糖","达格列净","恩格列净","西格列汀","沙格列汀","瑞格列奈","吡格列酮","利拉鲁肽","司美格鲁肽"]
+    },
+    "acei_arb": {
+      "name": "ACEI/ARB",
+      "name_en": "ACEI/ARB",
+      "keywords": ["培哚普利","依那普利","贝那普利","卡托普利","福辛普利","缬沙坦","厄贝沙坦","替米沙坦","氯沙坦","坎地沙坦","奥美沙坦"]
+    },
+    "ccb": {
+      "name": "CCB",
+      "name_en": "Calcium Channel Blockers",
+      "keywords": ["硝苯地平","氨氯地平","非洛地平","尼群地平","乐卡地平","拉西地平"]
+    },
+    "diuretic": {
+      "name": "利尿剂",
+      "name_en": "Diuretics",
+      "keywords": ["呋塞米","托拉塞米","氢氯噻嗪","螺内酯","吲达帕胺"]
+    },
+    "tcm_injection": {
+      "name": "中药注射剂",
+      "name_en": "TCM Injections",
+      "keywords": ["红花","丹参","川芎","银杏","血塞通","血栓通","舒血宁","丹红","灯盏花","生脉","参麦","醒脑静","清开灵","炎琥宁","喜炎平","痰热清","热毒宁"]
+    },
+    "nutrition_support": {
+      "name": "营养支持",
+      "name_en": "Nutrition Support",
+      "keywords": ["脂肪乳","氨基酸","葡萄糖","维生素","电解质","多种微量元素","丙氨酰","谷氨酰胺"]
+    }
+  },
+  "infection_keywords": [
+    "感染","炎","脓","热","肺炎","支气管","腹膜炎","尿路","败血","脓肿",
+    "蜂窝织炎","中耳","鼻窦","扁桃体","阑尾","胆囊","胰腺","脑膜",
+    "心内","骨髓","肾盂","附件","盆腔","伤寒","结核","菌","病毒",
+    "COVID","流感","支原体","衣原体","真菌"
+  ],
+  "ddi_pairs": [
+    {"class_a": "cephalosporin", "class_b": "aminoglycoside", "severity": "major", "mechanism": "协同肾毒性", "recommendation": "避免联用，或监测肾功能(每日Cr/BUN)，避免用于老年人", "data_support": 113},
+    {"class_a": "cephalosporin", "class_b": "diuretic", "severity": "major", "mechanism": "肾毒性叠加", "recommendation": "监测尿量和肾功能", "data_support": 82},
+    {"class_a": "quinolone", "class_b": "nsaid", "severity": "major", "mechanism": "CNS毒性/癫痫风险增加", "recommendation": "改用对乙酰氨基酚或其他镇痛药", "data_support": 131},
+    {"class_a": "nsaid", "class_b": "acei_arb", "severity": "major", "mechanism": "减弱降压+增加肾损伤", "recommendation": "监测血压和肾功能，限短期使用", "data_support": 29},
+    {"class_a": "nsaid", "class_b": "anticoagulant", "severity": "major", "mechanism": "消化道出血风险显著增加", "recommendation": "加用PPI，监测INR和出血症状", "data_support": 0},
+    {"class_a": "nsaid", "class_b": "antiplatelet", "severity": "major", "mechanism": "双重抗血小板效应，出血风险增加", "recommendation": "评估出血风险，短期使用，加PPI", "data_support": 0},
+    {"class_a": "anticoagulant", "class_b": "antiplatelet", "severity": "major", "mechanism": "严重出血风险", "recommendation": "严格评估适应证，限定治疗时程", "data_support": 0},
+    {"class_a": "macrolide", "class_b": "statin", "severity": "major", "mechanism": "CYP3A4抑制→他汀升高→横纹肌溶解", "recommendation": "暂停他汀或改用普伐他汀", "data_support": 32},
+    {"class_a": "quinolone", "class_b": "oral_hypoglycemic", "severity": "moderate", "mechanism": "血糖波动", "recommendation": "监测血糖，调整降糖药剂量", "data_support": 0},
+    {"class_a": "ppi", "class_b": "antiplatelet", "severity": "major", "mechanism": "PPI抑制CYP2C19，减弱氯吡格雷效果", "recommendation": "改用泮托拉唑或雷贝拉唑", "data_support": 0},
+    {"class_a": "corticosteroid", "class_b": "nsaid", "severity": "major", "mechanism": "消化道溃疡/出血风险", "recommendation": "避免联用，或加用PPI", "data_support": 0},
+    {"class_a": "cephalosporin", "class_b": "anticoagulant", "severity": "moderate", "mechanism": "头孢抑制VitK合成→INR升高", "recommendation": "监测INR，调整抗凝剂量", "data_support": 0},
+    {"class_a": "acei_arb", "class_b": "diuretic", "severity": "moderate", "mechanism": "首剂低血压风险", "recommendation": "利尿剂减量后小剂量起始ACEI/ARB", "data_support": 29},
+    {"class_a": "ccb", "class_b": "statin", "severity": "moderate", "mechanism": "CCB经CYP3A4代谢，与他汀竞争", "recommendation": "监测CK和肝功", "data_support": 32},
+    {"class_a": "quinolone", "class_b": "corticosteroid", "severity": "moderate", "mechanism": "增加肌腱炎/肌腱断裂风险", "recommendation": "老年人慎用，出现肌腱疼痛立即停用", "data_support": 33},
+    {"class_a": "tcm_injection", "class_b": "cephalosporin", "severity": "moderate", "mechanism": "中西药混合滴注配伍风险", "recommendation": "分瓶输注，两组间冲管", "data_support": 82},
+    {"class_a": "macrolide", "class_b": "anticoagulant", "severity": "moderate", "mechanism": "CYP3A4抑制→增强抗凝效果", "recommendation": "监测INR，调整华法林剂量", "data_support": 0}
+  ],
+  "model_metadata": {
+    "trained_on": "2026-06-02",
+    "training_samples": 29153,
+    "total_drug_administrations": 287730,
+    "drug_classes_defined": 22,
+    "ddi_pairs_defined": 17,
+    "prescription_rules_formed": 31,
+    "database_source": "金仕达卫宁THIS4 HIS",
+    "hospital_type": "大型三甲综合医院",
+    "data_period": "2015-04 ~ 2016-06"
+  }
+}

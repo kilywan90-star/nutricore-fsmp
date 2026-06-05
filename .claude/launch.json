@@ -2,6 +2,20 @@
   "version": "0.0.1",
   "configurations": [
     {
+      "name": "followup-frontend",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "dev"],
+      "port": 3000,
+      "cwd": "digital-doctor/frontend"
+    },
+    {
+      "name": "followup-backend",
+      "runtimeExecutable": "python",
+      "runtimeArgs": ["-m", "uvicorn", "src.main:app", "--host", "0.0.0.0", "--port", "8001"],
+      "port": 8001,
+      "cwd": "digital-doctor/backend"
+    },
+    {
       "name": "orthopedic-emr",
       "runtimeExecutable": "npx",
       "runtimeArgs": ["serve", "-l", "8080", "--no-clipboard"],
@@ -76,6 +90,34 @@
       "runtimeExecutable": "npx",
       "runtimeArgs": ["serve", "-l", "5600", "--no-clipboard"],
       "port": 5600
+    },
+    {
+      "name": "ultrasound-backend",
+      "runtimeExecutable": "python",
+      "runtimeArgs": ["-m", "uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8730"],
+      "port": 8730,
+      "cwd": "ultrasound-report-mvp/backend"
+    },
+    {
+      "name": "ultrasound-voice-backend",
+      "runtimeExecutable": "python",
+      "runtimeArgs": ["-m", "uvicorn", "app.main:app", "--host", "127.0.0.1", "--port", "8002", "--reload"],
+      "port": 8002,
+      "cwd": "backend"
+    },
+    {
+      "name": "ultrasound-mock-pacs",
+      "runtimeExecutable": "python",
+      "runtimeArgs": ["-m", "http.server", "8701"],
+      "port": 8701
+    }
+    {
+      "name": "business-travel-ai",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": ["next", "dev"],
+      "port": 3099,
+      "autoPort": true,
+      "cwd": "business-travel-ai"
     }
   ]
 }

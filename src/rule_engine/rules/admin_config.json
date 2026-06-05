@@ -1,0 +1,11 @@
+{
+  "fpg_diagnostic_threshold": 7.0,
+  "hba1c_diagnostic_threshold": 6.5,
+  "hba1c_treatment_target": 7.0,
+  "elderly_hba1c_target": 8.0,
+  "egfr_metformin_contraindication": 45,
+  "severe_hyperglycemia_threshold": 16.7,
+  "hypoglycemia_threshold": 3.9,
+  "config_version": 4,
+  "updated_at": "2026-05-30T08:13:22.121172"
+}

@@ -1,0 +1,1749 @@
+{
+  "summary": {
+    "model": "qwen2.5:14b-instruct",
+    "total": 100,
+    "template_acc": 100.0,
+    "measurement_f1": 95.88920216095045,
+    "abnormality_acc": 71.0,
+    "parse_errors": 0
+  },
+  "by_template": {
+    "A": {
+      "n": 20,
+      "template_acc": 100.0,
+      "meas_prec": 105.78024753024752,
+      "meas_recall": 78.75000000000001,
+      "abnorm_acc": 85.0
+    },
+    "B": {
+      "n": 20,
+      "template_acc": 100.0,
+      "meas_prec": 105.68055555555556,
+      "meas_recall": 89.50000000000001,
+      "abnorm_acc": 45.0
+    },
+    "C": {
+      "n": 20,
+      "template_acc": 100.0,
+      "meas_prec": 108.83333333333334,
+      "meas_recall": 95.9375,
+      "abnorm_acc": 60.0
+    },
+    "D": {
+      "n": 20,
+      "template_acc": 100.0,
+      "meas_prec": 117.7834249084249,
+      "meas_recall": 87.05882352941178,
+      "abnorm_acc": 95.0
+    },
+    "E": {
+      "n": 20,
+      "template_acc": 100.0,
+      "meas_prec": 102.62271062271063,
+      "meas_recall": 79.41176470588236,
+      "abnorm_acc": 70.0
+    }
+  },
+  "details": [
+    {
+      "idx": "1",
+      "template": "C",
+      "asr_preview": "男性, 61岁, 左心室舒张末期内径54.3mm, 心室收缩末期内径28.4mm, 室间隔后度9.6mm, 左室后壁厚度8.6mm, 左心房前后径37.1mm,",
+      "model_raw": "{\n  \"template\": \"C\",\n  \"measurements\": {\n    \"左心室舒张末径\": \"54.3mm\",\n    \"心室收缩末径\": \"28.4mm\",\n    \"室间隔厚度\": \"9.6mm\",\n    \"左室后壁厚度\": \"8.6mm\",\n    \"左心房前后径\": \"37.1mm\",\n    \"主动脉根部内径\": \"30.6mm\",\n    \"右心室前后径\": \"2",
+      "results": {
+        "template_match": true,
+        "template_pred": "C",
+        "measurement_precision": 1.1428571428571428,
+        "measurement_recall": 1.0,
+        "gold_meas_count": 16,
+        "pred_meas_count": 14,
+        "abnormality_match": true,
+        "pred_abnormality": "无",
+        "gold_abnormality": "无"
+      }
+    },
+    {
+      "idx": "2",
+      "template": "B",
+      "asr_preview": "孕22周5天, 胎心132次每分, 心胸面积比0.31, 二尖瓣血留E峰25.6cm/s, A峰31.4cm/s, 三尖瓣血流E峰35.5cm/s, A峰37.",
+      "model_raw": "{\n  \"template\": \"B\",\n  \"measurements\": {\n    \"胎心\": \"132 bpm\",\n    \"心胸面积比\": \"0.31\",\n    \"二尖瓣血流E峰\": \"25.6 cm/s\",\n    \"二尖瓣血流A峰\": \"31.4 cm/s\",\n    \"三尖瓣血流E峰\": \"35.5 cm/s\",\n    \"三尖瓣血流A峰\": \"37.0 cm/s\",\n    \"",
+      "results": {
+        "template_match": true,
+        "template_pred": "B",
+        "measurement_precision": 1.0,
+        "measurement_recall": 0.8,
+        "gold_meas_count": 10,
+        "pred_meas_count": 8,
+        "abnormality_match": false,
+        "pred_abnormality": "肺静脉引流入左心房",
+        "gold_abnormality": "无"
+      }
+    },
+    {
+      "idx": "3",
+      "template": "B",
+      "asr_preview": "孕28周, 胎心156次每分, 心胸面积比0.33 二尖瓣血留E峰26.9cm/s, A峰38.6cm/s, 尖瓣血流E27.4cms, A峰40.1cm/s,",
+      "model_raw": "{\n  \"template\": \"B\",\n  \"measurements\": {\n    \"胎心\": \"156 bpm\",\n    \"心胸面积比\": \"0.33\",\n    \"二尖瓣血流E峰\": \"26.9 cm/s\",\n    \"A峰\": \"38.6 cm/s\",\n    \"三尖瓣血流E峰\": \"27.4 cm/s\",\n    \"A峰\": \"40.1 cm/s\",\n    \"主动脉瓣上流速\": ",
+      "results": {
+        "template_match": true,
+        "template_pred": "B",
+        "measurement_precision": 1.25,
+        "measurement_recall": 1.0,
+        "gold_meas_count": 10,
+        "pred_meas_count": 8,
+        "abnormality_match": true,
+        "pred_abnormality": "无",
+        "gold_abnormality": "无"
+      }
+    },
+    {
+      "idx": "4",
+      "template": "E",
+      "asr_preview": "女性,  48岁, 肝脏右叶斜径118.2mm, 肝实质回这个声稍增粗, 胆囊大61.1mm×29.2mm, 壁后2.4mm, 胰腺头24mm体14mm尾18m",
+      "model_raw": "{\n  \"template\": \"E\",\n  \"measurements\": {\n    \"肝脏右叶斜径\": \"118.2mm\",\n    \"胆囊大小\": \"61.1mm×29.2mm\",\n    \"胆囊壁厚\": \"2.4mm\",\n    \"胰腺头\": \"24mm\",\n    \"胰腺体\": \"14mm\",\n    \"胰腺尾\": \"18mm\",\n    \"脾厚\": \"36.6mm\",\n    \"脾长",
+      "results": {
+        "template_match": true,
+        "template_pred": "E",
+        "measurement_precision": 0.9333333333333333,
+        "measurement_recall": 0.8235294117647058,
+        "gold_meas_count": 17,
+        "pred_meas_count": 15,
+        "abnormality_match": false,
+        "pred_abnormality": "肝实质回声稍增粗",
+        "gold_abnormality": "无"
+      }
+    },
+    {
+      "idx": "5",
+      "template": "A",
+      "asr_preview": "孕22周6天, 胎儿双丁径55.2mm, 头围195.9mm, 腹围170.2mm, 古骨长39.3mm, 肱骨长36.4mm, 小脑横径22.8mm, 侧脑时",
+      "model_raw": "{\n  \"template\": \"A\",\n  \"measurements\": {\n    \"胎儿双顶径\": \"55.2mm\",\n    \"头围\": \"195.9mm\",\n    \"腹围\": \"170.2mm\",\n    \"股骨长\": \"39.3mm\",\n    \"肱骨长\": \"36.4mm\",\n    \"小脑横径\": \"22.8mm\",\n    \"侧脑室宽\": \"4.5mm\",\n    \"羊水指数",
+      "results": {
+        "template_match": true,
+        "template_pred": "A",
+        "measurement_precision": 1.0,
+        "measurement_recall": 0.9166666666666666,
+        "gold_meas_count": 12,
+        "pred_meas_count": 11,
+        "abnormality_match": true,
+        "pred_abnormality": "无",
+        "gold_abnormality": "无"
+      }
+    },
+    {
+      "idx": "6",
+      "template": "A",
+      "asr_preview": "孕21周, 胎儿双顶径50.0mm, 头围184.4mm, 腹围164.4mm, 股骨长37.3mm, 肱骨长34.0mm, 脑横径21.4mm, 侧脑室款5.",
+      "model_raw": "{\n  \"template\": \"A\",\n  \"measurements\": {\n    \"胎儿双顶径\": \"50.0mm\",\n    \"头围\": \"184.4mm\",\n    \"腹围\": \"164.4mm\",\n    \"股骨长\": \"37.3mm\",\n    \"羊水指数\": \"120.9mm\",\n    \"最大羊水深度\": \"43.5mm\",\n    \"胎盘厚度\": \"36.8mm\",\n    ",
+      "results": {
+        "template_match": true,
+        "template_pred": "A",
+        "measurement_precision": 0.875,
+        "measurement_recall": 0.5833333333333334,
+        "gold_meas_count": 12,
+        "pred_meas_count": 8,
+        "abnormality_match": true,
+        "pred_abnormality": "侧脑室后角宽10.9mm, 临界增宽。透明隔腔可见。",
+        "gold_abnormality": "侧脑室后角宽10.9mm, 临界增宽"
+      }
+    },
+    {
+      "idx": "7",
+      "template": "B",
+      "asr_preview": "孕26周, 胎心136次每分, 心胸面积比0.33, 二尖办血流E峰34.1cm/s, A峰34.3m/s, 三尖瓣血流E峰32.2cm/s, A峰43.9cm",
+      "model_raw": "{\n  \"template\": \"B\",\n  \"measurements\": {\n    \"胎心\": \"136 bpm\",\n    \"心胸面积比\": \"0.33\",\n    \"二尖办血流E峰\": \"34.1 cm/s\",\n    \"二尖办血流A峰\": \"34.3 mm/s\",\n    \"三尖瓣血流E峰\": \"32.2 cm/s\",\n    \"三尖瓣血流A峰\": \"43.9 cm/s\",\n    \"",
+      "results": {
+        "template_match": true,
+        "template_pred": "B",
+        "measurement_precision": 0.9,
+        "measurement_recall": 0.9,
+        "gold_meas_count": 10,
+        "pred_meas_count": 10,
+        "abnormality_match": true,
+        "pred_abnormality": "肺动脉瓣狭窄, 流速349.6cm/s。",
+        "gold_abnormality": "肺动脉瓣狭窄, 流速349.6cm"
+      }
+    },
+    {
+      "idx": "8",
+      "template": "A",
+      "asr_preview": "孕22周6天, 胎儿双顶径53.2mm, 头围192.1mm, 腹围177.0mm, 古骨长39.5mm, 肱骨长37.0mm, 小脑横径24.3mm 侧脑室宽",
+      "model_raw": "{\n  \"template\": \"A\",\n  \"measurements\": {\n    \"胎儿双顶径\": \"53.2mm\",\n    \"头围\": \"192.1mm\",\n    \"腹围\": \"177.0mm\",\n    \"股骨长\": \"39.5mm\",\n    \"肱骨长\": \"37.0mm\",\n    \"小脑横径\": \"24.3mm\",\n    \"侧脑室宽\": \"7.2mm\",\n    \"羊水指数",
+      "results": {
+        "template_match": true,
+        "template_pred": "A",
+        "measurement_precision": 1.0,
+        "measurement_recall": 0.8333333333333334,
+        "gold_meas_count": 12,
+        "pred_meas_count": 10,
+        "abnormality_match": true,
+        "pred_abnormality": "无",
+        "gold_abnormality": "无"
+      }
+    },
+    {
+      "idx": "9",
+      "template": "A",
+      "asr_preview": "孕22周5天, 胎儿双顶径54.7mm, 头围197.9mm, 腹围173.2mm, 古骨长39.7mm, 肱骨长36.4m, 小脑横径22.6mm, 侧脑时宽",
+      "model_raw": "{\n  \"template\": \"A\",\n  \"measurements\": {\n    \"胎儿双顶径\": \"54.7mm\",\n    \"头围\": \"197.9mm\",\n    \"腹围\": \"173.2mm\",\n    \"股骨长\": \"39.7mm\",\n    \"肱骨长\": \"36.4mm\",\n    \"小脑横径\": \"22.6mm\",\n    \"侧脑室宽\": \"7.0mm\",\n    \"羊水指数",
+      "results": {
+        "template_match": true,
+        "template_pred": "A",
+        "measurement_precision": 1.0909090909090908,
+        "measurement_recall": 1.0,
+        "gold_meas_count": 12,
+        "pred_meas_count": 11,
+        "abnormality_match": true,
+        "pred_abnormality": "无",
+        "gold_abnormality": "无"
+      }
+    },
+    {
+      "idx": "10",
+      "template": "D",
+      "asr_preview": "女性, 75岁, 右侧颈总动脉内中膜厚度1.09mm, 管径5.8mm, 左侧颈总动脉内中膜厚就是度0.84mm, 管径6.3mm 右侧颈内动脉PSV55.6c",
+      "model_raw": "{\n  \"template\": \"D\",\n  \"measurements\": {\n    \"右侧颈总动脉内中膜厚度\": \"1.09mm\",\n    \"左侧颈总动脉内中膜厚\": \"0.84mm\",\n    \"右侧颈内动脉PSV\": \"55.6cm/s\",\n    \"左侧颈内动脉PSV\": \"52.5cm/s\",\n    \"右侧颈内动脉EDV\": \"19.5cm/s\",\n    \"左侧颈内动脉EDV\"",
+      "results": {
+        "template_match": true,
+        "template_pred": "D",
+        "measurement_precision": 1.1666666666666667,
+        "measurement_recall": 0.8235294117647058,
+        "gold_meas_count": 17,
+        "pred_meas_count": 12,
+        "abnormality_match": true,
+        "pred_abnormality": "双侧股总静脉瓣膜功能不全, 反流时间2.22s",
+        "gold_abnormality": "双侧股总静脉瓣膜功能不全, 反流时间2.22s"
+      }
+    },
+    {
+      "idx": "11",
+      "template": "D",
+      "asr_preview": "女性, 63岁, 右侧颈总动脉内中末厚度0.89mm, 管经6.8mm, 左侧颈总动脉内中膜厚度0.53mm, 管径7.0mm, 右侧颈内动脉PSV80.2cm",
+      "model_raw": "{\n  \"template\": \"D\",\n  \"measurements\": {\n    \"右侧颈总动脉内中膜厚度\": \"0.89mm\",\n    \"左侧颈总动脉内中膜厚度\": \"0.53mm\",\n    \"右侧颈内动脉PSV\": \"80.2cm/s\",\n    \"左侧颈内动脉PSV\": \"53.8cm/s\",\n    \"右侧椎动脉内径\": \"3.3mm\",\n    \"左侧椎动脉内径\": \"3.2",
+      "results": {
+        "template_match": true,
+        "template_pred": "D",
+        "measurement_precision": 1.2,
+        "measurement_recall": 0.7058823529411765,
+        "gold_meas_count": 17,
+        "pred_meas_count": 10,
+        "abnormality_match": true,
+        "pred_abnormality": "无",
+        "gold_abnormality": "无"
+      }
+    },
+    {
+      "idx": "12",
+      "template": "A",
+      "asr_preview": "孕24周2天,胎儿双丁径61.7mm, 头围210.7mm, 腹围200.0mm, 股骨长44.6mm,肱长42.9mm, 小脑横径26.4mm, 侧脑室款4.",
+      "model_raw": "{\n  \"template\": \"A\",\n  \"measurements\": {\n    \"胎儿双顶径\": \"61.7mm\",\n    \"头围\": \"210.7mm\",\n    \"腹围\": \"200.0mm\",\n    \"股骨长\": \"44.6mm\",\n    \"肱长\": \"42.9mm\",\n    \"小脑横径\": \"26.4mm\",\n    \"侧脑室宽\": \"4.4mm\",\n    \"羊水指数\"",
+      "results": {
+        "template_match": true,
+        "template_pred": "A",
+        "measurement_precision": 0.9,
+        "measurement_recall": 0.75,
+        "gold_meas_count": 12,
+        "pred_meas_count": 10,
+        "abnormality_match": false,
+        "pred_abnormality": "侧脑室增宽",
+        "gold_abnormality": "无"
+      }
+    },
+    {
+      "idx": "13",
+      "template": "A",
+      "asr_preview": "孕22周6天, 胎儿双顶径54.2mm, 头围199.7mm, 腹围175.那个9mm, 股骨长40.2mm, 肱骨长38.5mm, 脑横径24.0mm, 脑时",
+      "model_raw": "{\n  \"template\": \"A\",\n  \"measurements\": {\n    \"胎儿双顶径\": \"54.2mm\",\n    \"头围\": \"199.7mm\",\n    \"腹围\": \"175.9mm\",\n    \"股骨长\": \"40.2mm\",\n    \"羊水指数\": \"133.6mm\",\n    \"最羊水深度\": \"64.7mm\",\n    \"胎盘厚度\": \"32.1mm\"\n  },\n ",
+      "results": {
+        "template_match": true,
+        "template_pred": "A",
+        "measurement_precision": 1.1428571428571428,
+        "measurement_recall": 0.6666666666666666,
+        "gold_meas_count": 12,
+        "pred_meas_count": 7,
+        "abnormality_match": true,
+        "pred_abnormality": "无",
+        "gold_abnormality": "无"
+      }
+    },
+    {
+      "idx": "14",
+      "template": "B",
+      "asr_preview": "孕25周4天, 胎心149次每分, 心胸面积比0.29, 二尖瓣血流E峰37.2c/s, A峰33.6cm/s, 三尖瓣血流E峰21.6cm/s A峰36.7c",
+      "model_raw": "{\n  \"template\": \"B\",\n  \"measurements\": {\n    \"胎心\": \"149次/分\",\n    \"心胸面积比\": \"0.29\",\n    \"二尖瓣血流E峰\": \"37.2cm/s\",\n    \"二尖瓣血流A峰\": \"33.6cm/s\",\n    \"三尖瓣血流E峰\": \"21.6cm/s\",\n    \"三尖瓣血流A峰\": \"36.7cm/s\",\n    \"主动脉瓣上",
+      "results": {
+        "template_match": true,
+        "template_pred": "B",
+        "measurement_precision": 1.0,
+        "measurement_recall": 0.9,
+        "gold_meas_count": 10,
+        "pred_meas_count": 9,
+        "abnormality_match": false,
+        "pred_abnormality": "动脉导管开放, 上下腔静脉引流入右心房",
+        "gold_abnormality": "无"
+      }
+    },
+    {
+      "idx": "15",
+      "template": "C",
+      "asr_preview": "男性, 46岁, 左心时舒张末期内径47.1mm, 左心室收缩末期内径24.8mm, 室间隔厚度7.9mm, 左室后壁厚度8.8mm, 左心房前后33.6mm,",
+      "model_raw": "{\n  \"template\": \"C\",\n  \"measurements\": {\n    \"左心室舒张末径\": \"47.1mm\",\n    \"左心室收缩末径\": \"24.8mm\",\n    \"室间隔厚度\": \"7.9mm\",\n    \"左室后壁厚度\": \"8.8mm\",\n    \"左心房前后径\": \"33.6mm\",\n    \"主动脉根部内径\": \"32.2mm\",\n    \"右心室前后径\": \"",
+      "results": {
+        "template_match": true,
+        "template_pred": "C",
+        "measurement_precision": 1.1538461538461537,
+        "measurement_recall": 0.9375,
+        "gold_meas_count": 16,
+        "pred_meas_count": 13,
+        "abnormality_match": false,
+        "pred_abnormality": "三尖瓣反留流速68.9cm/s",
+        "gold_abnormality": "无"
+      }
+    },
+    {
+      "idx": "16",
+      "template": "A",
+      "asr_preview": "孕24周6天, 胎儿双丁径60.2mm, 头围211.2mm, 腹围190.1mm,古骨长45.8mm, 肱长42.6mm, 小脑横径26.8mm, 侧脑室宽5",
+      "model_raw": "{\n  \"template\": \"A\",\n  \"measurements\": {\n    \"胎儿双顶径\": \"60.2mm\",\n    \"头围\": \"211.2mm\",\n    \"腹围\": \"190.1mm\",\n    \"股骨长\": \"45.8mm\",\n    \"羊水指数\": \"154.8mm\",\n    \"最大羊水深度\": \"66.1mm\",\n    \"胎盘厚度\": \"31.2mm\"\n  },\n",
+      "results": {
+        "template_match": true,
+        "template_pred": "A",
+        "measurement_precision": 1.1428571428571428,
+        "measurement_recall": 0.6666666666666666,
+        "gold_meas_count": 12,
+        "pred_meas_count": 7,
+        "abnormality_match": true,
+        "pred_abnormality": "无",
+        "gold_abnormality": "无"
+      }
+    },
+    {
+      "idx": "17",
+      "template": "D",
+      "asr_preview": "女性, 40岁, 右侧颈总动脉内中膜厚0.97mm 管径5.7mm, 左侧颈总动脉内0厚.85mm, 管径5.5mm, 右侧颈内动脉PSV76.2cm/s, E",
+      "model_raw": "{\n  \"template\": \"D\",\n  \"measurements\": {\n    \"右侧颈总动脉内中膜厚度\": \"0.97mm\",\n    \"左侧颈总动脉内中膜厚度\": \"0.85mm\",\n    \"右侧颈内动脉PSV\": \"76.2cm/s\",\n    \"左侧颈内动脉PSV\": \"64.5cm/s\",\n    \"右侧椎动脉内径\": \"2.8mm\",\n    \"左侧椎动脉内径\": \"3.6",
+      "results": {
+        "template_match": true,
+        "template_pred": "D",
+        "measurement_precision": 1.2,
+        "measurement_recall": 0.7058823529411765,
+        "gold_meas_count": 17,
+        "pred_meas_count": 10,
+        "abnormality_match": false,
+        "pred_abnormality": "右侧颈总动脉内中膜厚",
+        "gold_abnormality": "无"
+      }
+    },
+    {
+      "idx": "18",
+      "template": "C",
+      "asr_preview": "男性, 55岁, 左心室舒张末期内径49.7mm, 左心室收缩末期内径24.4mm, 室间隔厚度8.6mm, 左壁厚度10.1mm, 左心房前后径28.8mm,",
+      "model_raw": "{\n  \"template\": \"C\",\n  \"measurements\": {\n    \"左心室舒张末径\": \"49.7mm\",\n    \"左心室收缩末径\": \"24.4mm\",\n    \"室间隔厚度\": \"8.6mm\",\n    \"左壁厚度\": \"10.1mm\",\n    \"左心房前后径\": \"28.8mm\",\n    \"主动脉根部内径\": \"28.6mm\",\n    \"右心室前后径\": \"1",
+      "results": {
+        "template_match": true,
+        "template_pred": "C",
+        "measurement_precision": 1.0,
+        "measurement_recall": 0.9375,
+        "gold_meas_count": 16,
+        "pred_meas_count": 15,
+        "abnormality_match": true,
+        "pred_abnormality": "心室舒张功能减退, E/A<1",
+        "gold_abnormality": "左心室舒张功能减退, E"
+      }
+    },
+    {
+      "idx": "19",
+      "template": "B",
+      "asr_preview": "孕26周1天, 胎心124次每分然后, 心胸面积比0.33, 二尖瓣血流E峰35.9cm/s, A峰33.5cm/s, 三尖瓣血流E峰36.5cm/s, A峰4",
+      "model_raw": "{\n  \"template\": \"B\",\n  \"measurements\": {\n    \"胎心\": \"124 bpm\",\n    \"心胸面积比\": \"0.33\",\n    \"二尖瓣血流E峰\": \"35.9 cm/s\",\n    \"二尖瓣血流A峰\": \"33.5 cm/s\",\n    \"三尖瓣血流E峰\": \"36.5 cm/s\",\n    \"三尖瓣血流A峰\": \"43.8 cm/s\",\n    \"",
+      "results": {
+        "template_match": true,
+        "template_pred": "B",
+        "measurement_precision": 1.0,
+        "measurement_recall": 0.8,
+        "gold_meas_count": 10,
+        "pred_meas_count": 8,
+        "abnormality_match": true,
+        "pred_abnormality": "无",
+        "gold_abnormality": "无"
+      }
+    },
+    {
+      "idx": "20",
+      "template": "C",
+      "asr_preview": "男, 64岁, 左心室舒张末期内径48.9mm, 左心室收缩末期内径28.5mm, 室间隔厚度8.8mm, 左室后壁厚度8.0mm, 左心房前后径32.0mm,",
+      "model_raw": "{\n  \"template\": \"C\",\n  \"measurements\": {\n    \"左心室舒张末径\": \"48.9mm\",\n    \"左心室收缩末径\": \"28.5mm\",\n    \"室间隔厚度\": \"8.8mm\",\n    \"左室后壁厚度\": \"8.0mm\",\n    \"左心房前后径\": \"32.0mm\",\n    \"主动根部内径\": \"26.4mm\",\n    \"右心室前后径\": \"2",
+      "results": {
+        "template_match": true,
+        "template_pred": "C",
+        "measurement_precision": 1.1428571428571428,
+        "measurement_recall": 1.0,
+        "gold_meas_count": 16,
+        "pred_meas_count": 14,
+        "abnormality_match": true,
+        "pred_abnormality": "无",
+        "gold_abnormality": "无"
+      }
+    },
+    {
+      "idx": "21",
+      "template": "A",
+      "asr_preview": "孕22周, 胎儿双顶经52.1mm, 头围196.2mm, 腹围175.1mm, 股骨长39.1mm, 肱骨长37.1mm, 小脑横径22.5mm, 侧脑室宽4",
+      "model_raw": "{\n  \"template\": \"A\",\n  \"measurements\": {\n    \"胎儿双顶径\": \"52.1mm\",\n    \"头围\": \"196.2mm\",\n    \"腹围\": \"175.1mm\",\n    \"股骨长\": \"39.1mm\",\n    \"羊水指数\": \"150.4mm\",\n    \"最大羊水深度\": \"41.3mm\",\n    \"胎心率\": \"159次/分\"\n  },\n ",
+      "results": {
+        "template_match": true,
+        "template_pred": "A",
+        "measurement_precision": 1.1428571428571428,
+        "measurement_recall": 0.6666666666666666,
+        "gold_meas_count": 12,
+        "pred_meas_count": 7,
+        "abnormality_match": true,
+        "pred_abnormality": "无",
+        "gold_abnormality": "无"
+      }
+    },
+    {
+      "idx": "22",
+      "template": "B",
+      "asr_preview": "孕27周4,胎心121次每分, 心胸面积比0.3, 二尖瓣血留E峰21.7cm/s,峰40.1cm/s, 三尖瓣血流E峰37.0m/s, A峰35.6cm/s,",
+      "model_raw": "{\n  \"template\": \"B\",\n  \"measurements\": {\n    \"胎心\": \"121 次/分\",\n    \"心胸面积比\": \"0.3\",\n    \"二尖瓣血流E峰\": \"21.7 cm/s\",\n    \"二尖瓣血流A峰\": \"40.1 cm/s\",\n    \"三尖瓣血流E峰\": \"37.0 cm/s\",\n    \"三尖瓣血流A峰\": \"35.6 cm/s\",\n    \"主",
+      "results": {
+        "template_match": true,
+        "template_pred": "B",
+        "measurement_precision": 1.0,
+        "measurement_recall": 0.8,
+        "gold_meas_count": 10,
+        "pred_meas_count": 8,
+        "abnormality_match": true,
+        "pred_abnormality": "永存左上静脉",
+        "gold_abnormality": "永存左上腔静脉"
+      }
+    },
+    {
+      "idx": "23",
+      "template": "C",
+      "asr_preview": "男性 73岁,左心室舒张末期内经47.8mm, 左心室收缩末期内径33.7mm, 室间隔厚度9.2mm, 左室后壁厚度8.8mm 左心房前后径37.3mm, 主",
+      "model_raw": "{\n  \"template\": \"C\",\n  \"measurements\": {\n    \"左心室舒张末径\": \"47.8mm\",\n    \"左心室收缩末径\": \"33.7mm\",\n    \"室间隔厚度\": \"9.2mm\",\n    \"左室后壁厚度\": \"8.8mm\",\n    \"左心房前后径\": \"37.3mm\",\n    \"主动脉根部内径\": \"26.4mm\",\n    \"右心室前后径\": \"",
+      "results": {
+        "template_match": true,
+        "template_pred": "C",
+        "measurement_precision": 1.0714285714285714,
+        "measurement_recall": 0.9375,
+        "gold_meas_count": 16,
+        "pred_meas_count": 14,
+        "abnormality_match": false,
+        "pred_abnormality": "三尖瓣反流流速42.7cm/s",
+        "gold_abnormality": "无"
+      }
+    },
+    {
+      "idx": "24",
+      "template": "B",
+      "asr_preview": "孕24周, 胎心121次每分, 心胸面积比0.31, 二尖瓣血留E峰30.0cm/s, A峰32.9cm/s, 三尖瓣血流E29.2cm/s, A峰36.4cm",
+      "model_raw": "{\n  \"template\": \"B\",\n  \"measurements\": {\n    \"胎心\": \"121 bpm\",\n    \"心胸面积比\": \"0.31\",\n    \"二尖瓣血流E峰\": \"30.0 cm/s\",\n    \"二尖瓣血流A峰\": \"32.9 cm/s\",\n    \"三尖瓣血流E峰\": \"29.2 cm/s\",\n    \"三尖瓣血流A峰\": \"36.4 cm/s\",\n    \"",
+      "results": {
+        "template_match": true,
+        "template_pred": "B",
+        "measurement_precision": 1.0,
+        "measurement_recall": 0.9,
+        "gold_meas_count": 10,
+        "pred_meas_count": 9,
+        "abnormality_match": true,
+        "pred_abnormality": "无",
+        "gold_abnormality": "无"
+      }
+    },
+    {
+      "idx": "25",
+      "template": "A",
+      "asr_preview": "孕24周, 胎儿双顶径61.9mm, 头围211.0mm, 腹围192.1mm, 古骨长45.5mm, 骨长43.1mm, 小脑横径25.1mm, 侧室宽6.4",
+      "model_raw": "{\n  \"template\": \"A\",\n  \"measurements\": {\n    \"胎儿双顶径\": \"61.9mm\",\n    \"头围\": \"211.0mm\",\n    \"腹围\": \"192.1mm\",\n    \"股骨长\": \"45.5mm\",\n    \"胎盘厚度\": \"39.7mm\",\n    \"羊水指数\": \"124.0mm\",\n    \"最大羊水深度\": \"68.3mm\",\n    ",
+      "results": {
+        "template_match": true,
+        "template_pred": "A",
+        "measurement_precision": 1.125,
+        "measurement_recall": 0.75,
+        "gold_meas_count": 12,
+        "pred_meas_count": 8,
+        "abnormality_match": true,
+        "pred_abnormality": "无",
+        "gold_abnormality": "无"
+      }
+    },
+    {
+      "idx": "26",
+      "template": "E",
+      "asr_preview": "女性, 66岁, 肝脏右叶斜经111.8mm, 肝实质回声稍增粗, 胆囊大小58.7mm×24.0mm, 壁后2.7mm, 胰腺头20mm体13mm尾13mm,",
+      "model_raw": "{\n  \"template\": \"E\",\n  \"measurements\": {\n    \"肝右叶斜径\": \"111.8mm\",\n    \"胆囊大小\": \"58.7mm×24.0mm\",\n    \"胰腺头\": \"20mm\",\n    \"胰腺体\": \"13mm\",\n    \"胰腺尾\": \"13mm\",\n    \"脾厚\": \"36.3mm\",\n    \"脾长径\": \"86.6mm\",\n    \"右肾\"",
+      "results": {
+        "template_match": true,
+        "template_pred": "E",
+        "measurement_precision": 1.0769230769230769,
+        "measurement_recall": 0.8235294117647058,
+        "gold_meas_count": 17,
+        "pred_meas_count": 13,
+        "abnormality_match": false,
+        "pred_abnormality": "肝实质回声稍增粗",
+        "gold_abnormality": "无"
+      }
+    },
+    {
+      "idx": "27",
+      "template": "D",
+      "asr_preview": "女性, 42岁, 右侧颈总动脉内中末后度0.8mm, 管经6.1mm, 左颈总动脉内中膜厚度1.08mm, 管径6.2mm,右侧颈内动脉PSV67.2cm/s,",
+      "model_raw": "{\n  \"template\": \"D\",\n  \"measurements\": {\n    \"右侧颈总动脉内中膜厚度\": \"0.8mm\",\n    \"左侧颈总动脉内中膜厚度\": \"1.08mm\",\n    \"右侧颈内动脉PSV\": \"67.2cm/s\",\n    \"左侧颈内动脉PSV\": \"83.2cm/s\",\n    \"右侧椎动脉内径\": \"3.1mm\",\n    \"左侧椎脉内径\": \"2.7mm",
+      "results": {
+        "template_match": true,
+        "template_pred": "D",
+        "measurement_precision": 1.2,
+        "measurement_recall": 0.7058823529411765,
+        "gold_meas_count": 17,
+        "pred_meas_count": 10,
+        "abnormality_match": true,
+        "pred_abnormality": "无",
+        "gold_abnormality": "无"
+      }
+    },
+    {
+      "idx": "28",
+      "template": "B",
+      "asr_preview": "孕271天, 胎心131次每分, 心胸面积比0.34, 二尖瓣血流E峰37.9m/, A峰30.6cm/s, 三尖瓣血E峰21.3cm/s, A峰38.6cm/",
+      "model_raw": "{\n  \"template\": \"B\",\n  \"measurements\": {\n    \"胎心\": \"131 bpm\",\n    \"心胸面积比\": \"0.34\",\n    \"二尖瓣血流E峰\": \"37.9 cm/s\",\n    \"二尖瓣血流A峰\": \"30.6 cm/s\",\n    \"三尖瓣血E峰\": \"21.3 cm/s\",\n    \"三尖瓣血A峰\": \"38.6 cm/s\",\n    \"主动",
+      "results": {
+        "template_match": true,
+        "template_pred": "B",
+        "measurement_precision": 1.125,
+        "measurement_recall": 0.9,
+        "gold_meas_count": 10,
+        "pred_meas_count": 8,
+        "abnormality_match": false,
+        "pred_abnormality": "动脉导管开放",
+        "gold_abnormality": "无"
+      }
+    },
+    {
+      "idx": "29",
+      "template": "C",
+      "asr_preview": "女性, 63岁, 左心室舒张末期内径39.6mm, 左心室收缩末期内径25.9mm, 室间隔厚度9.5mm, 左室后壁厚度10.0mm, 左心房前后径34.7m",
+      "model_raw": "{\n  \"template\": \"C\",\n  \"measurements\": {\n    \"左心室舒张末径\": \"39.6mm\",\n    \"左心室收缩末径\": \"25.9mm\",\n    \"室间隔厚度\": \"9.5mm\",\n    \"左室后壁厚度\": \"10.0mm\",\n    \"左心房前后径\": \"34.7mm\",\n    \"主动脉根部内径\": \"27.5mm\",\n    \"右心室前后径\": ",
+      "results": {
+        "template_match": true,
+        "template_pred": "C",
+        "measurement_precision": 1.2307692307692308,
+        "measurement_recall": 1.0,
+        "gold_meas_count": 16,
+        "pred_meas_count": 13,
+        "abnormality_match": false,
+        "pred_abnormality": "三尖瓣反留流速60.1cm/s",
+        "gold_abnormality": "无"
+      }
+    },
+    {
+      "idx": "30",
+      "template": "D",
+      "asr_preview": "女性, 59岁, 右侧颈冻麦内中膜后度0.76mm, 管径5.6mm 左侧颈总动脉内中膜厚度0.56mm, 管径5.6m, 右侧颈内动脉PSV84.0cm/s,",
+      "model_raw": "{\n  \"template\": \"D\",\n  \"measurements\": {\n    \"右侧颈动脉内中膜厚度\": \"0.76mm\",\n    \"左侧颈总动脉内中膜厚度\": \"0.56mm\",\n    \"右侧颈内动脉PSV\": \"84.0cm/s\",\n    \"左侧颈内动脉PSV\": \"66.4cm/s\",\n    \"右侧颈内动脉EDV\": \"21.0cm/s\",\n    \"左侧颈内动脉EDV\"",
+      "results": {
+        "template_match": true,
+        "template_pred": "D",
+        "measurement_precision": 1.0769230769230769,
+        "measurement_recall": 0.8235294117647058,
+        "gold_meas_count": 17,
+        "pred_meas_count": 13,
+        "abnormality_match": true,
+        "pred_abnormality": "无",
+        "gold_abnormality": "无"
+      }
+    },
+    {
+      "idx": "31",
+      "template": "D",
+      "asr_preview": "女性, 46岁, 右侧颈总动脉内中膜厚度0.61mm, 管径6.7mm, 左侧颈总动脉内中膜厚度1.0mm, 管径5.6mm, 右侧颈内动脉PSV58.0cm/",
+      "model_raw": "{\n  \"template\": \"D\",\n  \"measurements\": {\n    \"右侧颈总动脉内中膜厚度\": \"0.61mm\",\n    \"左侧颈总动脉内中膜厚度\": \"1.0mm\",\n    \"右侧颈内动脉PSV\": \"58.0cm/s\",\n    \"左侧颈内动脉PV\": \"58.2cm/s\",\n    \"右侧椎动脉内径\": \"3.1mm\",\n    \"左侧椎动脉内径\": \"3.0mm",
+      "results": {
+        "template_match": true,
+        "template_pred": "D",
+        "measurement_precision": 1.3,
+        "measurement_recall": 0.7647058823529411,
+        "gold_meas_count": 17,
+        "pred_meas_count": 10,
+        "abnormality_match": true,
+        "pred_abnormality": "无",
+        "gold_abnormality": "无"
+      }
+    },
+    {
+      "idx": "32",
+      "template": "C",
+      "asr_preview": "男性, 44岁, 左心室舒张末期内径50.3mm, 左心室收缩末期内径26.1mm, 室间隔厚度9.9mm, 左室后壁度8.0mm, 左心房前后径32.6mm,",
+      "model_raw": "{\n  \"template\": \"C\",\n  \"measurements\": {\n    \"左心室舒张末径\": \"50.3mm\",\n    \"左心室收缩末径\": \"26.1mm\",\n    \"室间隔厚度\": \"9.9mm\",\n    \"左室后壁度\": \"8.0mm\",\n    \"左心房前后径\": \"32.6mm\",\n    \"主动脉根部内径\": \"30.5mm\",\n    \"右心室前后径\": \"2",
+      "results": {
+        "template_match": true,
+        "template_pred": "C",
+        "measurement_precision": 1.1538461538461537,
+        "measurement_recall": 0.9375,
+        "gold_meas_count": 16,
+        "pred_meas_count": 13,
+        "abnormality_match": false,
+        "pred_abnormality": "三尖瓣反流流速55.0cm/s",
+        "gold_abnormality": "无"
+      }
+    },
+    {
+      "idx": "33",
+      "template": "E",
+      "asr_preview": "男性, 37岁, 肝脏右叶斜径135.4mm, 肝实质回声均匀, 胆囊大小67.4mm×31.2mm, 壁厚2.4mm, 胰腺头24mm体12mm尾18mm, ",
+      "model_raw": "{\n  \"template\": \"E\",\n  \"measurements\": {\n    \"肝右叶斜径\": \"135.4mm\",\n    \"胆囊大小\": \"67.4mm×31.2mm\",\n    \"胰腺头\": \"24mm\",\n    \"胰腺体\": \"12mm\",\n    \"胰腺尾\": \"18mm\",\n    \"脾厚\": \"30.1mm\",\n    \"脾长径\": \"103.3mm\",\n    \"右肾",
+      "results": {
+        "template_match": true,
+        "template_pred": "E",
+        "measurement_precision": 1.0,
+        "measurement_recall": 0.7647058823529411,
+        "gold_meas_count": 17,
+        "pred_meas_count": 13,
+        "abnormality_match": true,
+        "pred_abnormality": "无",
+        "gold_abnormality": "无"
+      }
+    },
+    {
+      "idx": "34",
+      "template": "D",
+      "asr_preview": "女,59岁, 右侧颈总动脉内中膜厚度0.55mm, 管径7.0mm, 左侧颈总动脉内中厚度0.68mm, 管径7.2mm, 右侧颈内动脉PSV75.4cm/s,",
+      "model_raw": "{\n  \"template\": \"D\",\n  \"measurements\": {\n    \"右侧颈总动脉内中膜厚度\": \"0.55mm\",\n    \"左侧颈总动脉内中膜厚度\": \"0.68mm\",\n    \"右侧颈内动脉PSV\": \"75.4cm/s\",\n    \"左侧颈内动脉PSV\": \"53.7cm/s\",\n    \"右侧颈内动脉EDV\": \"16.2cm/s\",\n    \"左侧颈内动脉EDV",
+      "results": {
+        "template_match": true,
+        "template_pred": "D",
+        "measurement_precision": 1.1666666666666667,
+        "measurement_recall": 0.8235294117647058,
+        "gold_meas_count": 17,
+        "pred_meas_count": 12,
+        "abnormality_match": true,
+        "pred_abnormality": "无",
+        "gold_abnormality": "无"
+      }
+    },
+    {
+      "idx": "35",
+      "template": "E",
+      "asr_preview": "女性, 33岁, 肝脏右叶斜径117.5mm 肝实回声均匀, 胆囊大小55.0mm×26.5mm, 壁厚2.6mm, 胰腺头20mm10mm尾17mm, 脾厚3",
+      "model_raw": "{\n  \"template\": \"E\",\n  \"measurements\": {\n    \"肝右叶斜径\": \"117.5mm\",\n    \"胆囊大小\": \"55.0mm×26.5mm\",\n    \"壁厚\": \"2.6mm\",\n    \"胰腺头\": \"20mm10mm\",\n    \"胰腺尾\": \"17mm\",\n    \"脾厚\": \"33.5mm\",\n    \"脾长径\": \"103.1mm\",\n   ",
+      "results": {
+        "template_match": true,
+        "template_pred": "E",
+        "measurement_precision": 1.0714285714285714,
+        "measurement_recall": 0.8823529411764706,
+        "gold_meas_count": 17,
+        "pred_meas_count": 14,
+        "abnormality_match": true,
+        "pred_abnormality": "无",
+        "gold_abnormality": "无"
+      }
+    },
+    {
+      "idx": "36",
+      "template": "E",
+      "asr_preview": "女性, 55岁, 肝脏右叶斜径114.9mm, 肝实质回声稍增粗, 胆囊大小59.9mm×23.4mm, 壁厚2.1mm, 胰腺头22mm体16mm尾10mm,",
+      "model_raw": "{\n  \"template\": \"E\",\n  \"measurements\": {\n    \"肝右叶斜径\": \"114.9mm\",\n    \"胆囊大小\": \"59.9mm×23.4mm\",\n    \"胰腺头\": \"22mm\",\n    \"胰腺体\": \"16mm\",\n    \"胰腺尾\": \"10mm\",\n    \"脾厚\": \"30.8mm\",\n    \"脾长径\": \"98.5mm\",\n    \"右肾\"",
+      "results": {
+        "template_match": true,
+        "template_pred": "E",
+        "measurement_precision": 1.0769230769230769,
+        "measurement_recall": 0.8235294117647058,
+        "gold_meas_count": 17,
+        "pred_meas_count": 13,
+        "abnormality_match": false,
+        "pred_abnormality": "肝实质回声稍增粗",
+        "gold_abnormality": "无"
+      }
+    },
+    {
+      "idx": "37",
+      "template": "D",
+      "asr_preview": "男性, 74岁, 右侧颈总动脉内中膜厚度0.67m, 管径6.9mm, 左侧颈总动脉内中膜厚度0嗯.9mm, 管径6.8mm, 右侧颈内动脉PSV78.1c/s",
+      "model_raw": "{\n  \"template\": \"D\",\n  \"measurements\": {\n    \"右侧颈总动脉内中膜厚度\": \"0.67mm\",\n    \"左侧颈总动脉内中膜厚度\": \"0.9mm\",\n    \"右侧颈内动脉PSV\": \"78.1cm/s\",\n    \"左侧颈内动脉PSV\": \"54.0cm/s\",\n    \"右侧椎动脉内径\": \"2.6mm\",\n    \"左侧椎动脉内径\": \"2.5m",
+      "results": {
+        "template_match": true,
+        "template_pred": "D",
+        "measurement_precision": 1.3,
+        "measurement_recall": 0.7647058823529411,
+        "gold_meas_count": 17,
+        "pred_meas_count": 10,
+        "abnormality_match": true,
+        "pred_abnormality": "无",
+        "gold_abnormality": "无"
+      }
+    },
+    {
+      "idx": "38",
+      "template": "C",
+      "asr_preview": "女性, 59岁, 左心时舒张末期内径49.9mm, 左心室收缩末期内径37.1m, 室间隔厚度10.5mm 左室后壁厚度8.0mm, 左心房前后径35.8mm,",
+      "model_raw": "{\n  \"template\": \"C\",\n  \"measurements\": {\n    \"左心室舒张末径\": \"49.9mm\",\n    \"左心室收缩末径\": \"37.1mm\",\n    \"室间隔厚度\": \"10.5mm\",\n    \"左室后壁厚度\": \"8.0mm\",\n    \"左心房前后径\": \"35.8mm\",\n    \"主动脉根部内径\": \"27.1mm\",\n    \"右心室前后径\": ",
+      "results": {
+        "template_match": true,
+        "template_pred": "C",
+        "measurement_precision": 1.0666666666666667,
+        "measurement_recall": 1.0,
+        "gold_meas_count": 16,
+        "pred_meas_count": 15,
+        "abnormality_match": true,
+        "pred_abnormality": "主动脉瓣反流, 轻度, 压差半降时间550.6ms",
+        "gold_abnormality": "主动脉瓣反流, 轻度, 压差半降时间550.6ms"
+      }
+    },
+    {
+      "idx": "39",
+      "template": "A",
+      "asr_preview": "孕241天, 胎儿双丁经60.2mm, 头围219.7mm, 腹191.4mm, 古骨长46.7mm, 肱骨长42.9mm, 小脑横径24.5mm, 侧脑室宽6",
+      "model_raw": "{\n  \"template\": \"A\",\n  \"measurements\": {\n    \"胎儿双顶径\": \"60.2mm\",\n    \"头围\": \"219.7mm\",\n    \"腹围\": \"191.4mm\",\n    \"股骨长\": \"46.7mm\",\n    \"肱骨长\": \"42.9mm\",\n    \"小脑横径\": \"24.5mm\",\n    \"侧脑室宽\": \"6.5mm\",\n    \"羊水最大",
+      "results": {
+        "template_match": true,
+        "template_pred": "A",
+        "measurement_precision": 1.1111111111111112,
+        "measurement_recall": 0.8333333333333334,
+        "gold_meas_count": 12,
+        "pred_meas_count": 9,
+        "abnormality_match": true,
+        "pred_abnormality": "无",
+        "gold_abnormality": "无"
+      }
+    },
+    {
+      "idx": "40",
+      "template": "C",
+      "asr_preview": "男性, 74岁, 左心室舒张末期内经47.3mm, 左心室收缩末期内径25.8mm,  室间隔后度9.8m, 左室后壁厚度9.2mm, 左心房前后径29.2mm",
+      "model_raw": "{\n  \"template\": \"C\",\n  \"measurements\": {\n    \"左心室舒张末径\": \"47.3mm\",\n    \"左心室收缩末径\": \"25.8mm\",\n    \"室间隔厚度\": \"9.8mm\",\n    \"左室后壁厚度\": \"9.2mm\",\n    \"左心房前后径\": \"29.2mm\",\n    \"主动脉根部内径\": \"27.2mm\",\n    \"右心室前径\": \"2",
+      "results": {
+        "template_match": true,
+        "template_pred": "C",
+        "measurement_precision": 1.0,
+        "measurement_recall": 0.9375,
+        "gold_meas_count": 16,
+        "pred_meas_count": 15,
+        "abnormality_match": true,
+        "pred_abnormality": "无",
+        "gold_abnormality": "无"
+      }
+    },
+    {
+      "idx": "41",
+      "template": "B",
+      "asr_preview": "孕22周1天, 胎心152次每分, 心胸面积比0.34, 二尖瓣血流E峰38.4cm/s, A峰48.1cm/s, 三尖瓣血流E峰27.1cm/s, A峰38.",
+      "model_raw": "{\n  \"template\": \"B\",\n  \"measurements\": {\n    \"胎心\": \"152 bpm\",\n    \"心胸面积比\": \"0.34\",\n    \"二尖瓣血流E峰\": \"38.4 cm/s\",\n    \"二尖瓣血流A峰\": \"48.1 cm/s\",\n    \"三尖瓣血流E峰\": \"27.1 cm/s\",\n    \"三尖瓣血流A峰\": \"38.0 cm/s\",\n    \"",
+      "results": {
+        "template_match": true,
+        "template_pred": "B",
+        "measurement_precision": 1.0,
+        "measurement_recall": 0.9,
+        "gold_meas_count": 10,
+        "pred_meas_count": 9,
+        "abnormality_match": true,
+        "pred_abnormality": "无",
+        "gold_abnormality": "无"
+      }
+    },
+    {
+      "idx": "42",
+      "template": "D",
+      "asr_preview": "女性, 55岁, 右侧总冻麦内中末厚度0.52m, 管径7.4mm, 左侧颈总动脉内中膜厚度0.51mm, 管径5.7mm, 右侧颈内动脉PS对吧V65.9cm",
+      "model_raw": "{\n  \"template\": \"D\",\n  \"measurements\": {\n    \"右侧颈总动脉内中膜厚度\": \"0.52mm\",\n    \"右侧颈总动脉管径\": \"7.4mm\",\n    \"左侧颈总动脉内中膜厚度\": \"0.51mm\",\n    \"左侧颈总动脉管径\": \"5.7mm\",\n    \"右侧颈内动脉PSV\": \"65.9cm/s\",\n    \"右侧颈内动脉EDV\": \"22.3",
+      "results": {
+        "template_match": true,
+        "template_pred": "D",
+        "measurement_precision": 1.2142857142857142,
+        "measurement_recall": 1.0,
+        "gold_meas_count": 17,
+        "pred_meas_count": 14,
+        "abnormality_match": true,
+        "pred_abnormality": "无",
+        "gold_abnormality": "无"
+      }
+    },
+    {
+      "idx": "43",
+      "template": "E",
+      "asr_preview": "女性, 69岁, 脏右叶斜经120.0mm, 肝实质回声均匀, 胆囊大小77.4mm×24.2mm, 壁厚3.0mm, 胰腺头23mm体12mm尾10mm, 脾",
+      "model_raw": "{\n  \"template\": \"E\",\n  \"measurements\": {\n    \"肝右叶斜径\": \"120.0mm\",\n    \"胆囊大小\": \"77.4mm×24.2mm\",\n    \"胰腺头\": \"23mm\",\n    \"胰腺体\": \"12mm\",\n    \"胰腺尾\": \"10mm\",\n    \"脾厚\": \"34.6mm\",\n    \"脾长径\": \"95.4mm\",\n    \"右肾\"",
+      "results": {
+        "template_match": true,
+        "template_pred": "E",
+        "measurement_precision": 1.0,
+        "measurement_recall": 0.7647058823529411,
+        "gold_meas_count": 17,
+        "pred_meas_count": 13,
+        "abnormality_match": true,
+        "pred_abnormality": "无",
+        "gold_abnormality": "无"
+      }
+    },
+    {
+      "idx": "44",
+      "template": "A",
+      "asr_preview": "孕23周2天, 胎儿双顶径55.2mm, 头围208.7mm, 腹围184.6mm, 股长41.4m, 肱骨长40.3m, 小脑横径23.9mm, 侧脑室宽5.",
+      "model_raw": "{\n  \"template\": \"A\",\n  \"measurements\": {\n    \"胎儿双顶径\": \"55.2mm\",\n    \"头围\": \"208.7mm\",\n    \"腹围\": \"184.6mm\",\n    \"股骨长\": \"41.4mm\",\n    \"肱骨长\": \"40.3mm\",\n    \"小脑横径\": \"23.9mm\",\n    \"侧脑室宽\": \"5.7mm\",\n    \"羊水指数",
+      "results": {
+        "template_match": true,
+        "template_pred": "A",
+        "measurement_precision": 1.0909090909090908,
+        "measurement_recall": 1.0,
+        "gold_meas_count": 12,
+        "pred_meas_count": 11,
+        "abnormality_match": true,
+        "pred_abnormality": "无",
+        "gold_abnormality": "无"
+      }
+    },
+    {
+      "idx": "45",
+      "template": "D",
+      "asr_preview": "女性, 74岁, 右侧颈总动内中膜后度0.76mm, 管经5.6mm 左侧颈总动脉内中膜厚度1.0mm,管径7.1mm, 右侧颈内动脉PSV83.1cm/s, ",
+      "model_raw": "{\n  \"template\": \"D\",\n  \"measurements\": {\n    \"右侧颈总动脉内中膜厚度\": \"0.76mm\",\n    \"右侧颈总动脉管径\": \"5.6mm\",\n    \"左侧颈总动脉内中膜厚度\": \"1.0mm\",\n    \"左侧颈总动脉管径\": \"7.1mm\",\n    \"右侧颈内动脉PSV\": \"83.1cm/s\",\n    \"右侧颈内动脉EDV\": \"25.9c",
+      "results": {
+        "template_match": true,
+        "template_pred": "D",
+        "measurement_precision": 1.0625,
+        "measurement_recall": 1.0,
+        "gold_meas_count": 17,
+        "pred_meas_count": 16,
+        "abnormality_match": true,
+        "pred_abnormality": "无",
+        "gold_abnormality": "无"
+      }
+    },
+    {
+      "idx": "46",
+      "template": "B",
+      "asr_preview": "孕23周6天, 胎心124次每分, 心胸面积比0.34, 二尖瓣血留E峰34.0c/s, A峰44.8cm/s, 三尖血流E峰39.1cm/s, A峰37.2c",
+      "model_raw": "{\n  \"template\": \"B\",\n  \"measurements\": {\n    \"胎心\": \"124 bpm\",\n    \"心胸面积比\": \"0.34\",\n    \"二尖瓣血流E峰\": \"34.0 cm/s\",\n    \"二尖瓣血流A峰\": \"44.8 cm/s\",\n    \"三尖瓣血流E峰\": \"39.1 cm/s\",\n    \"三尖瓣血流A峰\": \"37.2 cm/s\",\n    \"",
+      "results": {
+        "template_match": true,
+        "template_pred": "B",
+        "measurement_precision": 1.125,
+        "measurement_recall": 0.9,
+        "gold_meas_count": 10,
+        "pred_meas_count": 8,
+        "abnormality_match": false,
+        "pred_abnormality": "动脉导管开放",
+        "gold_abnormality": "无"
+      }
+    },
+    {
+      "idx": "47",
+      "template": "B",
+      "asr_preview": "孕26周, 胎心135次每分, 心胸面积比0.3, 二尖瓣血留E峰23.7cm/s, A峰43.2cm/s, 三尖瓣血流E峰26.6cm/s, A峰49.5cm",
+      "model_raw": "{\n  \"template\": \"B\",\n  \"measurements\": {\n    \"胎心\": \"135 bpm\",\n    \"心胸面积比\": \"0.3\",\n    \"二尖瓣血流E峰\": \"23.7 cm/s\",\n    \"二尖瓣血流A峰\": \"43.2 cm/s\",\n    \"三尖瓣血流E峰\": \"26.6 cm/s\",\n    \"三尖瓣血流A峰\": \"49.5 cm/s\",\n    \"主",
+      "results": {
+        "template_match": true,
+        "template_pred": "B",
+        "measurement_precision": 1.1111111111111112,
+        "measurement_recall": 1.0,
+        "gold_meas_count": 10,
+        "pred_meas_count": 9,
+        "abnormality_match": false,
+        "pred_abnormality": "动脉导管开放，肺静脉流入左心房，主动脉骑跨见异常",
+        "gold_abnormality": "无"
+      }
+    },
+    {
+      "idx": "48",
+      "template": "A",
+      "asr_preview": "孕20周1天, 胎儿双顶径48.3mm, 头围1就是说70.2mm, 腹围159.5mm, 古骨长33.3mm,肱骨长33.8mm, 小脑横径21.4mm, 侧",
+      "model_raw": "{\n  \"template\": \"A\",\n  \"measurements\": {\n    \"胎儿双顶径\": \"48.3mm\",\n    \"头围\": \"70.2mm\",\n    \"腹围\": \"159.5mm\",\n    \"股骨长\": \"33.3mm\",\n    \"肱骨长\": \"33.8mm\",\n    \"小脑横径\": \"21.4mm\",\n    \"侧脑室宽\": \"6.9mm\",\n    \"羊水指数\"",
+      "results": {
+        "template_match": true,
+        "template_pred": "A",
+        "measurement_precision": 0.9166666666666666,
+        "measurement_recall": 0.9166666666666666,
+        "gold_meas_count": 12,
+        "pred_meas_count": 12,
+        "abnormality_match": true,
+        "pred_abnormality": "无",
+        "gold_abnormality": "无"
+      }
+    },
+    {
+      "idx": "49",
+      "template": "C",
+      "asr_preview": "女性, 61岁, 左时舒张末期内径40.1mm, 左心室收缩末期内径30.2mm, 室间隔厚度10.4mm, 左室后壁厚度10.1mm, 左心房后径33.1mm",
+      "model_raw": "{\n  \"template\": \"C\",\n  \"measurements\": {\n    \"左心室舒张末径\": \"40.1mm\",\n    \"左心室收缩末径\": \"30.2mm\",\n    \"室间隔厚度\": \"10.4mm\",\n    \"左室后壁厚度\": \"10.1mm\",\n    \"左心房后径\": \"33.1mm\",\n    \"主动脉根部内径\": \"34.1mm\",\n    \"右心室前后径\": ",
+      "results": {
+        "template_match": true,
+        "template_pred": "C",
+        "measurement_precision": 1.0769230769230769,
+        "measurement_recall": 0.875,
+        "gold_meas_count": 16,
+        "pred_meas_count": 13,
+        "abnormality_match": false,
+        "pred_abnormality": "三尖瓣反留流速43.2cm/s",
+        "gold_abnormality": "无"
+      }
+    },
+    {
+      "idx": "50",
+      "template": "E",
+      "asr_preview": "女性, 53岁肝脏右叶斜经116.4mm, 肝实质回声均匀, 胆囊大小68.6mm×27.9mm, 壁2.9mm, 胰腺头24mm体17mm尾14mm, 脾厚3",
+      "model_raw": "{\n  \"template\": \"E\",\n  \"measurements\": {\n    \"肝右叶斜径\": \"116.4mm\",\n    \"胆囊大小\": \"68.6mm×27.9mm\",\n    \"胰腺头\": \"24mm\",\n    \"胰腺体\": \"17mm\",\n    \"胰腺尾\": \"14mm\",\n    \"脾厚\": \"30.0mm\",\n    \"脾长径\": \"93.4mm\",\n    \"右肾\"",
+      "results": {
+        "template_match": true,
+        "template_pred": "E",
+        "measurement_precision": 0.9230769230769231,
+        "measurement_recall": 0.7058823529411765,
+        "gold_meas_count": 17,
+        "pred_meas_count": 13,
+        "abnormality_match": true,
+        "pred_abnormality": "无",
+        "gold_abnormality": "无"
+      }
+    },
+    {
+      "idx": "51",
+      "template": "E",
+      "asr_preview": "男性, 60岁, 肝脏右叶斜径119.0mm, 肝质回声均匀, 胆囊大小60.7mm×24.2mm, 壁厚2.7mm, 胰腺头20mm17mm尾13mm, 脾厚",
+      "model_raw": "{\n  \"template\": \"E\",\n  \"measurements\": {\n    \"肝脏右叶斜径\": \"119.0mm\",\n    \"胆囊大小\": \"60.7mm×24.2mm\",\n    \"脾厚\": \"36.0mm\",\n    \"脾长径\": \"108.6mm\",\n    \"右肾\": \"103.1mm×56.3mm×42.6mm\",\n    \"左肾\": \"98.1mm×54.6mm×41.",
+      "results": {
+        "template_match": true,
+        "template_pred": "E",
+        "measurement_precision": 1.2,
+        "measurement_recall": 0.7058823529411765,
+        "gold_meas_count": 17,
+        "pred_meas_count": 10,
+        "abnormality_match": true,
+        "pred_abnormality": "胆囊结石, 5.4mm强回声伴声影。",
+        "gold_abnormality": "胆囊结石, 5.4mm, 强回声伴声影"
+      }
+    },
+    {
+      "idx": "52",
+      "template": "B",
+      "asr_preview": "孕27周6天, 胎心135次每分, 心胸面积比0.29, 二尖瓣血流E峰22.1cm/s, A峰30.0cm/s, 三尖瓣血流E峰20.6cm/s, A峰31.",
+      "model_raw": "{\n  \"template\": \"B\",\n  \"measurements\": {\n    \"胎心\": \"135 bpm\",\n    \"心胸面积比\": \"0.29\",\n    \"二尖瓣血流E峰\": \"22.1 cm/s\",\n    \"二尖瓣血流A峰\": \"30.0 cm/s\",\n    \"三尖瓣血流E峰\": \"20.6 cm/s\",\n    \"三尖瓣血流A峰\": \"31.0 cm/s\",\n    \"",
+      "results": {
+        "template_match": true,
+        "template_pred": "B",
+        "measurement_precision": 1.0,
+        "measurement_recall": 0.9,
+        "gold_meas_count": 10,
+        "pred_meas_count": 9,
+        "abnormality_match": false,
+        "pred_abnormality": "房间隔见卵圆孔, 上下腔静脉引流入右心房。",
+        "gold_abnormality": "无"
+      }
+    },
+    {
+      "idx": "53",
+      "template": "C",
+      "asr_preview": "女性, 54岁, 左心室张末期内径41.3mm, 左心室收缩末内径31.9mm, 室间隔厚度10.2mm, 左室后壁厚度9.1mm, 左心房前后径35.2mm,",
+      "model_raw": "{\n  \"template\": \"C\",\n  \"measurements\": {\n    \"左心室舒张末径\": \"41.3mm\",\n    \"左心室收缩末内径\": \"31.9mm\",\n    \"室间隔厚度\": \"10.2mm\",\n    \"左室后壁厚度\": \"9.1mm\",\n    \"左心房前后径\": \"35.2mm\",\n    \"主动脉根部内径\": \"28.5mm\",\n    \"右心室前后径\":",
+      "results": {
+        "template_match": true,
+        "template_pred": "C",
+        "measurement_precision": 1.1538461538461537,
+        "measurement_recall": 0.9375,
+        "gold_meas_count": 16,
+        "pred_meas_count": 13,
+        "abnormality_match": false,
+        "pred_abnormality": "三尖瓣反流流速60.6cm/s",
+        "gold_abnormality": "无"
+      }
+    },
+    {
+      "idx": "54",
+      "template": "B",
+      "asr_preview": "孕26周1天, 胎心131次每分, 心胸面积比0.34 二尖瓣血流E峰25.6c/s, A峰30.1cm/s, 三尖瓣血流E峰33.4cm/s, A峰38.7c",
+      "model_raw": "{\n  \"template\": \"B\",\n  \"measurements\": {\n    \"胎心\": \"131 bpm\",\n    \"心胸面积比\": \"0.34\",\n    \"二尖瓣血流E峰\": \"25.6 cm/s\",\n    \"二尖瓣血流A峰\": \"30.1 cm/s\",\n    \"三尖瓣血流E峰\": \"33.4 cm/s\",\n    \"三尖瓣血流A峰\": \"38.7 cm/s\",\n    \"",
+      "results": {
+        "template_match": true,
+        "template_pred": "B",
+        "measurement_precision": 1.25,
+        "measurement_recall": 1.0,
+        "gold_meas_count": 10,
+        "pred_meas_count": 8,
+        "abnormality_match": false,
+        "pred_abnormality": "动脉导管开放",
+        "gold_abnormality": "无"
+      }
+    },
+    {
+      "idx": "55",
+      "template": "B",
+      "asr_preview": "孕24周4天, 胎心140次每分, 心胸面积比0.3, 二尖瓣血流E峰21.0cm/, A峰40.3cm/s, 三尖瓣血流E峰22.5cm/s, A峰38.8c",
+      "model_raw": "{\n  \"template\": \"B\",\n  \"measurements\": {\n    \"胎心\": \"140 bpm\",\n    \"心胸面积比\": \"0.3\",\n    \"二尖瓣血流E峰\": \"21.0 cm/s\",\n    \"二尖瓣血流A峰\": \"40.3 cm/s\",\n    \"三尖瓣血流E峰\": \"22.5 cm/s\",\n    \"三尖瓣血流A峰\": \"38.8 cm/s\",\n    \"主",
+      "results": {
+        "template_match": true,
+        "template_pred": "B",
+        "measurement_precision": 1.0,
+        "measurement_recall": 0.9,
+        "gold_meas_count": 10,
+        "pred_meas_count": 9,
+        "abnormality_match": true,
+        "pred_abnormality": "无",
+        "gold_abnormality": "无"
+      }
+    },
+    {
+      "idx": "56",
+      "template": "D",
+      "asr_preview": "女性, 67岁, 右侧颈总动脉内中膜厚度1.07mm, 管径7.2mm, 左侧颈总动脉内中膜厚度0.95mm, 管径5.9mm, 右侧颈动脉PSV84.8cm/",
+      "model_raw": "{\n  \"template\": \"D\",\n  \"measurements\": {\n    \"右侧颈总动脉内中膜厚度\": \"1.07mm\",\n    \"左侧颈总动脉内中膜厚度\": \"0.95mm\",\n    \"右侧颈动脉PSV\": \"84.8cm/s\",\n    \"左侧颈内动脉PSV\": \"53.7cm/s\",\n    \"右侧椎动脉内径\": \"2.6mm\",\n    \"左侧椎动脉内径\": \"2.7m",
+      "results": {
+        "template_match": true,
+        "template_pred": "D",
+        "measurement_precision": 1.3,
+        "measurement_recall": 0.7647058823529411,
+        "gold_meas_count": 17,
+        "pred_meas_count": 10,
+        "abnormality_match": true,
+        "pred_abnormality": "双侧颈动脉粥样硬化并斑块形成",
+        "gold_abnormality": "双侧颈动脉粥样硬化并斑块形成"
+      }
+    },
+    {
+      "idx": "57",
+      "template": "D",
+      "asr_preview": "女性, 55岁, 右侧颈总动脉内膜厚度1.03mm, 管经6.0mm, 左侧颈总脉内中膜厚度0.92mm, 管径6.7mm, 右侧颈内动脉PSV50.1cm/s",
+      "model_raw": "{\n  \"template\": \"D\",\n  \"measurements\": {\n    \"右侧颈总动脉内膜厚度\": \"1.03mm\",\n    \"右侧颈总脉管径\": \"6.0mm\",\n    \"左侧颈总脉内中膜厚度\": \"0.92mm\",\n    \"左侧颈总脉管径\": \"6.7mm\",\n    \"右侧颈内动脉PSV\": \"50.1cm/s\",\n    \"右侧颈内动脉EDV\": \"16.7cm/s",
+      "results": {
+        "template_match": true,
+        "template_pred": "D",
+        "measurement_precision": 1.2142857142857142,
+        "measurement_recall": 1.0,
+        "gold_meas_count": 17,
+        "pred_meas_count": 14,
+        "abnormality_match": true,
+        "pred_abnormality": "右侧颈总动脉分叉处斑块, 8.3mm×1.6mm, 混合回声。",
+        "gold_abnormality": "右侧颈总动脉分叉处斑块, 8.3mm×1.6mm, 混合回声"
+      }
+    },
+    {
+      "idx": "58",
+      "template": "D",
+      "asr_preview": "女性, 72岁, 右侧颈总麦内中末度0.95mm, 管径5.7mm, 左侧颈总动脉内中膜厚度0.66mm, 管径7.1mm, 右侧颈内动脉PSV74.0cm/s",
+      "model_raw": "{\n  \"template\": \"D\",\n  \"measurements\": {\n    \"右侧颈总动脉IMT\": \"0.95mm\",\n    \"右侧颈总动脉管径\": \"5.7mm\",\n    \"左侧颈总动脉IMT\": \"0.66mm\",\n    \"左侧颈总动脉管径\": \"7.1mm\",\n    \"右侧颈内动脉PSV\": \"74.0cm/s\",\n    \"右侧颈内动脉EDV\": \"23.6cm/s",
+      "results": {
+        "template_match": true,
+        "template_pred": "D",
+        "measurement_precision": 1.2142857142857142,
+        "measurement_recall": 1.0,
+        "gold_meas_count": 17,
+        "pred_meas_count": 14,
+        "abnormality_match": true,
+        "pred_abnormality": "无",
+        "gold_abnormality": "无"
+      }
+    },
+    {
+      "idx": "59",
+      "template": "C",
+      "asr_preview": "男性, 52岁, 左心时张末期内径49.1mm, 左心室收缩末期内径26.6mm, 室间隔厚度9.3mm啊, 左室后壁厚度8.9mm, 左心房前后径36.5mm",
+      "model_raw": "{\n  \"template\": \"C\",\n  \"measurements\": {\n    \"左心室舒张末径\": \"49.1mm\",\n    \"左心室收缩末径\": \"26.6mm\",\n    \"室间隔厚度\": \"9.3mm\",\n    \"左室后壁厚度\": \"8.9mm\",\n    \"左心房前后径\": \"36.5mm\",\n    \"主动脉根部径\": \"30.2mm\",\n    \"右心室前后径\": \"2",
+      "results": {
+        "template_match": true,
+        "template_pred": "C",
+        "measurement_precision": 1.1428571428571428,
+        "measurement_recall": 1.0,
+        "gold_meas_count": 16,
+        "pred_meas_count": 14,
+        "abnormality_match": false,
+        "pred_abnormality": "三尖瓣反流流速49.1cm/s",
+        "gold_abnormality": "无"
+      }
+    },
+    {
+      "idx": "60",
+      "template": "C",
+      "asr_preview": "男性, 59岁, 嗯左心室舒张末期内径43.5mm, 左心室收缩末期内径26.0mm, 室间隔厚度8.9mm, 左室后壁厚度10.2mm, 左心房前后径34.7",
+      "model_raw": "{\n  \"template\": \"C\",\n  \"measurements\": {\n    \"左心室舒张末径\": \"43.5mm\",\n    \"左心室收缩末径\": \"26.0mm\",\n    \"室间隔厚度\": \"8.9mm\",\n    \"左室后壁厚度\": \"10.2mm\",\n    \"左心房前后径\": \"34.7mm\",\n    \"主麦根部内径\": \"27.7mm\",\n    \"右心室前后径\": \"",
+      "results": {
+        "template_match": true,
+        "template_pred": "C",
+        "measurement_precision": 1.2307692307692308,
+        "measurement_recall": 1.0,
+        "gold_meas_count": 16,
+        "pred_meas_count": 13,
+        "abnormality_match": false,
+        "pred_abnormality": "三尖瓣反流流速58.8cm/s",
+        "gold_abnormality": "无"
+      }
+    },
+    {
+      "idx": "61",
+      "template": "E",
+      "asr_preview": "女性, 54岁, 肝脏右叶斜径138.4m, 肝实质回声稍增粗, 胆囊大小69.0mm×29.9mm, 壁后2.8mm, 胰腺头23mm体10mm尾13mm, ",
+      "model_raw": "{\n  \"template\": \"E\",\n  \"measurements\": {\n    \"肝右叶斜径\": \"138.4mm\",\n    \"胆囊大小\": \"69.0mm×29.9mm\",\n    \"胰腺头\": \"23mm\",\n    \"胰腺体\": \"10mm\",\n    \"胰腺尾\": \"13mm\",\n    \"脾厚\": \"30.4mm\",\n    \"脾长径\": \"97.9mm\",\n    \"右肾\"",
+      "results": {
+        "template_match": true,
+        "template_pred": "E",
+        "measurement_precision": 1.0,
+        "measurement_recall": 0.7647058823529411,
+        "gold_meas_count": 17,
+        "pred_meas_count": 13,
+        "abnormality_match": false,
+        "pred_abnormality": "肝实质回声稍增粗",
+        "gold_abnormality": "无"
+      }
+    },
+    {
+      "idx": "62",
+      "template": "A",
+      "asr_preview": "孕22周1天, 胎儿双顶径52.9mm, 头围195.3mm,腹围179.2mm, 股长40.9mm, 肱骨长38.8mm, 小脑横径23.9mm, 侧脑时宽7",
+      "model_raw": "{\n  \"template\": \"A\",\n  \"measurements\": {\n    \"胎儿双顶径\": \"52.9mm\",\n    \"头围\": \"195.3mm\",\n    \"腹围\": \"179.2mm\",\n    \"股骨长\": \"40.9mm\",\n    \"肱骨长\": \"38.8mm\",\n    \"小脑横径\": \"23.9mm\",\n    \"侧脑室宽\": \"7.3mm\",\n    \"羊水指数",
+      "results": {
+        "template_match": true,
+        "template_pred": "A",
+        "measurement_precision": 1.0,
+        "measurement_recall": 0.8333333333333334,
+        "gold_meas_count": 12,
+        "pred_meas_count": 10,
+        "abnormality_match": false,
+        "pred_abnormality": "透明隔腔可见。颅骨光环完整。胱可见。双足可见。胃泡可见。四腔心可见。",
+        "gold_abnormality": "无"
+      }
+    },
+    {
+      "idx": "63",
+      "template": "B",
+      "asr_preview": "孕22周5天 胎心132次每分, 心胸面积比0.28, 二尖瓣血流E峰31.3cm/s, A峰33.6cm/s, 三尖瓣血流E峰30.6cm/s, A峰40.6",
+      "model_raw": "{\n  \"template\": \"B\",\n  \"measurements\": {\n    \"胎心\": \"132 bpm\",\n    \"心胸面积比\": \"0.28\",\n    \"二尖瓣血流E峰\": \"31.3 cm/s\",\n    \"二尖瓣血流A峰\": \"33.6 cm/s\",\n    \"三尖瓣血流E峰\": \"30.6 cm/s\",\n    \"三尖瓣血流A峰\": \"40.6 cm/s\",\n    \"",
+      "results": {
+        "template_match": true,
+        "template_pred": "B",
+        "measurement_precision": 1.0,
+        "measurement_recall": 0.9,
+        "gold_meas_count": 10,
+        "pred_meas_count": 9,
+        "abnormality_match": false,
+        "pred_abnormality": "房间隔见卵圆孔, 动脉导管开放。",
+        "gold_abnormality": "无"
+      }
+    },
+    {
+      "idx": "64",
+      "template": "C",
+      "asr_preview": "男性, 63岁, 左心室舒张末期内径55.0mm, 心室收缩末期内径33.8mm, 室间隔厚度8.1mm, 左室后壁厚度9.4mm, 左心房前后径31.8mm,",
+      "model_raw": "{\n  \"template\": \"C\",\n  \"measurements\": {\n    \"左心室舒张末径\": \"55.0mm\",\n    \"心室收缩末径\": \"33.8mm\",\n    \"室间隔厚度\": \"8.1mm\",\n    \"左室后壁厚度\": \"9.4mm\",\n    \"左心房前后径\": \"31.8mm\",\n    \"主动脉根部内径\": \"28.5mm\",\n    \"右心室前后径\": \"2",
+      "results": {
+        "template_match": true,
+        "template_pred": "C",
+        "measurement_precision": 1.0666666666666667,
+        "measurement_recall": 1.0,
+        "gold_meas_count": 16,
+        "pred_meas_count": 15,
+        "abnormality_match": true,
+        "pred_abnormality": "三尖瓣反流, 轻度, 估测肺动脉收缩压35.6mmHg。",
+        "gold_abnormality": "三尖瓣反流, 轻度, 估测肺动脉收缩压35.6mmHg"
+      }
+    },
+    {
+      "idx": "65",
+      "template": "C",
+      "asr_preview": "男性, 59岁, 左心室舒张末期内经50.6mm, 左心室收缩末期内径34.3mm, 室间隔后度10.9mm, 左室后壁厚度9.7mm 左心房前后径34.2mm",
+      "model_raw": "{\n  \"template\": \"C\",\n  \"measurements\": {\n    \"左心室舒张末径\": \"50.6mm\",\n    \"左心室收缩末径\": \"34.3mm\",\n    \"室间隔厚度\": \"10.9mm\",\n    \"左室后壁厚度\": \"9.7mm\",\n    \"左心房前后径\": \"34.2mm\",\n    \"主动脉瓣根部内径\": \"34.2mm\",\n    \"右室前后径\": ",
+      "results": {
+        "template_match": true,
+        "template_pred": "C",
+        "measurement_precision": 1.0,
+        "measurement_recall": 0.9375,
+        "gold_meas_count": 16,
+        "pred_meas_count": 15,
+        "abnormality_match": true,
+        "pred_abnormality": "二尖瓣反流, 轻度, 反流面积3.7cm²",
+        "gold_abnormality": "二尖瓣反流, 轻度, 反流面积3.7cm²"
+      }
+    },
+    {
+      "idx": "66",
+      "template": "E",
+      "asr_preview": "男性, 38岁, 肝右叶斜径127.3mm, 肝实质声均匀, 囊大小67.4mm×22.0mm, 壁厚2.6mm, 胰腺头24mm体10m尾16mm, 脾厚30",
+      "model_raw": "{\n  \"template\": \"E\",\n  \"measurements\": {\n    \"肝右叶斜径\": \"127.3mm\",\n    \"胆囊大小\": \"67.4mm×22.0mm\",\n    \"壁厚\": \"2.6mm\",\n    \"胰腺头\": \"24mm\",\n    \"胰腺体\": \"10m (补全为10cm)\",\n    \"胰腺尾\": \"16mm\",\n    \"脾厚\": \"30.2mm\",\n ",
+      "results": {
+        "template_match": true,
+        "template_pred": "E",
+        "measurement_precision": 1.0,
+        "measurement_recall": 0.8823529411764706,
+        "gold_meas_count": 17,
+        "pred_meas_count": 15,
+        "abnormality_match": true,
+        "pred_abnormality": "无",
+        "gold_abnormality": "无"
+      }
+    },
+    {
+      "idx": "67",
+      "template": "E",
+      "asr_preview": "女性, 36岁, 肝脏叶斜经139.7mm, 肝实质回均匀, 胆囊大79.0mm6×.7mm, 壁厚2.8mm, 胰腺头19mm体13mm尾15mm, 脾厚29",
+      "model_raw": "{\n  \"template\": \"E\",\n  \"measurements\": {\n    \"肝右叶斜径\": \"139.7mm\",\n    \"胆囊大小\": \"79.0mm×6.7mm\",\n    \"胰腺头\": \"19mm\",\n    \"胰腺体\": \"13mm\",\n    \"胰腺尾\": \"15mm\",\n    \"脾厚\": \"29.5mm\",\n    \"脾长径\": \"94.0mm\",\n    \"右肾大小",
+      "results": {
+        "template_match": true,
+        "template_pred": "E",
+        "measurement_precision": 1.0769230769230769,
+        "measurement_recall": 0.8235294117647058,
+        "gold_meas_count": 17,
+        "pred_meas_count": 13,
+        "abnormality_match": true,
+        "pred_abnormality": "无",
+        "gold_abnormality": "无"
+      }
+    },
+    {
+      "idx": "68",
+      "template": "D",
+      "asr_preview": "男, 73岁, 右侧颈总冻麦内中膜厚度1.07mm, 管经6.0mm, 左侧颈总动脉内中膜厚度0.52mm, 管径7.4mm, 右侧颈内动脉PSV71.6cm/",
+      "model_raw": "{\n  \"template\": \"D\",\n  \"measurements\": {\n    \"右侧颈总动脉内中膜厚度\": \"1.07mm\",\n    \"右侧颈总动脉管径\": \"6.0mm\",\n    \"左侧颈总动脉内中膜厚度\": \"0.52mm\",\n    \"左侧颈总动脉管径\": \"7.4mm\",\n    \"右侧颈内动脉PSV\": \"71.6cm/s\",\n    \"右侧颈内动脉EDV\": \"19.1",
+      "results": {
+        "template_match": true,
+        "template_pred": "D",
+        "measurement_precision": 1.0625,
+        "measurement_recall": 1.0,
+        "gold_meas_count": 17,
+        "pred_meas_count": 16,
+        "abnormality_match": true,
+        "pred_abnormality": "无",
+        "gold_abnormality": "无"
+      }
+    },
+    {
+      "idx": "69",
+      "template": "A",
+      "asr_preview": "孕23周6天, 胎儿双顶径56.0mm, 头围201.3mm, 腹围183.7mm, 古骨长43.1mm, 肱骨长41.0mm, 小脑横径25.3mm, 侧脑时",
+      "model_raw": "{\n  \"template\": \"A\",\n  \"measurements\": {\n    \"胎儿双顶径\": \"56.0mm\",\n    \"头围\": \"201.3mm\",\n    \"腹围\": \"183.7mm\",\n    \"股骨长\": \"43.1mm\",\n    \"羊水指数\": \"171.0mm\",\n    \"最大羊水深度\": \"35.9mm\",\n    \"胎心\": \"159次/分\"\n  },\n  ",
+      "results": {
+        "template_match": true,
+        "template_pred": "A",
+        "measurement_precision": 1.1428571428571428,
+        "measurement_recall": 0.6666666666666666,
+        "gold_meas_count": 12,
+        "pred_meas_count": 7,
+        "abnormality_match": true,
+        "pred_abnormality": "无",
+        "gold_abnormality": "无"
+      }
+    },
+    {
+      "idx": "70",
+      "template": "A",
+      "asr_preview": "孕23周3天, 胎儿双顶经56.6mm, 头围205.7mm, 腹围185.9mm, 骨长44.0mm, 肱骨那个长41.2mm,小脑横径23.0mm,侧脑室宽",
+      "model_raw": "{\n  \"template\": \"A\",\n  \"measurements\": {\n    \"胎儿双顶径\": \"56.6mm\",\n    \"头围\": \"205.7mm\",\n    \"腹围\": \"185.9mm\",\n    \"股骨长\": \"44.0mm\",\n    \"肱骨长\": \"41.2mm\",\n    \"小脑横径\": \"23.0mm\",\n    \"侧脑室宽\": \"7.3mm\",\n    \"羊水指数",
+      "results": {
+        "template_match": true,
+        "template_pred": "A",
+        "measurement_precision": 0.9230769230769231,
+        "measurement_recall": 1.0,
+        "gold_meas_count": 12,
+        "pred_meas_count": 13,
+        "abnormality_match": true,
+        "pred_abnormality": "侧脑室后宽8.8mm,临界增宽。",
+        "gold_abnormality": "侧脑室后角宽8.8mm, 临界增宽"
+      }
+    },
+    {
+      "idx": "71",
+      "template": "A",
+      "asr_preview": "孕21周, 胎儿双丁径49.5mm, 头围183.0那个mm, 腹围160.7mm, 古骨长38.7mm, 肱骨长35.2mm, 小脑横径22.5mm, 侧脑时",
+      "model_raw": "{\n  \"template\": \"A\",\n  \"measurements\": {\n    \"胎儿双顶径\": \"49.5mm\",\n    \"头围\": \"183.0mm\",\n    \"腹围\": \"160.7mm\",\n    \"股骨长\": \"38.7mm\",\n    \"肱骨长\": \"35.2mm\",\n    \"小脑横径\": \"22.5mm\",\n    \"侧脑室宽\": \"8.0mm\",\n    \"羊水指数",
+      "results": {
+        "template_match": true,
+        "template_pred": "A",
+        "measurement_precision": 1.0,
+        "measurement_recall": 0.8333333333333334,
+        "gold_meas_count": 12,
+        "pred_meas_count": 10,
+        "abnormality_match": true,
+        "pred_abnormality": "无",
+        "gold_abnormality": "无"
+      }
+    },
+    {
+      "idx": "72",
+      "template": "A",
+      "asr_preview": "孕22周2天, 胎儿双丁径54.2mm, 头围190.6mm, 腹173.1mm, 古骨长39.4mm, 肱骨长36.4mm, 小脑横径24.0mm, 侧脑室款",
+      "model_raw": "{\n  \"template\": \"A\",\n  \"measurements\": {\n    \"胎儿双顶径\": \"54.2mm\",\n    \"头围\": \"190.6mm\",\n    \"腹围\": \"173.1mm\",\n    \"股骨长\": \"39.4mm\",\n    \"肱骨长\": \"36.4mm\",\n    \"小脑横径\": \"24.0mm\",\n    \"侧脑室宽\": \"4.0mm\",\n    \"羊水指数",
+      "results": {
+        "template_match": true,
+        "template_pred": "A",
+        "measurement_precision": 0.9090909090909091,
+        "measurement_recall": 0.8333333333333334,
+        "gold_meas_count": 12,
+        "pred_meas_count": 11,
+        "abnormality_match": true,
+        "pred_abnormality": "无",
+        "gold_abnormality": "无"
+      }
+    },
+    {
+      "idx": "73",
+      "template": "C",
+      "asr_preview": "女性, 57岁, 左心室舒张末期经48.2mm, 左心室收缩末内径25.6mm, 室间隔后度8.8mm, 左后壁厚8.2mm, 左心房后径32.6m, 主冻麦根",
+      "model_raw": "{\n  \"template\": \"C\",\n  \"measurements\": {\n    \"左心室舒张末径\": \"48.2mm\",\n    \"左心室收缩末内径\": \"25.6mm\",\n    \"室间隔厚度\": \"8.8mm\",\n    \"左后壁厚\": \"8.2mm\",\n    \"左心房后径\": \"32.6mm\",\n    \"主动脉根部内径\": \"35.4mm\",\n    \"心室前后径\": \"21.",
+      "results": {
+        "template_match": true,
+        "template_pred": "C",
+        "measurement_precision": 1.0,
+        "measurement_recall": 0.9375,
+        "gold_meas_count": 16,
+        "pred_meas_count": 15,
+        "abnormality_match": true,
+        "pred_abnormality": "无",
+        "gold_abnormality": "无"
+      }
+    },
+    {
+      "idx": "74",
+      "template": "D",
+      "asr_preview": "男性, 47岁, 右侧颈总动脉内中膜厚度0.86mm, 管径6.0mm, 左侧颈总动脉内中膜厚度0.7mm, 管径5.5mm, 右侧颈内动脉PV86.2cm/s",
+      "model_raw": "{\n  \"template\": \"D\",\n  \"measurements\": {\n    \"右侧颈总动脉内中膜厚度\": \"0.86mm\",\n    \"左侧颈总动脉内中膜厚度\": \"0.7mm\",\n    \"右侧颈内动脉PSV\": \"86.2cm/s\",\n    \"左侧颈内动脉PSV\": \"63.6cm/s\",\n    \"右侧颈内动脉EDV\": \"27.5cm/s\",\n    \"左侧颈内动脉EDV\"",
+      "results": {
+        "template_match": true,
+        "template_pred": "D",
+        "measurement_precision": 1.25,
+        "measurement_recall": 0.8823529411764706,
+        "gold_meas_count": 17,
+        "pred_meas_count": 12,
+        "abnormality_match": true,
+        "pred_abnormality": "无",
+        "gold_abnormality": "无"
+      }
+    },
+    {
+      "idx": "75",
+      "template": "D",
+      "asr_preview": "男性, 42岁, 右侧颈总冻麦内中膜后度1.07mm, 管径7.0mm, 左侧颈总动脉内中膜厚度0.85mm, 管径7.3mm, 右侧颈内动脉PSV70.3m/",
+      "model_raw": "{\n  \"template\": \"D\",\n  \"measurements\": {\n    \"右侧颈总动脉内中膜厚度\": \"1.07mm\",\n    \"右侧颈总动脉管径\": \"7.0mm\",\n    \"左侧颈总动脉内中膜厚度\": \"0.85mm\",\n    \"左侧颈总动脉管径\": \"7.3mm\",\n    \"右侧颈内动脉PSV\": \"70.3cm/s\",\n    \"右侧颈内动脉EDV\": \"18.1",
+      "results": {
+        "template_match": true,
+        "template_pred": "D",
+        "measurement_precision": 1.0,
+        "measurement_recall": 1.0,
+        "gold_meas_count": 17,
+        "pred_meas_count": 17,
+        "abnormality_match": true,
+        "pred_abnormality": "右侧胫前动脉流速减低",
+        "gold_abnormality": "右侧胫前动脉流速减低, PSV29.2cm"
+      }
+    },
+    {
+      "idx": "76",
+      "template": "E",
+      "asr_preview": "女性, 35岁, 肝脏右叶斜径136.0mm,肝实嗯质回声稍增粗, 胆大小80.0mm×27.1m, 壁后2.0m, 胰腺头18mm体14mm尾18mm, 脾厚",
+      "model_raw": "{\n  \"template\": \"E\",\n  \"measurements\": {\n    \"肝右叶斜径\": \"136.0mm\",\n    \"胆囊大小\": \"80.0mm×27.1mm\",\n    \"胰腺头\": \"18mm\",\n    \"胰腺体\": \"14mm\",\n    \"胰腺尾\": \"18mm\",\n    \"脾厚\": \"33.9mm\",\n    \"脾长径\": \"91.9mm\",\n    \"右肾\"",
+      "results": {
+        "template_match": true,
+        "template_pred": "E",
+        "measurement_precision": 1.0714285714285714,
+        "measurement_recall": 0.8823529411764706,
+        "gold_meas_count": 17,
+        "pred_meas_count": 14,
+        "abnormality_match": false,
+        "pred_abnormality": "肝实质回声稍增粗",
+        "gold_abnormality": "无"
+      }
+    },
+    {
+      "idx": "77",
+      "template": "A",
+      "asr_preview": "孕21周6天, 胎儿双顶经52.5mm, 头围183.1mm, 腹围166.6mm, 骨长36.6mm, 肱骨长35.9mm, 小脑横径20.8mm 侧脑时宽7",
+      "model_raw": "{\n  \"template\": \"A\",\n  \"measurements\": {\n    \"胎儿双顶径\": \"52.5mm\",\n    \"头围\": \"183.1mm\",\n    \"腹围\": \"166.6mm\",\n    \"股骨长\": \"36.6mm\",\n    \"羊水指数\": \"91.8mm\",\n    \"最大羊水深度\": \"46.1mm\",\n    \"胎心\": \"135次/分\"\n  },\n  \"",
+      "results": {
+        "template_match": true,
+        "template_pred": "A",
+        "measurement_precision": 1.1428571428571428,
+        "measurement_recall": 0.6666666666666666,
+        "gold_meas_count": 12,
+        "pred_meas_count": 7,
+        "abnormality_match": true,
+        "pred_abnormality": "无",
+        "gold_abnormality": "无"
+      }
+    },
+    {
+      "idx": "78",
+      "template": "B",
+      "asr_preview": "孕24周3天, 胎心149次每, 心胸面积比0.31, 二尖办血流E峰20.7cm/s, A峰31.3cm/s, 三尖瓣血E峰22.0cm/s, A峰39.2c",
+      "model_raw": "{\n  \"template\": \"B\",\n  \"measurements\": {\n    \"胎心\": \"149次/分\",\n    \"心胸面积比\": \"0.31\",\n    \"二尖瓣血流E峰\": \"20.7cm/s\",\n    \"二尖瓣血流A峰\": \"31.3cm/s\",\n    \"三尖瓣血E峰\": \"22.0cm/s\",\n    \"三尖瓣血A峰\": \"39.2cm/s\",\n    \"主动脉瓣上流速",
+      "results": {
+        "template_match": true,
+        "template_pred": "B",
+        "measurement_precision": 1.0,
+        "measurement_recall": 0.8,
+        "gold_meas_count": 10,
+        "pred_meas_count": 8,
+        "abnormality_match": true,
+        "pred_abnormality": "无",
+        "gold_abnormality": "无"
+      }
+    },
+    {
+      "idx": "79",
+      "template": "E",
+      "asr_preview": "男性, 57岁, 肝脏右叶斜径110.1mm, 肝实质回声均匀, 胆囊大小73.8mm×33.0mm, 壁厚2.0mm, 胰腺头18mm体10mm尾17mm, ",
+      "model_raw": "{\n  \"template\": \"E\",\n  \"measurements\": {\n    \"肝右叶斜径\": \"110.1mm\",\n    \"胆囊大小\": \"73.8mm×33.0mm\",\n    \"胰腺头\": \"18mm\",\n    \"胰腺体\": \"10mm\",\n    \"胰腺尾\": \"17mm\",\n    \"脾厚\": \"29.0mm\",\n    \"脾长径\": \"109.0mm\",\n    \"右肾",
+      "results": {
+        "template_match": true,
+        "template_pred": "E",
+        "measurement_precision": 0.9230769230769231,
+        "measurement_recall": 0.7058823529411765,
+        "gold_meas_count": 17,
+        "pred_meas_count": 13,
+        "abnormality_match": true,
+        "pred_abnormality": "无",
+        "gold_abnormality": "无"
+      }
+    },
+    {
+      "idx": "80",
+      "template": "C",
+      "asr_preview": "男性, 41岁, 左心室舒张末期内经54.9mm, 左心室收缩末期内径36.5mm, 室间隔厚度10.3mm, 左室后壁厚度7.2mm, 左心房前后径33.8m",
+      "model_raw": "{\n  \"template\": \"C\",\n  \"measurements\": {\n    \"左心室舒张末径\": \"54.9mm\",\n    \"左心室收缩末径\": \"36.5mm\",\n    \"室间隔厚度\": \"10.3mm\",\n    \"左室后壁厚度\": \"7.2mm\",\n    \"左心房前后径\": \"33.8mm\",\n    \"主动脉根部内径\": \"30.3mm\",\n    \"右心室前后径\": ",
+      "results": {
+        "template_match": true,
+        "template_pred": "C",
+        "measurement_precision": 1.0,
+        "measurement_recall": 0.9375,
+        "gold_meas_count": 16,
+        "pred_meas_count": 15,
+        "abnormality_match": true,
+        "pred_abnormality": "室间隔基底部增厚, 12.3mm。",
+        "gold_abnormality": "室间隔基底部增厚, 12.3mm"
+      }
+    },
+    {
+      "idx": "81",
+      "template": "E",
+      "asr_preview": "女, 67岁, 肝脏右叶斜径138.6m, 肝实质回声均匀 胆囊大小71.9mm×25.1mm, 壁厚2.3mm, 胰腺头22mm体15mm尾16mm, 脾厚2",
+      "model_raw": "{\n  \"template\": \"E\",\n  \"measurements\": {\n    \"肝右叶斜径\": \"138.6mm\",\n    \"胆囊大小\": \"71.9mm×25.1mm\",\n    \"胰腺头\": \"22mm\",\n    \"胰腺体\": \"15mm\",\n    \"胰腺尾\": \"16mm\",\n    \"脾厚\": \"29.1mm\",\n    \"脾长径\": \"94.0mm\",\n    \"右肾\"",
+      "results": {
+        "template_match": true,
+        "template_pred": "E",
+        "measurement_precision": 1.0,
+        "measurement_recall": 0.8235294117647058,
+        "gold_meas_count": 17,
+        "pred_meas_count": 14,
+        "abnormality_match": true,
+        "pred_abnormality": "无",
+        "gold_abnormality": "无"
+      }
+    },
+    {
+      "idx": "82",
+      "template": "E",
+      "asr_preview": "男性, 45岁, 肝脏右叶斜径116.0mm, 肝质回声均匀, 胆囊大小79.4mm×29.8mm, 壁后2.2mm, 胰腺头18mm体10mm尾10mm, 脾",
+      "model_raw": "{\n  \"template\": \"E\",\n  \"measurements\": {\n    \"肝右叶斜径\": \"116.0mm\",\n    \"胆囊大小\": \"79.4mm×29.8mm\",\n    \"胰腺头\": \"18mm\",\n    \"胰腺体\": \"10mm\",\n    \"胰腺尾\": \"10mm\",\n    \"脾厚\": \"28.7mm\",\n    \"脾长径\": \"92.4mm\",\n    \"右肾\"",
+      "results": {
+        "template_match": true,
+        "template_pred": "E",
+        "measurement_precision": 1.0,
+        "measurement_recall": 0.7647058823529411,
+        "gold_meas_count": 17,
+        "pred_meas_count": 13,
+        "abnormality_match": true,
+        "pred_abnormality": "脾大, 厚46.0mm",
+        "gold_abnormality": "脾大, 厚46.0mm"
+      }
+    },
+    {
+      "idx": "83",
+      "template": "C",
+      "asr_preview": "男性, 42岁, 左心室舒张末期内经46.1mm, 左心室收缩末期内径34.2mm, 室间隔厚度10.8mm, 左室后壁厚度7.2mm, 左心房前后径33.3m",
+      "model_raw": "{\n  \"template\": \"C\",\n  \"measurements\": {\n    \"左心室舒张末径\": \"46.1mm\",\n    \"左心室收缩末径\": \"34.2mm\",\n    \"室间隔厚度\": \"10.8mm\",\n    \"左室后壁厚度\": \"7.2mm\",\n    \"左心房前后径\": \"33.3mm\",\n    \"主动脉根部内径\": \"34.9mm\",\n    \"右心室前后径\": ",
+      "results": {
+        "template_match": true,
+        "template_pred": "C",
+        "measurement_precision": 1.0666666666666667,
+        "measurement_recall": 1.0,
+        "gold_meas_count": 16,
+        "pred_meas_count": 15,
+        "abnormality_match": true,
+        "pred_abnormality": "无",
+        "gold_abnormality": "无"
+      }
+    },
+    {
+      "idx": "84",
+      "template": "D",
+      "asr_preview": "女, 对吧65岁, 右侧颈总动脉内中末后度1.09mm, 管径5.8mm, 左侧颈总动脉内中膜厚度0.63mm, 管径7.0mm, 右侧颈内动脉PSV67.3c",
+      "model_raw": "{\n  \"template\": \"D\",\n  \"measurements\": {\n    \"右侧颈总动脉内中膜厚度\": \"1.09mm\",\n    \"右侧颈总动脉管径\": \"5.8mm\",\n    \"左侧颈总动脉内中膜厚度\": \"0.63mm\",\n    \"左侧颈总动脉管径\": \"7.0mm\",\n    \"右侧颈内动脉PSV\": \"67.3cm/s\",\n    \"右侧颈内动脉EDV\": \"24.4",
+      "results": {
+        "template_match": true,
+        "template_pred": "D",
+        "measurement_precision": 1.2142857142857142,
+        "measurement_recall": 1.0,
+        "gold_meas_count": 17,
+        "pred_meas_count": 14,
+        "abnormality_match": true,
+        "pred_abnormality": "无",
+        "gold_abnormality": "无"
+      }
+    },
+    {
+      "idx": "85",
+      "template": "C",
+      "asr_preview": "女性, 39岁, 左心室舒张末期内径44.9mm, 左心室收缩末期内径33.5mm, 室间厚度10.6mm, 左室后壁厚度9.3mm, 左心房前后径34.3mm",
+      "model_raw": "{\n  \"template\": \"C\",\n  \"measurements\": {\n    \"左心室舒张末径\": \"44.9mm\",\n    \"左心室收缩末径\": \"33.5mm\",\n    \"室间隔厚度\": \"10.6mm\",\n    \"左室后壁厚度\": \"9.3mm\",\n    \"左心房前后径\": \"34.3mm\",\n    \"主动脉根部内径\": \"31.5mm\",\n    \"右心室前后径\": ",
+      "results": {
+        "template_match": true,
+        "template_pred": "C",
+        "measurement_precision": 1.0,
+        "measurement_recall": 0.875,
+        "gold_meas_count": 16,
+        "pred_meas_count": 14,
+        "abnormality_match": true,
+        "pred_abnormality": "无",
+        "gold_abnormality": "无"
+      }
+    },
+    {
+      "idx": "86",
+      "template": "E",
+      "asr_preview": "男性, 47岁, 肝脏右叶斜径125.4mm,肝实质回声稍增粗, 胆囊大小69.4mm×25.8mm, 壁后2.9mm, 胰腺头24mm体16m尾14mm, 脾",
+      "model_raw": "{\n  \"template\": \"E\",\n  \"measurements\": {\n    \"肝脏右叶斜径\": \"125.4mm\",\n    \"胆囊大小\": \"69.4mm×25.8mm\",\n    \"胰腺头\": \"24mm\",\n    \"胰腺体\": \"16m\",\n    \"胰腺尾\": \"14mm\",\n    \"脾厚\": \"36.6mm\",\n    \"脾长径\": \"108.8mm\",\n    \"右肾",
+      "results": {
+        "template_match": true,
+        "template_pred": "E",
+        "measurement_precision": 1.0,
+        "measurement_recall": 0.8235294117647058,
+        "gold_meas_count": 17,
+        "pred_meas_count": 14,
+        "abnormality_match": false,
+        "pred_abnormality": "肝实质回声稍增粗",
+        "gold_abnormality": "无"
+      }
+    },
+    {
+      "idx": "87",
+      "template": "E",
+      "asr_preview": "男性, 59岁, 肝脏右叶斜经128.5mm, 肝实质回声均匀, 胆囊大小65.6mm×23.7mm, 壁后2.8mm, 胰腺头23mm体13mm尾15mm, ",
+      "model_raw": "{\n  \"template\": \"E\",\n  \"measurements\": {\n    \"肝脏右叶斜经\": \"128.5mm\",\n    \"胆囊大小\": \"65.6mm×23.7mm\",\n    \"胰腺头\": \"23mm\",\n    \"胰腺体\": \"13mm\",\n    \"胰腺尾\": \"15mm\",\n    \"脾厚\": \"36.4mm\",\n    \"脾长径\": \"88.6mm\",\n    \"右肾",
+      "results": {
+        "template_match": true,
+        "template_pred": "E",
+        "measurement_precision": 1.0,
+        "measurement_recall": 0.8235294117647058,
+        "gold_meas_count": 17,
+        "pred_meas_count": 14,
+        "abnormality_match": true,
+        "pred_abnormality": "脂肪肝, 轻度",
+        "gold_abnormality": "脂肪肝, 轻度"
+      }
+    },
+    {
+      "idx": "88",
+      "template": "A",
+      "asr_preview": "孕24周 胎儿双丁经58.5mm, 头围217.8mm, 腹围192.5mm,对吧 古骨长45.8mm, 骨长43.2mm, 小脑横径24.1mm, 侧脑室宽7",
+      "model_raw": "{\n  \"template\": \"A\",\n  \"measurements\": {\n    \"胎儿双顶径\": \"58.5mm\",\n    \"头围\": \"217.8mm\",\n    \"腹围\": \"192.5mm\",\n    \"股骨长\": \"45.8mm\",\n    \"羊水指数\": \"99.5mm\",\n    \"最大羊水深度\": \"39.3mm\",\n    \"胎心\": \"146次/分\"\n  },\n  \"",
+      "results": {
+        "template_match": true,
+        "template_pred": "A",
+        "measurement_precision": 1.0,
+        "measurement_recall": 0.5833333333333334,
+        "gold_meas_count": 12,
+        "pred_meas_count": 7,
+        "abnormality_match": true,
+        "pred_abnormality": "无",
+        "gold_abnormality": "无"
+      }
+    },
+    {
+      "idx": "89",
+      "template": "B",
+      "asr_preview": "孕25周2天, 胎心129次每, 心胸面积比0.32, 二尖办血流峰27.2cm/s, A峰42.1cm/s, 三好尖瓣血流E峰31.9cm/s, A峰30.6",
+      "model_raw": "{\n  \"template\": \"B\",\n  \"measurements\": {\n    \"胎心\": \"129 次/分\",\n    \"心胸面积比\": \"0.32\",\n    \"二尖瓣血流峰\": \"27.2 cm/s\",\n    \"A峰\": \"42.1 cm/s\",\n    \"三尖瓣血流E峰\": \"31.9 cm/s\",\n    \"三尖瓣血流A峰\": \"30.6 cm/s\",\n    \"主动脉瓣上流",
+      "results": {
+        "template_match": true,
+        "template_pred": "B",
+        "measurement_precision": 1.0,
+        "measurement_recall": 0.8,
+        "gold_meas_count": 10,
+        "pred_meas_count": 8,
+        "abnormality_match": false,
+        "pred_abnormality": "房间隔见卵圆孔",
+        "gold_abnormality": "无"
+      }
+    },
+    {
+      "idx": "90",
+      "template": "E",
+      "asr_preview": "男性, 68岁, 肝脏右叶斜径111.7mm, 肝实质回声均匀, 胆囊大小65.8mm×26.9mm, 壁厚2.2mm, 胰腺头20mm体15mm尾16mm, ",
+      "model_raw": "{\n  \"template\": \"E\",\n  \"measurements\": {\n    \"肝脏右叶斜径\": \"111.7mm\",\n    \"胆囊大小\": \"65.8mm×26.9mm\",\n    \"胰腺头\": \"20mm\",\n    \"胰腺体\": \"15mm\",\n    \"胰腺尾\": \"16mm\",\n    \"脾厚\": \"35.0mm\",\n    \"脾长径\": \"86.6mm\",\n    \"右肾",
+      "results": {
+        "template_match": true,
+        "template_pred": "E",
+        "measurement_precision": 1.0714285714285714,
+        "measurement_recall": 0.8823529411764706,
+        "gold_meas_count": 17,
+        "pred_meas_count": 14,
+        "abnormality_match": true,
+        "pred_abnormality": "无",
+        "gold_abnormality": "无"
+      }
+    },
+    {
+      "idx": "91",
+      "template": "B",
+      "asr_preview": "孕23周, 胎心127次每分, 心胸面积比0.28,二尖瓣血流E峰22.8cm/s, A峰45.9cm/s, 三尖瓣血流E峰23.0cm/s, A峰46.4cm",
+      "model_raw": "{\n  \"template\": \"B\",\n  \"measurements\": {\n    \"胎心\": \"127 bpm\",\n    \"心胸面积比\": \"0.28\",\n    \"二尖瓣血流E峰\": \"22.8 cm/s\",\n    \"二尖瓣血流A峰\": \"45.9 cm/s\",\n    \"三尖瓣血流E峰\": \"23.0 cm/s\",\n    \"三尖瓣血流A峰\": \"46.4 cm/s\",\n    \"",
+      "results": {
+        "template_match": true,
+        "template_pred": "B",
+        "measurement_precision": 1.125,
+        "measurement_recall": 0.9,
+        "gold_meas_count": 10,
+        "pred_meas_count": 8,
+        "abnormality_match": false,
+        "pred_abnormality": "房间隔见卵圆孔",
+        "gold_abnormality": "无"
+      }
+    },
+    {
+      "idx": "92",
+      "template": "D",
+      "asr_preview": "男性, 43岁, 右侧颈总动脉内中膜厚度0.9m, 径6.9mm, 左侧颈动脉内中膜厚度1.01mm, 管径6.4mm, 右侧颈内动脉PSV68.8cm/s, ",
+      "model_raw": "{\n  \"template\": \"D\",\n  \"measurements\": {\n    \"右侧颈总动脉内中膜厚度\": \"0.9mm\",\n    \"右侧颈总动脉管径\": \"6.9mm\",\n    \"左侧颈动脉内中膜厚度\": \"1.01mm\",\n    \"左侧颈动脉管径\": \"6.4mm\",\n    \"右侧颈内动脉PSV\": \"68.8cm/s\",\n    \"右侧颈内动脉EDV\": \"26.4cm/",
+      "results": {
+        "template_match": true,
+        "template_pred": "D",
+        "measurement_precision": 1.0,
+        "measurement_recall": 0.9411764705882353,
+        "gold_meas_count": 17,
+        "pred_meas_count": 16,
+        "abnormality_match": true,
+        "pred_abnormality": "无",
+        "gold_abnormality": "无"
+      }
+    },
+    {
+      "idx": "93",
+      "template": "C",
+      "asr_preview": "男性, 78岁, 左心室舒张末期44.6mm,左心室收缩末期内径31.8mm,室间隔后度10.8mm, 左室后壁厚度9.1mm,左心房前后径31.2mm, 主冻",
+      "model_raw": "{\n  \"template\": \"C\",\n  \"measurements\": {\n    \"左心室舒张末径\": \"44.6mm\",\n    \"左心室收缩末期内径\": \"31.8mm\",\n    \"室间隔厚度\": \"10.8mm\",\n    \"左室后壁厚度\": \"9.1mm\",\n    \"左心房前后径\": \"31.2mm\",\n    \"主动脉根部内径\": \"35.2mm\",\n    \"右心室前后径\"",
+      "results": {
+        "template_match": true,
+        "template_pred": "C",
+        "measurement_precision": 1.0666666666666667,
+        "measurement_recall": 1.0,
+        "gold_meas_count": 16,
+        "pred_meas_count": 15,
+        "abnormality_match": true,
+        "pred_abnormality": "无",
+        "gold_abnormality": "无"
+      }
+    },
+    {
+      "idx": "94",
+      "template": "D",
+      "asr_preview": "女性, 40岁, 右侧颈总动脉内中末厚度1.06mm, 管径6.0mm, 左侧颈总动脉内中膜厚度0.75m, 管径6.7mm, 右侧颈内动脉PSV67.3cm/",
+      "model_raw": "{\n  \"template\": \"D\",\n  \"measurements\": {\n    \"右侧颈总动脉内中膜厚度\": \"1.06mm\",\n    \"左侧颈总动脉内中膜厚度\": \"0.75mm\",\n    \"右侧颈内动脉PSV\": \"67.3cm/s\",\n    \"左侧颈内动脉PV\": \"86.9cm/s\",\n    \"右侧椎动脉内径\": \"3.1mm\",\n    \"左侧椎动脉内径\": \"3.1m",
+      "results": {
+        "template_match": true,
+        "template_pred": "D",
+        "measurement_precision": 1.2,
+        "measurement_recall": 0.7058823529411765,
+        "gold_meas_count": 17,
+        "pred_meas_count": 10,
+        "abnormality_match": true,
+        "pred_abnormality": "无",
+        "gold_abnormality": "无"
+      }
+    },
+    {
+      "idx": "95",
+      "template": "B",
+      "asr_preview": "孕24周1天, 胎心160次每分, 心面积比0.33, 二尖瓣血流E峰27.5cm/s, A峰35.9cm/s, 三尖瓣血流E峰24.5cm/s, A峰42.0",
+      "model_raw": "{\n  \"template\": \"B\",\n  \"measurements\": {\n    \"胎心\": \"160 bpm\",\n    \"心胸面积比\": \"0.33\",\n    \"二尖瓣E峰\": \"27.5 cm/s\",\n    \"二尖瓣A峰\": \"35.9 cm/s\",\n    \"三尖瓣E峰\": \"24.5 cm/s\",\n    \"三尖瓣A峰\": \"42.0 cm/s\",\n    \"主动脉瓣上流速\"",
+      "results": {
+        "template_match": true,
+        "template_pred": "B",
+        "measurement_precision": 1.25,
+        "measurement_recall": 1.0,
+        "gold_meas_count": 10,
+        "pred_meas_count": 8,
+        "abnormality_match": false,
+        "pred_abnormality": "动脉导管开放，肺静脉引流入左心房",
+        "gold_abnormality": "无"
+      }
+    },
+    {
+      "idx": "96",
+      "template": "A",
+      "asr_preview": "孕20周5天, 胎儿双顶经48.3mm, 头围177.0mm, 腹围153.1mm, 股骨长35.6mm, 肱骨长32.7mm, 小横径20.4mm, 侧脑室款",
+      "model_raw": "{\n  \"template\": \"A\",\n  \"measurements\": {\n    \"胎儿双顶径\": \"48.3mm\",\n    \"头围\": \"177.0mm\",\n    \"腹围\": \"153.1mm\",\n    \"股骨长\": \"35.6mm\",\n    \"羊水指数\": \"171.5mm\",\n    \"最大羊水深度\": \"31.3mm\"\n  },\n  \"abnormality\": \"透明仓可",
+      "results": {
+        "template_match": true,
+        "template_pred": "A",
+        "measurement_precision": 1.5,
+        "measurement_recall": 0.75,
+        "gold_meas_count": 12,
+        "pred_meas_count": 6,
+        "abnormality_match": false,
+        "pred_abnormality": "透明仓可见",
+        "gold_abnormality": "无"
+      }
+    },
+    {
+      "idx": "97",
+      "template": "E",
+      "asr_preview": "女性, 30岁, 肝脏叶斜径112.3mm, 肝实质回声稍增粗, 胆囊大小78.6mm×30.9,m 壁后2.4mm, 胰腺头22mm体12mm尾18mm, 脾",
+      "model_raw": "{\n  \"template\": \"E\",\n  \"measurements\": {\n    \"肝右叶斜径\": \"112.3mm\",\n    \"胆囊大小\": \"78.6mm×30.9cm²\",\n    \"脾厚\": \"34.8mm\",\n    \"脾长径\": \"90.1mm\",\n    \"右肾\": \"108.9mm×57.6mm×41.7mm\",\n    \"左肾\": \"112.8mm×57.8mm×43.",
+      "results": {
+        "template_match": true,
+        "template_pred": "E",
+        "measurement_precision": 1.1,
+        "measurement_recall": 0.6470588235294118,
+        "gold_meas_count": 17,
+        "pred_meas_count": 10,
+        "abnormality_match": true,
+        "pred_abnormality": "胆囊息肉,大小6.5mm,不移动",
+        "gold_abnormality": "胆囊息肉, 6.5mm, 不移动"
+      }
+    },
+    {
+      "idx": "98",
+      "template": "D",
+      "asr_preview": "男, 56岁, 右侧颈总冻麦内中膜后度0.51mm, 管径7.2mm, 左侧颈总动脉内中膜厚度1.04mm, 管径5.8mm, 右侧颈内动脉PSV78.9cm/",
+      "model_raw": "{\n  \"template\": \"D\",\n  \"measurements\": {\n    \"右侧颈总动脉内中膜厚度\": \"0.51mm\",\n    \"右侧颈总动脉管径\": \"7.2mm\",\n    \"左侧颈总动脉内中膜厚度\": \"1.04mm\",\n    \"左侧颈总动脉管径\": \"5.8mm\",\n    \"右侧颈内动脉PSV\": \"78.9cm/s\",\n    \"右侧颈内动脉EDV\": \"26.7",
+      "results": {
+        "template_match": true,
+        "template_pred": "D",
+        "measurement_precision": 1.2142857142857142,
+        "measurement_recall": 1.0,
+        "gold_meas_count": 17,
+        "pred_meas_count": 14,
+        "abnormality_match": true,
+        "pred_abnormality": "无",
+        "gold_abnormality": "无"
+      }
+    },
+    {
+      "idx": "99",
+      "template": "E",
+      "asr_preview": "女性, 58岁, 肝脏右叶斜径112.4mm, 肝实质回声均匀, 胆囊大小60.4mm×22.2mm, 壁厚2.3mm, 胰腺头23mm体15mm尾18mm, ",
+      "model_raw": "{\n  \"template\": \"E\",\n  \"measurements\": {\n    \"肝右叶斜径\": \"112.4mm\",\n    \"胆囊大小\": \"60.4mm×22.2mm\",\n    \"胰腺头\": \"23mm\",\n    \"胰腺体\": \"15mm\",\n    \"胰腺尾\": \"18mm\",\n    \"脾厚\": \"33.2mm\",\n    \"脾长径\": \"104.9mm\",\n    \"右肾",
+      "results": {
+        "template_match": true,
+        "template_pred": "E",
+        "measurement_precision": 1.0,
+        "measurement_recall": 0.7647058823529411,
+        "gold_meas_count": 17,
+        "pred_meas_count": 13,
+        "abnormality_match": true,
+        "pred_abnormality": "无",
+        "gold_abnormality": "无"
+      }
+    },
+    {
+      "idx": "100",
+      "template": "B",
+      "asr_preview": "孕26周5天, 胎心137次每分, 心胸面积比0.3, 二尖瓣血流E峰35.9cm/s, A峰42.1cm/s, 三尖瓣血流E峰23.3cm/s, A峰34.1",
+      "model_raw": "{\n  \"template\": \"B\",\n  \"measurements\": {\n    \"胎心\": \"137 bpm\",\n    \"心胸面积比\": \"0.3\",\n    \"二尖瓣血流E峰\": \"35.9 cm/s\",\n    \"二尖瓣血流A峰\": \"42.1 cm/s\",\n    \"三尖瓣血流E峰\": \"23.3 cm/s\",\n    \"三尖瓣血流A峰\": \"34.1 cm/s\",\n    \"主",
+      "results": {
+        "template_match": true,
+        "template_pred": "B",
+        "measurement_precision": 1.0,
+        "measurement_recall": 0.9,
+        "gold_meas_count": 10,
+        "pred_meas_count": 9,
+        "abnormality_match": true,
+        "pred_abnormality": "无",
+        "gold_abnormality": "无"
+      }
+    }
+  ]
+}

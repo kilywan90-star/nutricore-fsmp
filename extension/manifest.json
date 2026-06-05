@@ -1,0 +1,13 @@
+{
+  "manifest_version": 3,
+  "name": "超声智能语音助手",
+  "version": "1.0",
+  "description": "适配网页版B/S PACS系统的语音结构化录入外挂插件",
+  "permissions": ["activeTab", "scripting"],
+  "content_scripts": [
+    {
+      "matches": ["http://*/*", "https://*/*", "file://*/*"],
+      "js": ["content.js"]
+    }
+  ]
+}

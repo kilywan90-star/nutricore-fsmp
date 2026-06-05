@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>超声语音报告填充系统 — 流式沙盒</title>
+<style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+        font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+        padding: 30px; background: #f1f5f9; color: #1e293b;
+    }
+    .wrapper { max-width: 720px; margin: 0 auto; }
+
+    .page-title { font-size: 22px; font-weight: 800; margin-bottom: 4px; color: #0f172a; }
+    .page-subtitle { font-size: 13px; color: #94a3b8; margin-bottom: 20px; }
+
+    /* ── Control Bar ── */
+    .control-bar {
+        background: #fff; border-radius: 12px; padding: 16px 20px;
+        box-shadow: 0 1px 4px rgba(0,0,0,0.06); margin-bottom: 16px;
+        display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
+    }
+    .ctrl-btn {
+        padding: 10px 20px; border-radius: 8px; font-weight: 700; font-size: 14px;
+        cursor: pointer; border: none; transition: background 0.2s, transform 0.1s;
+    }
+    .ctrl-btn:active { transform: scale(0.97); }
+    .btn-start { background: #2563eb; color: #fff; }
+    .btn-start:hover { background: #1d4ed8; }
+    .btn-stop { background: #fff; color: #2563eb; border: 1.5px solid #2563eb; display: none; }
+    .btn-stop:hover { background: #eff6ff; }
+    .btn-reset { background: #f1f5f9; color: #64748b; border: none; }
+    .btn-reset:hover { background: #e2e8f0; }
+
+    .status-dot {
+        width: 10px; height: 10px; border-radius: 50%;
+        background: #cbd5e1; flex-shrink: 0;
+    }
+    .status-dot.active { background: #22c55e; animation: pulse 1.2s infinite; }
+    .status-dot.locked { background: #2563eb; animation: none; }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+    .status-label { font-size: 12px; color: #64748b; }
+    .template-badge {
+        font-size: 12px; padding: 4px 12px; border-radius: 20px;
+        background: #f0f4ff; color: #475569; margin-left: auto;
+    }
+    .template-badge.locked { background: #d1fae5; color: #065f46; font-weight: 700; }
+
+    /* ── Transcript ── */
+    .live-transcript {
+        background: #fff; border-radius: 12px; padding: 16px;
+        box-shadow: 0 1px 4px rgba(0,0,0,0.06); margin-bottom: 20px;
+    }
+    .live-transcript .label {
+        font-size: 11px; color: #64748b; text-transform: uppercase;
+        letter-spacing: 0.5px; margin-bottom: 6px;
+    }
+    .live-transcript .text {
+        font-size: 15px; color: #0f172a; line-height: 1.6;
+        min-height: 24px; word-break: break-word;
+    }
+
+    /* ── Card sections ── */
+    .card {
+        background: #fff; border-radius: 12px; padding: 20px;
+        box-shadow: 0 1px 4px rgba(0,0,0,0.06); margin-bottom: 20px;
+        transition: box-shadow 0.3s, border-color 0.3s;
+        border: 2px solid transparent;
+    }
+    .card.highlight { border-color: #2563eb; box-shadow: 0 0 0 3px rgba(37,99,235,0.15); }
+    .card-header {
+        font-size: 16px; font-weight: 700; margin-bottom: 14px;
+        padding-bottom: 8px; border-bottom: 2px solid #e2e8f0;
+        display: flex; align-items: center; gap: 8px;
+    }
+    .breast-card .card-header { color: #be185d; border-color: #fbcfe8; }
+    .abdominal-card .card-header { color: #0d9488; border-color: #99f6e4; }
+
+    .form-row { margin-bottom: 12px; }
+    .form-row label {
+        display: block; font-size: 12px; color: #64748b;
+        margin-bottom: 4px; font-weight: 600;
+    }
+    .form-row input, .form-row textarea {
+        width: 100%; padding: 10px 12px; border: 1px solid #cbd5e1;
+        border-radius: 8px; font-size: 14px; color: #1e293b;
+        transition: background-color 0.4s ease, border-color 0.2s;
+    }
+    .form-row input:focus, .form-row textarea:focus {
+        outline: none; border-color: #2563eb; box-shadow: 0 0 0 2px rgba(37,99,235,0.08);
+    }
+    hr { border: none; border-top: 1px solid #e2e8f0; margin: 20px 0; }
+
+    /* ── Review toast ── */
+    .review-toast {
+        position: fixed; top: 20px; left: 50%; transform: translateX(-50%);
+        background: #0f172a; color: #fff; padding: 14px 24px;
+        border-radius: 10px; font-size: 13px; max-width: 500px;
+        box-shadow: 0 8px 24px rgba(0,0,0,0.18); z-index: 9999;
+        display: none; text-align: center; line-height: 1.5;
+    }
+</style>
+</head>
+<body>
+
+<div class="wrapper">
+    <div class="page-title">超声科检查报告单</div>
+    <div class="page-subtitle">流式语音感知 · 渐进模板匹配 · 实时槽位填充</div>
+
+    <!-- ── Control Bar ── -->
+    <div class="control-bar">
+        <span class="status-dot" id="statusDot"></span>
+        <span class="status-label" id="statusText">系统就绪</span>
+        <span class="template-badge" id="templateBadge">科室: 待检测</span>
+        <button class="ctrl-btn btn-start" id="btnStart" onclick="startSession()">开始听写</button>
+        <button class="ctrl-btn btn-stop" id="btnStop" onclick="stopSession()">停止并核对</button>
+        <button class="ctrl-btn btn-reset" id="btnReset" onclick="resetSession()">重置</button>
+    </div>
+
+    <!-- ── Transcript ── -->
+    <div class="live-transcript">
+        <div class="label">实时听写文本预览</div>
+        <div class="text" id="liveTranscript">点击"开始听写"并对着麦克风说话...</div>
+    </div>
+
+    <!-- Breast Card -->
+    <div class="card breast-card" id="breastCard">
+        <div class="card-header"><span>&#x1FA7A;</span> 乳腺检查模板区域</div>
+        <div class="form-row">
+            <label>左乳结节所见</label>
+            <input type="text" id="input_left_breast_nodule" placeholder="AI 将自动填充...">
+        </div>
+        <div class="form-row">
+            <label>右乳结节所见</label>
+            <input type="text" id="input_right_breast_nodule" placeholder="AI 将自动填充...">
+        </div>
+        <div class="form-row">
+            <label>BI-RADS 分级结论</label>
+            <input type="text" id="input_bi_rads_grade" placeholder="AI 将自动填充...">
+        </div>
+    </div>
+
+    <!-- Abdominal Card -->
+    <div class="card abdominal-card" id="abdominalCard">
+        <div class="card-header"><span>&#x1FADB;</span> 腹部彩超模板区域</div>
+        <div class="form-row">
+            <label>肝脏大小</label>
+            <input type="text" id="input_liver_size" placeholder="AI 将自动填充...">
+        </div>
+        <div class="form-row">
+            <label>肝脏回声</label>
+            <input type="text" id="input_liver_echo" placeholder="AI 将自动填充...">
+        </div>
+        <div class="form-row">
+            <label>胆囊大小</label>
+            <input type="text" id="input_gallbladder_size" placeholder="AI 将自动填充...">
+        </div>
+        <div class="form-row">
+            <label>胆囊壁情况</label>
+            <input type="text" id="input_gallbladder_wall" placeholder="AI 将自动填充...">
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header"><span>&#x1F4DD;</span> 其他发现 / 备注</div>
+        <div class="form-row">
+            <textarea id="input_other_findings" rows="3" placeholder="AI 将自动填充..."></textarea>
+        </div>
+    </div>
+</div>
+
+<!-- Review Toast -->
+<div class="review-toast" id="reviewToast"></div>
+
+<script>
+/* ================================================================
+   Self-contained streaming voice report system
+   WebSocket → DeepSeek progressive template matching → live DOM fill
+   ================================================================ */
+
+var ws = null;
+var recognition = null;
+var isActive = false;
+
+var statusDot = document.getElementById('statusDot');
+var statusText = document.getElementById('statusText');
+var templateBadge = document.getElementById('templateBadge');
+var liveTranscript = document.getElementById('liveTranscript');
+var btnStart = document.getElementById('btnStart');
+var btnStop = document.getElementById('btnStop');
+var btnReset = document.getElementById('btnReset');
+var breastCard = document.getElementById('breastCard');
+var abdominalCard = document.getElementById('abdominalCard');
+var reviewToast = document.getElementById('reviewToast');
+
+/* ── WebSocket ── */
+function connectWS() {
+    ws = new WebSocket('ws://127.0.0.1:8002/api/v1/stream-report');
+    ws.onopen = function() {
+        statusDot.className = 'status-dot active';
+        statusText.innerText = 'WebSocket 已连接，开始说话吧...';
+    };
+    ws.onmessage = function(e) {
+        var msg = JSON.parse(e.data);
+        handleMessage(msg);
+    };
+    ws.onclose = function() {
+        statusDot.className = 'status-dot';
+        statusText.innerText = '连接已断开';
+    };
+    ws.onerror = function() {
+        statusText.innerText = '连接失败 — 请确认后端已启动 (python -m uvicorn app.main:app)';
+    };
+}
+
+/* ── Message Router ── */
+function handleMessage(msg) {
+    if (msg.type === 'INTENT_PENDING') {
+        templateBadge.innerText = msg.msg || '检测中...';
+        templateBadge.className = 'template-badge';
+    }
+    if (msg.type === 'TEMPLATE_LOCKED') {
+        templateBadge.innerText = '已锁定: ' + msg.template;
+        templateBadge.className = 'template-badge locked';
+        statusDot.className = 'status-dot locked';
+        statusText.innerText = '模板已锁定 — 实时填充中';
+
+        if (msg.template === 'breast') {
+            breastCard.classList.add('highlight');
+            abdominalCard.classList.remove('highlight');
+        } else if (msg.template === 'abdominal') {
+            abdominalCard.classList.add('highlight');
+            breastCard.classList.remove('highlight');
+        }
+    }
+    if (msg.type === 'SLOT_UPDATES' && msg.slots) {
+        injectSlots(msg.slots);
+        statusText.innerText = '实时更新中...';
+    }
+    if (msg.type === 'FINAL_REVIEW') {
+        if (msg.slots) injectSlots(msg.slots);
+        showReview(msg.review || '审核完成');
+        templateBadge.innerText = '已完成';
+        templateBadge.className = 'template-badge';
+        statusDot.className = 'status-dot';
+        statusText.innerText = '审核完成';
+        btnStart.style.display = 'inline-block';
+        btnStart.innerText = '开始听写';
+        btnStop.style.display = 'none';
+    }
+    if (msg.type === 'RESET') {
+        templateBadge.innerText = '科室: 待检测';
+        templateBadge.className = 'template-badge';
+        breastCard.classList.remove('highlight');
+        abdominalCard.classList.remove('highlight');
+        statusDot.className = 'status-dot';
+    }
+}
+
+/* ── Slot Injection ── */
+function injectSlots(slots) {
+    Object.keys(slots).forEach(function(key) {
+        var el = document.getElementById('input_' + key);
+        if (el) {
+            el.value = slots[key] || '';
+            el.style.backgroundColor = '#fef3c7';
+            setTimeout(function() { el.style.backgroundColor = ''; }, 1500);
+        }
+    });
+}
+
+/* ── Toast ── */
+function showReview(text) {
+    reviewToast.innerText = text;
+    reviewToast.style.display = 'block';
+    setTimeout(function() { reviewToast.style.display = 'none'; }, 6000);
+}
+
+/* ── Web Speech API ── */
+function initSpeech() {
+    var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SR) {
+        statusText.innerText = '浏览器不支持语音识别（夸克浏览器请确认已授权麦克风权限）';
+        return null;
+    }
+    var rec = new SR();
+    rec.lang = 'zh-CN';
+    rec.continuous = true;
+    rec.interimResults = true;
+
+    var finalText = '';
+    rec.onresult = function(event) {
+        var interim = '';
+        for (var i = event.resultIndex; i < event.results.length; i++) {
+            var r = event.results[i];
+            if (r.isFinal) finalText += r[0].transcript;
+            else interim += r[0].transcript;
+        }
+        var display = finalText + interim;
+        liveTranscript.innerText = display || '聆听中...';
+
+        if (ws && ws.readyState === WebSocket.OPEN) {
+            ws.send(JSON.stringify({ type: 'text_update', text: finalText }));
+        }
+    };
+    rec.onerror = function(e) {
+        statusText.innerText = '语音识别错误: ' + e.error;
+    };
+    rec.onend = function() {
+        if (isActive) {
+            try { rec.start(); } catch(ex) {}
+        }
+    };
+    return rec;
+}
+
+/* ── Session Control ── */
+function startSession() {
+    if (isActive) return;
+    isActive = true;
+    btnStart.style.display = 'none';
+    btnStop.style.display = 'inline-block';
+    statusText.innerText = '正在连接...';
+    liveTranscript.innerText = '聆听中...';
+    connectWS();
+
+    recognition = initSpeech();
+    if (recognition) {
+        recognition.start();
+    }
+}
+
+function stopSession() {
+    if (!isActive) return;
+    isActive = false;
+    btnStart.style.display = 'inline-block';
+    btnStart.innerText = '提交中...';
+    btnStop.style.display = 'none';
+
+    if (recognition) {
+        recognition.onend = null;
+        recognition.stop();
+        recognition = null;
+    }
+    if (ws && ws.readyState === WebSocket.OPEN) {
+        ws.send(JSON.stringify({ type: 'finish' }));
+    }
+    statusText.innerText = '正在提交最终审核...';
+}
+
+function resetSession() {
+    if (isActive) {
+        if (recognition) { recognition.onend = null; recognition.stop(); recognition = null; }
+        isActive = false;
+    }
+    if (ws) { try { ws.close(); } catch(e) {} ws = null; }
+    btnStart.style.display = 'inline-block';
+    btnStart.innerText = '开始听写';
+    btnStop.style.display = 'none';
+    statusDot.className = 'status-dot';
+    statusText.innerText = '系统就绪';
+    templateBadge.innerText = '科室: 待检测';
+    templateBadge.className = 'template-badge';
+    liveTranscript.innerText = '点击"开始听写"并对着麦克风说话...';
+    breastCard.classList.remove('highlight');
+    abdominalCard.classList.remove('highlight');
+    ['left_breast_nodule','right_breast_nodule','bi_rads_grade','liver_size','liver_echo','gallbladder_size','gallbladder_wall','other_findings'].forEach(function(k) {
+        var el = document.getElementById('input_' + k);
+        if (el) { el.value = ''; el.style.backgroundColor = ''; }
+    });
+    reviewToast.style.display = 'none';
+}
+</script>
+</body>
+</html>

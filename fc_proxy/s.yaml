@@ -1,0 +1,51 @@
+edition: 3.0.0
+name: fc3-example
+access: default
+resources:
+  fcDemo:
+    component: fc3
+    props:
+      region: cn-hangzhou
+      handler: index.handler
+      role: ''
+      disableOndemand: false
+      description: 'HTTPS反向代理 → 超声报告系统 47.109.151.238:8700'
+      timeout: 30
+      diskSize: 512
+      internetAccess: true
+      layers:
+        - acs:fc:cn-hangzhou:official:layers/Nodejs20/versions/3
+      resourceGroupId: rg-acfmvz3vdailyny
+      instanceIsolationMode: SHARE
+      customRuntimeConfig:
+        port: 9000
+        command:
+          - npm
+          - run
+          - start
+      functionName: proxy
+      sessionAffinity: NONE
+      runtime: custom.debian11
+      cpu: 0.05
+      instanceConcurrency: 20
+      memorySize: 128
+      environmentVariables:
+        PATH: >-
+          /opt/nodejs20/bin:/usr/local/bin/apache-maven/bin:/usr/local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/ruby/bin:/opt/bin:/code:/code/bin
+        LD_LIBRARY_PATH: /code:/code/lib:/usr/lib:/opt/lib:/usr/local/lib
+        NODE_PATH: /opt/nodejs/node_modules
+      code: ./proxy
+      triggers:
+        - triggerConfig:
+            methods:
+              - GET
+              - POST
+              - PUT
+              - DELETE
+              - OPTIONS
+            authType: anonymous
+            disableURLInternet: false
+          triggerName: defaultTrigger
+          description: ''
+          qualifier: LATEST
+          triggerType: http

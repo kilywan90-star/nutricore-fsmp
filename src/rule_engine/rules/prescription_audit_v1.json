@@ -1,0 +1,483 @@
+{
+  "version": "1.0.0",
+  "guideline_source": "29,153条真实三甲医院HIS处方数据挖掘 + 《中国国家处方集》+ 药品说明书 + 抗菌药物分级管理目录",
+  "effective_date": "2026-06-02",
+  "training_data": {
+    "total_prescriptions": 29153,
+    "total_drug_administrations": 287730,
+    "source_database": "金仕达卫宁THIS4 HIS (SQL Server 2012, 12 databases, 5,787 tables)",
+    "data_period": "2015-04 ~ 2016-06",
+    "hospital_type": "大型三甲综合医院"
+  },
+  "rules": {
+    "ddi": [
+      {
+        "id": "ddi-001",
+        "name": "头孢类+氨基糖苷类 — 协同肾毒性",
+        "type": "hard",
+        "category": "ddi",
+        "severity": "REJECTED",
+        "conditions": [
+          {"field": "has_cephalosporin", "operator": "eq", "value": true},
+          {"field": "has_aminoglycoside", "operator": "eq", "value": true}
+        ],
+        "conclusion": "头孢类与氨基糖苷类联用增加肾毒性风险，应避免联用或密切监测肾功能",
+        "confidence": "high",
+        "recommendation": "避免联用；如必须使用，监测肾功能(每日查Cr/BUN)，避免用于老年人",
+        "reference": "《中国国家处方集》§抗感染药物; 数据支撑: 113条处方"
+      },
+      {
+        "id": "ddi-002",
+        "name": "头孢类+利尿剂 — 肾毒性叠加",
+        "type": "hard",
+        "category": "ddi",
+        "severity": "REJECTED",
+        "conditions": [
+          {"field": "has_cephalosporin", "operator": "eq", "value": true},
+          {"field": "has_diuretic", "operator": "eq", "value": true}
+        ],
+        "conclusion": "头孢类与利尿剂(呋塞米等)联用增加肾毒性风险",
+        "confidence": "high",
+        "recommendation": "监测尿量和肾功能，必要时调整剂量或更换药物",
+        "reference": "《中国国家处方集》§抗感染药物; 数据支撑: 82条处方"
+      },
+      {
+        "id": "ddi-003",
+        "name": "喹诺酮类+NSAIDs — CNS毒性/癫痫风险",
+        "type": "hard",
+        "category": "ddi",
+        "severity": "REJECTED",
+        "conditions": [
+          {"field": "has_quinolone", "operator": "eq", "value": true},
+          {"field": "has_nsaid", "operator": "eq", "value": true}
+        ],
+        "conclusion": "喹诺酮类与NSAIDs联用增加中枢神经毒性及癫痫风险",
+        "confidence": "high",
+        "recommendation": "避免联用，改用对乙酰氨基酚或其他镇痛药",
+        "reference": "《中国国家处方集》; 药品说明书(喹诺酮类黑框警告)"
+      },
+      {
+        "id": "ddi-004",
+        "name": "NSAIDs+ACEI/ARB — 肾损伤+降压减弱",
+        "type": "hard",
+        "category": "ddi",
+        "severity": "REJECTED",
+        "conditions": [
+          {"field": "has_nsaid", "operator": "eq", "value": true},
+          {"field": "has_acei_arb", "operator": "eq", "value": true}
+        ],
+        "conclusion": "NSAIDs可减弱ACEI/ARB降压效果，增加急性肾损伤风险",
+        "confidence": "high",
+        "recommendation": "监测血压和肾功能，限短期使用，或改用其他降压方案",
+        "reference": "《中国高血压防治指南》; KDIGO指南"
+      },
+      {
+        "id": "ddi-005",
+        "name": "NSAIDs+抗凝类 — 消化道出血风险",
+        "type": "hard",
+        "category": "ddi",
+        "severity": "REJECTED",
+        "conditions": [
+          {"field": "has_nsaid", "operator": "eq", "value": true},
+          {"field": "has_anticoagulant", "operator": "eq", "value": true}
+        ],
+        "conclusion": "NSAIDs与抗凝药联用显著增加消化道出血风险",
+        "confidence": "high",
+        "recommendation": "加用PPI保护胃黏膜，监测INR和出血症状",
+        "reference": "ACC/AHA抗凝管理指南; FDA黑框警告"
+      },
+      {
+        "id": "ddi-006",
+        "name": "NSAIDs+抗血小板 — 双重出血风险",
+        "type": "hard",
+        "category": "ddi",
+        "severity": "REJECTED",
+        "conditions": [
+          {"field": "has_nsaid", "operator": "eq", "value": true},
+          {"field": "has_antiplatelet", "operator": "eq", "value": true}
+        ],
+        "conclusion": "NSAIDs与抗血小板药物(阿司匹林/氯吡格雷等)联用显著增加消化道出血",
+        "confidence": "high",
+        "recommendation": "评估出血风险，短期使用，加用PPI",
+        "reference": "《中国国家处方集》; ESC抗血小板指南"
+      },
+      {
+        "id": "ddi-007",
+        "name": "抗凝类+抗血小板 — 严重出血风险",
+        "type": "hard",
+        "category": "ddi",
+        "severity": "REJECTED",
+        "conditions": [
+          {"field": "has_anticoagulant", "operator": "eq", "value": true},
+          {"field": "has_antiplatelet", "operator": "eq", "value": true}
+        ],
+        "conclusion": "抗凝药+抗血小板药双重抗栓，出血风险显著增加",
+        "confidence": "high",
+        "recommendation": "严格评估适应证(如PCI术后/房颤+ACS)，限定治疗时程",
+        "reference": "ESC/EACTS双重抗栓指南"
+      },
+      {
+        "id": "ddi-008",
+        "name": "大环内酯类+他汀类 — 横纹肌溶解",
+        "type": "hard",
+        "category": "ddi",
+        "severity": "REJECTED",
+        "conditions": [
+          {"field": "has_macrolide", "operator": "eq", "value": true},
+          {"field": "has_statin", "operator": "eq", "value": true}
+        ],
+        "conclusion": "大环内酯类(CYP3A4抑制剂)致他汀血药浓度升高→横纹肌溶解风险",
+        "confidence": "high",
+        "recommendation": "暂停他汀类药物，或改用不经CYP3A4代谢的普伐他汀/瑞舒伐他汀",
+        "reference": "FDA药物相互作用警告; 数据支撑: 32条处方"
+      },
+      {
+        "id": "ddi-009",
+        "name": "喹诺酮类+口服降糖药 — 血糖波动",
+        "type": "hard",
+        "category": "ddi",
+        "severity": "CAUTION",
+        "conditions": [
+          {"field": "has_quinolone", "operator": "eq", "value": true},
+          {"field": "has_oral_hypoglycemic", "operator": "eq", "value": true}
+        ],
+        "conclusion": "喹诺酮类抗生素可引起血糖波动(高血糖或低血糖)",
+        "confidence": "medium",
+        "recommendation": "监测血糖，必要时调整降糖药剂量",
+        "reference": "药品说明书(喹诺酮类); FDA安全通报"
+      },
+      {
+        "id": "ddi-010",
+        "name": "PPI+氯吡格雷 — 抗血小板减弱",
+        "type": "hard",
+        "category": "ddi",
+        "severity": "CAUTION",
+        "conditions": [
+          {"field": "has_ppi", "operator": "eq", "value": true},
+          {"field": "has_clopidogrel", "operator": "eq", "value": true}
+        ],
+        "conclusion": "PPI(奥美拉唑/埃索美拉唑)抑制CYP2C19，减弱氯吡格雷抗血小板效果",
+        "confidence": "high",
+        "recommendation": "改用与CYP2C19相互作用较小的泮托拉唑或雷贝拉唑",
+        "reference": "FDA/EMA药物安全警告; COGENT研究"
+      },
+      {
+        "id": "ddi-011",
+        "name": "糖皮质激素+NSAIDs — 消化道溃疡",
+        "type": "hard",
+        "category": "ddi",
+        "severity": "REJECTED",
+        "conditions": [
+          {"field": "has_corticosteroid", "operator": "eq", "value": true},
+          {"field": "has_nsaid", "operator": "eq", "value": true}
+        ],
+        "conclusion": "糖皮质激素与NSAIDs联用显著增加消化道溃疡/出血风险",
+        "confidence": "high",
+        "recommendation": "避免联用，或加用PPI保护胃黏膜并密切观察",
+        "reference": "《中国国家处方集》; AGA指南"
+      },
+      {
+        "id": "ddi-012",
+        "name": "中药注射剂+头孢类 — 中西药混合风险",
+        "type": "soft",
+        "category": "ddi",
+        "severity": "CAUTION",
+        "conditions": [
+          {"field": "has_tcm_injection", "operator": "eq", "value": true},
+          {"field": "has_cephalosporin", "operator": "eq", "value": true}
+        ],
+        "conclusion": "中药注射剂与头孢类抗生素混合滴注存在配伍风险",
+        "confidence": "medium",
+        "recommendation": "分瓶输注，两组液体之间用生理盐水冲管",
+        "reference": "《中药注射剂临床使用原则》; 数据支撑: 82条处方"
+      },
+      {
+        "id": "ddi-013",
+        "name": "喹诺酮类+糖皮质激素 — 肌腱炎风险",
+        "type": "soft",
+        "category": "ddi",
+        "severity": "CAUTION",
+        "conditions": [
+          {"field": "has_quinolone", "operator": "eq", "value": true},
+          {"field": "has_corticosteroid", "operator": "eq", "value": true}
+        ],
+        "conclusion": "喹诺酮类与糖皮质激素联用增加肌腱炎/肌腱断裂风险",
+        "confidence": "medium",
+        "recommendation": "老年人及肾功能减退者慎用，出现肌腱疼痛立即停用",
+        "reference": "FDA黑框警告(喹诺酮类肌腱损伤); 数据支撑: 33条处方"
+      }
+    ],
+    "age_contraindication": [
+      {
+        "id": "age-001",
+        "name": "喹诺酮类 >60岁 — 肌腱炎高风险",
+        "type": "hard",
+        "category": "age_contraindication",
+        "severity": "CAUTION",
+        "conditions": [
+          {"field": "has_quinolone", "operator": "eq", "value": true},
+          {"field": "age", "operator": "gte", "value": 60}
+        ],
+        "conclusion": "年龄≥60岁，喹诺酮类增加肌腱炎/肌腱断裂风险",
+        "confidence": "high",
+        "recommendation": "避免用于有肌腱疾病史者，出现关节/肌腱疼痛立即停药",
+        "reference": "FDA黑框警告; 数据支撑: 该院≥60岁实际使用484次"
+      },
+      {
+        "id": "age-002",
+        "name": "头孢类 >75岁 — 需减量",
+        "type": "soft",
+        "category": "age_contraindication",
+        "severity": "CAUTION",
+        "conditions": [
+          {"field": "has_cephalosporin", "operator": "eq", "value": true},
+          {"field": "age", "operator": "gte", "value": 75}
+        ],
+        "conclusion": "年龄≥75岁，肾功能生理性减退，头孢类需根据eGFR减量",
+        "confidence": "high",
+        "recommendation": "根据肾功能调整剂量(CrCl<50ml/min时延长给药间隔或减量)",
+        "reference": "《热病-桑福德抗微生物指南》; 数据支撑: 该院≥75岁实际使用403次"
+      },
+      {
+        "id": "age-003",
+        "name": "氨基糖苷类 >65岁 — 肾毒性高风险",
+        "type": "hard",
+        "category": "age_contraindication",
+        "severity": "CAUTION",
+        "conditions": [
+          {"field": "has_aminoglycoside", "operator": "eq", "value": true},
+          {"field": "age", "operator": "gte", "value": 65}
+        ],
+        "conclusion": "年龄≥65岁，氨基糖苷类肾/耳毒性风险显著增加",
+        "confidence": "high",
+        "recommendation": "优先选择其他类别抗生素; 如必须使用, TDM监测血药浓度",
+        "reference": "《抗菌药物临床应用指导原则》; 数据支撑: 该院≥65岁实际使用55次"
+      },
+      {
+        "id": "age-004",
+        "name": "NSAIDs >70岁 — 消化道+肾双重风险",
+        "type": "soft",
+        "category": "age_contraindication",
+        "severity": "CAUTION",
+        "conditions": [
+          {"field": "has_nsaid", "operator": "eq", "value": true},
+          {"field": "age", "operator": "gte", "value": 70}
+        ],
+        "conclusion": "年龄≥70岁，NSAIDs消化道溃疡/出血和急性肾损伤风险增高",
+        "confidence": "high",
+        "recommendation": "首选对乙酰氨基酚或塞来昔布(选择性COX-2)，加用PPI，短期使用",
+        "reference": "《中国骨关节炎诊疗指南》; AGS Beers标准; 数据支撑: 该院≥70岁实际使用29次"
+      },
+      {
+        "id": "age-005",
+        "name": "抗凝药 >75岁 — 出血高危",
+        "type": "hard",
+        "category": "age_contraindication",
+        "severity": "REJECTED",
+        "conditions": [
+          {"field": "has_anticoagulant", "operator": "eq", "value": true},
+          {"field": "age", "operator": "gte", "value": 75}
+        ],
+        "conclusion": "年龄≥75岁，抗凝治疗出血风险显著增加(HAS-BLED评分自动+1)",
+        "confidence": "high",
+        "recommendation": "严格评估适应证，考虑减量使用或改用NOAC(如适用)，定期监测",
+        "reference": "ESC房颤管理指南; HAS-BLED评分标准; 数据支撑: 该院≥75岁实际使用22次"
+      }
+    ],
+    "antimicrobial_stewardship": [
+      {
+        "id": "abx-001",
+        "name": "碳青霉烯类 — 特殊使用级抗菌药",
+        "type": "hard",
+        "category": "antimicrobial_stewardship",
+        "severity": "REJECTED",
+        "conditions": [
+          {"field": "has_carbapenem", "operator": "eq", "value": true},
+          {"field": "has_infection_indication", "operator": "eq", "value": false}
+        ],
+        "conclusion": "碳青霉烯类为特殊使用级抗菌药，必须有明确感染指征+副主任医师以上审批",
+        "confidence": "high",
+        "recommendation": "送检微生物培养+药敏; 需副主任医师以上审批后方可使用",
+        "reference": "《抗菌药物临床应用管理办法》(卫生部令第84号); 抗菌药物分级管理目录"
+      },
+      {
+        "id": "abx-002",
+        "name": "糖肽类 — 特殊使用级抗菌药",
+        "type": "hard",
+        "category": "antimicrobial_stewardship",
+        "severity": "REJECTED",
+        "conditions": [
+          {"field": "has_glycopeptide", "operator": "eq", "value": true},
+          {"field": "has_infection_indication", "operator": "eq", "value": false}
+        ],
+        "conclusion": "糖肽类(万古霉素/替考拉宁)为特殊使用级，限MRSA或严重G+感染",
+        "confidence": "high",
+        "recommendation": "需确认MRSA感染证据+血药浓度监测(TDM); 副主任医师以上审批",
+        "reference": "《万古霉素临床合理应用中国专家共识》; 抗菌药物分级管理目录"
+      },
+      {
+        "id": "abx-003",
+        "name": "第三代头孢 — 需感染指征",
+        "type": "soft",
+        "category": "antimicrobial_stewardship",
+        "severity": "CAUTION",
+        "conditions": [
+          {"field": "has_cephalosporin", "operator": "eq", "value": true},
+          {"field": "has_infection_indication", "operator": "eq", "value": false}
+        ],
+        "conclusion": "头孢类抗菌药物使用需有感染指征，避免无指征预防用药",
+        "confidence": "medium",
+        "recommendation": "核实是否有明确感染诊断(CAP、UTI、SSI等); 数据中该院2,764次头孢使用未见明确感染诊断",
+        "reference": "《抗菌药物临床应用指导原则》(国卫办医发2015-43号)"
+      },
+      {
+        "id": "abx-004",
+        "name": "喹诺酮类 — 限制使用级",
+        "type": "soft",
+        "category": "antimicrobial_stewardship",
+        "severity": "CAUTION",
+        "conditions": [
+          {"field": "has_quinolone", "operator": "eq", "value": true},
+          {"field": "has_infection_indication", "operator": "eq", "value": false}
+        ],
+        "conclusion": "喹诺酮类为限制使用级抗菌药，非经验性首选",
+        "confidence": "medium",
+        "recommendation": "需药敏结果指导使用; 该院1,331次喹诺酮使用未见明确感染诊断",
+        "reference": "《抗菌药物临床应用指导原则》(国卫办医发2015-43号)"
+      }
+    ],
+    "duplicate_therapy": [
+      {
+        "id": "dup-001",
+        "name": "重复PPI用药",
+        "type": "soft",
+        "category": "duplicate_therapy",
+        "severity": "CAUTION",
+        "conditions": [
+          {"field": "ppi_count", "operator": "gte", "value": 2}
+        ],
+        "conclusion": "处方含≥2种PPI类药物(如注射奥美拉唑+口服奥美拉唑)，存在重复用药",
+        "confidence": "high",
+        "recommendation": "核实是否为不同时段给药(如序贯治疗)，避免同时重复使用; 该院2,759次PPI重复",
+        "reference": "《质子泵抑制剂临床应用指导原则》"
+      },
+      {
+        "id": "dup-002",
+        "name": "重复CCB用药",
+        "type": "soft",
+        "category": "duplicate_therapy",
+        "severity": "CAUTION",
+        "conditions": [
+          {"field": "ccb_count", "operator": "gte", "value": 2}
+        ],
+        "conclusion": "处方含≥2种CCB类药物(钙通道阻滞剂)，可能重复用药",
+        "confidence": "high",
+        "recommendation": "核实是否为联合用药方案(如CCB+ACEI)，避免同类CCB重复; 该院205次CCB重复",
+        "reference": "《中国高血压防治指南》"
+      },
+      {
+        "id": "dup-003",
+        "name": "重复ACEI/ARB用药",
+        "type": "soft",
+        "category": "duplicate_therapy",
+        "severity": "CAUTION",
+        "conditions": [
+          {"field": "acei_arb_count", "operator": "gte", "value": 2}
+        ],
+        "conclusion": "处方含≥2种ACEI/ARB类药物，联合使用不推荐(ONTARGET研究显示无额外获益且增加不良反应)",
+        "confidence": "high",
+        "recommendation": "ACEI与ARB不应联用，选择其一即可; 该院137次ACEI/ARB重复",
+        "reference": "《中国高血压防治指南》; ONTARGET研究(NEJM 2008)"
+      },
+      {
+        "id": "dup-004",
+        "name": "重复NSAIDs用药",
+        "type": "soft",
+        "category": "duplicate_therapy",
+        "severity": "CAUTION",
+        "conditions": [
+          {"field": "nsaid_count", "operator": "gte", "value": 2}
+        ],
+        "conclusion": "处方含≥2种NSAIDs，联合使用不增加疗效但显著增加消化道/肾毒性",
+        "confidence": "high",
+        "recommendation": "只使用一种NSAID; 该院131次NSAIDs重复",
+        "reference": "《中国骨关节炎诊疗指南》; NICE指南"
+      },
+      {
+        "id": "dup-005",
+        "name": "重复他汀用药",
+        "type": "soft",
+        "category": "duplicate_therapy",
+        "severity": "CAUTION",
+        "conditions": [
+          {"field": "statin_count", "operator": "gte", "value": 2}
+        ],
+        "conclusion": "处方含≥2种他汀类药物，联合使用无额外获益且增加肌毒性",
+        "confidence": "high",
+        "recommendation": "只使用一种他汀，必要时联合依折麦布而非双他汀",
+        "reference": "《中国血脂管理指南》"
+      },
+      {
+        "id": "dup-006",
+        "name": "重复口服降糖药",
+        "type": "soft",
+        "category": "duplicate_therapy",
+        "severity": "CAUTION",
+        "conditions": [
+          {"field": "hypoglycemic_count", "operator": "gte", "value": 2}
+        ],
+        "conclusion": "处方含≥2种口服降糖药，需确认是否为合理联合方案",
+        "confidence": "medium",
+        "recommendation": "核实联合方案合理性(如二甲双胍+SGLT2i为合理联合)，避免同机制药物重复; 该院114次降糖药重复",
+        "reference": "《中国2型糖尿病防治指南(2024版)》"
+      }
+    ],
+    "special_population": [
+      {
+        "id": "sp-001",
+        "name": "肝肾功能减退 — 药物蓄积风险",
+        "type": "hard",
+        "category": "special_population",
+        "severity": "REJECTED",
+        "conditions": [
+          {"field": "egfr", "operator": "lt", "value": 30},
+          {"field": "has_cephalosporin", "operator": "eq", "value": true}
+        ],
+        "conclusion": "eGFR<30ml/min，头孢类药物需根据肾功能调整剂量或更换",
+        "confidence": "high",
+        "recommendation": "根据CrCl调整给药方案; 肾功能不全时优先选择经肝胆排泄的抗生素",
+        "reference": "《热病-桑福德抗微生物指南》; 药品说明书"
+      },
+      {
+        "id": "sp-002",
+        "name": "肝功能异常 — 肝代谢药物慎用",
+        "type": "soft",
+        "category": "special_population",
+        "severity": "CAUTION",
+        "conditions": [
+          {"field": "alt", "operator": "gte", "value": 120},
+          {"field": "has_statin", "operator": "eq", "value": true}
+        ],
+        "conclusion": "ALT≥120U/L(3×ULN)，他汀类药物可能加重肝损伤",
+        "confidence": "high",
+        "recommendation": "暂停他汀，排查肝损原因，待肝功能恢复后重新评估",
+        "reference": "《中国血脂管理指南》; FDA他汀肝毒性警告"
+      },
+      {
+        "id": "sp-003",
+        "name": "电解质紊乱 — 氯化钾注射安全",
+        "type": "hard",
+        "category": "special_population",
+        "severity": "REJECTED",
+        "conditions": [
+          {"field": "has_kcl_injection", "operator": "eq", "value": true},
+          {"field": "is_bolus_route", "operator": "eq", "value": true}
+        ],
+        "conclusion": "氯化钾注射液严禁直接静脉推注(可致心脏骤停)",
+        "confidence": "high",
+        "recommendation": "必须稀释后静脉滴注，浓度不超过0.3%(40mmol/L)，速度不超过10-20mmol/h",
+        "reference": "《临床静脉用药调配与使用规范》; 药品说明书(氯化钾注射液黑框警告)"
+      }
+    ]
+  }
+}

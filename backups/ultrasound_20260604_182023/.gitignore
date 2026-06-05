@@ -1,0 +1,28 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+venv/
+.env/
+.venv/
+
+# IDE
+.vscode/
+.idea/
+
+# Database & backups
+*.db
+*.db-shm
+*.db-wal
+audio_backups/
+
+# Test outputs
+test_results*.json
+*_debug*.txt
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Environment
+.env

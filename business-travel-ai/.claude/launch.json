@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "business-travel-ai",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": ["next", "dev", "-p", "3099"],
+      "port": 3099
+    }
+  ]
+}
