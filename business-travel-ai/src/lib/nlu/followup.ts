@@ -1,7 +1,7 @@
 import type { ExtendedIntent, ExtendedNLUSlots } from "@/types";
 
 const REQUIRED_SLOTS: Record<string, string[]> = {
-  dining_recommend: ["city", "guestCount"],
+  dining_recommend: ["guestCount"],
   booking: ["city", "guestCount"],
   query_restaurant: [],
   modify_plan: [],

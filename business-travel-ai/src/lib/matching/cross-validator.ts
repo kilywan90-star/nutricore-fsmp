@@ -136,5 +136,10 @@ export async function crossValidate(
     });
   }
 
-  return results;
+  // 过滤掉LLM幻觉（非当前城市、未验证的非DB推荐）
+  const cityResults = results.filter(r => {
+    if (r.verified || r.source === "database") return r.restaurant.city === city;
+    return false; // LLM unverified that didn't match any DB — skip
+  });
+  return cityResults.length > 0 ? cityResults : [];
 }

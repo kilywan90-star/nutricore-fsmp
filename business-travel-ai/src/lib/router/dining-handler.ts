@@ -39,7 +39,16 @@ export const handleDining: DomainHandler = async (nluResult, sessionId): Promise
   ]);
 
   // 3. 交叉验证
-  const validated = await crossValidate(llmRecs, dbCandidates, constraints.city);
+  let validated = await crossValidate(llmRecs, dbCandidates, constraints.city);
+
+  // 交叉验证后如果没有结果，直接使用DB候选（跳过有问题的LLM推荐）
+  if (validated.length === 0 && dbCandidates.length > 0) {
+    validated = dbCandidates.map(dc => ({
+      restaurant: dc.restaurant,
+      verified: true,
+      source: "database" as const,
+    }));
+  }
 
   // 4. 排序 Top 8
   const ranked = rankRestaurants(validated, dbCandidates, constraints, memoryBoosts, 8);

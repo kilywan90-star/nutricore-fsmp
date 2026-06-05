@@ -115,9 +115,11 @@ export function buildRestaurantRecommendPrompt(
   const systemMsg = `你是资深商务餐饮顾问。根据用户需求从候选餐厅列表中推荐最合适的，并说明推荐理由。
 
 重要规则：
-1. 你不得编造任何文化故事、历史典故或菜品传说。你只负责基于约束条件推荐餐厅并给出理由。
-2. 所有文化故事由独立数据库提供，你不需要也不应该生成任何文化相关内容。
-3. 推荐理由应聚焦于商务场景的适合度（私密性、氛围、菜系匹配度等）。
+1. 你只能从候选餐厅列表中推荐，绝对不能推荐列表之外的任何餐厅
+2. 如果候选列表为空，返回空数组 {"recommendations": []}
+3. 你不得编造任何文化故事、历史典故或菜品传说。你只负责基于约束条件推荐餐厅并给出理由。
+4. 推荐理由应聚焦于商务场景的适合度（私密性、氛围、菜系匹配度等）。
+5. 餐厅名称必须与候选列表完全一致，不要修改或润色名称
 
 以JSON格式回复: {"recommendations": [{"name": "餐厅名", "reason": "推荐理由"}]}`;
 
@@ -129,7 +131,7 @@ ${constraints.budgetPerPerson ? `- 人均预算: ${constraints.budgetPerPerson}�
 ${constraints.privacyMin ? `- 私密性要求: ${constraints.privacyMin}及以上` : ""}
 ${constraints.scene ? `- 场景: ${constraints.scene}` : ""}
 
-候选餐厅: ${restaurantNames.join("、")}
+候选餐厅: ${restaurantNames.length > 0 ? restaurantNames.join("、") : "（无候选餐厅，请返回空数组）"}
 
 Reply with valid JSON.`;
 
