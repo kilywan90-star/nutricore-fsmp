@@ -139,7 +139,18 @@ export async function crossValidate(
   // 过滤掉LLM幻觉（非当前城市、未验证的非DB推荐）
   const cityResults = results.filter(r => {
     if (r.verified || r.source === "database") return r.restaurant.city === city;
-    return false; // LLM unverified that didn't match any DB — skip
+    return false;
   });
-  return cityResults.length > 0 ? cityResults : [];
+  // 如果交叉验证没有结果，但DB有候选，回退到DB
+  if (cityResults.length === 0 && dbCandidates.length > 0) {
+    return dbCandidates
+      .filter(dc => dc.restaurant.city === city)
+      .slice(0, 5)
+      .map(dc => ({
+        restaurant: dc.restaurant,
+        verified: true,
+        source: "database" as const,
+      }));
+  }
+  return cityResults;
 }

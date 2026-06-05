@@ -8,6 +8,7 @@ const envSchema = z.object({
   // 旧版百炼配置 (向后兼容)
   DASHSCOPE_API_KEY: z.string().min(1).optional(),
   AMAP_API_KEY: z.string().optional(),
+  AMAP_SECRET: z.string().optional(),
   PORT: z.coerce.number().default(3000),
 });
 
