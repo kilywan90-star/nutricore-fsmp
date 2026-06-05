@@ -24,8 +24,7 @@ const SLOT_QUESTIONS: Record<string, (slots: ExtendedNLUSlots) => string> = {
     slots.guestProfile
       ? `您要宴请${slots.guestProfile}在哪个城市呢？`
       : "请问在哪个城市？",
-  guestCount: (slots) =>
-    slots.scene ? `${slots.scene}大概多少人参加？` : "请问一共几位？",
+  guestCount: (slots) => "请问一共几位？",
   date: () => "请问安排在哪天？",
   time: () => "大概几点开始呢？",
   cuisine: () => "想吃什么菜系呢？比如粤菜、川菜、日料？",
