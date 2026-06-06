@@ -1,0 +1,1013 @@
+{
+  "summary": {
+    "total": 100,
+    "success": 100,
+    "failed": 0,
+    "avg_score": 100,
+    "avg_latency_s": 10.401322968006134,
+    "total_time_s": 1040.1406173706055,
+    "icd10_coverage_rate": "76.4%"
+  },
+  "details": [
+    {
+      "index": 1,
+      "success": true,
+      "elapsed": 15.745264530181885,
+      "score": 100,
+      "findings_count": 4,
+      "diags_count": 2,
+      "icd10_count": 1,
+      "issues": []
+    },
+    {
+      "index": 2,
+      "success": true,
+      "elapsed": 13.097933292388916,
+      "score": 100,
+      "findings_count": 7,
+      "diags_count": 1,
+      "icd10_count": 0,
+      "issues": []
+    },
+    {
+      "index": 3,
+      "success": true,
+      "elapsed": 13.113073110580444,
+      "score": 100,
+      "findings_count": 6,
+      "diags_count": 2,
+      "icd10_count": 2,
+      "issues": []
+    },
+    {
+      "index": 4,
+      "success": true,
+      "elapsed": 9.536415576934814,
+      "score": 100,
+      "findings_count": 2,
+      "diags_count": 1,
+      "icd10_count": 1,
+      "issues": []
+    },
+    {
+      "index": 5,
+      "success": true,
+      "elapsed": 5.750009298324585,
+      "score": 100,
+      "findings_count": 1,
+      "diags_count": 1,
+      "icd10_count": 1,
+      "issues": []
+    },
+    {
+      "index": 6,
+      "success": true,
+      "elapsed": 8.75350546836853,
+      "score": 100,
+      "findings_count": 1,
+      "diags_count": 1,
+      "icd10_count": 1,
+      "issues": []
+    },
+    {
+      "index": 7,
+      "success": true,
+      "elapsed": 8.245083332061768,
+      "score": 100,
+      "findings_count": 2,
+      "diags_count": 2,
+      "icd10_count": 1,
+      "issues": []
+    },
+    {
+      "index": 8,
+      "success": true,
+      "elapsed": 6.418935060501099,
+      "score": 100,
+      "findings_count": 2,
+      "diags_count": 1,
+      "icd10_count": 1,
+      "issues": []
+    },
+    {
+      "index": 9,
+      "success": true,
+      "elapsed": 6.886883020401001,
+      "score": 100,
+      "findings_count": 1,
+      "diags_count": 1,
+      "icd10_count": 1,
+      "issues": []
+    },
+    {
+      "index": 10,
+      "success": true,
+      "elapsed": 6.583490371704102,
+      "score": 100,
+      "findings_count": 1,
+      "diags_count": 1,
+      "icd10_count": 1,
+      "issues": []
+    },
+    {
+      "index": 11,
+      "success": true,
+      "elapsed": 7.275519132614136,
+      "score": 100,
+      "findings_count": 1,
+      "diags_count": 1,
+      "icd10_count": 1,
+      "issues": []
+    },
+    {
+      "index": 12,
+      "success": true,
+      "elapsed": 16.231143712997437,
+      "score": 100,
+      "findings_count": 1,
+      "diags_count": 1,
+      "icd10_count": 1,
+      "issues": []
+    },
+    {
+      "index": 13,
+      "success": true,
+      "elapsed": 9.069599866867065,
+      "score": 100,
+      "findings_count": 2,
+      "diags_count": 3,
+      "icd10_count": 2,
+      "issues": []
+    },
+    {
+      "index": 14,
+      "success": true,
+      "elapsed": 6.589834451675415,
+      "score": 100,
+      "findings_count": 2,
+      "diags_count": 1,
+      "icd10_count": 1,
+      "issues": []
+    },
+    {
+      "index": 15,
+      "success": true,
+      "elapsed": 8.612756490707397,
+      "score": 100,
+      "findings_count": 1,
+      "diags_count": 1,
+      "icd10_count": 1,
+      "issues": []
+    },
+    {
+      "index": 16,
+      "success": true,
+      "elapsed": 9.522062063217163,
+      "score": 100,
+      "findings_count": 2,
+      "diags_count": 1,
+      "icd10_count": 1,
+      "issues": []
+    },
+    {
+      "index": 17,
+      "success": true,
+      "elapsed": 18.33576488494873,
+      "score": 100,
+      "findings_count": 2,
+      "diags_count": 1,
+      "icd10_count": 1,
+      "issues": []
+    },
+    {
+      "index": 18,
+      "success": true,
+      "elapsed": 12.28899097442627,
+      "score": 100,
+      "findings_count": 2,
+      "diags_count": 2,
+      "icd10_count": 1,
+      "issues": []
+    },
+    {
+      "index": 19,
+      "success": true,
+      "elapsed": 6.741626739501953,
+      "score": 100,
+      "findings_count": 2,
+      "diags_count": 1,
+      "icd10_count": 1,
+      "issues": []
+    },
+    {
+      "index": 20,
+      "success": true,
+      "elapsed": 18.06042218208313,
+      "score": 100,
+      "findings_count": 7,
+      "diags_count": 1,
+      "icd10_count": 1,
+      "issues": []
+    },
+    {
+      "index": 21,
+      "success": true,
+      "elapsed": 10.365461111068726,
+      "score": 100,
+      "findings_count": 1,
+      "diags_count": 1,
+      "icd10_count": 1,
+      "issues": []
+    },
+    {
+      "index": 22,
+      "success": true,
+      "elapsed": 10.504389762878418,
+      "score": 100,
+      "findings_count": 1,
+      "diags_count": 1,
+      "icd10_count": 1,
+      "issues": []
+    },
+    {
+      "index": 23,
+      "success": true,
+      "elapsed": 6.40570068359375,
+      "score": 100,
+      "findings_count": 1,
+      "diags_count": 1,
+      "icd10_count": 0,
+      "issues": []
+    },
+    {
+      "index": 24,
+      "success": true,
+      "elapsed": 19.117971897125244,
+      "score": 100,
+      "findings_count": 3,
+      "diags_count": 1,
+      "icd10_count": 1,
+      "issues": []
+    },
+    {
+      "index": 25,
+      "success": true,
+      "elapsed": 6.847924709320068,
+      "score": 100,
+      "findings_count": 1,
+      "diags_count": 1,
+      "icd10_count": 1,
+      "issues": []
+    },
+    {
+      "index": 26,
+      "success": true,
+      "elapsed": 14.93886423110962,
+      "score": 100,
+      "findings_count": 3,
+      "diags_count": 1,
+      "icd10_count": 0,
+      "issues": []
+    },
+    {
+      "index": 27,
+      "success": true,
+      "elapsed": 6.144490957260132,
+      "score": 100,
+      "findings_count": 1,
+      "diags_count": 1,
+      "icd10_count": 1,
+      "issues": []
+    },
+    {
+      "index": 28,
+      "success": true,
+      "elapsed": 8.896173238754272,
+      "score": 100,
+      "findings_count": 2,
+      "diags_count": 1,
+      "icd10_count": 1,
+      "issues": []
+    },
+    {
+      "index": 29,
+      "success": true,
+      "elapsed": 16.498054027557373,
+      "score": 100,
+      "findings_count": 1,
+      "diags_count": 1,
+      "icd10_count": 0,
+      "issues": []
+    },
+    {
+      "index": 30,
+      "success": true,
+      "elapsed": 10.965389966964722,
+      "score": 100,
+      "findings_count": 1,
+      "diags_count": 1,
+      "icd10_count": 1,
+      "issues": []
+    },
+    {
+      "index": 31,
+      "success": true,
+      "elapsed": 6.239643096923828,
+      "score": 100,
+      "findings_count": 1,
+      "diags_count": 1,
+      "icd10_count": 0,
+      "issues": []
+    },
+    {
+      "index": 32,
+      "success": true,
+      "elapsed": 13.655935049057007,
+      "score": 100,
+      "findings_count": 1,
+      "diags_count": 2,
+      "icd10_count": 1,
+      "issues": []
+    },
+    {
+      "index": 33,
+      "success": true,
+      "elapsed": 7.1827452182769775,
+      "score": 100,
+      "findings_count": 1,
+      "diags_count": 1,
+      "icd10_count": 1,
+      "issues": []
+    },
+    {
+      "index": 34,
+      "success": true,
+      "elapsed": 18.471389770507812,
+      "score": 100,
+      "findings_count": 1,
+      "diags_count": 1,
+      "icd10_count": 1,
+      "issues": []
+    },
+    {
+      "index": 35,
+      "success": true,
+      "elapsed": 7.380254507064819,
+      "score": 100,
+      "findings_count": 2,
+      "diags_count": 1,
+      "icd10_count": 1,
+      "issues": []
+    },
+    {
+      "index": 36,
+      "success": true,
+      "elapsed": 8.499933958053589,
+      "score": 100,
+      "findings_count": 3,
+      "diags_count": 1,
+      "icd10_count": 0,
+      "issues": []
+    },
+    {
+      "index": 37,
+      "success": true,
+      "elapsed": 7.794760704040527,
+      "score": 100,
+      "findings_count": 1,
+      "diags_count": 1,
+      "icd10_count": 1,
+      "issues": []
+    },
+    {
+      "index": 38,
+      "success": true,
+      "elapsed": 13.962703466415405,
+      "score": 100,
+      "findings_count": 1,
+      "diags_count": 1,
+      "icd10_count": 0,
+      "issues": []
+    },
+    {
+      "index": 39,
+      "success": true,
+      "elapsed": 11.408560276031494,
+      "score": 100,
+      "findings_count": 2,
+      "diags_count": 1,
+      "icd10_count": 1,
+      "issues": []
+    },
+    {
+      "index": 40,
+      "success": true,
+      "elapsed": 12.765685081481934,
+      "score": 100,
+      "findings_count": 1,
+      "diags_count": 1,
+      "icd10_count": 1,
+      "issues": []
+    },
+    {
+      "index": 41,
+      "success": true,
+      "elapsed": 13.932603120803833,
+      "score": 100,
+      "findings_count": 1,
+      "diags_count": 1,
+      "icd10_count": 1,
+      "issues": []
+    },
+    {
+      "index": 42,
+      "success": true,
+      "elapsed": 9.91391134262085,
+      "score": 100,
+      "findings_count": 1,
+      "diags_count": 1,
+      "icd10_count": 0,
+      "issues": []
+    },
+    {
+      "index": 43,
+      "success": true,
+      "elapsed": 11.226930618286133,
+      "score": 100,
+      "findings_count": 2,
+      "diags_count": 1,
+      "icd10_count": 1,
+      "issues": []
+    },
+    {
+      "index": 44,
+      "success": true,
+      "elapsed": 11.916881799697876,
+      "score": 100,
+      "findings_count": 2,
+      "diags_count": 2,
+      "icd10_count": 1,
+      "issues": []
+    },
+    {
+      "index": 45,
+      "success": true,
+      "elapsed": 6.583797216415405,
+      "score": 100,
+      "findings_count": 2,
+      "diags_count": 1,
+      "icd10_count": 0,
+      "issues": []
+    },
+    {
+      "index": 46,
+      "success": true,
+      "elapsed": 10.247689723968506,
+      "score": 100,
+      "findings_count": 1,
+      "diags_count": 1,
+      "icd10_count": 0,
+      "issues": []
+    },
+    {
+      "index": 47,
+      "success": true,
+      "elapsed": 8.360072612762451,
+      "score": 100,
+      "findings_count": 1,
+      "diags_count": 1,
+      "icd10_count": 1,
+      "issues": []
+    },
+    {
+      "index": 48,
+      "success": true,
+      "elapsed": 14.14005160331726,
+      "score": 100,
+      "findings_count": 1,
+      "diags_count": 2,
+      "icd10_count": 1,
+      "issues": []
+    },
+    {
+      "index": 49,
+      "success": true,
+      "elapsed": 16.707437992095947,
+      "score": 100,
+      "findings_count": 1,
+      "diags_count": 1,
+      "icd10_count": 1,
+      "issues": []
+    },
+    {
+      "index": 50,
+      "success": true,
+      "elapsed": 6.0896618366241455,
+      "score": 100,
+      "findings_count": 1,
+      "diags_count": 1,
+      "icd10_count": 1,
+      "issues": []
+    },
+    {
+      "index": 51,
+      "success": true,
+      "elapsed": 5.968533039093018,
+      "score": 100,
+      "findings_count": 1,
+      "diags_count": 1,
+      "icd10_count": 1,
+      "issues": []
+    },
+    {
+      "index": 52,
+      "success": true,
+      "elapsed": 12.127862691879272,
+      "score": 100,
+      "findings_count": 1,
+      "diags_count": 1,
+      "icd10_count": 1,
+      "issues": []
+    },
+    {
+      "index": 53,
+      "success": true,
+      "elapsed": 11.93416714668274,
+      "score": 100,
+      "findings_count": 1,
+      "diags_count": 2,
+      "icd10_count": 1,
+      "issues": []
+    },
+    {
+      "index": 54,
+      "success": true,
+      "elapsed": 8.525081872940063,
+      "score": 100,
+      "findings_count": 1,
+      "diags_count": 1,
+      "icd10_count": 1,
+      "issues": []
+    },
+    {
+      "index": 55,
+      "success": true,
+      "elapsed": 19.341689109802246,
+      "score": 100,
+      "findings_count": 1,
+      "diags_count": 1,
+      "icd10_count": 1,
+      "issues": []
+    },
+    {
+      "index": 56,
+      "success": true,
+      "elapsed": 7.583653211593628,
+      "score": 100,
+      "findings_count": 1,
+      "diags_count": 1,
+      "icd10_count": 1,
+      "issues": []
+    },
+    {
+      "index": 57,
+      "success": true,
+      "elapsed": 14.953916549682617,
+      "score": 100,
+      "findings_count": 1,
+      "diags_count": 1,
+      "icd10_count": 1,
+      "issues": []
+    },
+    {
+      "index": 58,
+      "success": true,
+      "elapsed": 15.602345943450928,
+      "score": 100,
+      "findings_count": 1,
+      "diags_count": 1,
+      "icd10_count": 1,
+      "issues": []
+    },
+    {
+      "index": 59,
+      "success": true,
+      "elapsed": 15.57255244255066,
+      "score": 100,
+      "findings_count": 1,
+      "diags_count": 1,
+      "icd10_count": 1,
+      "issues": []
+    },
+    {
+      "index": 60,
+      "success": true,
+      "elapsed": 12.555021286010742,
+      "score": 100,
+      "findings_count": 1,
+      "diags_count": 1,
+      "icd10_count": 1,
+      "issues": []
+    },
+    {
+      "index": 61,
+      "success": true,
+      "elapsed": 8.771357536315918,
+      "score": 100,
+      "findings_count": 1,
+      "diags_count": 1,
+      "icd10_count": 0,
+      "issues": []
+    },
+    {
+      "index": 62,
+      "success": true,
+      "elapsed": 6.16499924659729,
+      "score": 100,
+      "findings_count": 1,
+      "diags_count": 1,
+      "icd10_count": 0,
+      "issues": []
+    },
+    {
+      "index": 63,
+      "success": true,
+      "elapsed": 9.668696403503418,
+      "score": 100,
+      "findings_count": 1,
+      "diags_count": 1,
+      "icd10_count": 0,
+      "issues": []
+    },
+    {
+      "index": 64,
+      "success": true,
+      "elapsed": 8.711433172225952,
+      "score": 100,
+      "findings_count": 2,
+      "diags_count": 2,
+      "icd10_count": 2,
+      "issues": []
+    },
+    {
+      "index": 65,
+      "success": true,
+      "elapsed": 9.399065494537354,
+      "score": 100,
+      "findings_count": 1,
+      "diags_count": 1,
+      "icd10_count": 0,
+      "issues": []
+    },
+    {
+      "index": 66,
+      "success": true,
+      "elapsed": 10.989037275314331,
+      "score": 100,
+      "findings_count": 1,
+      "diags_count": 1,
+      "icd10_count": 1,
+      "issues": []
+    },
+    {
+      "index": 67,
+      "success": true,
+      "elapsed": 6.983161211013794,
+      "score": 100,
+      "findings_count": 1,
+      "diags_count": 1,
+      "icd10_count": 1,
+      "issues": []
+    },
+    {
+      "index": 68,
+      "success": true,
+      "elapsed": 9.002975940704346,
+      "score": 100,
+      "findings_count": 2,
+      "diags_count": 1,
+      "icd10_count": 1,
+      "issues": []
+    },
+    {
+      "index": 69,
+      "success": true,
+      "elapsed": 7.830440044403076,
+      "score": 100,
+      "findings_count": 1,
+      "diags_count": 1,
+      "icd10_count": 1,
+      "issues": []
+    },
+    {
+      "index": 70,
+      "success": true,
+      "elapsed": 8.359171867370605,
+      "score": 100,
+      "findings_count": 1,
+      "diags_count": 1,
+      "icd10_count": 1,
+      "issues": []
+    },
+    {
+      "index": 71,
+      "success": true,
+      "elapsed": 7.895490407943726,
+      "score": 100,
+      "findings_count": 2,
+      "diags_count": 1,
+      "icd10_count": 1,
+      "issues": []
+    },
+    {
+      "index": 72,
+      "success": true,
+      "elapsed": 6.332986831665039,
+      "score": 100,
+      "findings_count": 1,
+      "diags_count": 1,
+      "icd10_count": 1,
+      "issues": []
+    },
+    {
+      "index": 73,
+      "success": true,
+      "elapsed": 7.122575521469116,
+      "score": 100,
+      "findings_count": 1,
+      "diags_count": 1,
+      "icd10_count": 1,
+      "issues": []
+    },
+    {
+      "index": 74,
+      "success": true,
+      "elapsed": 9.147420406341553,
+      "score": 100,
+      "findings_count": 1,
+      "diags_count": 1,
+      "icd10_count": 0,
+      "issues": []
+    },
+    {
+      "index": 75,
+      "success": true,
+      "elapsed": 16.896475076675415,
+      "score": 100,
+      "findings_count": 1,
+      "diags_count": 1,
+      "icd10_count": 1,
+      "issues": []
+    },
+    {
+      "index": 76,
+      "success": true,
+      "elapsed": 10.20184326171875,
+      "score": 100,
+      "findings_count": 2,
+      "diags_count": 1,
+      "icd10_count": 1,
+      "issues": []
+    },
+    {
+      "index": 77,
+      "success": true,
+      "elapsed": 11.771323919296265,
+      "score": 100,
+      "findings_count": 1,
+      "diags_count": 1,
+      "icd10_count": 1,
+      "issues": []
+    },
+    {
+      "index": 78,
+      "success": true,
+      "elapsed": 8.544658184051514,
+      "score": 100,
+      "findings_count": 1,
+      "diags_count": 1,
+      "icd10_count": 1,
+      "issues": []
+    },
+    {
+      "index": 79,
+      "success": true,
+      "elapsed": 8.47664499282837,
+      "score": 100,
+      "findings_count": 1,
+      "diags_count": 1,
+      "icd10_count": 0,
+      "issues": []
+    },
+    {
+      "index": 80,
+      "success": true,
+      "elapsed": 9.714398860931396,
+      "score": 100,
+      "findings_count": 1,
+      "diags_count": 1,
+      "icd10_count": 1,
+      "issues": []
+    },
+    {
+      "index": 81,
+      "success": true,
+      "elapsed": 16.64795446395874,
+      "score": 100,
+      "findings_count": 6,
+      "diags_count": 3,
+      "icd10_count": 3,
+      "issues": []
+    },
+    {
+      "index": 82,
+      "success": true,
+      "elapsed": 7.572258472442627,
+      "score": 100,
+      "findings_count": 1,
+      "diags_count": 1,
+      "icd10_count": 1,
+      "issues": []
+    },
+    {
+      "index": 83,
+      "success": true,
+      "elapsed": 9.656444311141968,
+      "score": 100,
+      "findings_count": 3,
+      "diags_count": 3,
+      "icd10_count": 2,
+      "issues": []
+    },
+    {
+      "index": 84,
+      "success": true,
+      "elapsed": 7.705012083053589,
+      "score": 100,
+      "findings_count": 1,
+      "diags_count": 1,
+      "icd10_count": 1,
+      "issues": []
+    },
+    {
+      "index": 85,
+      "success": true,
+      "elapsed": 5.892167091369629,
+      "score": 100,
+      "findings_count": 1,
+      "diags_count": 1,
+      "icd10_count": 1,
+      "issues": []
+    },
+    {
+      "index": 86,
+      "success": true,
+      "elapsed": 6.344381809234619,
+      "score": 100,
+      "findings_count": 1,
+      "diags_count": 2,
+      "icd10_count": 0,
+      "issues": []
+    },
+    {
+      "index": 87,
+      "success": true,
+      "elapsed": 9.394853115081787,
+      "score": 100,
+      "findings_count": 1,
+      "diags_count": 1,
+      "icd10_count": 1,
+      "issues": []
+    },
+    {
+      "index": 88,
+      "success": true,
+      "elapsed": 11.064814567565918,
+      "score": 100,
+      "findings_count": 2,
+      "diags_count": 1,
+      "icd10_count": 1,
+      "issues": []
+    },
+    {
+      "index": 89,
+      "success": true,
+      "elapsed": 6.635888338088989,
+      "score": 100,
+      "findings_count": 1,
+      "diags_count": 1,
+      "icd10_count": 1,
+      "issues": []
+    },
+    {
+      "index": 90,
+      "success": true,
+      "elapsed": 6.8132007122039795,
+      "score": 100,
+      "findings_count": 1,
+      "diags_count": 1,
+      "icd10_count": 1,
+      "issues": []
+    },
+    {
+      "index": 91,
+      "success": true,
+      "elapsed": 6.374047040939331,
+      "score": 100,
+      "findings_count": 2,
+      "diags_count": 1,
+      "icd10_count": 1,
+      "issues": []
+    },
+    {
+      "index": 92,
+      "success": true,
+      "elapsed": 13.269229173660278,
+      "score": 100,
+      "findings_count": 1,
+      "diags_count": 1,
+      "icd10_count": 1,
+      "issues": []
+    },
+    {
+      "index": 93,
+      "success": true,
+      "elapsed": 8.24807596206665,
+      "score": 100,
+      "findings_count": 5,
+      "diags_count": 3,
+      "icd10_count": 2,
+      "issues": []
+    },
+    {
+      "index": 94,
+      "success": true,
+      "elapsed": 9.66853666305542,
+      "score": 100,
+      "findings_count": 2,
+      "diags_count": 2,
+      "icd10_count": 2,
+      "issues": []
+    },
+    {
+      "index": 95,
+      "success": true,
+      "elapsed": 11.303949356079102,
+      "score": 100,
+      "findings_count": 2,
+      "diags_count": 2,
+      "icd10_count": 2,
+      "issues": []
+    },
+    {
+      "index": 96,
+      "success": true,
+      "elapsed": 18.762171506881714,
+      "score": 100,
+      "findings_count": 3,
+      "diags_count": 2,
+      "icd10_count": 1,
+      "issues": []
+    },
+    {
+      "index": 97,
+      "success": true,
+      "elapsed": 9.26846170425415,
+      "score": 100,
+      "findings_count": 1,
+      "diags_count": 1,
+      "icd10_count": 1,
+      "issues": []
+    },
+    {
+      "index": 98,
+      "success": true,
+      "elapsed": 16.134596586227417,
+      "score": 100,
+      "findings_count": 2,
+      "diags_count": 1,
+      "icd10_count": 1,
+      "issues": []
+    },
+    {
+      "index": 99,
+      "success": true,
+      "elapsed": 11.205250978469849,
+      "score": 100,
+      "findings_count": 1,
+      "diags_count": 2,
+      "icd10_count": 2,
+      "issues": []
+    },
+    {
+      "index": 100,
+      "success": true,
+      "elapsed": 7.998640775680542,
+      "score": 100,
+      "findings_count": 2,
+      "diags_count": 2,
+      "icd10_count": 2,
+      "issues": []
+    }
+  ]
+}
