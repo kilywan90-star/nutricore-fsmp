@@ -1,0 +1,70 @@
+{
+  "total_complete_records": 234862,
+  "total_sections_normalized": 1374568,
+  "unique_sections": 73769,
+  "coverage": {
+    "50": 7,
+    "60": 11,
+    "70": 17,
+    "80": 54,
+    "85": 124,
+    "90": 448,
+    "95": 9034,
+    "99": 60024
+  },
+  "templates_extracted": 54,
+  "categories": {
+    "乳腺": {
+      "count": 0,
+      "total_frequency": 0,
+      "sample_ids": []
+    },
+    "其他": {
+      "count": 0,
+      "total_frequency": 0,
+      "sample_ids": []
+    },
+    "前列腺": {
+      "count": 0,
+      "total_frequency": 0,
+      "sample_ids": []
+    },
+    "妇科": {
+      "count": 0,
+      "total_frequency": 0,
+      "sample_ids": []
+    },
+    "心脏": {
+      "count": 0,
+      "total_frequency": 0,
+      "sample_ids": []
+    },
+    "甲状腺": {
+      "count": 10,
+      "total_frequency": 67451,
+      "sample_ids": [
+        "T0012",
+        "T0017",
+        "T0018",
+        "T0025",
+        "T0026"
+      ]
+    },
+    "腹部综合": {
+      "count": 44,
+      "total_frequency": 1032272,
+      "sample_ids": [
+        "T0001",
+        "T0002",
+        "T0003",
+        "T0004",
+        "T0005"
+      ]
+    },
+    "颈动脉": {
+      "count": 0,
+      "total_frequency": 0,
+      "sample_ids": []
+    }
+  }
+}
