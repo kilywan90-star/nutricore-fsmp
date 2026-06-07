@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>超声语音助手 - 原型</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,'Microsoft YaHei',sans-serif;background:#f0f4f8;color:#1a2332;padding:20px}
+.container{max-width:760px;margin:0 auto}
+h1{font-size:18px;text-align:center;padding:14px;background:#1a73e8;color:white;border-radius:10px;margin-bottom:16px}
+.card{background:white;border-radius:10px;padding:16px;margin-bottom:12px;box-shadow:0 1px 4px rgba(0,0,0,0.06)}
+.mic-btn{width:44px;height:44px;border-radius:50%;border:none;background:#e8f5e9;font-size:22px;cursor:pointer;transition:.2s}
+.mic-btn.active{background:#c62828;color:white;animation:pulse 1.5s infinite}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(198,40,40,0.5)}70%{box-shadow:0 0 0 14px rgba(198,40,40,0)}100%{box-shadow:0 0 0 0 rgba(198,40,40,0)}}
+.step{display:flex;gap:10px;padding:8px 0;border-bottom:1px solid #f1f3f4}
+.step-num{width:26px;height:26px;background:#e8f0fe;border-radius:50%;text-align:center;line-height:26px;font-size:12px;color:#1a73e8;flex-shrink:0}
+.speech{background:#e8f5e9;border-radius:6px;padding:6px 10px;display:inline-block;font-size:13px}
+.system{color:#1565c0;font-size:13px;padding:2px 0}
+.tag{font-size:10px;padding:1px 5px;border-radius:3px}
+.tag-auto{background:#f3e5f5;color:#7b1fa2}
+.tag-voice{background:#e8f5e9;color:#2e7d32}
+.tag-calc{background:#fff3e0;color:#e65100}
+.report{background:#fafafa;border-radius:6px;padding:12px;font-size:13px;line-height:1.8;border:1px solid #eee}
+.progress{height:4px;background:#e0e0e0;border-radius:2px;margin:8px 0;overflow:hidden}
+.progress-fill{height:100%;background:#1a73e8;transition:width .5s}
+.btn{padding:6px 16px;border-radius:5px;border:none;font-size:12px;cursor:pointer}
+.btn-primary{background:#1a73e8;color:white}
+.btn-outline{background:white;color:#1a73e8;border:1px solid #1a73e8}
+.flex{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
+</style>
+</head>
+<body>
+<div class="container">
+<h1>超声语音助手 v1.0 原型</h1>
+
+<div class="card" style="text-align:center">
+<button class="mic-btn" onclick="this.classList.toggle('active')">&#127908;</button>
+<p style="font-size:12px;color:#5f6368;margin-top:6px">点击模拟开始语音</p>
+</div>
+
+<div class="card" id="dialogBox">
+<div class="step"><div class="step-num">1</div><div><div class="speech">开始写</div><div class="system">→ 语音引擎已激活</div></div></div>
+<div class="step"><div class="step-num">2</div><div><div class="speech">肝脏</div><div class="system">→ 展开19个肝脏模板</div></div></div>
+<div class="step"><div class="step-num">3</div><div><div class="speech">脂肪肝</div><div class="system">→ 已展开脂肪肝模板</div></div></div>
+</div>
+
+<div class="card">
+<div style="font-size:13px;color:#5f6368;margin-bottom:6px">&#128203; 实时报告 (<span id="pct">20</span>%)</div>
+<div class="progress"><div class="progress-fill" id="prog" style="width:20%"></div></div>
+<div class="report" id="reportOut">
+<span class="tag tag-auto">自动</span> 肝脏形态规则，大小正常，表面光滑<br>
+<span class="tag tag-auto">自动</span> 实质回声分布欠均匀<br>
+<span class="tag tag-auto">自动</span> 肝内管系显示欠清<br>
+<span style="color:#9e9e9e">等待语音输入...</span>
+</div>
+</div>
+
+<div class="card flex">
+<button class="btn btn-primary" onclick="simNext()">&#9654; 模拟下一步</button>
+<button class="btn btn-outline" onclick="resetAll()">&#8635; 重置</button>
+</div>
+</div>
+
+<script>
+var step = 2;
+var data = [
+{speech:"开始写",system:"语音引擎已激活",report:"",pct:0},
+{speech:"肝脏",system:"展开19个肝脏模板",report:"",pct:0},
+{speech:"脂肪肝",system:"已展开脂肪肝模板",
+report:'<span class="tag tag-auto">自动</span> 肝脏形态规则，大小正常，表面光滑<br><span class="tag tag-auto">自动</span> 实质回声分布欠均匀<br><span class="tag tag-auto">自动</span> 肝内管系显示欠清',pct:20},
+{speech:"近场增强",system:"已填充近场回声增强",
+report:'<span class="tag tag-auto">自动</span> 肝脏形态规则，大小正常，表面光滑<br><span class="tag tag-auto">自动</span> 实质回声分布欠均匀<br><span class="tag tag-voice">语音</span> <b>近场回声增强，远场回声衰减</b><br><span class="tag tag-auto">自动</span> 肝内管系显示欠清',pct:50},
+{speech:"CDFI未见异常",system:"已填充CDFI描述",
+report:'<span class="tag tag-auto">自动</span> 肝脏形态规则，大小正常，表面光滑，实质回声分布欠均匀，近场回声增强，远场回声衰减<br><span class="tag tag-auto">自动</span> 肝内管系显示欠清<br><span class="tag tag-voice">语音</span> CDFI：未见明显异常血流信号',pct:80},
+{speech:"完成",system:"报告已生成",
+report:'【超声所见】肝脏形态规则，大小正常，表面光滑。实质回声分布欠均匀，近场回声增强，远场回声衰减。肝内管系显示欠清。CDFI：未见明显异常血流信号。<br><br><b>【超声提示】脂肪肝（轻度）。</b><br><br><span style="color:#1a73e8">说"好"确认</span>',pct:100}
+];
+function simNext() {
+step++; if(step>=data.length)step=data.length-1;
+var d=data[step];
+var box=document.getElementById('dialogBox');
+var e=document.createElement('div');e.className='step';
+e.innerHTML='<div class="step-num">'+(step+1)+'</div><div><div class="speech">'+d.speech+'</div><div class="system">→ '+d.system+'</div></div>';
+box.appendChild(e);
+box.scrollTop = box.scrollHeight;
+document.getElementById('reportOut').innerHTML=d.report;
+document.getElementById('prog').style.width=d.pct+'%';
+document.getElementById('pct').textContent=d.pct;
+}
+function resetAll() {
+step=2;
+var box=document.getElementById('dialogBox');
+box.innerHTML='';
+for(var i=0;i<=step;i++){
+var d=data[i];
+var e=document.createElement('div');e.className='step';
+e.innerHTML='<div class="step-num">'+(i+1)+'</div><div><div class="speech">'+d.speech+'</div><div class="system">→ '+d.system+'</div></div>';
+box.appendChild(e);
+}
+document.getElementById('reportOut').innerHTML=data[step].report;
+document.getElementById('prog').style.width=data[step].pct+'%';
+document.getElementById('pct').textContent=data[step].pct;
+}
+</script>
+</body>
+</html>

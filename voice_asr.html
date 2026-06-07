@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>超声语音报告系统</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,'Microsoft YaHei',sans-serif;background:#f0f4f8;color:#1a2332;padding:20px}
+.container{max-width:860px;margin:0 auto}
+h1{font-size:18px;text-align:center;padding:14px;background:#1a73e8;color:white;border-radius:10px;margin-bottom:16px}
+.card{background:white;border-radius:10px;padding:16px;margin-bottom:12px;box-shadow:0 1px 4px rgba(0,0,0,0.06)}
+.card-title{font-size:13px;font-weight:600;color:#5f6368;margin-bottom:8px}
+.btn{padding:8px 20px;border-radius:6px;border:none;font-size:14px;cursor:pointer;font-weight:500}
+.btn-primary{background:#1a73e8;color:white}
+.btn-danger{background:#c62828;color:white}
+.btn-outline{background:white;color:#1a73e8;border:1px solid #1a73e8}
+.flex{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.presets{display:flex;gap:4px;flex-wrap:wrap;margin-bottom:8px}
+.presets button{font-size:11px;padding:4px 8px}
+.status-bar{padding:8px 12px;border-radius:6px;font-size:13px;flex:1}
+.s0{background:#f5f5f5;color:#5f6368}
+.s1{background:#fce4ec;color:#c62828}
+.s2{background:#e8f5e9;color:#2e7d32}
+.s3{background:#fff3e0;color:#e65100}
+.match-row{display:flex;align-items:center;padding:6px 10px;margin:3px 0;border-radius:6px}
+.match-row.m0{background:#e3f2fd}
+.match-row.m1{background:#e8f5e9;border:1px solid #a5d6a7}
+.match-row.m2{background:#fafafa}
+.bar{height:8px;border-radius:4px;background:#e0e0e0;flex:1;margin:0 10px;overflow:hidden}
+.bar-fill{height:100%;border-radius:4px;transition:width .3s}
+.ct{font-size:13px;font-weight:600;width:45px;text-align:right}
+.name{font-size:13px;flex:1;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.rid{color:#5f6368;font-size:11px;width:35px}
+.badge{font-size:10px;padding:1px 6px;border-radius:4px;margin-left:5px}
+.b-lock{background:#a5d6a7;color:#1b5e20}
+.b-top{background:#bbdefb;color:#1565c0}
+.out-box{background:#fafafa;border-radius:6px;padding:12px;font-size:13px;line-height:1.8;border:1px solid #e0e0e0;min-height:60px;white-space:pre-wrap}
+.tag{font-size:10px;padding:1px 5px;border-radius:3px;margin-right:4px}
+.t-lock{background:#e8f5e9;color:#2e7d32}
+.t-group{background:#e8eaf6;color:#283593}
+.sug-box{background:#fff3e0;border-radius:6px;padding:10px;font-size:13px;margin-top:8px;border-left:3px solid #ff9800}
+@keyframes p1{0%{opacity:1}50%{opacity:0.3}100%{opacity:1}}
+.pulse{animation:p1 1.5s infinite}
+.inp{width:100%;padding:10px;border:1px solid #dadce0;border-radius:6px;font-size:14px;outline:none;margin-top:8px}
+.inp:focus{border-color:#1a73e8}
+</style>
+</head>
+<body>
+<div class="container">
+<h1>🎤 超声语音报告系统</h1>
+
+<div class="card">
+<div class="card-title">🎙️ 语音输入</div>
+<div class="presets">
+<button class="btn btn-outline" onclick="go('肝脏形态规则，大小正常，表面光滑，实质回声分布均匀，肝内管系尚清')">肝脏脂肪沉积</button>
+<button class="btn btn-outline" onclick="go('膀胱充盈可，壁光滑，内未见明显包块回声。前列腺形态稍饱满')">前列腺增大</button>
+<button class="btn btn-outline" onclick="go('双乳组织增厚、增粗，回声分布不均，见多个粗大点片状低回声区')">双乳小叶增生</button>
+<button class="btn btn-outline" onclick="go('甲状腺双侧叶形态规则，大小正常，表面光滑，实质回声不均匀')">甲状腺回声不均</button>
+<button class="btn btn-outline" onclick="go('肝脏形态大小正常，表面光滑，实质回声分布欠均匀，近场回声增强')">脂肪肝</button>
+<button class="btn btn-outline" onclick="go('双侧颈动脉走行正常，内膜面毛糙，内中膜不厚')">颈动脉斑块</button>
+</div>
+<div class="flex" style="margin-bottom:4px">
+<button class="btn btn-primary" id="btnRec" onclick="toggleRec()">🎤 按住说话</button>
+<button class="btn btn-outline" onclick="clearAll()">清除</button>
+<span class="status-bar s0" id="statusLabel">就绪</span>
+</div>
+<input class="inp" id="txtInput" placeholder="或直接输入文本" oninput="onType(this.value)">
+</div>
+
+<div class="card">
+<div class="card-title">📊 实时匹配 <span id="matchInfo" style="font-size:11px;color:#9e9e9e;font-weight:normal"></span></div>
+<div id="matchList"><div style="font-size:13px;color:#9e9e9e;padding:30px;text-align:center">输入或语音后显示匹配结果</div></div>
+</div>
+
+<div class="card" id="resultCard" style="display:none">
+<div class="card-title">📋 生成报告</div>
+<div class="out-box" id="reportOutput"></div>
+<div id="sugBox" class="sug-box" style="display:none"></div>
+</div>
+</div>
+
+<script>
+let rec = null;
+let isRec = false;
+
+function init() {
+    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SR) {
+        setStatus('⚠️ 请用Chrome浏览器', 's3');
+        document.getElementById('btnRec').disabled = true;
+        return;
+    }
+    rec = new SR();
+    rec.lang = 'zh-CN';
+    rec.continuous = true;
+    rec.interimResults = true;
+    rec.maxAlternatives = 1;
+
+    rec.onresult = function(e) {
+        let finalText = '';
+        let interimText = '';
+        for (let i = e.resultIndex; i < e.results.length; i++) {
+            if (e.results[i].isFinal) {
+                finalText += e.results[i][0].transcript;
+            } else {
+                interimText += e.results[i][0].transcript;
+            }
+        }
+        // 只要有最终结果就立即匹配
+        if (finalText) {
+            document.getElementById('txtInput').value = finalText;
+            setStatus('🔴 正在识别... [' + finalText.slice(0,15) + ']', 's1');
+            sendText(finalText);
+        } else if (interimText) {
+            // 中间结果也发，让界面有反应
+            document.getElementById('txtInput').value = interimText;
+            sendText(interimText);
+        }
+    };
+    rec.onend = function() {
+        document.getElementById('btnRec').textContent = '🎤 按住说话';
+        document.getElementById('btnRec').className = 'btn btn-primary';
+        isRec = false;
+    };
+    rec.onerror = function(e) {
+        if (e.error === 'no-speech') {
+            setStatus('⏳ 未听到声音，点击重试', 's3');
+        } else if (e.error !== 'aborted') {
+            setStatus('❌ ' + e.error, 's3');
+        }
+        document.getElementById('btnRec').textContent = '🎤 按住说话';
+        document.getElementById('btnRec').className = 'btn btn-primary';
+        isRec = false;
+    };
+}
+
+function toggleRec() {
+    if (isRec) {
+        rec.stop();
+        return;
+    }
+    rec.start();
+    isRec = true;
+    document.getElementById('btnRec').textContent = '⏹ 松开结束';
+    document.getElementById('btnRec').className = 'btn btn-danger';
+    setStatus('🔴 正在聆听...', 's1');
+}
+
+function setStatus(t, cls) {
+    const el = document.getElementById('statusLabel');
+    el.className = 'status-bar ' + cls;
+    el.innerHTML = t;
+}
+
+function clearAll() {
+    document.getElementById('txtInput').value = '';
+    document.getElementById('matchList').innerHTML = '<div style="font-size:13px;color:#9e9e9e;padding:30px;text-align:center">输入或语音后显示匹配结果</div>';
+    document.getElementById('resultCard').style.display = 'none';
+    setStatus('就绪', 's0');
+}
+
+function onType(v) {
+    if (v && v.trim().length >= 3) sendText(v);
+    else clearAll();
+}
+
+function go(t) {
+    document.getElementById('txtInput').value = t;
+    sendText(t);
+}
+
+function sendText(text) {
+    if (!text || text.trim().length < 2) return;
+    setStatus('⏳ 匹配中...', 's1');
+
+    fetch('/api/match', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({text: text})
+    })
+    .then(r => r.json())
+    .then(data => {
+        const top5 = data.top5 || [];
+        const locked = data.locked;
+        let html = '';
+        top5.forEach(function(m, i) {
+            const cls = i===0 ? (locked?'m1':'m0') : 'm2';
+            const fc = i===0 ? (locked?'#2e7d32':'#1a73e8') : '#90a4ae';
+            const badge = i===0 && locked ? '<span class="badge b-lock">锁定</span>' : (i===0 ? '<span class="badge b-top">TOP1</span>' : '');
+            html += '<div class="match-row '+cls+'"><span class="rid">'+m.rid+'</span><span class="name">'+m.discname+badge+'</span><span class="ct">'+Math.round(m.score*100)+'%</span><div class="bar"><div class="bar-fill" style="width:'+Math.min(m.score*100,100)+'%;background:'+fc+'"></div></div></div>';
+        });
+        document.getElementById('matchList').innerHTML = html;
+        document.getElementById('matchInfo').textContent = 'TOP '+top5.length;
+
+        if (locked) {
+            setStatus('✅ 已锁定: '+locked.discname+' ('+Math.round(locked.confidence*100)+'%)', 's2');
+            let rh = '<span class="tag t-lock">锁定 rid='+locked.rid+'</span> <b>'+locked.discname+'</b><br>';
+            rh += '<span class="tag t-group">'+locked.discgroup+'</span><br><br>';
+            rh += '<b>诊断提示：</b> '+locked.tpl_hint+'<br><br>';
+            rh += '<b>完整报告：</b><br>'+locked.full_report;
+            document.getElementById('reportOutput').innerHTML = rh;
+            document.getElementById('resultCard').style.display = 'block';
+            if (locked.suggestion) {
+                document.getElementById('sugBox').innerHTML = '<b>随访建议：</b> '+locked.suggestion;
+                document.getElementById('sugBox').style.display = 'block';
+            } else document.getElementById('sugBox').style.display = 'none';
+        } else {
+            const t = top5[0];
+            setStatus('TOP1: '+(t?t.discname:'')+' ('+(t?Math.round(t.score*100):0)+'%)', 's0');
+            document.getElementById('resultCard').style.display = 'none';
+        }
+    })
+    .catch(err => setStatus('❌ 请求失败: '+err, 's3'));
+}
+
+init();
+</script>
+</body>
+</html>

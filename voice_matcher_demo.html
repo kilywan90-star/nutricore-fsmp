@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>超声语音匹配引擎 - 实时演示</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,'Microsoft YaHei',sans-serif;background:#f0f4f8;padding:20px;color:#1a2332}
+.container{max-width:820px;margin:0 auto}
+h1{font-size:18px;text-align:center;padding:14px;background:#1a73e8;color:white;border-radius:10px;margin-bottom:16px}
+.card{background:white;border-radius:10px;padding:16px;margin-bottom:12px;box-shadow:0 1px 4px rgba(0,0,0,0.06)}
+.card-title{font-size:13px;font-weight:600;color:#5f6368;margin-bottom:8px;display:flex;align-items:center;gap:6px}
+.input-box{width:100%;padding:10px;border:1px solid #dadce0;border-radius:6px;font-size:14px;outline:none}
+.input-box:focus{border-color:#1a73e8;box-shadow:0 0 0 2px rgba(26,115,232,0.15)}
+.match-row{display:flex;align-items:center;padding:6px 10px;margin:3px 0;border-radius:6px}
+.match-row.locked{background:#e8f5e9;border:1px solid #a5d6a7}
+.match-row.top1{background:#e3f2fd}
+.match-row.others{background:#fafafa}
+.conf-bar{height:8px;border-radius:4px;background:#e0e0e0;flex:1;margin:0 10px;overflow:hidden}
+.conf-fill{height:100%;border-radius:4px;transition:width .3s}
+.conf-text{font-size:13px;font-weight:600;width:45px;text-align:right}
+.rid{color:#5f6368;font-size:11px;width:35px}
+.name{font-size:13px;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.badge{font-size:10px;padding:1px 6px;border-radius:4px;margin-left:5px}
+.badge-lock{background:#a5d6a7;color:#1b5e20}
+.badge-top{background:#bbdefb;color:#1565c0}
+.output-box{background:#fafafa;border-radius:6px;padding:12px;font-size:13px;line-height:1.8;border:1px solid #e0e0e0;min-height:60px;white-space:pre-wrap}
+.suggestion-box{background:#fff3e0;border-radius:6px;padding:10px;font-size:13px;margin-top:8px;border-left:3px solid #ff9800}
+.btn{padding:6px 14px;border-radius:5px;border:none;font-size:12px;cursor:pointer;transition:.15s}
+.btn-primary{background:#1a73e8;color:white}
+.btn-outline{background:white;color:#1a73e8;border:1px solid #1a73e8}
+.tag{font-size:10px;padding:1px 5px;border-radius:3px;margin-right:4px}
+.tag-group{background:#e8eaf6;color:#283593}
+.tag-lock{background:#e8f5e9;color:#2e7d32}
+.flex{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.mt8{margin-top:8px}
+</style>
+</head>
+<body>
+<div class="container">
+<h1>&#127908; 超声语音匹配引擎 v2.0</h1>
+
+<div class="card">
+<div class="card-title">&#127908; 模拟语音输入</div>
+<div class="flex" style="margin-bottom:8px">
+<button class="btn btn-outline" onclick="sim('肝脏形态规则，大小正常，表面光滑，实质回声分布均匀，肝内管系尚清')">肝脏脂肪沉积</button>
+<button class="btn btn-outline" onclick="sim('膀胱充盈可，壁光滑，内未见明显包块回声。前列腺形态稍饱满')">前列腺增大</button>
+<button class="btn btn-outline" onclick="sim('双乳组织增厚、增粗，回声分布不均，见多个粗大点片状低回声区')">双乳小叶增生</button>
+<button class="btn btn-outline" onclick="sim('甲状腺双侧叶形态规则，大小正常，表面光滑，实质回声不均匀')">甲状腺回声不均</button>
+<button class="btn btn-outline" onclick="sim('双侧颈动脉走行正常，内膜面毛糙，内中膜不厚，颈总动脉分叉处可见中等回声附壁光团')">颈动脉斑块</button>
+<button class="btn btn-outline" onclick="sim('肝脏形态大小正常，表面光滑，实质回声分布欠均匀，近场回声增强，远场回声衰减')">脂肪肝</button>
+<button class="btn btn-outline" onclick="sim('肝内可见无回声区，大小约18x14mm，壁薄，后壁回声增强')">肝囊肿</button>
+</div>
+<div class="flex">
+<button class="btn btn-outline" onclick="prog()">&#9654; 渐进模拟</button>
+<button class="btn btn-primary" onclick="clearAll()">&#8635; 清除</button>
+<span id="statusLabel" style="font-size:12px;color:#5f6368">等待输入...</span>
+</div>
+<input class="input-box" id="voiceInput" placeholder="点击上方按钮模拟语音输入，或用真实语音助手填入" oninput="onInput(this.value)" style="margin-top:8px">
+</div>
+
+<div class="card">
+<div class="card-title">&#128202; 实时匹配 <span id="matchInfo" style="font-size:11px;color:#9e9e9e;font-weight:normal"></span></div>
+<div id="matchList">
+<div style="font-size:13px;color:#9e9e9e;padding:20px;text-align:center">输入文本后实时显示TOP5匹配结果<br>置信度超过85%自动锁定</div>
+</div>
+</div>
+
+<div class="card" id="outputCard" style="display:none">
+<div class="card-title">&#128203; 生成完整报告</div>
+<div class="output-box" id="reportOutput"></div>
+<div id="suggestionArea" class="suggestion-box" style="display:none"></div>
+</div>
+</div>
+
+<script>
+var THRESHOLD = 0.85;
+var demoData = {
+'肝脏形态规则，大小正常，表面光滑，实质回声分布均匀，肝内管系尚清': {
+top:[{rid:408,dn:'肝脏脂肪沉积(xy)',dg:'肝脏',s:0.97,see:'肝脏形态规则，大小正常，表面光滑，实质光点细密，回声分布均匀，肝内管系尚清。',hint:'肝脏脂肪沉积。'}], ful:true,sg:'定期复查（1年）'},
+'膀胱充盈可，壁光滑，内未见明显包块回声。前列腺形态稍饱满': {
+top:[{rid:283,dn:'前列腺稍大-ch',dg:'前列腺',s:0.94,see:'膀胱充盈可，壁光滑，内未见明显包块回声。前列腺形态稍饱满，大小约xxmm，实质回声均匀。',hint:'前列腺稍大。'}],ful:true,sg:'定期复查（1年）'},
+'双乳组织增厚、增粗，回声分布不均，见多个粗大点片状低回声区': {
+top:[{rid:82,dn:'双乳小叶增生 1类',dg:'乳腺疾病',s:0.87,see:'双乳组织增厚、增粗，回声分布不均，见多个粗大点片状低回声区，呈豹纹征。',hint:'双侧乳腺未见占位性病变，BI-RADS 1类。'}],ful:true,sg:'定期复查（1年）'},
+'甲状腺双侧叶形态规则，大小正常，表面光滑，实质回声不均匀': {
+top:[{rid:94,dn:'甲状腺回声不均匀',dg:'甲状腺疾病',s:0.98,see:'甲状腺双侧叶形态规则，大小正常，表面光滑，实质回声不均匀，内未见明显结节及占位回声。',hint:'甲状腺实质回声不均匀，请结合临床及实验室检查。'}],ful:true,sg:'建议结合临床及实验室检查'},
+'双侧颈动脉走行正常，内膜面毛糙，内中膜不厚，颈总动脉分叉处可见中等回声附壁光团': {
+top:[{rid:272,dn:'（纤维成分为主）斑块',dg:'颈动脉疾病',s:0.93,see:'双侧颈动脉走行正常，内膜面毛糙，内中膜不厚，侧颈总动脉分叉处可见中等回声附壁光团。',hint:'颈总动脉分叉处粥样硬化斑块（纤维成分为主）。'}],ful:true,sg:'建议神经内科/血管内科就诊'},
+'肝脏形态大小正常，表面光滑，实质回声分布欠均匀，近场回声增强，远场回声衰减': {
+top:[{rid:218,dn:'脂肪肝',dg:'肝脏',s:0.95,see:'肝脏形态大小正常，表面光滑，实质回声分布欠均匀，近场回声增强，远场回声衰减，肝内管系显示欠清。',hint:'脂肪肝。'}],ful:true,sg:'建议消化内科就诊，注意饮食控制；定期复查6-12个月'},
+'肝内可见无回声区，大小约18x14mm，壁薄，后壁回声增强': {
+top:[{rid:16,dn:'肝囊肿（单发）',dg:'肝脏',s:0.86,see:'肝内可见无回声区，大小约xmm，壁薄，后壁回声增强，内透声可。',hint:'肝囊肿。'}],ful:true,sg:'定期复查（1年）'},
+'前列腺形态稍饱满': {
+top:[{rid:283,dn:'前列腺稍大-ch',dg:'前列腺',s:0.72},{rid:184,dn:'膀胱',dg:'前列腺',s:0.48},{rid:255,dn:'前列腺增生伴钙化',dg:'前列腺',s:0.42}],ful:false},
+'实质回声分布均匀': {
+top:[{rid:408,dn:'肝脏脂肪沉积(xy)',dg:'肝脏',s:0.68},{rid:218,dn:'脂肪肝',dg:'肝脏',s:0.52},{rid:82,dn:'双乳小叶增生',dg:'乳腺',s:0.35}],ful:false},
+'甲状腺': {
+top:[{rid:94,dn:'甲状腺回声不均匀',dg:'甲状腺疾病',s:0.42},{rid:225,dn:'甲状腺实质弥漫性病变',dg:'甲状腺疾病',s:0.38},{rid:52,dn:'甲状腺单发结节',dg:'甲状腺疾病',s:0.32}],ful:false},
+'肝脏形态规则，大小正常': {
+top:[{rid:408,dn:'肝脏脂肪沉积(xy)',dg:'肝脏',s:0.82},{rid:218,dn:'脂肪肝',dg:'肝脏',s:0.42},{rid:16,dn:'肝囊肿（单发）',dg:'肝脏',s:0.30}],ful:false},
+'肝脏形态规则': {
+top:[{rid:408,dn:'肝脏脂肪沉积(xy)',dg:'肝脏',s:0.58},{rid:218,dn:'脂肪肝',dg:'肝脏',s:0.32},{rid:16,dn:'肝囊肿（单发）',dg:'肝脏',s:0.22}],ful:false},
+'肝脏': {
+top:[{rid:408,dn:'肝脏脂肪沉积(xy)',dg:'肝脏',s:0.28},{rid:218,dn:'脂肪肝',dg:'肝脏',s:0.22},{rid:16,dn:'肝囊肿（单发）',dg:'肝脏',s:0.15}],ful:false}
+};
+
+function sim(text) {
+document.getElementById('voiceInput').value = text;
+onInput(text);
+}
+
+var pIdx = 0;
+var pTexts = ['肝脏','肝脏形态','肝脏形态规则','肝脏形态规则，大小正常','肝脏形态规则，大小正常，表面光滑','肝脏形态规则，大小正常，表面光滑，实质回声分布均匀','肝脏形态规则，大小正常，表面光滑，实质回声分布均匀，肝内管系尚清'];
+function prog() {
+if (pIdx < pTexts.length) {
+document.getElementById('voiceInput').value = pTexts[pIdx];
+onInput(pTexts[pIdx]);
+pIdx++;
+if (pIdx >= pTexts.length) pIdx = 0;
+}
+}
+
+function onInput(text) {
+if (!text || text.trim().length < 1) {
+document.getElementById('matchList').innerHTML = '<div style="font-size:13px;color:#9e9e9e;padding:20px;text-align:center">输入文本后实时显示TOP5匹配结果<br>置信度超过85%自动锁定</div>';
+document.getElementById('outputCard').style.display = 'none';
+document.getElementById('statusLabel').textContent = '等待输入...';
+return;
+}
+// 查找最佳匹配
+var bestKey = '';
+var bestLen = 0;
+for (var key in demoData) {
+if (text.includes(key) && key.length > bestLen) { bestKey = key; bestLen = key.length; }
+}
+if (!bestKey) {
+for (var key in demoData) {
+var common = 0;
+for (var i=0; i<text.length && i<key.length; i++) {
+if (text[i]===key[i]) common++; else break;
+}
+if (common > bestLen) { bestLen = common; bestKey = key; }
+}
+}
+if (!bestKey || bestLen < 2) {
+document.getElementById('matchList').innerHTML = '<div style="font-size:13px;color:#9e9e9e;padding:20px;text-align:center">输入更多内容进行匹配...</div>';
+return;
+}
+var data = demoData[bestKey];
+if (!data || !data.top) return;
+var top = data.top;
+var maxScore = top[0].s;
+var isLocked = maxScore >= THRESHOLD;
+var html = '';
+top.forEach(function(m,i){
+var cls = i===0?(isLocked?'locked':'top1'):'others';
+var fc = i===0?(isLocked?'#2e7d32':'#1a73e8'):'#90a4ae';
+var badge = '';
+if (i===0 && isLocked) badge = '<span class="badge badge-lock">锁定</span>';
+else if (i===0) badge = '<span class="badge badge-top">TOP1</span>';
+html += '<div class="match-row '+cls+'">';
+html += '<span class="rid">'+m.rid+'</span>';
+html += '<span class="name">'+m.dn+badge+'</span>';
+html += '<span class="conf-text">'+Math.round(m.s*100)+'%</span>';
+html += '<div class="conf-bar"><div class="conf-fill" style="width:'+Math.min(m.s*100,100)+'%;background:'+fc+'"></div></div>';
+html += '</div>';
+});
+html += '<div style="font-size:11px;color:#9e9e9e;margin-top:6px">匹配基准: "'+bestKey+'" | 阈值: '+(THRESHOLD*100)+'%';
+document.getElementById('matchList').innerHTML = html;
+document.getElementById('matchInfo').textContent = 'TOP '+top.length;
+if (isLocked) {
+document.getElementById('statusLabel').innerHTML = '<b style="color:#2e7d32">已锁定</b> '+top[0].dn+' ('+Math.round(maxScore*100)+'%)';
+var rh = '';
+rh += '<span class="tag tag-lock">锁定 rid='+top[0].rid+'</span> <b>'+top[0].dn+'</b><br>';
+rh += '<span class="tag tag-group">诊断分组</span> '+top[0].dg+'<br><br>';
+if (data.ful) {
+var fi = top[0].see;
+var fu = top[0].hint;
+rh += '<b>完整报告:</b><br>'+fi+'<br><br>';
+rh += '<b>诊断提示:</b> '+fu;
+}
+document.getElementById('reportOutput').innerHTML = rh;
+document.getElementById('outputCard').style.display = 'block';
+if (data.sg) {
+document.getElementById('suggestionArea').innerHTML = '<b>随访建议:</b> '+data.sg;
+document.getElementById('suggestionArea').style.display = 'block';
+} else {
+document.getElementById('suggestionArea').style.display = 'none';
+}
+} else {
+document.getElementById('statusLabel').textContent = '匹配中... TOP1: '+top[0].dn+' ('+Math.round(maxScore*100)+'%)';
+document.getElementById('outputCard').style.display = 'none';
+}
+}
+
+function clearAll() {
+document.getElementById('voiceInput').value = '';
+document.getElementById('matchList').innerHTML = '<div style="font-size:13px;color:#9e9e9e;padding:20px;text-align:center">输入文本后实时显示TOP5匹配结果<br>置信度超过85%自动锁定</div>';
+document.getElementById('outputCard').style.display = 'none';
+document.getElementById('statusLabel').textContent = '等待输入...';
+pIdx = 0;
+}
+</script>
+</body>
+</html>

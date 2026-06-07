@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>超声语音ASR演示 - 方言测试</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,'Microsoft YaHei',sans-serif;background:#f0f4f8;padding:20px;color:#1a2332}
+.container{max-width:800px;margin:0 auto}
+h1{font-size:18px;text-align:center;padding:14px;background:#1a73e8;color:white;border-radius:10px;margin-bottom:16px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
+@media(max-width:640px){.grid{grid-template-columns:1fr}}
+.card{background:white;border-radius:10px;padding:16px;box-shadow:0 1px 4px rgba(0,0,0,0.06)}
+.card-title{font-size:13px;font-weight:600;color:#5f6368;margin-bottom:8px;display:flex;align-items:center;gap:6px}
+.select-case{width:100%;padding:8px;border:1px solid #dadce0;border-radius:6px;font-size:13px;margin-bottom:8px}
+.original-text{background:#fef7e0;padding:8px 12px;border-radius:6px;font-size:13px;color:#e65100;margin:6px 0}
+.step{margin:6px 0}
+.step-label{display:inline-block;width:24px;height:24px;line-height:24px;text-align:center;background:#e8f0fe;border-radius:50%;font-size:11px;color:#1a73e8;margin-right:6px}
+.output{background:#e8f5e9;padding:8px 12px;border-radius:6px;font-size:13px;color:#2e7d32;margin:4px 0}
+.tpl-match{background:#e3f2fd;padding:8px 12px;border-radius:6px;font-size:13px;color:#1565c0;margin:4px 0}
+.diff-badge{display:inline-block;font-size:10px;padding:1px 6px;border-radius:4px;margin:2px}
+.diff-new{background:#fce4ec;color:#c62828}
+.diff-have{background:#e8f5e9;color:#2e7d32}
+.diff-part{background:#fff3e0;color:#e65100}
+table{width:100%;border-collapse:collapse;font-size:12px;margin:8px 0}
+td,th{padding:5px 6px;border-bottom:1px solid #f1f3f4;text-align:left}
+th{color:#5f6368;font-weight:500}
+</style>
+</head>
+<body>
+<div class="container">
+<h1>&#127908; 超声语音ASR 方言演示</h1>
+
+<div class="grid">
+<div class="card">
+<div class="card-title">&#128220; 选择测试用例</div>
+<select class="select-case" id="caseSelect" onchange="loadCase(this.value)"></select>
+<div class="card-title" style="margin-top:12px">&#128172; 原始口述（医生方言）</div>
+<div class="original-text" id="inputText">选择一条用例</div>
+</div>
+
+<div class="card">
+<div class="card-title">&#9889; 处理管线</div>
+<div id="pipelineSteps">
+<div class="step"><span class="step-label">0</span> 等待输入...</div>
+</div>
+</div>
+</div>
+
+<div class="card">
+<div class="card-title">&#128202; 结果</div>
+<div id="resultDisplay">
+<div class="output">标准化文本: </div>
+<div class="tpl-match">模板匹配: </div>
+</div>
+</div>
+
+<div class="card">
+<div class="card-title">&#128200; 能力覆盖矩阵</div>
+<table>
+<tr><th>能力</th><th>状态</th><th>30条覆盖</th></tr>
+<tr><td>中文数字识别</td><td><span class="diff-new diff-badge" id="stat_num">新增</span></td><td id="num_coverage">37%</td></tr>
+<tr><td>方言术语映射</td><td><span class="diff-new diff-badge" id="stat_dial">新增</span></td><td id="dial_coverage">20%</td></tr>
+<tr><td>口误修正</td><td><span class="diff-new diff-badge" id="stat_fix">新增</span></td><td id="fix_coverage">13%</td></tr>
+<tr><td>噪音/对话过滤</td><td><span class="diff-new diff-badge" id="stat_noise">新增</span></td><td id="noise_coverage">10%</td></tr>
+<tr><td>多病灶区分</td><td><span class="diff-part diff-badge" id="stat_multi">部分</span></td><td id="multi_coverage">17%</td></tr>
+<tr><td>模板匹配(183rid)</td><td><span class="diff-have diff-badge" id="stat_tpl">已有</span></td><td id="tpl_coverage">80%</td></tr>
+<tr><td>数值阶梯校验</td><td><span class="diff-have diff-badge" id="stat_val">已有</span></td><td id="val_coverage">70%</td></tr>
+<tr><td>回声指纹</td><td><span class="diff-have diff-badge" id="stat_echo">已有</span></td><td id="echo_coverage">65%</td></tr>
+</table>
+</div>
+</div>
+
+<script>
+// 30条测试 + 方言处理演示
+const CASES = [
+{id:"TC-01",d:"","orig":"右乳外上零点八乘零点五低回声，边界清，无血流，二类","norm":"右侧乳腺外上象限见0.8×0.5cm低回声结节，边界清晰，未见明显血流信号，BI-RADS 2类","steps":["原始口述","方言:无特殊","数字:零点八→0.8，零点五→0.5","模板匹配→rid=207 乳腺结节(无回声)"],"tpl":"rid=207 乳腺结节(无回声) [已有]"},
+{id:"TC-04",d:"川渝方言","orig":"双乳增生，左乳外上多个小囊肿，最大零点三，腋窝阴性","norm":"双侧乳腺腺体增厚，回声不均，呈增生样改变。左侧乳腺外上象限可见多个无回声结节，最大约0.3×0.2cm。双侧腋窝未见明显肿大淋巴结","steps":["原始口述","方言:无特殊","数字:零点三→0.3","模板匹配→rid=82 双乳小叶增生 + rid=311 乳腺多发无回声结节"],"tpl":"rid=82 双乳小叶增生 + rid=311 乳腺多发无回声结节 [已有]"},
+{id:"TC-11",d:"数字省略读法","orig":"右乳外上点八点五低回声，边界清，形态规则，无血流，二类","norm":"右侧乳腺外上象限见0.8×0.5cm低回声结节，边界清晰，形态规则，未见明显血流信号，BI-RADS 2类","steps":["原始口述","方言:无特殊","数字:点八→0.8，点五→0.5","模板匹配→rid=207 乳腺结节(无回声)"],"tpl":"rid=207 乳腺结节(无回声) [已有]"},
+{id:"TC-12",d:"方言:石头=结石","orig":"胆囊头头有个一点二的石头，壁不厚，不疼","norm":"胆囊颈部可见一大小约1.2cm强回声团，后方伴声影，胆囊壁不厚","steps":["原始口述","方言:石头→结石，头头→颈部","数字:一点二→1.2","模板匹配→rid=2 胆囊多发结石"],"tpl":"rid=2 胆囊多发结石 [已有]"},
+{id:"TC-13",d:"方言:水泡泡=囊肿","orig":"甲状腺右叶有个零点四的水泡泡，边界清，二类","norm":"甲状腺右叶可见一大小约0.4×0.3cm无回声结节，边界清晰，TI-RADS 2类","steps":["原始口述","方言:水泡泡→囊肿","数字:零点四→0.4","模板匹配→rid=54 甲状腺无回声结节(单发)"],"tpl":"rid=54 甲状腺无回声结节(单发) [已有]"},
+{id:"TC-14",d:"方言:包包=结节","orig":"左乳内上有个一点二的包包，边界欠清，内见点状强回声，血流稍丰富，四a","norm":"左侧乳腺内上象限可见一大小约1.2×0.9cm低回声结节，边界欠清晰，内部可见点状强回声，CDFI示其内可见少量血流信号。BI-RADS 4a类","steps":["原始口述","方言:包包→结节","数字:一点二→1.2","分级:四a→BI-RADS 4a","模板匹配→rid=195 乳腺实性结节(CH)"],"tpl":"rid=195 乳腺实性结节(CH) [已有，需确认BIRADS]"},
+{id:"TC-15",d:"方言:腰子=肾","orig":"腰子左叶有个一点二的无回声，边界清，突出表面","norm":"左肾可见一大小约1.2×1.0cm无回声区，边界清晰，向外突出","steps":["原始口述","方言:腰子→肾","数字:一点二→1.2","模板匹配→rid=27 肾囊肿"],"tpl":"rid=27 肾囊肿 [已有]"},
+{id:"TC-18",d:"多个病灶","orig":"甲状腺双叶多发结节，右叶最大零点六低回声，三类；左叶零点四无回声，二类","norm":"甲状腺双叶可见多个结节，右叶最大约0.6×0.4cm低回声结节，边界清晰，TI-RADS 3类；左叶可见一约0.4×0.3cm无回声结节，TI-RADS 2类","steps":["原始口述","数字:零点六→0.6，零点四→0.4","分级:三类→TI-RADS 3，二类→TI-RADS 2","模板匹配→rid=52 甲状腺单发结节 + rid=220 甲状腺多发结节"],"tpl":"rid=52+220 多发结节组合 [已有]"},
+{id:"TC-21",d:"口误修正","orig":"右乳外上...（停顿3秒）...零点八乘零点五...不对不对，零点九乘零点六...低回声，边界清，二类","norm":"右侧乳腺外上象限见0.9×0.6cm低回声结节，边界清晰，未见明显血流信号，BI-RADS 2类","steps":["原始口述","思考停顿:删除","口误:不对不对→丢弃前值0.8，取后值0.9","数字:零点九→0.9","模板匹配→rid=207 乳腺结节"],"tpl":"rid=207 乳腺结节(无回声) [已有]"},
+{id:"TC-22",d:"背景噪音","orig":"（背景：打印机声音）胆囊大小正常...（咳嗽）...腔内见一点二的石头，后方伴声影","norm":"胆囊大小形态正常，腔内可见一大小约1.2cm强回声团，后方伴声影","steps":["原始口述(带噪音)","噪音段:忽略","方言:石头→结石","数字:一点二→1.2","模板匹配→rid=2 胆囊多发结石"],"tpl":"rid=2 胆囊多发结石 [已有]"},
+{id:"TC-23",d:"交叉对话","orig":"医生：甲状腺左叶零点三无回声，二类\n打字员：左叶哈？\n医生：对，左叶","norm":"甲状腺左叶可见一大小约0.3×0.2cm无回声结节，边界清晰，TI-RADS 2类","steps":["原始口述(多角色)","角色识别:仅保留医生行","医生:左叶零点三无回声","数字:零点三→0.3","模板匹配→rid=54 甲状腺无回声结节"],"tpl":"rid=54 甲状腺无回声结节(单发) [已有]"},
+{id:"TC-24",d:"与患者对话过滤","orig":"右乳外上零点八低回声，边界清...（和患者说：放松点，不要紧张）...无血流，二类","norm":"右侧乳腺外上象限见0.8×0.5cm低回声结节，边界清晰，未见明显血流信号，BI-RADS 2类","steps":["原始口述","过滤:放松点不要紧张→删除","数字:零点八→0.8","模板匹配→rid=207 乳腺结节"],"tpl":"rid=207 乳腺结节(无回声) [已有]"},
+{id:"TC-25",d:"事后修正","orig":"等一下，刚才那个数改一下，零点六改成零点七，血流写丰富一点","norm":"右侧乳腺外上象限见0.7×0.5cm低回声结节，边界清晰，CDFI示其内可见丰富血流信号","steps":["原始口述","修正:等一下→待修改","数值:0.6→0.7","血流:写丰富一点","需复核前文的部位信息"],"tpl":"需结合上下文 [部分支持]"},
+{id:"TC-29",d:"地狱4病灶","orig":"右乳外上零点八低回声，二类；右乳内上零点六无回声，二类；左乳外上一点二低回声，内见点状强回声，四a；左腋窝见一点零乘零点五淋巴结","norm":"右侧乳腺外上象限0.8cm低回声BI-RADS 2类；右乳内上0.6cm无回声BI-RADS 2类；左乳外上1.2cm低回声BI-RADS 4a类；左侧腋窝可见1.0cm淋巴结","steps":["原始口述(4病灶+淋巴结)","数字:点八→0.8，点六→0.6，一点二→1.2","病灶1:右乳外上→BI-RADS 2","病灶2:右乳内上→BI-RADS 2","病灶3:左乳外上→BI-RADS 4a","淋巴结:左腋窝","共现匹配→乳腺+淋巴结"],"tpl":"多个独立模板拼接 [需扩展]"},
+{id:"TC-30",d:"地狱甲状腺+淋巴结","orig":"甲状腺右叶零点五低回声，边界欠清，内见点状强回声，四b；左叶零点三无回声，二类；双侧颈部见多个淋巴结，最大一点二乘零点六","norm":"甲状腺右叶0.5×0.4cm低回声TI-RADS 4b类；甲状腺左叶0.3×0.2cm无回声TI-RADS 2类；双侧颈部可见多个淋巴结，最大约1.2×0.6cm","steps":["原始口述","数字:零点五→0.5，零点三→0.3","病灶1:右叶→TI-RADS 4b","病灶2:左叶→TI-RADS 2","淋巴结:双侧颈部","模板→甲状腺结节+颈部淋巴结"],"tpl":"rid=52+rid=185 [部分支持]"}
+];
+
+var select = document.getElementById('caseSelect');
+CASES.forEach(function(c, i){
+var opt = document.createElement('option');
+opt.value = i;
+opt.textContent = c.id + ' ' + (c.d ? '['+c.d+'] ':'') + c.orig.slice(0,20)+'...';
+select.appendChild(opt);
+});
+
+function loadCase(idx) {
+var c = CASES[parseInt(idx)];
+document.getElementById('inputText').textContent = c.orig;
+
+// 管线步骤
+var pipeHtml = '';
+c.steps.forEach(function(s, i){
+var tag = '';
+if(s.includes('方言')) tag = '<span class="diff-new diff-badge">新</span>';
+else if(s.includes('数字') || s.includes('口误')) tag = '<span class="diff-new diff-badge">新</span>';
+else if(s.includes('模板')) tag = '<span class="diff-have diff-badge">有</span>';
+else if(s.includes('过滤') || s.includes('噪音')) tag = '<span class="diff-new diff-badge">新</span>';
+else if(s.includes('分级') || s.includes('病灶')) tag = '<span class="diff-part diff-badge">部</span>';
+pipeHtml += '<div class="step"><span class="step-label">'+(i)+'</span>'+tag+' '+s+'</div>';
+});
+document.getElementById('pipelineSteps').innerHTML = pipeHtml;
+
+// 结果
+document.getElementById('resultDisplay').innerHTML = '<div class="output">标准化文本: '+c.norm+'</div><div class="tpl-match">模板匹配: '+c.tpl+'</div>';
+
+// 更新能力矩阵状态
+var states = {num:'新增',dial:'新增',fix:'新增',noise:'新增',multi:'部分',tpl:'已有',val:'已有',echo:'已有'};
+Object.keys(states).forEach(function(k){
+var el = document.getElementById('stat_'+k);
+el.textContent = states[k];
+el.className = 'diff-badge diff-'+(states[k]=='已有'?'have':(states[k]=='部分'?'part':'new'));
+});
+}
+loadCase(0);
+</script>
+</body>
+</html>

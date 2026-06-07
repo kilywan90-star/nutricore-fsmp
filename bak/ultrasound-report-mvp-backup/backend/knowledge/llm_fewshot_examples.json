@@ -1,0 +1,64 @@
+{
+  "_description": "LLM few-shot 分科室示例 — 按 template_key 注入对应科室样例, 提升大模型输出格式贴合度",
+  "_total_examples": 35,
+  "_departments": {
+    "其他": 30,
+    "腹部": 5
+  },
+  "其他": [
+    {
+      "phrase": "肺门及纵隔结构未见异常",
+      "frequency": 69
+    },
+    {
+      "phrase": "子宫实质内未见异常血流信号",
+      "frequency": 450
+    },
+    {
+      "phrase": "盆腔及子宫直肠间隙未见积液",
+      "frequency": 397
+    },
+    {
+      "phrase": "子宫大小形态正常",
+      "frequency": 392
+    },
+    {
+      "phrase": "双侧附件区未见异常血流信息",
+      "frequency": 370
+    },
+    {
+      "phrase": "双侧附件未见占位性病变",
+      "frequency": 309
+    },
+    {
+      "phrase": "经阴道超声检查子宫附件见",
+      "frequency": 56
+    },
+    {
+      "phrase": "子宫实质内未见异常血流信号",
+      "frequency": 55
+    }
+  ],
+  "腹部": [
+    {
+      "phrase": "多普勒超声检查见",
+      "frequency": 2331
+    },
+    {
+      "phrase": "胰腺周围未见占位性病变",
+      "frequency": 2328
+    },
+    {
+      "phrase": "肝内外胆管不扩张",
+      "frequency": 2322
+    },
+    {
+      "phrase": "脾实质内未见异常血流信号",
+      "frequency": 2312
+    },
+    {
+      "phrase": "双侧肾大小形态正常",
+      "frequency": 2312
+    }
+  ]
+}

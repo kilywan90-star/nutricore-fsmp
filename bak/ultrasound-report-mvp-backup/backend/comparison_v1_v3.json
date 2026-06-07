@@ -1,0 +1,52 @@
+{
+  "v1_baseline": {
+    "label": "v1(前100条基线)",
+    "total": 100,
+    "clean": 87,
+    "clean_pct": "87.0%",
+    "d1": {
+      "total_issues": 9,
+      "fetal_misroute": 4,
+      "abn_to_normal": 1,
+      "normal_to_abn": 4
+    },
+    "d2": {
+      "total_issues": 9,
+      "placeholder_raw": 7,
+      "duplicate": 3,
+      "cross_organ": 4
+    },
+    "d3": {
+      "total_issues": 5,
+      "num_loss": 4,
+      "abn_disappear": 1,
+      "pct_loss": 0,
+      "supplement_ok": 24
+    }
+  },
+  "v3_fixed": {
+    "label": "v3(100条修复后)",
+    "total": 100,
+    "clean": 51,
+    "clean_pct": "51.0%",
+    "d1": {
+      "total_issues": 17,
+      "fetal_misroute": 4,
+      "abn_to_normal": 11,
+      "normal_to_abn": 2
+    },
+    "d2": {
+      "total_issues": 22,
+      "placeholder_raw": 10,
+      "duplicate": 13,
+      "cross_organ": 5
+    },
+    "d3": {
+      "total_issues": 34,
+      "num_loss": 21,
+      "abn_disappear": 19,
+      "pct_loss": 0,
+      "supplement_ok": 8
+    }
+  }
+}
